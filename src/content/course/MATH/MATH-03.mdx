@@ -1,0 +1,99 @@
+---
+id: MATH-03
+block: MATH
+title: "Vector Spaces, Bases & Linear Maps"
+tier: 1
+estimatedHours: 3
+prerequisites: ["MATH-01"]
+objectives:
+  - "State what a vector space and a basis are, and why coordinates are basis-dependent while vectors themselves aren't."
+  - "Derive the change-of-basis coordinate transformation."
+  - "Compute a vector's coordinates in a new basis."
+  - "Understand matrices as coordinate representations of linear maps."
+sources:
+  - { sourceId: "lecture-maths", pages: "p21-30 (§3.1-3.2)", role: "primary" }
+concepts:
+  - "Vector space"
+  - "Basis and coordinates"
+  - "Change of basis"
+  - "Linear map"
+  - "Matrix as coordinate representation"
+notation:
+  - { symbol: "$v$", meaning: "a vector, a geometric object independent of any particular basis" }
+  - { symbol: "$b_1,\\dots,b_n$", meaning: "a basis: a linearly independent, spanning set of vectors" }
+  - { symbol: "$[v]_B$", meaning: "the coordinates of $v$ in basis $B$: the coefficients $c_i$ such that $v=\\sum_i c_i b_i$" }
+  - { symbol: "$B$", meaning: "basis matrix, with the basis vectors as its columns" }
+cheatsheetLinks: []
+nextModules: ["MATH-04"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Nearly everything downstream in this course (rotation matrices, the SVD, PCA, even neural network weight matrices) is really a statement about linear maps between vector spaces, expressed in a chosen basis. Being sloppy about the vector/coordinate distinction is a common, quiet source of bugs when multiple coordinate frames are involved, exactly the situation you're in constantly in robotics (base frame, end-effector frame, world frame). This module makes that distinction precise.
+
+## Prerequisites & readiness check
+
+You should be comfortable with basic matrix-vector multiplication and matrix inversion for small matrices.
+
+<ReadinessCheck
+  question="For $M=\begin{pmatrix}1&2\\3&4\end{pmatrix}$, what is $\det(M)$, and is $M$ invertible?"
+  answer="$\det(M) = 1(4)-2(3) = -2 \neq 0$, so yes, $M$ is invertible."
+/>
+
+## Vector spaces and bases, briefly
+
+A **vector space** is a set of objects (vectors) closed under addition and scalar multiplication, satisfying the usual algebraic axioms (associativity, distributivity, etc.). A **basis** $\{b_1,\dots,b_n\}$ is a linearly independent set that spans the space: every vector $v$ can be written uniquely as $v = \sum_i c_i b_i$. The $c_i$ are $v$'s **coordinates** in that basis.
+
+Crucially: $v$ itself doesn't depend on which basis you chose, but $[v]_B = (c_1,\dots,c_n)$ absolutely does.
+
+<ExerciseCard id="MATH-03-ex1-why-coordinate-free" />
+
+## Change of basis
+
+Given $v$'s coordinates in the standard basis (i.e. just $v$ itself, written as a list of numbers the usual way), how do you find its coordinates in a *different* basis $B$?
+
+<ExerciseCard id="MATH-03-ex2-change-of-basis-derivation" />
+
+## Worked example
+
+Let $v = \begin{pmatrix}3\\2\end{pmatrix}$, and a new basis $b_1=\begin{pmatrix}1\\1\end{pmatrix}$, $b_2 = \begin{pmatrix}1\\-1\end{pmatrix}$, so $B = \begin{pmatrix}1&1\\1&-1\end{pmatrix}$.
+
+$$\det(B) = 1(-1)-1(1) = -2, \qquad B^{-1} = \frac{1}{-2}\begin{pmatrix}-1&-1\\-1&1\end{pmatrix} = \begin{pmatrix}0.5&0.5\\0.5&-0.5\end{pmatrix}$$
+
+$$[v]_B = B^{-1}v = \begin{pmatrix}0.5&0.5\\0.5&-0.5\end{pmatrix}\begin{pmatrix}3\\2\end{pmatrix} = \begin{pmatrix}2.5\\0.5\end{pmatrix}$$
+
+*(Verified: $2.5\,b_1 + 0.5\,b_2 = 2.5\begin{pmatrix}1\\1\end{pmatrix}+0.5\begin{pmatrix}1\\-1\end{pmatrix} = \begin{pmatrix}2.5+0.5\\2.5-0.5\end{pmatrix} = \begin{pmatrix}3\\2\end{pmatrix} = v$. Matches.)*
+
+<ExerciseCard id="MATH-03-ex3-numeric" />
+
+## Matrices as linear maps
+
+A matrix $A$ isn't fundamentally "a grid of numbers", it's the coordinate representation of a **linear map** (a function $T$ satisfying $T(u+v)=T(u)+T(v)$ and $T(\alpha v) = \alpha T(v)$) in a particular pair of bases (one for the input space, one for the output space). This is exactly why the *same* linear map can look like a very different matrix depending on your basis choice, and it's the conceptual foundation for why the SVD (next module) is interesting: it finds the basis pair in which a linear map's matrix representation is as simple as possible (diagonal).
+
+## Summary
+
+- A vector is basis-independent; its coordinates are not.
+- Change of basis: $[v]_B = B^{-1}v$, where $B$'s columns are the new basis vectors.
+- A matrix represents a linear map relative to chosen input/output bases, the same map can have very different matrix forms in different bases.
+
+## Retrieval questions
+
+1. Write the change-of-basis formula from memory, and explain why $B$ must be invertible for it to make sense.
+2. Why is it useful to think of a matrix as "a linear map in a particular basis" rather than just "a grid of numbers"?
+
+## Mastery checklist
+
+- [ ] Can explain why a vector's coordinates depend on the chosen basis but the vector itself doesn't.
+- [ ] Derived $[v]_B = B^{-1}v$ from the definition of basis coordinates.
+- [ ] Computed a vector's coordinates in a new basis by hand.
+
+## Source note
+
+This module's topic and page range are from `lecture-maths`, §3.1-3.2 (pp. 21-30), which also covers dual vector spaces and tensors in more depth than this module does (deferred, not covered by this workbook yet). All exposition, the worked example, and every exercise here are newly authored, paraphrasing the source's topic coverage.
+
+---
+
+**Next**: [MATH-04: SVD & Eigendecomposition](/course/MATH/MATH-04)

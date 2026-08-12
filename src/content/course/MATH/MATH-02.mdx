@@ -1,0 +1,110 @@
+---
+id: MATH-02
+block: MATH
+title: "Gradients, Jacobians, Hessians & Taylor Expansion"
+tier: 1
+estimatedHours: 3
+prerequisites: ["MATH-01"]
+objectives:
+  - "Compute gradients of scalar-valued functions and Jacobians of vector-valued functions from scratch."
+  - "Compute Hessians and use them in a second-order Taylor expansion."
+  - "Derive the gradient of a quadratic form $x^\\top Ax$ from index notation."
+  - "Numerically verify a hand-derived gradient using finite differences."
+sources:
+  - { sourceId: "lecture-maths", pages: "p12-19 (§2.3-2.6)", role: "primary" }
+concepts:
+  - "Gradient"
+  - "Jacobian"
+  - "Hessian"
+  - "Taylor expansion"
+  - "Quadratic form"
+  - "Numerical gradient checking"
+notation:
+  - { symbol: "$\\nabla f(x)$", meaning: "gradient: vector of partial derivatives, for scalar-valued $f:\\mathbb{R}^n\\to\\mathbb{R}$" }
+  - { symbol: "$J(x)$", meaning: "Jacobian: matrix of partial derivatives, for vector-valued $f:\\mathbb{R}^n\\to\\mathbb{R}^m$" }
+  - { symbol: "$H(x)$ or $\\nabla^2 f(x)$", meaning: "Hessian: matrix of second partial derivatives" }
+  - { symbol: "$x^\\top Ax$", meaning: "quadratic form: a scalar built from a vector $x$ and matrix $A$" }
+cheatsheetLinks: []
+nextModules: ["MATH-03"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Gradients, Jacobians, and Hessians are the vocabulary every optimization algorithm and every learned model gradient in this course is written in. This module rebuilds the mechanics from concrete component-level definitions, so that later, when you see $\nabla f(x) = (A+A^\top)x$ appear (as it will, constantly, e.g. underlying least-squares and Gauss-Newton in the Optimization block), you know exactly where it comes from rather than just recognizing the shape of the formula.
+
+## Prerequisites & readiness check
+
+You should be comfortable with the chain rule from MATH-01.
+
+<ReadinessCheck
+  question="For $z=f(x,y)=xy$ with $x=t$, $y=t^2$, what is $dz/dt$ at $t=2$ via the chain rule?"
+  answer="$\partial z/\partial x = y$, $\partial z/\partial y = x$; $dx/dt=1$, $dy/dt=2t$. $dz/dt = y(1) + x(2t) = t^2 + t(2t) = 3t^2$. At $t=2$: $12$."
+/>
+
+## Gradient, Jacobian, Hessian
+
+For a scalar-valued function $f:\mathbb{R}^n\to\mathbb{R}$, the **gradient** $\nabla f(x) \in \mathbb{R}^n$ collects all $n$ partial derivatives into a vector: $[\nabla f(x)]_i = \partial f/\partial x_i$.
+
+For a vector-valued function $f:\mathbb{R}^n\to\mathbb{R}^m$, the **Jacobian** $J(x)\in\mathbb{R}^{m\times n}$ generalizes this to a matrix: $J_{ij} = \partial f_i/\partial x_j$. (A gradient is just the special case $m=1$, written as a row or column depending on convention.)
+
+The **Hessian** $H(x) \in \mathbb{R}^{n\times n}$ collects second derivatives: $H_{ij} = \partial^2 f/\partial x_i \partial x_j$. It's symmetric whenever $f$ is twice continuously differentiable (mixed partials commute).
+
+These feed directly into the **second-order Taylor expansion**, which you'll use throughout the Optimization block: $f(x+\delta) \approx f(x) + \nabla f(x)^\top \delta + \tfrac12 \delta^\top H(x) \delta$.
+
+## Checking your gradients numerically
+
+Deriving a gradient by hand is error-prone, and a subtly wrong gradient can make an optimizer silently converge to the wrong place. The standard defense: compare your analytical gradient against a **finite-difference** approximation, which estimates the derivative directly from the definition, no calculus required:
+
+$$\frac{\partial f}{\partial x_i} \approx \frac{f(x+\epsilon e_i) - f(x-\epsilon e_i)}{2\epsilon}, \qquad \epsilon \approx 10^{-6}$$
+
+<ExerciseCard id="MATH-02-ex1-why-check-numerically" />
+
+## The gradient of a quadratic form
+
+Quadratic forms $f(x) = x^\top Ax$ show up constantly (cost functions, energy functions, the core of least-squares). Rather than memorizing $\nabla f(x) = (A+A^\top)x$, derive it once from index notation, so you can rederive it (or a variant, like a weighted quadratic form) whenever you need to.
+
+<ExerciseCard id="MATH-02-ex2-quadratic-gradient-derivation" />
+
+**Stop and try**: before continuing, check the formula's sanity for a symmetric $A$ ($A=A^\top$): it should simplify to $\nabla f(x) = 2Ax$. Confirm that follows directly from what you just derived.
+
+## Worked example
+
+Let $A = \begin{pmatrix}2&1\\0&3\end{pmatrix}$ (not symmetric), $x=\begin{pmatrix}1\\2\end{pmatrix}$. Then $A+A^\top = \begin{pmatrix}4&1\\1&6\end{pmatrix}$, and
+
+$$\nabla f(x) = (A+A^\top)x = \begin{pmatrix}4&1\\1&6\end{pmatrix}\begin{pmatrix}1\\2\end{pmatrix} = \begin{pmatrix}6\\13\end{pmatrix}$$
+
+*(Independently verified with a finite-difference check at $\epsilon=10^{-6}$ while authoring this module: numerical gradient $[6.0, 13.0]$, matching exactly.)* The Hessian here is simply $A+A^\top = \begin{pmatrix}4&1\\1&6\end{pmatrix}$ itself, since $f$ is quadratic (the gradient is linear in $x$, so its derivative, the Hessian, is constant).
+
+<ExerciseCard id="MATH-02-ex3-numeric" />
+
+<ExerciseCard id="MATH-02-ex4-hessian-symbolic" />
+
+## Summary
+
+- Gradient (vector), Jacobian (matrix, vector-valued generalization of gradient), and Hessian (matrix of second derivatives) are all built from the same partial-derivative bookkeeping.
+- $\nabla(x^\top Ax) = (A+A^\top)x$ in general, simplifying to $2Ax$ only when $A$ is symmetric, derive it from index notation rather than memorizing the symmetric-only shortcut.
+- Always sanity-check a hand-derived gradient against a finite-difference numerical estimate before trusting it.
+
+## Retrieval questions
+
+1. What's the shape difference between a gradient and a Jacobian, and when does one reduce to the other?
+2. Write the finite-difference gradient-check formula from memory.
+3. Derive (don't just recall) $\nabla(x^\top Ax)$ for symmetric $A$ from the general (non-symmetric) result.
+
+## Mastery checklist
+
+- [ ] Can state the definitions of gradient, Jacobian, and Hessian precisely (not just "the derivative version").
+- [ ] Derived $\nabla(x^\top Ax) = (A+A^\top)x$ from index notation.
+- [ ] Computed a gradient and Hessian for a concrete quadratic form.
+- [ ] Can explain what a numerical gradient check protects against.
+
+## Source note
+
+This module's topic and page range are from `lecture-maths`, §2.3-2.6 (pp. 12-19), which also contains a GP-regression and a logistic-regression worked example (§2.4.2-2.4.3) and the "backprop in a neural net" exercises (§2.7-2.8, covered separately in [ML-03](/course/ML/ML-03)). All exposition, the worked example, and every exercise here are newly authored, paraphrasing the source's general topic coverage rather than quoting it.
+
+---
+
+**Next**: [MATH-03: Vector Spaces, Bases & Linear Maps](/course/MATH/MATH-03)

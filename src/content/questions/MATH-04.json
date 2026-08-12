@@ -1,0 +1,71 @@
+{
+  "moduleId": "MATH-04",
+  "exercises": [
+    {
+      "id": "MATH-04-ex1-why-orthonormal",
+      "objective": "Explain what the SVD gives you that a raw matrix doesn't.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "svd", "page": 1, "originalNumber": "opening motivation" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "A matrix $A$ can be viewed as a collection of rows spanning an input space, or a collection of columns spanning an output space, but the raw rows/columns generally aren't orthonormal and may be linearly dependent. In your own words, what does the SVD $A=U S V^\\top$ give you that the raw matrix doesn't, and why does that make $A$'s action easier to understand?",
+      "hints": [
+        "The SVD gives you an *explicit orthonormal basis* for both the input space (columns of $V$) and the output space (columns of $U$), rather than the possibly-redundant, non-orthogonal raw rows/columns of $A$.",
+        "It also tells you exactly which input direction maps to which output direction, and by how much (the singular values), rather than leaving that relationship implicit in the raw numbers.",
+        "With the SVD, you can describe $A$'s entire action as: project onto input direction $v_i$, scale by $\\sigma_i$, place along output direction $u_i$, independently for each $i$, since the $v_i$ are mutually orthogonal and the $u_i$ are mutually orthogonal."
+      ],
+      "reviewCardIds": ["RC-MATH-04-01"]
+    },
+    {
+      "id": "MATH-04-ex2-eigendecomp-connection",
+      "objective": "Derive the connection between the SVD and the eigendecomposition of A^T A.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["MATH-04-ex1-why-orthonormal"],
+      "answerType": "derivation",
+      "prompt": "Starting from $A = USV^\\top$ (with $U,V$ orthonormal, $S$ diagonal with the singular values), derive an expression for $A^\\top A$ in terms of $V$ and $S$ only, and use it to explain why the columns of $V$ are eigenvectors of $A^\\top A$ with eigenvalues $\\sigma_i^2$.",
+      "hints": [
+        "$A^\\top A = (USV^\\top)^\\top(USV^\\top) = VS^\\top U^\\top USV^\\top$. Use that $U$ is orthonormal, so $U^\\top U = I$.",
+        "This simplifies to $A^\\top A = VS^\\top SV^\\top = VS^2V^\\top$ (since $S$ is diagonal, $S^\\top S = S^2$, the diagonal matrix of squared singular values).",
+        "$A^\\top A = VS^2V^\\top$ is exactly the eigendecomposition of $A^\\top A$: $V$'s columns are orthonormal eigenvectors, and $S^2$'s diagonal entries $\\sigma_i^2$ are the corresponding eigenvalues. This is also the practical way to *compute* an SVD by hand for a small matrix: find the eigendecomposition of $A^\\top A$ (or $AA^\\top$ for $U$), then take square roots of the eigenvalues to get singular values."
+      ],
+      "reviewCardIds": ["RC-MATH-04-02"]
+    },
+    {
+      "id": "MATH-04-ex3-numeric",
+      "objective": "Compute the largest singular value of a 2x2 matrix by hand.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 18,
+      "prerequisites": ["MATH-04-ex2-eigendecomp-connection"],
+      "answerType": "numeric",
+      "prompt": "Let $A = \\begin{pmatrix}2&0\\\\1&2\\end{pmatrix}$. Compute $A^\\top A$, find its eigenvalues, and report the **larger singular value** of $A$ (the square root of the larger eigenvalue of $A^\\top A$). Enter a decimal to 3 decimal places.",
+      "hints": [
+        "$A^\\top A = \\begin{pmatrix}2&1\\\\0&2\\end{pmatrix}\\begin{pmatrix}2&0\\\\1&2\\end{pmatrix} = \\begin{pmatrix}5&2\\\\2&4\\end{pmatrix}$.",
+        "For a $2\\times2$ symmetric matrix $\\begin{pmatrix}p&q\\\\q&r\\end{pmatrix}$, eigenvalues are $\\dfrac{p+r}{2} \\pm \\sqrt{\\left(\\dfrac{p-r}{2}\\right)^2+q^2}$. Here $p=5,q=2,r=4$.",
+        "$\\dfrac{5+4}{2} \\pm \\sqrt{(0.5)^2+4} = 4.5 \\pm \\sqrt{4.25} = 4.5 \\pm 2.0616$. Larger eigenvalue $\\approx 6.5616$, so larger singular value $= \\sqrt{6.5616} \\approx 2.562$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-04-ex4-rank1-challenge",
+      "objective": "Explain why every matrix can be built from rank-1 pieces.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "svd", "page": 2, "originalNumber": "closing discussion" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 10,
+      "prerequisites": ["MATH-04-ex3-numeric"],
+      "answerType": "proof",
+      "prompt": "The SVD writes $A = \\sum_{i=1}^k \\sigma_i u_i v_i^\\top$, a sum of $k$ rank-1 matrices $u_i v_i^\\top$ (outer products). Explain why each term $u_i v_i^\\top$ has rank exactly 1, and why this decomposition justifies calling rank-1 matrices the \"minimalistic building blocks\" of any matrix.",
+      "hints": [
+        "A rank-1 matrix $uv^\\top$ (outer product of two vectors) has every column equal to $u$ scaled by a different number: column $j$ is $v_j u$. All columns are scalar multiples of the single vector $u$, hence rank 1 (a 1-dimensional column space).",
+        "The SVD sum $A=\\sum_i \\sigma_i u_i v_i^\\top$ expresses $A$'s action as $k$ independent input-direction-to-output-direction mappings, added together: each term picks up the component of $x$ along $v_i$, scales it, and places it along $u_i$.",
+        "Since any matrix of rank $k$ can be written this way (as a sum of exactly $k$ rank-1 pieces via its SVD), and no fewer rank-1 pieces would suffice (rank is additive-minimal in this sense), rank-1 matrices are literally the atomic units any linear map decomposes into: nothing simpler can capture a genuine input-to-output direction mapping."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

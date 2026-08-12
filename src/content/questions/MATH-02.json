@@ -1,0 +1,69 @@
+{
+  "moduleId": "MATH-02",
+  "exercises": [
+    {
+      "id": "MATH-02-ex1-why-check-numerically",
+      "objective": "Explain the value of numerical gradient checking.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "You derive a gradient analytically (by hand or in code) and want to confirm it's correct before trusting it in an optimizer. Explain how a finite-difference numerical gradient check works, and what it means if the numerical and analytical gradients disagree in only *one* entry but match everywhere else.",
+      "hints": [
+        "The finite-difference approximation is $\\partial f/\\partial x_i \\approx \\dfrac{f(x+\\epsilon e_i) - f(x-\\epsilon e_i)}{2\\epsilon}$ for a small $\\epsilon$: it directly estimates the slope from the definition of a derivative, without using your analytical formula at all.",
+        "If most entries match but one doesn't, your analytical derivation likely has a localized bug (e.g. a sign error or a missed term) affecting only that one component or variable, not a fundamental misunderstanding of the whole derivative.",
+        "This is exactly why gradient checking is standard practice before trusting a hand-derived (or hand-coded) gradient in an optimizer: an optimizer can silently converge to the wrong answer, or fail to converge at all, if even one gradient component is wrong, and that failure mode can be very hard to diagnose without a check like this."
+      ],
+      "reviewCardIds": ["RC-MATH-02-01"]
+    },
+    {
+      "id": "MATH-02-ex2-quadratic-gradient-derivation",
+      "objective": "Derive the gradient of a general quadratic form from index notation.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["MATH-02-ex1-why-check-numerically"],
+      "answerType": "derivation",
+      "prompt": "For $f(x) = x^\\top A x$ with $x \\in \\mathbb{R}^n$ and $A \\in \\mathbb{R}^{n\\times n}$ (not necessarily symmetric), derive $\\nabla f(x) = (A+A^\\top)x$ starting from the index-notation definition $f(x) = \\sum_{i,j} A_{ij}x_i x_j$. Differentiate w.r.t. a single component $x_k$ first, then assemble the result back into vector form.",
+      "hints": [
+        "Differentiate $f(x)=\\sum_{i,j}A_{ij}x_ix_j$ w.r.t. $x_k$. Split the sum into terms where $i=k$, terms where $j=k$, and note both cases can occur (when $i=j=k$ it's counted correctly if you're careful).",
+        "$\\partial f/\\partial x_k = \\sum_j A_{kj}x_j + \\sum_i A_{ik}x_i$ (the first sum is from $i=k$ terms, the second from $j=k$ terms).",
+        "The first sum $\\sum_j A_{kj}x_j$ is the $k$-th entry of $Ax$. The second sum $\\sum_i A_{ik}x_i$ is the $k$-th entry of $A^\\top x$ (since $A_{ik} = (A^\\top)_{ki}$). So $\\partial f/\\partial x_k = [Ax]_k + [A^\\top x]_k = [(A+A^\\top)x]_k$ for every $k$, i.e. $\\nabla f(x) = (A+A^\\top)x$."
+      ],
+      "reviewCardIds": ["RC-MATH-02-02"]
+    },
+    {
+      "id": "MATH-02-ex3-numeric",
+      "objective": "Compute the gradient of a quadratic form at a point.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["MATH-02-ex2-quadratic-gradient-derivation"],
+      "answerType": "numeric",
+      "prompt": "Let $A = \\begin{pmatrix}1 & -1\\\\ 2 & 4\\end{pmatrix}$ and $x = \\begin{pmatrix}2\\\\-1\\end{pmatrix}$. Using $\\nabla f(x) = (A+A^\\top)x$ for $f(x)=x^\\top Ax$, compute the **first component** of the gradient. Enter a decimal number.",
+      "hints": [
+        "First compute $A + A^\\top$. Note $A^\\top = \\begin{pmatrix}1&2\\\\-1&4\\end{pmatrix}$.",
+        "$A+A^\\top = \\begin{pmatrix}2 & 1\\\\ 1 & 8\\end{pmatrix}$.",
+        "$(A+A^\\top)x = \\begin{pmatrix}2&1\\\\1&8\\end{pmatrix}\\begin{pmatrix}2\\\\-1\\end{pmatrix} = \\begin{pmatrix}2(2)+1(-1)\\\\ 1(2)+8(-1)\\end{pmatrix} = \\begin{pmatrix}3\\\\-6\\end{pmatrix}$. First component is $3$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-02-ex4-hessian-symbolic",
+      "objective": "Derive the Hessian of a general 2D quadratic form symbolically.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["MATH-02-ex2-quadratic-gradient-derivation"],
+      "answerType": "symbolic",
+      "prompt": "For $f(x_1,x_2) = a x_1^2 + (b+c)x_1x_2 + d x_2^2$ (the general 2D quadratic form for $A=\\begin{pmatrix}a&b\\\\c&d\\end{pmatrix}$), the Hessian is a $2\\times 2$ matrix. Compute the $(1,1)$ entry, $\\partial^2 f/\\partial x_1^2$. Enter your answer in terms of `a` (e.g. if the answer were $3a$, you'd enter `3*a`).",
+      "hints": [
+        "$\\partial f/\\partial x_1 = 2ax_1 + (b+c)x_2$ first.",
+        "Now differentiate that w.r.t. $x_1$ again.",
+        "$\\partial^2 f/\\partial x_1^2 = 2a$."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

@@ -45,12 +45,14 @@ Rationale: your Phase 0 background check flagged calculus/linear algebra as rust
 | ID | Title | Source & pages | Objective | Prereqs | Hrs | Tier |
 |---|---|---|---|---|---|---|
 | MATH-01 | Functions, Derivatives & the Chain Rule | `lecture-maths` p8–11 | Rebuild fluency computing partial/total derivatives and chain rules by hand, incl. computation-graph view | — | 2.5 | 1 |
-| MATH-02 | Gradients, Jacobians, Hessians & Taylor Expansion | `lecture-maths` p12–19 + Ex.4/5 | Compute gradients/Jacobians/Hessians of vector-valued and matrix functions from scratch; numerically verify | MATH-01 | 3 | 1 |
+| MATH-02 | Gradients, Jacobians, Hessians & Taylor Expansion | `lecture-maths` p12–19 | Compute gradients/Jacobians/Hessians of vector-valued and matrix functions from scratch; numerically verify | MATH-01 | 3 | 1 |
 | MATH-03 | Vector Spaces, Bases & Linear Maps | `lecture-maths` p21–30 | Reconstruct vector-space/basis/dual-space concepts and connect to matrices as coordinate representations | MATH-01 | 3 | 1 |
 | MATH-04 | SVD & Eigendecomposition | `svd` [html] (intuition-first) → `lecture-maths` p31–39 + Ex.1–3 | Derive and interpret the SVD theorem geometrically; compute eigendecompositions by hand for small matrices | MATH-03 | 3 | 1 |
 | MATH-05 | Covariant Gradient & Steepest Descent | `lecture-maths` p39–42 | Distinguish contravariant/covariant vectors; derive the steepest-descent direction under a metric | MATH-04 | 1.5 | 1 |
 
 **Milestone**: Math Foundations Exam (see Assessment Schedule).
+
+**Production note (Phase 4, batch 1)**: `lecture-maths` Exercises 4 and 5 (§2.7–2.8, "Backprop in a Neural Net") were originally scoped as MATH-02's own exercises but ended up used in [ML-03](/course/ML/ML-03) instead, since they fit thematically better alongside neural-network content and ML-03 was built first as a pilot. MATH-02 as actually authored uses newly-written exercises instead, covering the same gradient/Jacobian/Hessian mechanics without duplicating ML-03's material.
 
 ---
 

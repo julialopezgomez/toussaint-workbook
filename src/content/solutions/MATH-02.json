@@ -1,0 +1,51 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "MATH-02-ex1-why-check-numerically",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly describes the central-difference formula and that it estimates the derivative independently of the analytical formula." },
+          { "points": 1, "description": "Correctly interprets a single-entry mismatch as pointing to a localized bug (e.g. one term/sign) rather than a wholesale misunderstanding." }
+        ],
+        "commonErrors": [
+          "Only stating 'it checks if your gradient is right' without explaining the actual mechanism (comparing to an independent finite-difference estimate).",
+          "Claiming a single-entry mismatch means the whole derivation is wrong, rather than localizing the likely bug."
+        ]
+      },
+      "fullSolution": "A finite-difference check estimates partial f/partial x_i as [f(x+eps*e_i) - f(x-eps*e_i)] / (2 eps) for small eps, using only evaluations of f itself, never touching your analytical gradient formula. If this numerical estimate matches your analytical gradient closely (for a well-chosen eps, not too big or too small due to floating-point error), your derivation is very likely correct. If only one entry disagrees while the rest match, that's strong evidence of a localized bug affecting just that variable or term (e.g. a dropped factor, sign error, or wrong index) rather than a fundamental error in your whole approach, since a fundamental error would typically show up in most or all entries."
+    },
+    {
+      "exerciseId": "MATH-02-ex2-quadratic-gradient-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly differentiates the double sum w.r.t. x_k, splitting into the i=k and j=k contributions." },
+          { "points": 1, "description": "Correctly identifies the first sum as [Ax]_k." },
+          { "points": 1, "description": "Correctly identifies the second sum as [A^T x]_k, using A_ik = (A^T)_ki." }
+        ],
+        "commonErrors": [
+          "Assuming A is symmetric and skipping straight to 2Ax (only valid when A=A^T; the general derivation must keep A and A^T separate).",
+          "Double-counting or missing the i=j=k diagonal term when splitting the sum."
+        ]
+      },
+      "fullSolution": "f(x) = sum_{i,j} A_ij x_i x_j. Differentiate w.r.t. x_k using the product rule on each term: a term A_ij x_i x_j contributes A_kj x_j (from x_i=x_k, when i=k) plus A_ik x_i (from x_j=x_k, when j=k); summing over all i,j:\npartial f/partial x_k = sum_j A_kj x_j + sum_i A_ik x_i.\nThe first sum is exactly [Ax]_k (row k of A dotted with x). The second sum, sum_i A_ik x_i, is [A^T x]_k, since (A^T)_ki = A_ik. So partial f/partial x_k = [Ax]_k + [A^T x]_k = [(A+A^T)x]_k for every k, i.e. grad f(x) = (A+A^T)x."
+    },
+    {
+      "exerciseId": "MATH-02-ex3-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 3, "tolerance": 0.01 },
+      "fullSolution": "A+A^T = [[2,1],[1,8]]. (A+A^T)x = [[2,1],[1,8]] @ [2,-1] = [2*2+1*(-1), 1*2+8*(-1)] = [3, -6]. First component: 3."
+    },
+    {
+      "exerciseId": "MATH-02-ex4-hessian-symbolic",
+      "checkMode": "symbolic",
+      "symbolic": {
+        "expectedExpr": "2*a",
+        "variables": ["a"],
+        "equivalenceNotes": "Equivalent forms like a+a are accepted."
+      },
+      "fullSolution": "partial f/partial x1 = 2*a*x1 + (b+c)*x2. Differentiating again w.r.t. x1: partial^2 f/partial x1^2 = 2*a. (Note this matches the general formula (A+A^T) entry (1,1) = 2a, consistent with the previous exercise's derivation.)"
+    }
+  ]
+}

@@ -4,18 +4,26 @@ import ProgressControls from '../components/ProgressControls.astro';
 import { getCollection } from 'astro:content';
 
 const modules = await getCollection('course');
+
+// Curriculum block order from data/curriculum/CURRICULUM.md (main-route order, not alphabetical).
+const BLOCK_ORDER = ['MATH', 'OPT', 'PROB', 'ODE', 'KIN', 'DYN', 'PLAN', 'MANIP', 'ML', 'RL', 'SYM', 'RLEARN', 'CAP'];
+const sorted = [...modules].sort((a, b) => {
+  const bi = BLOCK_ORDER.indexOf(a.data.block) - BLOCK_ORDER.indexOf(b.data.block);
+  return bi !== 0 ? bi : a.data.id.localeCompare(b.data.id);
+});
+const totalHours = modules.reduce((sum, m) => sum + m.data.estimatedHours, 0);
 ---
 <BaseLayout title="Start Here">
   <h1>Toussaint Workbook</h1>
   <p>
     A private, self-paced course built from Marc Toussaint's TU Berlin lecture notes, sequenced and
-    prioritized for one specific PhD research direction. This is still an early build: two pilot modules
-    exist so far, with the rest of the ~63-module curriculum to be produced in batches.
+    prioritized for one specific PhD research direction. {modules.length} of ~63 planned modules are
+    authored so far (~{totalHours} hrs), produced in batches per <code>data/curriculum/CURRICULUM.md</code>.
   </p>
 
   <h2>Modules so far</h2>
   <ul>
-    {modules.map((m) => (
+    {sorted.map((m) => (
       <li>
         <a href={`/course/${m.data.block}/${m.data.id}`}><strong>{m.data.id}</strong>: {m.data.title}</a>
         {' '}<span style="opacity:0.6">(~{m.data.estimatedHours} hrs, block {m.data.block})</span>
@@ -49,8 +57,8 @@ const modules = await getCollection('course');
   <h2>Full curriculum</h2>
   <p>
     The complete 13-block, ~63-module plan lives in <code>data/curriculum/CURRICULUM.md</code>: not yet
-    wired into this site's navigation, since only the pilot module has been authored. The roadmap/search/
-    index pages described in <code>data/curriculum/ARCHITECTURE.md</code> get built once real content
-    exists to index.
+    wired into this site's navigation as a roadmap page, since most modules aren't authored yet. The
+    roadmap/search/index pages described in <code>data/curriculum/ARCHITECTURE.md</code> get built once
+    enough real content exists to make them worthwhile.
   </p>
 </BaseLayout>

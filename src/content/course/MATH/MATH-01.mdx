@@ -1,0 +1,111 @@
+---
+id: MATH-01
+block: MATH
+title: "Functions, Derivatives & the Chain Rule"
+tier: 1
+estimatedHours: 2.5
+prerequisites: []
+objectives:
+  - "Distinguish partial and total derivatives, and explain why they differ."
+  - "Derive the multivariable chain rule for a total derivative from a first-order Taylor expansion."
+  - "Compute total derivatives via the chain rule, both symbolically and numerically."
+  - "Read a computation graph and sum contributions over multiple paths."
+sources:
+  - { sourceId: "lecture-maths", pages: "p8-11 (§2.1-2.2)", role: "primary" }
+concepts:
+  - "Continuity, differentiability, smoothness"
+  - "Partial derivative"
+  - "Total derivative"
+  - "Multivariable chain rule"
+  - "Computation graph"
+notation:
+  - { symbol: "$\\partial f/\\partial x$", meaning: "partial derivative: rate of change of $f$ w.r.t. $x$ alone, other variables fixed" }
+  - { symbol: "$df/dt$", meaning: "total derivative: rate of change of $f$ w.r.t. $t$, accounting for every variable that depends on $t$" }
+  - { symbol: "$\\dot x(t)$", meaning: "shorthand for $dx/dt$" }
+  - { symbol: "$o(\\delta)$", meaning: "little-o: a quantity that vanishes faster than $\\delta$ as $\\delta \\to 0$" }
+cheatsheetLinks: []
+nextModules: ["MATH-02"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Every gradient you'll ever compute, whether it's a robot dynamics Jacobian, a loss function's gradient in a learning algorithm, or a trajectory optimizer's cost gradient, is built out of the chain rule applied systematically. This module rebuilds that foundation from scratch: not just recalling the chain rule formula, but understanding *why* it's true, so you can apply it correctly even when a problem doesn't look like a textbook example.
+
+## Prerequisites & readiness check
+
+This is the first module in the course, so there's no formal prerequisite, just ordinary single-variable calculus (derivatives of polynomials, sin/cos, products).
+
+<ReadinessCheck
+  question="What is $\frac{d}{dx}\left[x^3 \sin(x)\right]$?"
+  answer="By the product rule: $3x^2\sin(x) + x^3\cos(x)$."
+/>
+
+## Partial vs. total derivatives
+
+Consider $z = f(x,y)$, a function of two variables. The **partial derivative** $\partial f/\partial x$ answers: if I nudge $x$ alone, holding $y$ fixed, how does $z$ change? It treats $x$ and $y$ as independent.
+
+Now suppose $x$ and $y$ *aren't* actually independent: both depend on a third variable, $x=x(t)$, $y=y(t)$. The **total derivative** $dz/dt$ answers a different question: if I nudge $t$, how does $z$ actually change, given that nudging $t$ moves both $x$ and $y$ at once?
+
+<ExerciseCard id="MATH-01-ex1-partial-vs-total" />
+
+## Deriving the chain rule
+
+The total derivative isn't a new kind of derivative, it's built entirely out of partial derivatives, combined via the chain rule:
+
+$$\frac{dz}{dt} = \frac{\partial f}{\partial x}\frac{dx}{dt} + \frac{\partial f}{\partial y}\frac{dy}{dt}$$
+
+This is worth deriving properly once, rather than just memorizing, because the *reasoning* (a first-order Taylor expansion) is exactly the reasoning you'll reuse for every multivariable derivative in this course.
+
+<ExerciseCard id="MATH-01-ex2-chainrule-derivation" />
+
+**Stop and try**: before continuing, check that the formula degenerates correctly in a trivial case: if $y$ doesn't actually depend on $t$ at all (i.e. $y$ is a constant), what does $dz/dt$ reduce to? (It should reduce to just $\frac{\partial f}{\partial x}\frac{dx}{dt}$, since $dy/dt=0$ kills the second term.)
+
+## Worked example
+
+Let $z = x^2y + \sin(x)$, with $x=t^2$, $y=t+1$. Compute $dz/dt$ at $t=1$.
+
+**Direct substitution check first** (so we have a ground truth to verify against): $z(t) = t^4(t+1) + \sin(t^2) = t^5+t^4+\sin(t^2)$, so $dz/dt = 5t^4+4t^3+2t\cos(t^2)$. At $t=1$: $5+4+2\cos(1) = 9+2\cos(1) \approx 10.081$.
+
+**Via the chain rule**: $\partial z/\partial x = 2xy+\cos(x)$, $\partial z/\partial y = x^2$. At $t=1$: $x=1, y=2$, so $\partial z/\partial x = 2(1)(2)+\cos(1) = 4+\cos(1)$, $\partial z/\partial y = 1$. Also $dx/dt=2t=2$, $dy/dt=1$ at $t=1$.
+
+$$\frac{dz}{dt}\bigg|_{t=1} = (4+\cos(1))(2) + (1)(1) = 8+2\cos(1)+1 = 9+2\cos(1) \approx 10.081$$
+
+Matches the direct computation exactly, as it must.
+
+<ExerciseCard id="MATH-01-ex3-numeric" />
+
+## Multiple paths: the computation-graph view
+
+When $z$ depends on $t$ through *more than one* intermediate variable, each path from $t$ to $z$ contributes its own term, and the total derivative sums over all paths. This is the computation-graph picture you'll use constantly from here on: draw $t \to x \to z$ and $t \to y \to z$ as two separate arrows-chains, and the chain rule is just "multiply along each chain, then add the chains up."
+
+<ExerciseCard id="MATH-01-ex4-multipath-challenge" />
+
+## Summary
+
+- $\partial f/\partial x$ isolates one direct effect; $dz/dt$ sums *all* the indirect effects of $t$ on $z$, through every variable that depends on $t$.
+- The chain rule formula follows directly from a first-order Taylor expansion of $f$, it's not a separate rule to memorize independently of Taylor expansions.
+- When multiple paths connect a variable to the output, sum the chain-rule contribution of each path.
+
+## Retrieval questions
+
+1. Write the multivariable chain rule for $z=f(x,y)$, $x=x(t)$, $y=y(t)$, from memory.
+2. What mathematical tool is the chain rule's derivation actually built from?
+3. If $z$ depends on $s$ through three different intermediate variables, how many terms does $\partial z/\partial s$ have?
+
+## Mastery checklist
+
+- [ ] Can explain the difference between a partial and a total derivative in one sentence each.
+- [ ] Derived the chain rule from a Taylor expansion, not just recalled the formula.
+- [ ] Computed a total derivative via the chain rule and got the same answer as direct substitution.
+- [ ] Applied the sum-over-paths rule to a multi-path computation graph.
+
+## Source note
+
+This module's topic and page range are from `lecture-maths`, §2.1-2.2 (pp. 8-11). All exposition, the worked example, and every exercise in this module are newly authored for this workbook (paraphrased/synthesized, not quoted from the source); the source's own treatment of this material is significantly more compact. The "backprop in a neural net" exercises from this same chapter of `lecture-maths` (Exercises 4 and 5, §2.7-2.8) are covered separately in [ML-03](/course/ML/ML-03), where they fit thematically better alongside neural network content.
+
+---
+
+**Next**: [MATH-02: Gradients, Jacobians, Hessians & Taylor Expansion](/course/MATH/MATH-02)

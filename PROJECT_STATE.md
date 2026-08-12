@@ -1,7 +1,7 @@
 # Project State — Toussaint Workbook
 
 ## Current phase
-**Phase 3 complete: both pilot modules (ML-03, KIN-02) built, self-tested, and approved by the user (style/depth confirmed acceptable, bugs found and fixed). Repository is public on GitHub. Ready to scope the first real batch for Phase 4, pending user input on batch size/order.**
+**Phase 4 in progress: batch 1 (rest of Block MATH, 5 modules) complete, self-tested, and pushed. 7 of ~63 planned modules now exist across MATH/KIN/ML blocks. Ready to scope batch 2 pending user input.**
 
 ## Approved decisions
 See `docs/decisions/0000-requirements.md`, `0001-corpus-update-and-priorities.md`, `0002-phase2-and-pilot-approval.md` for full records. Summary:
@@ -42,8 +42,16 @@ See `docs/decisions/0000-requirements.md`, `0001-corpus-update-and-priorities.md
 - **KIN-02 (Quaternions: Exponential/Log Maps, Interpolation & Jacobians) built as the second pilot module**, full-length per the Phase 2 plan (user's confirmed weak spot). 5 exercises (short-text/derivation/symbolic/numeric/proof), all worked-example and exercise numbers independently verified with NumPy (including a finite-difference check on the angular Jacobian) before writing them into the lesson. Tested live: numeric checker ✓, symbolic checker (including a different valid algebraic form, `(1-q0**2)**0.5` vs `sqrt(1-q0**2)`) ✓, KaTeX rendering (174 spans) ✓. Production build clean, 4 pages.
 - **Real bug found and fixed**: after adding KIN-02, the dev server briefly served an empty `<article>` for its page. Traced to leftover duplicate `astro dev` processes from earlier in the session competing for/rebinding ports; NOT a content or code bug (the production build had rendered KIN-02 correctly the whole time). Fixed by fully clearing all stale processes on ports 4321-4325 before restarting. Worth remembering for future sessions: always `lsof -ti:<port> | xargs kill -9` before restarting the dev server if multiple restarts have happened in one session.
 
+## Completed — Phase 4, batch 1 (2026-08-12, fifth pass)
+- **Block MATH is now complete**: MATH-01 (Functions/Derivatives/Chain Rule), MATH-02 (Gradients/Jacobians/Hessians/Taylor), MATH-03 (Vector Spaces/Bases/Linear Maps), MATH-04 (SVD & Eigendecomposition, source-adapted from `svd` note), MATH-05 (Covariant Gradient & Steepest Descent). 18 exercises total across the 5 modules, spanning short-text/derivation/symbolic/numeric/proof answer types.
+- All worked-example and exercise numbers independently verified with NumPy/SymPy before writing them into lessons (chain-rule values, quadratic-form gradients/Hessians, change-of-basis coordinates, SVD singular values via the $A^\top A$ eigendecomposition route, steepest-descent directions under a non-Euclidean metric, cross-checked in one case against a 200,000-sample random search).
+- **Exercise-overlap caught and fixed before publishing**: MATH-02's originally-scoped exercises (`lecture-maths` Ex.4/5, "Backprop in a Neural Net") were already used in ML-03. Rewrote MATH-02 with new exercises covering the same gradient/Jacobian/Hessian mechanics instead of duplicating ML-03's material; updated `CURRICULUM.md`'s MATH-02 row and added a production note there.
+- Homepage updated to list all 7 modules in curriculum block order (not alphabetical) with a running total-hours count.
+- Tested live: numeric checkers (3 different modules) ✓, symbolic checker with an alternate valid algebraic form (`s+s` vs `2*s`) ✓, KaTeX rendering (133 spans on MATH-04, correct `katex-sizing` class) ✓. Type check and production build both clean (9 pages, 0 errors).
+- Pushed to the public repo.
+
 ## Pending — next action needed from user
-- **Scope batch 1 of Phase 4.** Both pilot modules are approved and pushed; the two-module-at-a-time pace doesn't scale to ~61 remaining modules. Before generating more content unsupervised, propose a concrete batch (e.g. "finish Block MATH, 5 modules" or "finish Block KIN, 1 more module") and confirm size/order with the user rather than silently producing the whole curriculum. Default recommendation if not specified: proceed block-by-block in the Tier-1 main-route order from `CURRICULUM.md`, starting with the rest of Block MATH (foundational, blocks everything else), in batches of roughly 4-6 modules with a validation/report checkpoint after each, per the original spec's batch-production process.
+- **Scope batch 2 of Phase 4.** Recommend continuing block-by-block in Tier-1 main-route order: Block OPT next (6 modules, directly builds on MATH, and is itself a prerequisite for much of the rest of the course), unless the user would rather jump to something closer to their research (e.g. Block DYN or the TAMP-related RLEARN modules).
 - Confirm the Review-with-Claude clipboard button and the progress-import file upload actually work for the user (neither could be verified in the automated browser testing tool).
 
 ## Known uncertainties
@@ -56,7 +64,8 @@ See `docs/decisions/0000-requirements.md`, `0001-corpus-update-and-priorities.md
 - Astro type check (`npx astro check`): 0 errors.
 - Production build: succeeds, 4 pages (index, ML-03, KIN-02, 1 cheatsheet).
 - Manual + automated interaction testing across both modules: numeric checker ✓, symbolic checker (live SymPy round-trip, including alternate algebraic forms) ✓, rubric/attempt flow ✓, IndexedDB progress ✓, KaTeX rendering (correct `katex-sizing` classes and 0.7em scaling after the dedup fix) ✓, cheat sheet page ✓, homepage ✓, progress export ✓. Clipboard copy and progress import: not independently exercised in the automated browser tool; user should verify both themselves.
-- Git: public repo at `https://github.com/julialopezgomez/toussaint-workbook`, 5 commits, source PDFs and extracted text excluded throughout.
+- Git: public repo at `https://github.com/julialopezgomez/toussaint-workbook`, source PDFs and extracted text excluded throughout.
+- Production build after batch 1: succeeds, 9 pages, 0 type errors.
 
 ## Next exact action
-Propose and confirm the scope of Phase 4 batch 1 with the user (see "Pending" above), then produce that batch, validate it, and report before starting the next one.
+Get user confirmation on batch 2's scope (see "Pending" above), then produce it, validate it, and report before starting the next one.

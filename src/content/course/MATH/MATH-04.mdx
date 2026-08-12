@@ -1,0 +1,103 @@
+---
+id: MATH-04
+block: MATH
+title: "SVD & Eigendecomposition"
+tier: 1
+estimatedHours: 3
+prerequisites: ["MATH-03"]
+objectives:
+  - "Explain what the SVD $A=USV^\\top$ gives you that the raw matrix doesn't."
+  - "Derive the connection between the SVD and the eigendecomposition of $A^\\top A$."
+  - "Compute the singular values of a small matrix by hand."
+  - "Explain why every matrix decomposes into rank-1 pieces."
+sources:
+  - { sourceId: "svd", pages: "p1-2 (HTML-sourced)", role: "primary" }
+  - { sourceId: "lecture-maths", pages: "p31-39 (§3.4-3.8)", role: "supplementary" }
+concepts:
+  - "Singular Value Decomposition (SVD)"
+  - "Eigendecomposition"
+  - "Rank-1 matrices / outer products"
+  - "Orthonormal basis"
+notation:
+  - { symbol: "$A=USV^\\top$", meaning: "singular value decomposition: $U,V$ orthonormal, $S$ diagonal with singular values $\\sigma_i \\ge 0$" }
+  - { symbol: "$\\sigma_i$", meaning: "the $i$-th singular value" }
+  - { symbol: "$u_i, v_i$", meaning: "the $i$-th columns of $U$, $V$: output and input singular directions" }
+  - { symbol: "$uv^\\top$", meaning: "outer product of two vectors: a rank-1 matrix" }
+cheatsheetLinks: []
+nextModules: ["MATH-05"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+The SVD underlies PCA (dimensionality reduction), least-squares solutions, matrix conditioning/numerical stability, and low-rank approximation, all of which reappear throughout this course. It's also one of the cleanest illustrations of MATH-03's theme: a matrix looks arbitrary in the standard basis, but in the *right* basis (the singular directions), its action becomes as simple as possible: independent scalings along orthogonal axes.
+
+## Prerequisites & readiness check
+
+You should be comfortable with matrices as linear maps and orthonormal bases from MATH-03.
+
+<ReadinessCheck
+  question="What does it mean for a set of vectors $\{v_1,\dots,v_k\}$ to be orthonormal?"
+  answer="Each vector has unit length ($v_i^\top v_i = 1$) and every pair is orthogonal ($v_i^\top v_j = 0$ for $i\neq j$)."
+/>
+
+## Matrices as row space / column space
+
+A matrix $A \in \mathbb{R}^{m\times n}$ can be viewed as a collection of rows (each row dotted with $x$ picks up a component of $x$ within the row-spanned input space), or as a collection of columns (applying $A$ to $x$ linearly combines the columns, weighted by $x$'s entries, landing in the column-spanned output space). The problem: raw rows/columns are generally neither orthonormal nor guaranteed independent, so there's no clean, explicit description of exactly how $A$ transports the input space to the output space.
+
+<ExerciseCard id="MATH-04-ex1-why-orthonormal" />
+
+## The SVD theorem
+
+For any $A \in \mathbb{R}^{m\times n}$, there exists a rank $k \le \min(m,n)$, orthonormal vectors $v_1,\dots,v_k \in \mathbb{R}^n$, orthonormal vectors $u_1,\dots,u_k\in\mathbb{R}^m$, and scalars $\sigma_1,\dots,\sigma_k > 0$, such that
+
+$$A = \sum_{i=1}^k \sigma_i u_i v_i^\top = USV^\top, \qquad S=\text{diag}(\sigma_{1:k}),\ U=u_{1:k},\ V=v_{1:k}$$
+
+Each term $\sigma_i u_i v_i^\top$ projects $x$ onto input direction $v_i$, scales by $\sigma_i$, and places the result along output direction $u_i$, entirely independently of the other terms (since the $v_i$ are mutually orthogonal and the $u_i$ are mutually orthogonal).
+
+## Computing an SVD by hand: the eigendecomposition connection
+
+You rarely need to invoke specialized SVD algorithms for small matrices: the SVD is directly computable from an eigendecomposition you may already know how to do.
+
+<ExerciseCard id="MATH-04-ex2-eigendecomp-connection" />
+
+## Worked example
+
+Let $A = \begin{pmatrix}3&1\\1&3\end{pmatrix}$ (symmetric, chosen so the eigendecomposition is clean). Since $A$ is symmetric, $A^\top A = A^2$, and $A$'s own eigendecomposition gives the SVD directly (up to sign): eigenvalues of $A$ are $\lambda=4$ (eigenvector $\tfrac{1}{\sqrt2}(1,1)$) and $\lambda=2$ (eigenvector $\tfrac{1}{\sqrt2}(1,-1)$). Both eigenvalues are positive, so the singular values are just $\sigma_1=4$, $\sigma_2=2$ (for a symmetric positive-definite matrix, singular values equal eigenvalues exactly, and $U=V$).
+
+*(Verified with NumPy's `svd` while authoring this module: $S=[4.0, 2.0]$, matching exactly.)*
+
+<ExerciseCard id="MATH-04-ex3-numeric" />
+
+## Rank-1 matrices as building blocks
+
+<ExerciseCard id="MATH-04-ex4-rank1-challenge" />
+
+## Summary
+
+- $A=USV^\top$ gives explicit orthonormal bases for the input space ($V$) and output space ($U$), with singular values $\sigma_i$ describing exactly how much each input direction is scaled on its way to the corresponding output direction.
+- $A^\top A = VS^2V^\top$: the SVD is directly computable from the eigendecomposition of $A^\top A$ (columns of $V$ = eigenvectors, $\sigma_i=\sqrt{\lambda_i}$).
+- Every matrix of rank $k$ decomposes into exactly $k$ rank-1 pieces ($\sigma_i u_i v_i^\top$), the minimal atomic units of any linear map.
+
+## Retrieval questions
+
+1. Write the relationship between $A^\top A$ and the SVD components $V$, $S$ from memory.
+2. Why does a rank-1 outer product $uv^\top$ have rank exactly 1?
+3. For a symmetric positive-definite matrix, how do the singular values relate to the eigenvalues?
+
+## Mastery checklist
+
+- [ ] Can explain what the SVD provides that a raw matrix doesn't.
+- [ ] Derived $A^\top A = VS^2V^\top$ from $A=USV^\top$.
+- [ ] Computed a matrix's singular values by hand via the $A^\top A$ eigendecomposition.
+- [ ] Can explain why rank-1 matrices are the atomic units of the SVD decomposition.
+
+## Source note
+
+The opening motivation (rows/columns view, the SVD theorem, and the rank-1 building-block discussion) is adapted from Marc Toussaint's `svd` lecture note (HTML-sourced, identical to the PDF version), used with attribution per this repository's README. The eigendecomposition-connection derivation, the worked example, and the numeric exercise are newly authored for this workbook. `lecture-maths` §3.4-3.8 (pp. 31-39) covers this same material in more depth (including the general eigendecomposition and power-method computation), noted here as supplementary further reading, not yet incorporated into this module.
+
+---
+
+**Next**: [MATH-05: Covariant Gradient & Steepest Descent](/course/MATH/MATH-05)

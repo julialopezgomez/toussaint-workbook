@@ -1,0 +1,53 @@
+{
+  "moduleId": "MATH-05",
+  "exercises": [
+    {
+      "id": "MATH-05-ex1-why-not-plain-gradient",
+      "objective": "Explain why the plain gradient isn't always the steepest-descent direction.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "The plain gradient $\\nabla f(x)$ points in the direction of steepest *increase* of $f$, but only when \"steepest\" is measured using the ordinary Euclidean notion of direction/distance. If your parameters have a non-Euclidean or rescaled geometry (e.g. one parameter is measured in millimeters and another in meters, or your coordinates come from a nonlinear change of variables), why might $-\\nabla f(x)$ no longer be the direction that decreases $f$ fastest per unit of \"actual\" movement?",
+      "hints": [
+        "\"Steepest\" is only meaningful relative to a notion of distance (a metric): steepest descent asks for the direction $d$ (of some fixed length under that metric) that decreases $f$ the most.",
+        "The plain gradient direction is steepest specifically under the assumption that a unit step in any coordinate direction costs the same amount of 'distance', i.e. under the standard Euclidean metric $\\|d\\|^2 = d^\\top d$.",
+        "If your coordinates have different physical scales or units (e.g. millimeters vs. meters), a 'unit step' in Euclidean coordinate-space corresponds to wildly different amounts of actual physical movement in each direction, so the direction that looks steepest in raw coordinates isn't the direction that actually decreases $f$ fastest per unit of real movement."
+      ],
+      "reviewCardIds": ["RC-MATH-05-01"]
+    },
+    {
+      "id": "MATH-05-ex2-steepest-descent-derivation",
+      "objective": "Derive the steepest descent direction under a general metric.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["MATH-05-ex1-why-not-plain-gradient"],
+      "answerType": "derivation",
+      "prompt": "Let the \"length\" of a step $d$ be measured by $\\|d\\|_G := \\sqrt{d^\\top G d}$ for a symmetric positive-definite matrix $G$ (the metric). The steepest-descent direction is the unit-length (under $\\|\\cdot\\|_G$) direction $d$ that minimizes $\\nabla f(x)^\\top d$ (most negative directional derivative). Using a Lagrange-multiplier argument (minimize $\\nabla f(x)^\\top d$ subject to $d^\\top Gd = 1$), derive that the steepest-descent direction is $d^* \\propto -G^{-1}\\nabla f(x)$.",
+      "hints": [
+        "Set up the Lagrangian $L(d,\\lambda) = \\nabla f(x)^\\top d + \\lambda(d^\\top G d - 1)$, and take $\\partial L/\\partial d = 0$.",
+        "$\\partial L/\\partial d = \\nabla f(x) + 2\\lambda G d = 0$, so $Gd = -\\dfrac{1}{2\\lambda}\\nabla f(x)$.",
+        "Solving for $d$: $d = -\\dfrac{1}{2\\lambda}G^{-1}\\nabla f(x)$, which is exactly $-G^{-1}\\nabla f(x)$ up to the positive scalar $1/(2\\lambda)$ that only fixes the step's length (chosen to satisfy the constraint), not its direction. So the steepest-descent *direction* is $d^* \\propto -G^{-1}\\nabla f(x)$."
+      ],
+      "reviewCardIds": ["RC-MATH-05-02"]
+    },
+    {
+      "id": "MATH-05-ex3-numeric",
+      "objective": "Compute the steepest-descent direction under a non-Euclidean metric.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["MATH-05-ex2-steepest-descent-derivation"],
+      "answerType": "numeric",
+      "prompt": "At a point where $\\nabla f(x) = \\begin{pmatrix}6\\\\13\\end{pmatrix}$, and with metric $G = \\begin{pmatrix}2&0\\\\0&0.5\\end{pmatrix}$, compute the **second component** of the (unnormalized) steepest-descent direction $d = -G^{-1}\\nabla f(x)$. Enter a decimal number.",
+      "hints": [
+        "Since $G$ is diagonal, $G^{-1} = \\begin{pmatrix}0.5&0\\\\0&2\\end{pmatrix}$ (reciprocals of the diagonal entries).",
+        "$G^{-1}\\nabla f(x) = \\begin{pmatrix}0.5&0\\\\0&2\\end{pmatrix}\\begin{pmatrix}6\\\\13\\end{pmatrix} = \\begin{pmatrix}3\\\\26\\end{pmatrix}$.",
+        "$d = -G^{-1}\\nabla f(x) = \\begin{pmatrix}-3\\\\-26\\end{pmatrix}$. Second component: $-26$."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

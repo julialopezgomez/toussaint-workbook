@@ -1,0 +1,53 @@
+{
+  "moduleId": "MATH-03",
+  "exercises": [
+    {
+      "id": "MATH-03-ex1-why-coordinate-free",
+      "objective": "Explain why distinguishing a vector from its coordinates matters.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "A vector $v$ (e.g. a physical displacement, or a robot's joint-velocity state) is a single geometric object, but its *coordinates* $[v]_1, [v]_2, \\dots$ change depending on which basis you choose to describe it in. Explain why it's useful to keep this distinction in mind (vector vs. its coordinates in a particular basis) rather than just thinking of a vector as \"a list of numbers.\"",
+      "hints": [
+        "If a vector were fundamentally just a list of numbers, changing basis would seem to change the vector itself, which doesn't match physical intuition: a robot's actual velocity doesn't change just because you decided to describe it in a rotated coordinate frame.",
+        "Keeping the distinction lets you reason about which quantities are basis-independent (the vector itself, geometric relationships, physical outcomes) versus which are basis-dependent (the specific numbers in a coordinate list).",
+        "This distinction becomes essential once you compose transformations across multiple frames (e.g. robot base frame, end-effector frame, world frame): if you conflate a vector with one particular coordinate representation, it's easy to silently mix up which frame a set of numbers belongs to."
+      ],
+      "reviewCardIds": ["RC-MATH-03-01"]
+    },
+    {
+      "id": "MATH-03-ex2-change-of-basis-derivation",
+      "objective": "Derive the change-of-basis coordinate transformation.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["MATH-03-ex1-why-coordinate-free"],
+      "answerType": "derivation",
+      "prompt": "Let $v \\in \\mathbb{R}^n$ have standard coordinates (i.e. $v$ itself, in the standard basis). Let $B = [b_1, b_2, \\dots, b_n]$ be a matrix whose columns are a new basis. Derive the formula for $[v]_B$, the coordinates of $v$ in the new basis (i.e. the coefficients $c_i$ such that $v = \\sum_i c_i b_i$), in terms of $B$ and $v$.",
+      "hints": [
+        "Write $v = \\sum_i c_i b_i$ where $c_i$ are the unknown new-basis coordinates. This is exactly the statement $v = Bc$, where $c$ is the vector of coefficients (since $Bc$ computes exactly $\\sum_i c_i b_i$ when $b_i$ are the columns of $B$).",
+        "You have $v = Bc$ and want to solve for $c$. Since the $b_i$ form a basis, $B$ is invertible.",
+        "$c = B^{-1}v$, i.e. $[v]_B = B^{-1}v$: to find coordinates in a new basis, apply the inverse of the basis matrix to the standard-basis vector."
+      ],
+      "reviewCardIds": ["RC-MATH-03-02"]
+    },
+    {
+      "id": "MATH-03-ex3-numeric",
+      "objective": "Compute a vector's coordinates in a new basis.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["MATH-03-ex2-change-of-basis-derivation"],
+      "answerType": "numeric",
+      "prompt": "Let $v = \\begin{pmatrix}5\\\\-1\\end{pmatrix}$ (standard coordinates), and let the new basis be $b_1 = \\begin{pmatrix}2\\\\1\\end{pmatrix}$, $b_2=\\begin{pmatrix}1\\\\3\\end{pmatrix}$. Using $[v]_B = B^{-1}v$, compute the **first** new-basis coordinate, $c_1$. Enter a decimal to 2 decimal places.",
+      "hints": [
+        "$B = \\begin{pmatrix}2&1\\\\1&3\\end{pmatrix}$. First compute $B^{-1}$: for a $2\\times2$ matrix $\\begin{pmatrix}a&b\\\\c&d\\end{pmatrix}$, the inverse is $\\dfrac{1}{ad-bc}\\begin{pmatrix}d&-b\\\\-c&a\\end{pmatrix}$.",
+        "$\\det(B) = 2(3)-1(1) = 5$, so $B^{-1} = \\dfrac15\\begin{pmatrix}3&-1\\\\-1&2\\end{pmatrix}$.",
+        "$c = B^{-1}v = \\dfrac15\\begin{pmatrix}3&-1\\\\-1&2\\end{pmatrix}\\begin{pmatrix}5\\\\-1\\end{pmatrix} = \\dfrac15\\begin{pmatrix}3(5)-1(-1)\\\\-1(5)+2(-1)\\end{pmatrix} = \\dfrac15\\begin{pmatrix}16\\\\-7\\end{pmatrix}$. First coordinate: $16/5=3.2$."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

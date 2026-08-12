@@ -1,0 +1,41 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "MATH-05-ex1-why-not-plain-gradient",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Identifies that 'steepest' is only meaningful relative to a chosen notion of distance/metric." },
+          { "points": 1, "description": "Explains that the plain gradient is steepest specifically under the Euclidean metric, and gives a concrete reason a different metric (e.g. mismatched units/scales) breaks that." }
+        ],
+        "commonErrors": [
+          "Saying the gradient is 'just wrong' in general, without identifying that it's correct under one specific (Euclidean) assumption.",
+          "Not connecting the units/scale example back to the abstract metric concept."
+        ]
+      },
+      "fullSolution": "'Steepest descent' means: among all directions of a fixed 'length', which one decreases f the most. That notion of length requires choosing a metric. The plain gradient direction is steepest specifically under the standard Euclidean metric, where a unit step means d^T d = 1, i.e. every coordinate direction is treated as costing the same amount of movement. If coordinates have different physical scales or units (millimeters vs meters, or more generally after a nonlinear change of variables), a Euclidean unit step in one coordinate corresponds to a very different amount of actual physical movement than a Euclidean unit step in another coordinate. So the direction that looks steepest when measured in raw, unit-blind coordinates isn't actually the direction that decreases f the most per unit of real, physically meaningful movement."
+    },
+    {
+      "exerciseId": "MATH-05-ex2-steepest-descent-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly sets up the Lagrangian for the constrained minimization." },
+          { "points": 2, "description": "Correctly differentiates and sets partial L/partial d = 0, getting grad f(x) + 2*lambda*G*d = 0." },
+          { "points": 1, "description": "Correctly solves for d and identifies that the scalar factor only affects length, not direction, giving d* proportional to -G^-1 grad f(x)." }
+        ],
+        "commonErrors": [
+          "Forgetting the factor of 2 from differentiating the quadratic constraint d^T G d.",
+          "Not explaining why the scalar 1/(2*lambda) doesn't matter for the DIRECTION of steepest descent, only its magnitude."
+        ]
+      },
+      "fullSolution": "Lagrangian: L(d,lambda) = grad_f(x)^T d + lambda(d^T G d - 1). Setting partial L/partial d = 0: grad_f(x) + 2*lambda*G*d = 0, so G*d = -(1/(2*lambda)) grad_f(x), hence d = -(1/(2*lambda)) G^-1 grad_f(x).\n\nThe scalar 1/(2*lambda) is positive (chosen to satisfy the unit-length constraint d^T G d=1) and only rescales d's magnitude, not its direction. So the steepest-descent DIRECTION is d* proportional to -G^-1 grad_f(x). This is exactly the covariant gradient: -G^-1 grad_f(x) rather than the plain -grad_f(x), correcting for the geometry encoded by G."
+    },
+    {
+      "exerciseId": "MATH-05-ex3-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": -26, "tolerance": 0.1 },
+      "fullSolution": "G^-1 = [[0.5,0],[0,2]] (reciprocals of diagonal entries, since G is diagonal). G^-1 @ grad = [0.5*6, 2*13] = [3, 26]. d = -G^-1 @ grad = [-3,-26]. Second component: -26."
+    }
+  ]
+}

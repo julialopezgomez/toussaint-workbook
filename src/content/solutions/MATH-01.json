@@ -1,0 +1,51 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "MATH-01-ex1-partial-vs-total",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "States that the partial derivative treats the other variable(s) as fixed/independent, isolating one direct effect." },
+          { "points": 1, "description": "States that the total derivative accounts for all the ways t indirectly affects z (through both x and y), summing the contributions." }
+        ],
+        "commonErrors": [
+          "Saying they're 'basically the same thing computed differently' without identifying that one ignores indirect dependencies and the other doesn't.",
+          "Confusing this with directional derivatives (a related but different concept)."
+        ]
+      },
+      "fullSolution": "partial z/partial x measures how z changes if x alone is nudged, with y held fixed, treating x and y as independent variables. It ignores the fact that, in this problem, y also happens to depend on t. dz/dt measures how z actually changes as t is nudged, which moves x AND y simultaneously (since both are functions of t). It's therefore a sum of the partial-derivative effect through x plus the partial-derivative effect through y, not a single partial derivative. This is exactly the 'sum over paths in the computation graph' idea that appears again, more generally, when you get to backprop."
+    },
+    {
+      "exerciseId": "MATH-01-ex2-chainrule-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly first-order Taylor-expands f around (x(t), y(t)) with increments delta*xdot(t), delta*ydot(t)." },
+          { "points": 2, "description": "Correctly substitutes into the difference quotient and takes delta -> 0, showing the Taylor remainder vanishes." },
+          { "points": 1, "description": "Arrives at the correct final formula dz/dt = (partial f/partial x)(dx/dt) + (partial f/partial y)(dy/dt)." }
+        ],
+        "commonErrors": [
+          "Trying to prove this from the limit definition without ever introducing a Taylor expansion (technically possible but far more painful, and not what's being asked).",
+          "Forgetting that the Taylor remainder is o(delta), not just 'small', which is what justifies dropping it in the delta -> 0 limit."
+        ]
+      },
+      "fullSolution": "x(t+delta) = x(t) + delta*xdot(t) + o(delta), similarly for y. First-order Taylor expansion of f around (x(t),y(t)):\nf(x(t+delta), y(t+delta)) = f(x(t),y(t)) + (partial f/partial x)(delta*xdot(t)) + (partial f/partial y)(delta*ydot(t)) + o(delta).\n\nSubtract f(x(t),y(t)) and divide by delta:\n[f(x(t+delta),y(t+delta)) - f(x(t),y(t))]/delta = (partial f/partial x)*xdot(t) + (partial f/partial y)*ydot(t) + o(delta)/delta.\n\nAs delta -> 0, the o(delta)/delta term vanishes by definition of little-o, leaving exactly dz/dt = (partial f/partial x)(dx/dt) + (partial f/partial y)(dy/dt)."
+    },
+    {
+      "exerciseId": "MATH-01-ex3-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 15.683, "tolerance": 0.01 },
+      "fullSolution": "At s=1: x=3, y=1. partial z/partial x = y^2 = 1. partial z/partial y = 2xy + sin(y) = 2*3*1 + sin(1) = 6 + 0.8415 = 6.8415. dx/ds=2, dy/ds=2s=2.\ndz/ds = (1)(2) + (6.8415)(2) = 2 + 13.683 = 15.683."
+    },
+    {
+      "exerciseId": "MATH-01-ex4-multipath-challenge",
+      "checkMode": "symbolic",
+      "symbolic": {
+        "expectedExpr": "2*s",
+        "variables": ["s"],
+        "equivalenceNotes": "Any form algebraically equal to 2*s is accepted (e.g. s+s)."
+      },
+      "fullSolution": "partial z/partial x = y, partial z/partial y = x, partial x/partial s = 1, partial y/partial s = 1.\npartial z/partial s = y*1 + x*1 = x + y = (s+t) + (s-t) = 2s. The t-dependence cancels exactly."
+    }
+  ]
+}

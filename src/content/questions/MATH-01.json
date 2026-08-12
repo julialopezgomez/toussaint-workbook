@@ -1,0 +1,69 @@
+{
+  "moduleId": "MATH-01",
+  "exercises": [
+    {
+      "id": "MATH-01-ex1-partial-vs-total",
+      "objective": "Distinguish partial and total derivatives conceptually.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 5,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Let $z = f(x,y) = x^2 y$, where $x$ and $y$ both happen to depend on a third variable $t$ (say $x=t^2$, $y=t+1$). Explain in your own words the difference between $\\partial z/\\partial x$ and $dz/dt$: what question does each one answer, and why are they different numbers even though both involve differentiating $z$?",
+      "hints": [
+        "$\\partial z/\\partial x$ asks: if I nudge $x$ while holding $y$ fixed, how does $z$ change? It treats $x$ and $y$ as independent, even though in this problem they secretly aren't.",
+        "$dz/dt$ asks: if I nudge $t$, how does $z$ actually change, given that nudging $t$ moves *both* $x$ and $y$ simultaneously?",
+        "$dz/dt$ has to account for both routes $t$ affects $z$ through ($t\\to x\\to z$ and $t\\to y\\to z$), so it's a sum of partial-derivative contributions, not a single partial derivative."
+      ],
+      "reviewCardIds": ["RC-MATH-01-01"]
+    },
+    {
+      "id": "MATH-01-ex2-chainrule-derivation",
+      "objective": "Derive the multivariable chain rule for a total derivative.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["MATH-01-ex1-partial-vs-total"],
+      "answerType": "derivation",
+      "prompt": "For $z=f(x,y)$ with $x=x(t)$, $y=y(t)$, derive the total derivative formula $\\dfrac{dz}{dt} = \\dfrac{\\partial f}{\\partial x}\\dfrac{dx}{dt} + \\dfrac{\\partial f}{\\partial y}\\dfrac{dy}{dt}$ starting from the definition of a derivative as a limit, $\\dfrac{dz}{dt} = \\lim_{\\delta \\to 0} \\dfrac{f(x(t+\\delta),y(t+\\delta)) - f(x(t),y(t))}{\\delta}$. (A first-order Taylor expansion of $f$ around $(x(t),y(t))$ is the key tool: don't try to do this from the raw limit definition alone.)",
+      "hints": [
+        "Write $x(t+\\delta) \\approx x(t) + \\delta \\dot x(t)$ and similarly for $y$, then Taylor-expand $f$ to first order around $(x(t), y(t))$: $f(x+\\Delta x, y + \\Delta y) \\approx f(x,y) + \\dfrac{\\partial f}{\\partial x}\\Delta x + \\dfrac{\\partial f}{\\partial y}\\Delta y$.",
+        "Substitute $\\Delta x = \\delta \\dot x(t)$, $\\Delta y = \\delta \\dot y(t)$ into the Taylor expansion, then subtract $f(x(t),y(t))$ and divide by $\\delta$.",
+        "You should get $\\dfrac{f(x(t+\\delta),y(t+\\delta))-f(x(t),y(t))}{\\delta} \\approx \\dfrac{\\partial f}{\\partial x}\\dot x(t) + \\dfrac{\\partial f}{\\partial y}\\dot y(t)$, with the approximation becoming exact as $\\delta\\to 0$ (the Taylor remainder vanishes faster than $\\delta$)."
+      ],
+      "reviewCardIds": ["RC-MATH-01-02"]
+    },
+    {
+      "id": "MATH-01-ex3-numeric",
+      "objective": "Compute a total derivative via the chain rule with concrete numbers.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["MATH-01-ex2-chainrule-derivation"],
+      "answerType": "numeric",
+      "prompt": "Let $z = xy^2 - \\cos(y)$, with $x=2s+1$ and $y=s^2$. Compute $dz/ds$ at $s=1$ using the chain rule (not by fully substituting and expanding, practice the chain-rule bookkeeping). Enter a decimal to 3 decimal places.",
+      "hints": [
+        "$\\partial z/\\partial x = y^2$, $\\partial z/\\partial y = 2xy + \\sin(y)$. Evaluate these at $x=x(1)=3$, $y=y(1)=1$ first.",
+        "$dx/ds = 2$, $dy/ds = 2s$, evaluated at $s=1$: $dx/ds=2$, $dy/ds=2$.",
+        "Combine: $dz/ds = (\\partial z/\\partial x)(dx/ds) + (\\partial z/\\partial y)(dy/ds) = (1)(2) + (2\\cdot3\\cdot1+\\sin(1))(2)$. Finish the arithmetic; $\\sin(1) \\approx 0.8415$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-01-ex4-multipath-challenge",
+      "objective": "Apply the sum-over-paths chain rule to a computation graph with two intermediate variables.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": ["MATH-01-ex3-numeric"],
+      "answerType": "symbolic",
+      "prompt": "Let $z = f(x,y) = xy$, with $x=g(s,t)=s+t$ and $y=h(s,t)=s-t$ (so now $z$ depends on $s$ through *two* separate paths: $s\\to x \\to z$ and $s \\to y \\to z$). Derive $\\partial z/\\partial s$ (holding $t$ fixed) by summing the contribution of both paths, and simplify fully in terms of $s$ alone (the $t$-dependence should cancel). Enter your simplified expression in Python-style syntax with `s` as the variable, e.g. `2*s`.",
+      "hints": [
+        "The computation graph has two paths from $s$ to $z$: through $x$, and through $y$. The total derivative sums both: $\\partial z/\\partial s = (\\partial z/\\partial x)(\\partial x/\\partial s) + (\\partial z/\\partial y)(\\partial y/\\partial s)$.",
+        "$\\partial z/\\partial x = y$, $\\partial z/\\partial y = x$, and $\\partial x/\\partial s = \\partial y/\\partial s = 1$. So $\\partial z/\\partial s = y + x$.",
+        "Substitute $x=s+t$, $y=s-t$: $\\partial z/\\partial s = (s-t)+(s+t) = 2s$. The $t$'s cancel exactly, as promised."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

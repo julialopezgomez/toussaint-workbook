@@ -1,0 +1,56 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "MATH-04-ex1-why-orthonormal",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Identifies that SVD provides explicit orthonormal bases for input and output spaces, unlike raw (possibly dependent, non-orthogonal) rows/columns." },
+          { "points": 1, "description": "Identifies that SVD makes explicit which input direction maps to which output direction and by how much (singular values)." }
+        ],
+        "commonErrors": [
+          "Only saying 'SVD decomposes a matrix' without explaining what specifically becomes clearer or easier as a result.",
+          "Confusing orthonormality of U/V with A itself being orthogonal (A is generally not orthogonal; only U and V are)."
+        ]
+      },
+      "fullSolution": "A raw matrix's rows/columns may be linearly dependent and are generally not orthonormal, so there's no explicit, clean basis describing the input or output space. The SVD A=USV^T provides exactly that: V's columns are an orthonormal basis for the input space, U's columns an orthonormal basis for the output space, and S's diagonal entries (singular values) tell you exactly how much each input basis direction gets scaled on its way to the corresponding output basis direction. Because the v_i are mutually orthogonal and the u_i are mutually orthogonal, A's whole action decomposes into k independent, non-interfering pieces: project onto v_i, scale by sigma_i, place along u_i, which is much easier to reason about than the raw matrix entries."
+    },
+    {
+      "exerciseId": "MATH-04-ex2-eigendecomp-connection",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly expands A^T A = V S^T U^T U S V^T and uses U^T U = I to simplify." },
+          { "points": 1, "description": "Correctly identifies S^T S = S^2 (diagonal matrix of squared singular values)." },
+          { "points": 1, "description": "Correctly concludes A^T A = V S^2 V^T is the eigendecomposition, identifying V's columns as eigenvectors and sigma_i^2 as eigenvalues." }
+        ],
+        "commonErrors": [
+          "Forgetting to transpose correctly: (USV^T)^T = VS^T U^T, not USV^T again.",
+          "Not explicitly connecting the final form V S^2 V^T to the definition of an eigendecomposition (orthonormal eigenvector matrix times diagonal eigenvalue matrix times its transpose)."
+        ]
+      },
+      "fullSolution": "A^T A = (USV^T)^T (USV^T) = V S^T U^T U S V^T. Since U is orthonormal, U^T U = I, so this becomes V S^T S V^T. Since S is diagonal, S^T S = S^2, the diagonal matrix of squared singular values. So A^T A = V S^2 V^T.\n\nThis is exactly the form of an eigendecomposition (orthonormal matrix, diagonal matrix, transpose of the same orthonormal matrix), so V's columns are orthonormal eigenvectors of A^T A, with eigenvalues sigma_i^2 (the diagonal entries of S^2). Practically: to compute an SVD by hand, find the eigendecomposition of A^T A to get V and the singular values (as square roots of the eigenvalues), then find U similarly from A A^T (or via U = AV S^-1)."
+    },
+    {
+      "exerciseId": "MATH-04-ex3-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 2.562, "tolerance": 0.01 },
+      "fullSolution": "A^T A = [[2,1],[0,2]] @ [[2,0],[1,2]] = [[5,2],[2,4]]. Eigenvalues of a symmetric [[p,q],[q,r]] matrix: (p+r)/2 +- sqrt(((p-r)/2)^2 + q^2). Here p=5, r=4, q=2: (9)/2 +- sqrt(0.25+4) = 4.5 +- sqrt(4.25) = 4.5 +- 2.0616. Eigenvalues: 6.5616 and 2.4384. Larger singular value = sqrt(6.5616) = 2.562 (verified independently with NumPy while authoring this module, matching to full precision)."
+    },
+    {
+      "exerciseId": "MATH-04-ex4-rank1-challenge",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly shows every column of u v^T is a scalar multiple of u, hence a 1-dimensional column space (rank 1)." },
+          { "points": 2, "description": "Explains why this makes rank-1 matrices the minimal/atomic building blocks: any rank-k matrix decomposes into exactly k such pieces via its SVD, no fewer would suffice." }
+        ],
+        "commonErrors": [
+          "Confusing rank 1 with 'small' or 'simple looking' rather than the precise column-space-dimension definition.",
+          "Not connecting back to why the SVD specifically (as opposed to an arbitrary decomposition) gives a minimal/canonical rank-1 decomposition."
+        ]
+      },
+      "fullSolution": "For a rank-1 matrix uv^T, column j is (uv^T)_{:,j} = v_j * u, i.e. every column is some scalar multiple of the single vector u. So the column space is spanned by u alone: 1-dimensional, i.e. rank 1.\n\nThe SVD sum A = sum_i sigma_i u_i v_i^T expresses A's entire action as k independent rank-1 pieces added together, each one an isolated input-direction-to-output-direction mapping. Since a rank-k matrix requires at least k rank-1 pieces to express as a sum (rank is subadditive: rank of a sum is at most the sum of ranks, so you can't do it with fewer than k rank-1 terms), and the SVD achieves exactly k, rank-1 matrices are literally the minimal, atomic units that any linear map decomposes into: nothing simpler than 'pick up one input direction, scale, place along one output direction' can capture a genuine directional mapping at all."
+    }
+  ]
+}

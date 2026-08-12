@@ -1,0 +1,40 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "MATH-03-ex1-why-coordinate-free",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Identifies that the underlying vector/physical quantity doesn't change when you change basis, only its numeric description does." },
+          { "points": 1, "description": "Gives a concrete reason this matters (e.g. avoiding frame-mixing bugs, reasoning about basis-independent physical outcomes)." }
+        ],
+        "commonErrors": [
+          "Treating this as a purely abstract/philosophical point without connecting it to a practical consequence.",
+          "Conflating change of basis with a physical rotation of the object itself (the object doesn't move; only the description changes)."
+        ]
+      },
+      "fullSolution": "A vector like a physical displacement or velocity is a geometric object that exists independent of how you choose to describe it numerically. Its coordinates are just a particular numeric encoding relative to a chosen basis, and change if you change the basis, even though the underlying vector doesn't. Keeping this distinction matters practically: it lets you correctly reason about which quantities are basis-independent (physical relationships, the vector itself) versus basis-dependent (a specific list of numbers), which becomes essential once multiple coordinate frames are in play (e.g. robot base frame vs. end-effector frame vs. world frame), since conflating a vector with one specific coordinate list makes it easy to silently mix up which frame a set of numbers actually belongs to."
+    },
+    {
+      "exerciseId": "MATH-03-ex2-change-of-basis-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly sets up v = sum_i c_i b_i as the matrix equation v = Bc." },
+          { "points": 2, "description": "Correctly solves for c by inverting B, using the fact that a basis matrix is invertible." }
+        ],
+        "commonErrors": [
+          "Writing v = B^{-1}c or another incorrect arrangement of the matrix equation.",
+          "Not noting that B being a basis (linearly independent columns spanning the space) is exactly what guarantees invertibility."
+        ]
+      },
+      "fullSolution": "v = sum_i c_i b_i is exactly the matrix-vector product v = Bc, where B has the b_i as its columns and c is the vector of unknown coefficients. Since {b_i} is a basis, the b_i are linearly independent and span the space, which means B is a square, invertible matrix. Left-multiplying v=Bc by B^{-1} gives B^{-1}v = c, i.e. [v]_B = B^{-1}v."
+    },
+    {
+      "exerciseId": "MATH-03-ex3-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 3.2, "tolerance": 0.02 },
+      "fullSolution": "B = [[2,1],[1,3]], det(B) = 2*3-1*1 = 5. B^-1 = (1/5)*[[3,-1],[-1,2]]. B^-1 @ v = (1/5)*[[3,-1],[-1,2]] @ [5,-1] = (1/5)*[3*5-1*(-1), -1*5+2*(-1)] = (1/5)*[16,-7]. First coordinate c1 = 16/5 = 3.2."
+    }
+  ]
+}
