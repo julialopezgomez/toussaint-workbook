@@ -1,0 +1,19 @@
+---
+import BaseLayout from './BaseLayout.astro';
+interface Props { id: string; title: string; relatedModules: string[]; }
+const { id, title, relatedModules } = Astro.props;
+---
+<BaseLayout title={`Cheat sheet: ${title}`}>
+  <nav class="no-print breadcrumb"><a href="/">Start</a> / <a href="/cheatsheets">Cheat sheets</a> / {id}</nav>
+  <h1>{title}</h1>
+  {relatedModules.length > 0 && (
+    <p class="related"><strong>Related modules:</strong> {relatedModules.join(', ')}</p>
+  )}
+  <article><slot /></article>
+  <style>
+    .breadcrumb { font-size: 0.85rem; opacity: 0.7; margin-bottom: 1rem; }
+    .breadcrumb a { color: inherit; }
+    .related { font-size: 0.85rem; opacity: 0.75; }
+    table { font-size: 0.9rem; }
+  </style>
+</BaseLayout>

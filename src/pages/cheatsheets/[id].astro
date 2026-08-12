@@ -1,0 +1,15 @@
+---
+import { getCollection, render } from 'astro:content';
+import CheatsheetLayout from '../../layouts/CheatsheetLayout.astro';
+
+export async function getStaticPaths() {
+  const sheets = await getCollection('cheatsheets');
+  return sheets.map((s) => ({ params: { id: s.data.id }, props: { entry: s } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<CheatsheetLayout {...entry.data}>
+  <Content />
+</CheatsheetLayout>

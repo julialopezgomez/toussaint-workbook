@@ -1,0 +1,58 @@
+[
+  {
+    "source_id": "energy",
+    "html_url": "https://www.user.tu-berlin.de/mtoussai/notes/energy.html",
+    "html_text_file": "data/source-manifest/html-text/energy.md",
+    "display_math_blocks": 5,
+    "inline_math_spans": 61,
+    "char_count": 7948
+  },
+  {
+    "source_id": "entropy",
+    "html_url": "https://www.user.tu-berlin.de/mtoussai/notes/entropy.html",
+    "html_text_file": "data/source-manifest/html-text/entropy.md",
+    "display_math_blocks": 5,
+    "inline_math_spans": 84,
+    "char_count": 6775
+  },
+  {
+    "source_id": "gaussians",
+    "html_url": "https://www.user.tu-berlin.de/mtoussai/notes/gaussians.html",
+    "html_text_file": "data/source-manifest/html-text/gaussians.md",
+    "display_math_blocks": 18,
+    "inline_math_spans": 23,
+    "char_count": 14581
+  },
+  {
+    "source_id": "quaternions",
+    "html_url": "https://www.user.tu-berlin.de/mtoussai/notes/quaternions.html",
+    "html_text_file": "data/source-manifest/html-text/quaternions.md",
+    "display_math_blocks": 24,
+    "inline_math_spans": 218,
+    "char_count": 18264
+  },
+  {
+    "source_id": "robotkin",
+    "html_url": "https://www.user.tu-berlin.de/mtoussai/notes/robotKin.html",
+    "html_text_file": "data/source-manifest/html-text/robotkin.md",
+    "display_math_blocks": 10,
+    "inline_math_spans": 193,
+    "char_count": 21708
+  },
+  {
+    "source_id": "splines",
+    "html_url": "https://www.user.tu-berlin.de/mtoussai/notes/splines.html",
+    "html_text_file": "data/source-manifest/html-text/splines.md",
+    "display_math_blocks": 14,
+    "inline_math_spans": 182,
+    "char_count": 21831
+  },
+  {
+    "source_id": "svd",
+    "html_url": "https://www.user.tu-berlin.de/mtoussai/notes/svd.html",
+    "html_text_file": "data/source-manifest/html-text/svd.md",
+    "display_math_blocks": 1,
+    "inline_math_spans": 61,
+    "char_count": 4479
+  }
+]

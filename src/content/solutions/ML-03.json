@@ -1,0 +1,83 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "ML-03-ex1",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Identifies that reverse mode computes each layer's local Jacobian once and reuses it for every upstream parameter." },
+          { "points": 1, "description": "Connects this to the shape of the problem: one scalar loss, many parameters — so accumulating from the output backward is cheap (one pass), while accumulating from each input parameter forward would need one pass per parameter." }
+        ],
+        "commonErrors": [
+          "Saying 'it's just how the chain rule works' without explaining the computational cost argument.",
+          "Confusing this with the difference between symbolic and numeric differentiation (a different topic) rather than forward-mode vs. reverse-mode autodiff."
+        ]
+      },
+      "fullSolution": "Forward-mode accumulation would need to track, for every parameter, how a perturbation of that single parameter propagates all the way to the scalar output — that's one full forward-shaped computation per parameter. Reverse-mode (backprop) instead starts from the single scalar output and asks 'how sensitive is the loss to this intermediate quantity', propagating that sensitivity backward one layer at a time. Each layer's local Jacobian (e.g. sigma'(z_1)) is computed exactly once and reused for every parameter that feeds into it. Since a typical network has one scalar loss but potentially millions of parameters, reverse mode is dramatically cheaper — it costs roughly one backward pass total, versus one forward pass per parameter for forward mode."
+    },
+    {
+      "exerciseId": "lecture-maths-ex5-1-backprop-general",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Writes the full chain rule df/dx0 = (df/dx2)(dx2/dz2)(dz2/dx1)(dx1/dz1)(dz1/dx0) with every factor identified as a specific matrix (W2, diag(sigma'(z2)), W1, diag(sigma'(z1)), W0)." },
+          { "points": 2, "description": "Derives sigma'(z) = sigma(z)(1-sigma(z)) via direct differentiation of (1+e^-z)^-1, showing the algebraic substitution step (not just stating the result)." }
+        ],
+        "commonErrors": [
+          "Treating dx_l/dz_l as a scalar rather than a diagonal matrix (it's elementwise, so it IS diagonal, but that fact needs to be stated — otherwise the matrix dimensions in the chain don't work).",
+          "Getting the sign wrong in the derivative of e^{-z} (it's -e^{-z}, easy to drop the minus sign)."
+        ]
+      },
+      "fullSolution": "df/dx0 = (dz2)^{-1}... concretely: df/dx0 = W2 * diag(sigma'(z2)) * W1 * diag(sigma'(z1)) * W0, where diag(sigma'(z_l)) is the diagonal matrix of elementwise sigmoid derivatives at layer l (diagonal because sigma is applied elementwise, so each output of x_l depends only on the corresponding entry of z_l).\n\nFor the derivative: sigma(z) = (1+e^{-z})^{-1}. By the chain rule, sigma'(z) = -1*(1+e^{-z})^{-2} * (-e^{-z}) = e^{-z}/(1+e^{-z})^2. To express this in terms of sigma(z) itself: note 1-sigma(z) = e^{-z}/(1+e^{-z}), so sigma(z)*(1-sigma(z)) = [1/(1+e^{-z})] * [e^{-z}/(1+e^{-z})] = e^{-z}/(1+e^{-z})^2 = sigma'(z). Hence sigma'(z) = sigma(z)(1-sigma(z))."
+    },
+    {
+      "exerciseId": "ML-03-ex3-sigmoid-symbolic",
+      "checkMode": "symbolic",
+      "symbolic": {
+        "expectedExpr": "exp(-z)/(1+exp(-z))**2",
+        "variables": ["z"],
+        "equivalenceNotes": "Any algebraically equivalent form is accepted, e.g. 1/(4*cosh(z/2)**2) or sigma(z)*(1-sigma(z)) rewritten purely in z. The local SymPy checker verifies equivalence by simplifying the difference to zero, not by string matching."
+      },
+      "fullSolution": "sigma'(z) = e^{-z}/(1+e^{-z})^2, derived by substituting sigma(z)=1/(1+e^{-z}) into sigma(z)(1-sigma(z)) and simplifying (see the previous exercise's full solution for the derivation steps)."
+    },
+    {
+      "exerciseId": "ML-03-ex4-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.04009, "tolerance": 0.001 },
+      "fullSolution": "Forward pass: z1 = [0.2*0.5+0.1*(-1.0), -0.3*0.5+0.5*(-1.0)] = [0.0, -0.65]. x1 = [sigma(0), sigma(-0.65)] = [0.5, 0.34299]. f = -0.4*0.5 + 0.7*0.34299 = -0.2 + 0.24009 = 0.04009. L=(f-0)^2=0.00161.\nBackward: dL/df = 2*(f-y) = 2*0.04009 = 0.08019. dL/dW1 = dL/df * x1 = 0.08019 * [0.5, 0.34299] = [0.04009, 0.02750]. So dL/dW1^(1) (first entry) = 0.04009, matching f itself here only because y=0 makes dL/df*x1^(1) = 2f*x1^(1); this is a coincidence of this particular numeric choice, not a general identity, so don't rely on that shortcut for other numbers."
+    },
+    {
+      "exerciseId": "ML-03-ex5-pytorch",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Code runs without shape/dtype errors and uses torch.sigmoid rather than a hand-rolled formula." },
+          { "points": 1, "description": "requires_grad=True is set only on W0 and W1, not on x0 or y." },
+          { "points": 2, "description": "Printed W0.grad and W1.grad match the lesson's manually-derived dL/dW0=[[-0.30249,-0.60497],[0.27822,0.55643]] and dL/dW1=[-1.05315,-1.85671] to at least 4 decimal places." }
+        ],
+        "commonErrors": [
+          "Forgetting requires_grad=True and getting a 'does not require grad' error on .backward().",
+          "Using torch.matmul with mismatched shapes (W0 @ x0 requires x0 to be a 1D tensor of length 2, matching W0's second dimension).",
+          "Calling .backward() twice without zeroing gradients first (not an issue in this single-pass exercise, but worth flagging as a habit for later multi-step exercises)."
+        ]
+      },
+      "fullSolution": "import torch\nx0 = torch.tensor([1.0, 2.0])\nW0 = torch.tensor([[0.1, -0.2],[0.3, 0.4]], requires_grad=True)\nW1 = torch.tensor([0.5, -0.6], requires_grad=True)\ny = torch.tensor(1.0)\nz1 = W0 @ x0\nx1 = torch.sigmoid(z1)\nf = W1 @ x1\nL = (f - y)**2\nL.backward()\nprint(W0.grad)   # tensor([[-0.3025, -0.6050], [0.2782, 0.5564]])\nprint(W1.grad)   # tensor([-1.0532, -1.8567])\nThis was verified to match the manual/NumPy derivation to within float32 rounding (4th decimal place) when this module was authored."
+    },
+    {
+      "exerciseId": "ML-03-ex6-challenge",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Defines the error signal delta_l = dL/dz_l and gives the correct recursion delta_l = (W_l^T delta_{l+1}) elementwise-times sigma'(z_l)." },
+          { "points": 1, "description": "Gives the correct weight-gradient formula dL/dW_l = delta_{l+1} x_l^T for each layer." },
+          { "points": 1, "description": "Explicitly states that x_l and z_l for every layer must be cached during the forward pass for the backward pass to avoid recomputation." }
+        ],
+        "commonErrors": [
+          "Writing the recursion in the wrong order (forward instead of backward index direction).",
+          "Forgetting the elementwise (Hadamard) product in the delta recursion and writing a matrix product instead — dimensions won't work out if you do."
+        ]
+      },
+      "fullSolution": "Forward pass (cache everything): for l=0..L-2: z_{l+1} = W_l x_l; x_{l+1} = sigma(z_{l+1}) for hidden layers (linear for the final output layer). Cache all x_l, z_l.\nBackward pass: delta_{L-1} = dL/df (from the loss). For l = L-2 down to 0: dL/dW_l = delta_{l+1} x_l^T; delta_l = (W_l^T delta_{l+1}) elementwise-times sigma'(z_l) [only for hidden layers; the recursion stops once you reach x_0]. This is exactly backprop: one forward sweep caching activations, one backward sweep reusing them, each layer's local Jacobian computed once."
+    }
+  ]
+}

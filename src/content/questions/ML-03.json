@@ -1,0 +1,103 @@
+{
+  "moduleId": "ML-03",
+  "exercises": [
+    {
+      "id": "ML-03-ex1",
+      "objective": "Explain why backprop traverses the computation graph in reverse.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 5,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "In the computation graph $x_0 \\to z_1 \\to x_1 \\to z_2 \\to x_2 \\to f$, forward evaluation computes left to right. Backprop computes $\\partial f/\\partial x_0$ by working right to left instead. In your own words, why is that the efficient order — what would go wrong (or become expensive) if you tried to accumulate the chain rule left to right for a network with many parameters?",
+      "hints": [
+        "Think about how many distinct partial derivatives you'd need to compute and store if you started from $x_0$ and pushed forward, versus starting from $f$ and pushing backward, for a network with one scalar output but thousands of parameters.",
+        "Each layer's local Jacobian (e.g. $\\partial z_2/\\partial x_1$) gets reused for every parameter upstream of it. Reverse mode computes each local Jacobian once and reuses it; forward mode would recompute a full Jacobian chain per parameter.",
+        "Forward mode costs roughly one pass per input dimension; reverse mode costs roughly one pass per output dimension. A loss function has a single scalar output but can have millions of parameters — so reverse mode (backprop) wins by that ratio."
+      ],
+      "reviewCardIds": ["RC-ML-03-01"]
+    },
+    {
+      "id": "lecture-maths-ex5-1-backprop-general",
+      "objective": "Derive the general chain-rule expression for backprop through a 3-layer MLP, including the sigmoid derivative.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-maths", "page": 20, "originalNumber": "Exercise 5 / §2.8.1" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["ML-03-ex1"],
+      "answerType": "derivation",
+      "prompt": "Consider $f: \\mathbb{R}^{h_0} \\to \\mathbb{R}^{h_3}$, $f(x_0) = W_2\\,\\sigma(W_1\\,\\sigma(W_0 x_0))$, where $W_l \\in \\mathbb{R}^{h_{l+1}\\times h_l}$ and $\\sigma(z) = 1/(1+e^{-z})$ is applied elementwise. Write out the full chain rule $\\dfrac{df}{dx_0} = \\dfrac{\\partial f}{\\partial x_2}\\dfrac{\\partial x_2}{\\partial z_2}\\dfrac{\\partial x_2}{\\partial z_1}\\cdots$ (fill in every factor), and derive $\\dfrac{\\partial x_l}{\\partial z_l} = \\sigma'(z_l)$ explicitly in closed form, expressed in terms of $x_l = \\sigma(z_l)$ itself rather than $z_l$.",
+      "hints": [
+        "Start from the outermost function and peel off one layer at a time — you already have the computation graph $x_0 \\to z_1 \\to x_1 \\to z_2 \\to x_2 \\to f$ from the lesson.",
+        "$\\partial x_2/\\partial z_2$ and $\\partial x_1/\\partial z_1$ are both diagonal matrices (since $\\sigma$ is applied elementwise) — you only need the elementwise derivative $\\sigma'(z)$ once, applied at each layer.",
+        "Write $\\sigma(z) = (1+e^{-z})^{-1}$ and differentiate directly with the chain rule; then substitute $e^{-z} = (1-\\sigma(z))/\\sigma(z)$ (from rearranging the definition of $\\sigma$) to eliminate $z$ entirely. You should land on $\\sigma'(z) = \\sigma(z)(1-\\sigma(z))$."
+      ],
+      "reviewCardIds": ["RC-ML-03-02"]
+    },
+    {
+      "id": "ML-03-ex3-sigmoid-symbolic",
+      "objective": "Confirm the sigmoid-derivative identity symbolically.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 8,
+      "prerequisites": ["lecture-maths-ex5-1-backprop-general"],
+      "answerType": "symbolic",
+      "prompt": "Using the result from the previous exercise, write $\\sigma'(z)$ as an explicit expression in the single variable $z$ (not in terms of $\\sigma(z)$) — i.e. substitute $\\sigma(z) = 1/(1+e^{-z})$ back in and simplify as far as you can. Enter your expression using Python-style syntax with `exp(...)` for $e^{(\\cdot)}$ and `z` as the variable, e.g. `exp(-z)/(1+exp(-z))**2`.",
+      "hints": [
+        "You already derived $\\sigma'(z) = \\sigma(z)(1-\\sigma(z))$ in the previous exercise — this is just substitution.",
+        "$1 - \\sigma(z) = 1 - \\frac{1}{1+e^{-z}} = \\frac{e^{-z}}{1+e^{-z}}$.",
+        "Multiply the two pieces: $\\sigma'(z) = \\dfrac{1}{1+e^{-z}}\\cdot\\dfrac{e^{-z}}{1+e^{-z}} = \\dfrac{e^{-z}}{(1+e^{-z})^2}$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-03-ex4-numeric",
+      "objective": "Manually compute a full forward+backward pass for a small MLP with new numbers.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 20,
+      "prerequisites": ["lecture-maths-ex5-1-backprop-general"],
+      "answerType": "numeric",
+      "prompt": "Using the same 2-input, 2-hidden-unit, 1-output network as the worked example (sigmoid hidden layer, linear output, square loss $L=(f-y)^2$), but now with $x_0=[0.5,-1.0]$, $W_0=\\begin{pmatrix}0.2 & 0.1\\\\ -0.3 & 0.5\\end{pmatrix}$, $W_1=[-0.4,\\ 0.7]$, and target $y=0$: compute $\\dfrac{\\partial L}{\\partial W_1^{(1)}}$ (the gradient w.r.t. the **first entry** of $W_1$, i.e. the weight connecting the first hidden unit to the output). Enter a decimal number to 3 decimal places.",
+      "hints": [
+        "First compute the forward pass all the way through: $z_1$, then $x_1=\\sigma(z_1)$, then $f=W_1 x_1$, then $L=(f-y)^2$. Don't skip to the gradient — you need $x_1$ and $f$ as intermediate values.",
+        "$\\partial L/\\partial W_1 = \\partial L/\\partial f \\cdot \\partial f/\\partial W_1 = 2(f-y)\\cdot x_1$ — this is a vector; you want its first entry, which only needs $x_1^{(1)} = \\sigma(z_1^{(1)})$, the first hidden unit's activation.",
+        "$z_1^{(1)} = 0.2\\times 0.5 + 0.1\\times(-1.0) = 0.1-0.1 = 0$, so $x_1^{(1)}=\\sigma(0)=0.5$ exactly. Then $f = -0.4\\times 0.5 + 0.7\\times\\sigma(-0.65)$ — finish computing $f$, then apply the formula from hint 2."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-03-ex5-pytorch",
+      "objective": "Reproduce the worked example in PyTorch and confirm gradients match the manual derivation to 4 decimal places.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["ML-03-ex4-numeric"],
+      "answerType": "code",
+      "prompt": "Write PyTorch code that reproduces the lesson's worked example exactly: $x_0=[1,2]$, $W_0=\\begin{pmatrix}0.1&-0.2\\\\0.3&0.4\\end{pmatrix}$, $W_1=[0.5,-0.6]$, sigmoid hidden layer, linear output, target $y=1$, square loss. Use `requires_grad=True` on `W0` and `W1`, call `.backward()`, and print `W0.grad` and `W1.grad`. Confirm the printed values match the lesson's manually-derived $dL/dW_0$ and $dL/dW_1$ to at least 4 decimal places.",
+      "hints": [
+        "Use `torch.sigmoid(z1)` for the activation — don't hand-roll $1/(1+e^{-z})$, it's numerically equivalent but the built-in is what you'll use in practice.",
+        "The full pipeline is: `z1 = W0 @ x0`, `x1 = torch.sigmoid(z1)`, `f = W1 @ x1`, `L = (f - y)**2`, then `L.backward()`.",
+        "If your gradients don't match: check that `x0` and `y` do NOT have `requires_grad=True` (they're data, not parameters) and that you didn't accidentally overwrite `W0`/`W1` with a non-leaf tensor before calling backward."
+      ],
+      "reviewCardIds": ["RC-ML-03-03"]
+    },
+    {
+      "id": "ML-03-ex6-challenge",
+      "objective": "Generalize the backward pass to an arbitrary number of layers.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-maths", "page": 20, "originalNumber": "Exercise 4 / §2.7.3" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 20,
+      "prerequisites": ["ML-03-ex4-numeric", "ML-03-ex5-pytorch"],
+      "answerType": "proof",
+      "prompt": "Generalize the worked example to a network with an arbitrary number of layers $L$: $f(x_0) = W_{L-1}\\,\\sigma(W_{L-2}\\,\\sigma(\\cdots\\sigma(W_0 x_0)\\cdots))$. Write pseudocode for a generic backward pass that computes $dL/dW_l$ for every layer $l$, reusing intermediate results rather than recomputing the chain rule from scratch for each layer. State explicitly what needs to be cached during the forward pass for the backward pass to be efficient.",
+      "hints": [
+        "Define $\\delta_l := \\partial L/\\partial z_l$ (the 'error signal' at layer $l$'s pre-activation). If you can write a recursion for $\\delta_l$ in terms of $\\delta_{l+1}$, you have the general algorithm.",
+        "$\\delta_l = (W_l^\\top \\delta_{l+1}) \\odot \\sigma'(z_l)$, where $\\odot$ is elementwise product — this is exactly the pattern you computed by hand in the numeric exercise, just written recursively.",
+        "Cache every $x_l$ and $z_l$ during the forward pass. Then: $dL/dW_l = \\delta_{l+1}\\, x_l^\\top$ for each layer, computed in one backward sweep, each $\\delta_l$ computed once and reused for that layer's weight gradient before moving further back."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+.venv/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/
+
+# Extracted full text of Marc Toussaint's copyrighted lecture notes (see CLAUDE.md rule 1).
+# The source PDFs themselves live outside this repo entirely (../original notes/), but these
+# are full plain-text transcriptions of that same copyrighted material, so they don't belong
+# in version control either, private repo or not.
+data/source-manifest/raw-text/
+data/source-manifest/html-text/

@@ -1,0 +1,42 @@
+---
+id: neural-networks-backprop
+title: "Neural Networks & Backpropagation"
+relatedModules: ["ML-03", "ML-04"]
+---
+
+## Definitions
+
+- **MLP**: $f(x_0) = W_{L-1}\,\sigma(\cdots\sigma(W_0 x_0)\cdots)$ — alternating linear maps and elementwise nonlinearities.
+- **Forward pass**: evaluate the computation graph left to right, caching every $z_l, x_l$.
+- **Backward pass**: propagate $\partial L/\partial(\cdot)$ right to left, reusing cached values.
+
+## Core equations
+
+| Quantity | Formula |
+|---|---|
+| Pre-activation | $z_l = W_{l-1} x_{l-1}$ |
+| Activation | $x_l = \sigma(z_l)$ |
+| Sigmoid | $\sigma(z) = 1/(1+e^{-z})$ |
+| Sigmoid derivative | $\sigma'(z) = \sigma(z)(1-\sigma(z))$ |
+| Output-layer error | $\delta_{L-1} = \partial L/\partial f$ (from the loss) |
+| Error recursion | $\delta_l = (W_l^\top \delta_{l+1}) \odot \sigma'(z_l)$ |
+| Weight gradient | $\partial L/\partial W_l = \delta_{l+1}\, x_l^\top$ |
+
+## Assumptions & applicability
+
+- $\sigma$ applied elementwise ⇒ local Jacobians $\partial x_l/\partial z_l$ are diagonal, hence the $\odot$ (elementwise) rather than full matrix product in the $\delta$ recursion.
+- Square loss $L=(f-y)^2$ used above; for cross-entropy loss, $\partial L/\partial f$ changes but the recursion structure is identical (see [entropy](/cheatsheets/entropy) cheat sheet for the cross-entropy gradient).
+
+## Common mistakes
+
+- Confusing $z_l$ (pre-activation) with $x_l$ (post-activation) — always double-check which one an equation is asking for.
+- Forgetting the $\odot$ (elementwise) in the $\delta$ recursion and writing a matrix product instead — dimensions won't match if you do.
+- Setting `requires_grad=True` on data tensors ($x_0$, $y$) instead of parameters ($W_0$, $W_1$) in PyTorch.
+
+## Decision rule
+
+- Need a gradient w.r.t. a weight matrix deep in a network? Don't re-derive from scratch — cache forward-pass activations, then apply the $\delta$ recursion once per layer, back to front.
+
+## Full lesson
+
+[ML-03 — Neural Networks: Manual Forward/Backward Pass ↔ PyTorch](/course/ML/ML-03)

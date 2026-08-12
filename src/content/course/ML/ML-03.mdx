@@ -1,0 +1,161 @@
+---
+id: ML-03
+block: ML
+title: "Neural Networks: Manual Forward/Backward Pass ↔ PyTorch"
+tier: 1
+estimatedHours: 3.5
+prerequisites: ["ML-01", "ML-02"]
+objectives:
+  - "Compute the full forward pass of a small multilayer perceptron (MLP) by hand, given concrete numbers."
+  - "Derive the backward pass (gradients w.r.t. every weight matrix) from the chain rule, entirely by hand."
+  - "Reproduce the identical computation in PyTorch using autograd, and map every manual step to the corresponding PyTorch operation."
+  - "Explain why reverse-mode automatic differentiation (backprop) is the efficient way to compute these gradients."
+sources:
+  - { sourceId: "lecture-maths", pages: "p19-21 (§2.7.3, Exercise 5/§2.8.1)", role: "primary" }
+  - { sourceId: "lecture-ai", pages: "p28-36 (§1.3 Supervised ML / Neural Nets)", role: "supplementary" }
+concepts:
+  - "Multilayer perceptron (MLP)"
+  - "Computation graph"
+  - "Forward pass"
+  - "Backward pass / backpropagation"
+  - "Sigmoid activation and its derivative"
+  - "Reverse-mode automatic differentiation"
+  - "PyTorch autograd"
+notation:
+  - { symbol: "$x_0$", meaning: "network input vector" }
+  - { symbol: "$W_l$", meaning: "weight matrix of layer $l$, shape $h_{l+1}\\times h_l$" }
+  - { symbol: "$z_l$", meaning: "pre-activation at layer $l$: $z_l = W_{l-1} x_{l-1}$" }
+  - { symbol: "$x_l$", meaning: "post-activation at layer $l$: $x_l = \\sigma(z_l)$" }
+  - { symbol: "$\\sigma(z)$", meaning: "sigmoid activation, $1/(1+e^{-z})$, applied elementwise" }
+  - { symbol: "$f$", meaning: "network output" }
+  - { symbol: "$L$", meaning: "scalar loss, here $(f-y)^2$" }
+  - { symbol: "$\\odot$", meaning: "elementwise (Hadamard) product" }
+cheatsheetLinks: ["neural-networks-backprop"]
+nextModules: ["ML-04"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Every "learned dynamics model," "learned world model," or policy network you'll meet later in this course — including in your own manipulation-planning research — is, underneath, a function built out of the same handful of operations you'll compute by hand in this module. If you can't manually trace a gradient through a 2-layer network, it's very hard to debug why a real network *isn't* training, or to judge whether a paper's claimed architecture actually does what the authors say. This module closes that gap directly: you'll compute one small network's forward and backward pass entirely by hand, then reproduce the exact same numbers in PyTorch, line by line.
+
+## Prerequisites & readiness check
+
+You should already be comfortable with: the chain rule for scalar functions (ML-01), and reading a computation graph left-to-right (ML-01). Quick check before continuing — if this takes you more than a minute or feels shaky, revisit ML-01 first.
+
+<ReadinessCheck
+  question="If $y = g(h(x))$, what is $dy/dx$ in terms of derivatives of $g$ and $h$?"
+  answer="$dy/dx = g'(h(x)) \cdot h'(x)$ — the derivative of the outer function evaluated at the inner function's output, times the derivative of the inner function."
+/>
+
+## Notation
+
+See the frontmatter-generated notation box above this section (rendered from this module's `notation` field) for the symbols used throughout. The one worth committing to memory now: $z_l$ is *before* the activation function, $x_l$ is *after* — mixing these two up is the single most common source of backprop bugs.
+
+## The network as a computation graph
+
+We'll work with the same general form as `lecture-maths` §2.7–2.8: a network
+
+$$f(x_0) = W_2\,\sigma\big(W_1\,\sigma(W_0 x_0)\big)$$
+
+described as the computation graph
+
+$$x_0 \;\to\; z_1 = W_0 x_0 \;\to\; x_1 = \sigma(z_1) \;\to\; z_2 = W_1 x_1 \;\to\; x_2 = \sigma(z_2) \;\to\; f = W_2 x_2$$
+
+Each arrow is one operation: a matrix multiply or an elementwise sigmoid. Forward pass = walk the arrows left to right, plugging in numbers at each step. Backward pass = walk the *same* arrows right to left, propagating a gradient instead of a value.
+
+For the worked example below, we'll simplify to **one hidden layer** (drop the middle $W_1\,\sigma(\cdot)$ stage) so every number is hand-tractable — the two-hidden-layer chain rule above is what you'll derive symbolically in the exercises, and it generalizes the same way.
+
+**Stop and try**: before reading on, sketch the computation graph for a network with *two* hidden layers plus an output layer — just the sequence of arrows, no numbers. Then check: does it match the graph above?
+
+## Worked example: forward pass
+
+Take a network with 2 inputs, 2 hidden units (sigmoid), and 1 linear output — $f(x_0) = W_1\,\sigma(W_0 x_0)$ — trained with square loss $L = (f-y)^2$.
+
+$$x_0 = \begin{pmatrix}1\\2\end{pmatrix}, \quad W_0 = \begin{pmatrix}0.1 & -0.2\\0.3 & 0.4\end{pmatrix}, \quad W_1 = \begin{pmatrix}0.5 & -0.6\end{pmatrix}, \quad y = 1$$
+
+**Step 1 — pre-activation.** $z_1 = W_0 x_0 = \begin{pmatrix}0.1(1)+(-0.2)(2)\\0.3(1)+0.4(2)\end{pmatrix} = \begin{pmatrix}-0.3\\1.1\end{pmatrix}$
+
+**Step 2 — activation.** $x_1 = \sigma(z_1) = \begin{pmatrix}\sigma(-0.3)\\\sigma(1.1)\end{pmatrix} = \begin{pmatrix}0.42556\\0.75026\end{pmatrix}$
+
+**Step 3 — output.** $f = W_1 x_1 = 0.5(0.42556) + (-0.6)(0.75026) = -0.23738$
+
+**Step 4 — loss.** $L = (f-y)^2 = (-0.23738 - 1)^2 = 1.53110$
+
+*(Every number here was verified with an independent NumPy computation and cross-checked against PyTorch autograd while this module was authored — see the source note at the bottom of the page.)*
+
+## Worked example: backward pass
+
+Now walk back along the same graph, computing $\partial L/\partial(\cdot)$ at each stage.
+
+**$\partial L/\partial f$**: $L=(f-y)^2 \Rightarrow \partial L/\partial f = 2(f-y) = 2(-1.23738) = -2.47475$
+
+**$\partial L/\partial W_1$**: since $f = W_1 x_1$, $\partial f/\partial W_1 = x_1^\top$, so by the chain rule $\dfrac{\partial L}{\partial W_1} = \dfrac{\partial L}{\partial f}\,x_1^\top = -2.47475 \times (0.42556,\ 0.75026) = (-1.05315,\ -1.85671)$
+
+**$\partial L/\partial x_1$**: since $f = W_1 x_1$, $\partial f/\partial x_1 = W_1^\top$, so $\dfrac{\partial L}{\partial x_1} = \dfrac{\partial L}{\partial f}\,W_1^\top = -2.47475 \times (0.5,\ -0.6) = (-1.23738,\ 1.48485)$
+
+**$\sigma'(z_1)$**: using the identity $\sigma'(z) = \sigma(z)(1-\sigma(z))$ (you'll derive this in the exercises) — $\sigma'(z_1) = x_1 \odot (1-x_1) = (0.24446,\ 0.18737)$
+
+**$\partial L/\partial z_1$**: chain rule through the elementwise activation — $\dfrac{\partial L}{\partial z_1} = \dfrac{\partial L}{\partial x_1} \odot \sigma'(z_1) = (-1.23738 \times 0.24446,\ 1.48485\times 0.18737) = (-0.30249,\ 0.27822)$
+
+**$\partial L/\partial W_0$**: since $z_1 = W_0 x_0$, $\dfrac{\partial L}{\partial W_0} = \dfrac{\partial L}{\partial z_1}\,x_0^\top = \begin{pmatrix}-0.30249\\0.27822\end{pmatrix}(1,\ 2) = \begin{pmatrix}-0.30249 & -0.60497\\0.27822 & 0.55643\end{pmatrix}$
+
+Notice the pattern: **every gradient is a local Jacobian times the gradient that arrived from downstream.** That's the entire algorithm. Nothing about it is specific to 2 layers — the derivation exercise below asks you to write it for $L$ layers.
+
+<ExerciseCard id="ML-03-ex1" />
+
+## Deriving the general chain rule (and the sigmoid derivative)
+
+The worked example used $\sigma'(z) = \sigma(z)(1-\sigma(z))$ without proof. Time to derive both that identity and the full multi-layer chain rule yourself.
+
+<ExerciseCard id="lecture-maths-ex5-1-backprop-general" />
+
+<ExerciseCard id="ML-03-ex3-sigmoid-symbolic" />
+
+## Your turn: a full pass with new numbers
+
+<ExerciseCard id="ML-03-ex4-numeric" />
+
+## Bridging to PyTorch
+
+Everything above is exactly what `loss.backward()` does under the hood, one operation at a time. PyTorch's autograd builds the same computation graph implicitly as you write forward-pass code, then walks it backward exactly as you just did by hand — the only difference is it never forgets a step and never makes an arithmetic slip.
+
+<ExerciseCard id="ML-03-ex5-pytorch" />
+
+## Challenge: generalize to arbitrary depth
+
+<ExerciseCard id="ML-03-ex6-challenge" />
+
+## Summary
+
+- A forward pass is a left-to-right walk of the computation graph, evaluating one operation at a time.
+- A backward pass is a right-to-left walk of the *same* graph, multiplying local Jacobians as you go — this is exactly the chain rule, applied systematically.
+- For elementwise activations like sigmoid, the local Jacobian is diagonal, which is why it shows up as an elementwise (Hadamard) product rather than a matrix multiply in the backward pass.
+- $\sigma'(z) = \sigma(z)(1-\sigma(z))$ — worth memorizing, it recurs constantly.
+- PyTorch's `.backward()` performs exactly this algorithm automatically; understanding the manual version is what lets you debug it when something goes wrong.
+
+## Retrieval questions
+
+Answer these without looking back at the lesson — they're for your own later spaced review, not graded here.
+
+1. What is the shape of $\partial x_l/\partial z_l$ for an elementwise activation function, and why is it that shape?
+2. Write $\sigma'(z)$ two ways: in terms of $\sigma(z)$, and in terms of $z$ directly.
+3. Why does reverse-mode autodiff cost roughly "one pass" regardless of the number of parameters, while forward-mode would cost "one pass per parameter"?
+
+## Mastery checklist
+
+- [ ] Computed a full forward pass by hand for a 2-input/2-hidden/1-output network from raw numbers.
+- [ ] Derived $\sigma'(z) = \sigma(z)(1-\sigma(z))$ from the definition of $\sigma$, not just recalled it.
+- [ ] Computed a full backward pass by hand, matching the deterministic checker on ML-03-ex4-numeric.
+- [ ] Reproduced the worked example in PyTorch and confirmed gradients match to 4 decimal places.
+- [ ] Can state, without notes, why backprop traverses the graph in reverse.
+
+## Source note
+
+Worked-example numbers were computed independently in NumPy and cross-checked against PyTorch `autograd` while authoring this module (both matched to float32 precision) — see `data/curriculum/` build notes. The general chain-rule setup and the exercise numbering (Exercise 4 / §2.7.3, Exercise 5 / §2.8.1) are adapted from `lecture-maths`, pp. 19–21; the sigmoid-derivative closed form and all specific numeric examples in this module are newly authored, not present verbatim in the source.
+
+---
+
+**Next**: [ML-04 — Neural Network Architecture Essentials](/course/ML/ML-04)

@@ -1,0 +1,114 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface SourceRef {
+  sourceId: string;
+  pages: string;
+  role: 'primary' | 'supplementary' | 'cross-reference';
+}
+interface NotationItem { symbol: string; meaning: string; }
+interface Props {
+  id: string;
+  block: string;
+  title: string;
+  tier: 1 | 2 | 3 | 4;
+  estimatedHours: number;
+  prerequisites: string[];
+  objectives: string[];
+  sources: SourceRef[];
+  concepts: string[];
+  notation: NotationItem[];
+  cheatsheetLinks: string[];
+  nextModules: string[];
+}
+const { id, block, title, tier, estimatedHours, prerequisites, objectives, sources, concepts, notation, cheatsheetLinks } =
+  Astro.props as Props;
+
+const tierLabel: Record<number, string> = {
+  1: 'Core — main route',
+  2: 'Main route (sequenced early)',
+  3: 'Optional branch',
+  4: 'Reference only',
+};
+---
+<BaseLayout title={`${id} · ${title}`}>
+  <nav class="no-print breadcrumb"><a href="/">Start</a> / <a href={`/course/${block}`}>{block}</a> / {id}</nav>
+
+  <header>
+    <p class="module-id">{id}</p>
+    <h1>{title}</h1>
+    <div class="badges">
+      <span class="badge">{tierLabel[tier]}</span>
+      <span class="badge">~{estimatedHours} hrs</span>
+      <span class="badge">block: {block}</span>
+    </div>
+  </header>
+
+  {prerequisites.length > 0 && (
+    <section class="meta-box">
+      <h3>Prerequisites</h3>
+      <p>{prerequisites.join(', ')}</p>
+    </section>
+  )}
+
+  <section class="meta-box">
+    <h3>Learning objectives</h3>
+    <ul>
+      {objectives.map((o: string) => <li set:html={o} />)}
+    </ul>
+  </section>
+
+  {notation.length > 0 && (
+    <section class="meta-box">
+      <h3>Notation</h3>
+      <table>
+        <thead><tr><th>Symbol</th><th>Meaning</th></tr></thead>
+        <tbody>
+          {notation.map((n: NotationItem) => (
+            <tr><td set:html={n.symbol} /><td>{n.meaning}</td></tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  )}
+
+  <article>
+    <slot />
+  </article>
+
+  <footer class="module-footer">
+    <section class="meta-box">
+      <h3>Sources cited in this module</h3>
+      <ul>
+        {sources.map((s: SourceRef) => <li><code>{s.sourceId}</code> {s.pages} <em>({s.role})</em></li>)}
+      </ul>
+    </section>
+    {concepts.length > 0 && (
+      <p class="concepts"><strong>Concepts:</strong> {concepts.join(' · ')}</p>
+    )}
+    {cheatsheetLinks.length > 0 && (
+      <p class="no-print">
+        {cheatsheetLinks.map((c: string) => <a href={`/cheatsheets/${c}`}>📄 Cheat sheet: {c}</a>)}
+      </p>
+    )}
+  </footer>
+
+  <style>
+    .breadcrumb { font-size: 0.85rem; opacity: 0.7; margin-bottom: 1rem; }
+    .breadcrumb a { color: inherit; }
+    .module-id { font-family: ui-monospace, monospace; color: var(--accent); font-weight: 600; margin: 0; }
+    h1 { margin-top: 0.2rem; }
+    .badges { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .badge {
+      background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px;
+      padding: 0.2rem 0.75rem; font-size: 0.8rem;
+    }
+    .meta-box {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 0.6rem;
+      padding: 0.9rem 1.2rem; margin: 1rem 0;
+    }
+    .meta-box h3 { margin-top: 0; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.03em; opacity: 0.75; }
+    .module-footer { margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+    .concepts { font-size: 0.85rem; opacity: 0.8; }
+  </style>
+</BaseLayout>

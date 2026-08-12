@@ -1,0 +1,4383 @@
+[
+  {
+    "source_id": "lecture-ai",
+    "filename": "Lecture-AI.pdf",
+    "relative_path": "original notes/Lecture-AI.pdf",
+    "sha256": "be696efe2d8b4822c1da9f0e6a90446e08572e2118d1ac978ee3f2b9ba14dd2f",
+    "page_count": 219,
+    "pdf_metadata": {
+      "title": "Introduction to Artificial Intelligence",
+      "author": "Marc Toussaint",
+      "subject": null,
+      "creation_date": "D:20260714154944+02'00'",
+      "mod_date": "D:20260714154944+02'00'",
+      "producer": "pdfTeX-1.40.25"
+    },
+    "embedded_toc": [
+      {
+        "level": 1,
+        "title": "1 Part 1: ML & Decisions",
+        "page": 5
+      },
+      {
+        "level": 2,
+        "title": "1.1 Computation Graphs, AutoGrad, & Models",
+        "page": 5
+      },
+      {
+        "level": 3,
+        "title": "Computation Graphs",
+        "page": 5
+      },
+      {
+        "level": 3,
+        "title": "Chain rules",
+        "page": 6
+      },
+      {
+        "level": 3,
+        "title": "Jacobians",
+        "page": 7
+      },
+      {
+        "level": 3,
+        "title": "Computation Graphs in practice",
+        "page": 8
+      },
+      {
+        "level": 2,
+        "title": "1.2 Probabilities",
+        "page": 10
+      },
+      {
+        "level": 3,
+        "title": "Basic definitions",
+        "page": 11
+      },
+      {
+        "level": 3,
+        "title": "Definitions based on sets",
+        "page": 11
+      },
+      {
+        "level": 3,
+        "title": "Random variables",
+        "page": 11
+      },
+      {
+        "level": 3,
+        "title": "Entropy, Information, & Metrics",
+        "page": 12
+      },
+      {
+        "level": 3,
+        "title": "Neg-log-likelihood",
+        "page": 12
+      },
+      {
+        "level": 3,
+        "title": "Entropy",
+        "page": 13
+      },
+      {
+        "level": 3,
+        "title": "Cross-Entropy",
+        "page": 14
+      },
+      {
+        "level": 3,
+        "title": "Kullback-Leibler divergence",
+        "page": 14
+      },
+      {
+        "level": 3,
+        "title": "Multivariate Distributions",
+        "page": 15
+      },
+      {
+        "level": 3,
+        "title": "Joint distribution",
+        "page": 15
+      },
+      {
+        "level": 3,
+        "title": "Marginal",
+        "page": 15
+      },
+      {
+        "level": 3,
+        "title": "Conditional distribution",
+        "page": 15
+      },
+      {
+        "level": 3,
+        "title": "conditional independence",
+        "page": 15
+      },
+      {
+        "level": 3,
+        "title": "Gaussians",
+        "page": 17
+      },
+      {
+        "level": 3,
+        "title": "Gaussian",
+        "page": 17
+      },
+      {
+        "level": 3,
+        "title": "Monte Carlo methods",
+        "page": 18
+      },
+      {
+        "level": 3,
+        "title": "Monte Carlo",
+        "page": 18
+      },
+      {
+        "level": 3,
+        "title": "Rejection sampling",
+        "page": 19
+      },
+      {
+        "level": 3,
+        "title": "Importance sampling",
+        "page": 19
+      },
+      {
+        "level": 3,
+        "title": "Various probability distributions",
+        "page": 20
+      },
+      {
+        "level": 3,
+        "title": "Bernoulli and Binomial distributions",
+        "page": 20
+      },
+      {
+        "level": 3,
+        "title": "Beta",
+        "page": 20
+      },
+      {
+        "level": 3,
+        "title": "Multinomial",
+        "page": 21
+      },
+      {
+        "level": 3,
+        "title": "Dirichlet",
+        "page": 22
+      },
+      {
+        "level": 3,
+        "title": "Conjugate priors",
+        "page": 24
+      },
+      {
+        "level": 3,
+        "title": "Particle approximation of a distribution",
+        "page": 24
+      },
+      {
+        "level": 3,
+        "title": "Student's t, Exponential, Laplace, Chi-squared, Gamma distributions",
+        "page": 26
+      },
+      {
+        "level": 3,
+        "title": "Motivation for Probabilities",
+        "page": 26
+      },
+      {
+        "level": 3,
+        "title": "Probabilities as information calculus",
+        "page": 26
+      },
+      {
+        "level": 3,
+        "title": "Inference: general meaning",
+        "page": 27
+      },
+      {
+        "level": 3,
+        "title": "Frequentist vs Bayesian",
+        "page": 28
+      },
+      {
+        "level": 2,
+        "title": "1.3 Supervised Machine Learning",
+        "page": 28
+      },
+      {
+        "level": 3,
+        "title": "Supervised ML",
+        "page": 29
+      },
+      {
+        "level": 3,
+        "title": "Regression",
+        "page": 29
+      },
+      {
+        "level": 3,
+        "title": "Classification",
+        "page": 30
+      },
+      {
+        "level": 3,
+        "title": "Regularization",
+        "page": 31
+      },
+      {
+        "level": 3,
+        "title": "Linear Models",
+        "page": 32
+      },
+      {
+        "level": 3,
+        "title": "Neural Nets",
+        "page": 35
+      },
+      {
+        "level": 3,
+        "title": "NN architecture essentials",
+        "page": 36
+      },
+      {
+        "level": 3,
+        "title": "Convolutional NN",
+        "page": 36
+      },
+      {
+        "level": 3,
+        "title": "LSTM",
+        "page": 38
+      },
+      {
+        "level": 3,
+        "title": "NN initialization",
+        "page": 42
+      },
+      {
+        "level": 3,
+        "title": "NN regularization",
+        "page": 43
+      },
+      {
+        "level": 3,
+        "title": "NN Dropout",
+        "page": 43
+      },
+      {
+        "level": 3,
+        "title": "data augmentation",
+        "page": 44
+      },
+      {
+        "level": 3,
+        "title": "Stochastic Gradient Descent",
+        "page": 44
+      },
+      {
+        "level": 2,
+        "title": "1.4 Bandits & UCB1",
+        "page": 45
+      },
+      {
+        "level": 3,
+        "title": "Multi-armed Bandits",
+        "page": 46
+      },
+      {
+        "level": 3,
+        "title": "Exploration, Exploitation",
+        "page": 47
+      },
+      {
+        "level": 3,
+        "title": "Upper Confidence Bound (UCB1)",
+        "page": 48
+      },
+      {
+        "level": 3,
+        "title": "Upper Confidence Bound (UCB1)",
+        "page": 48
+      },
+      {
+        "level": 3,
+        "title": "Contextual Bandits",
+        "page": 50
+      },
+      {
+        "level": 3,
+        "title": "Contextual Bandits",
+        "page": 50
+      },
+      {
+        "level": 1,
+        "title": "2 Part 2: Sequential Decisions",
+        "page": 52
+      },
+      {
+        "level": 2,
+        "title": "2.1 Sequential Decisions & Monte-Carlo Tree Search",
+        "page": 52
+      },
+      {
+        "level": 3,
+        "title": "Sequential Decision Making",
+        "page": 52
+      },
+      {
+        "level": 3,
+        "title": "Decision Trees",
+        "page": 55
+      },
+      {
+        "level": 3,
+        "title": "Decision Trees",
+        "page": 55
+      },
+      {
+        "level": 3,
+        "title": "Monte Carlo Tree Search",
+        "page": 58
+      },
+      {
+        "level": 3,
+        "title": "Monte Carlo Tree Search (MCTS)",
+        "page": 58
+      },
+      {
+        "level": 3,
+        "title": "Monte Carlo",
+        "page": 59
+      },
+      {
+        "level": 3,
+        "title": "Upper Confidence Tree (UCT)",
+        "page": 62
+      },
+      {
+        "level": 3,
+        "title": "UCT for Game Playing",
+        "page": 63
+      },
+      {
+        "level": 3,
+        "title": "UCT for games",
+        "page": 64
+      },
+      {
+        "level": 3,
+        "title": "Evaluation Functions",
+        "page": 64
+      },
+      {
+        "level": 2,
+        "title": "2.2 Value Iteration & Reinforcement Learning",
+        "page": 67
+      },
+      {
+        "level": 3,
+        "title": "Recap",
+        "page": 67
+      },
+      {
+        "level": 3,
+        "title": "Bellman Optimality & Value Iteration",
+        "page": 68
+      },
+      {
+        "level": 3,
+        "title": "Value Function",
+        "page": 68
+      },
+      {
+        "level": 3,
+        "title": "Bellman optimality equation",
+        "page": 70
+      },
+      {
+        "level": 3,
+        "title": "Value Iteration",
+        "page": 71
+      },
+      {
+        "level": 3,
+        "title": "Q-Iteration",
+        "page": 71
+      },
+      {
+        "level": 3,
+        "title": "Proof of convergence of Q-Iteration",
+        "page": 72
+      },
+      {
+        "level": 3,
+        "title": "Model-Free Reinforcement Learning",
+        "page": 72
+      },
+      {
+        "level": 3,
+        "title": "Temporal difference (TD)",
+        "page": 72
+      },
+      {
+        "level": 3,
+        "title": "model-free RL",
+        "page": 73
+      },
+      {
+        "level": 3,
+        "title": "Temporal difference (TD)",
+        "page": 73
+      },
+      {
+        "level": 3,
+        "title": "Q-learning",
+        "page": 73
+      },
+      {
+        "level": 3,
+        "title": "Proof of convergence of Q-learning",
+        "page": 74
+      },
+      {
+        "level": 3,
+        "title": "Improvements & Deep RL",
+        "page": 76
+      },
+      {
+        "level": 3,
+        "title": "Policy Gradient",
+        "page": 77
+      },
+      {
+        "level": 3,
+        "title": "Example RL Applications",
+        "page": 79
+      },
+      {
+        "level": 3,
+        "title": "Appendix",
+        "page": 81
+      },
+      {
+        "level": 2,
+        "title": "2.3 RL Discussion",
+        "page": 82
+      },
+      {
+        "level": 3,
+        "title": "Model-based RL",
+        "page": 83
+      },
+      {
+        "level": 3,
+        "title": "model-free RL",
+        "page": 83
+      },
+      {
+        "level": 3,
+        "title": "model-based RL",
+        "page": 83
+      },
+      {
+        "level": 3,
+        "title": "Exploration",
+        "page": 84
+      },
+      {
+        "level": 3,
+        "title": "Epsilon-greedy exploration in Q-learning",
+        "page": 84
+      },
+      {
+        "level": 3,
+        "title": "R-Max",
+        "page": 85
+      },
+      {
+        "level": 3,
+        "title": "Bayesian RL",
+        "page": 86
+      },
+      {
+        "level": 3,
+        "title": "Classical Behavioral Psychology",
+        "page": 87
+      },
+      {
+        "level": 2,
+        "title": "2.4 Decision Theory, Objectives, & Value Alignment",
+        "page": 90
+      },
+      {
+        "level": 3,
+        "title": "Decision Networks",
+        "page": 92
+      },
+      {
+        "level": 3,
+        "title": "Objectives",
+        "page": 94
+      },
+      {
+        "level": 3,
+        "title": "Value Alignment",
+        "page": 96
+      },
+      {
+        "level": 3,
+        "title": "Value Alignment",
+        "page": 97
+      },
+      {
+        "level": 1,
+        "title": "3 Part 3: Discussions",
+        "page": 99
+      },
+      {
+        "level": 2,
+        "title": "3.1 Reasoning in/with LMs & RL Finetuning",
+        "page": 99
+      },
+      {
+        "level": 3,
+        "title": "Supervised Instruction Finetuning (SFT)",
+        "page": 99
+      },
+      {
+        "level": 3,
+        "title": "RL-based Finetuning",
+        "page": 100
+      },
+      {
+        "level": 3,
+        "title": "Chain of Thought",
+        "page": 102
+      },
+      {
+        "level": 2,
+        "title": "3.2 Explainable AI",
+        "page": 104
+      },
+      {
+        "level": 3,
+        "title": "Pearl's Causal Networks & Do-Calculus",
+        "page": 105
+      },
+      {
+        "level": 3,
+        "title": "Technical Approaches to Sensitivity Analysis",
+        "page": 106
+      },
+      {
+        "level": 3,
+        "title": "Other Approaches to Explainability",
+        "page": 110
+      },
+      {
+        "level": 1,
+        "title": "4 Part 4: Classical Lectures",
+        "page": 112
+      },
+      {
+        "level": 2,
+        "title": "4.1 Search",
+        "page": 112
+      },
+      {
+        "level": 3,
+        "title": "Problem Formulation & Examples",
+        "page": 113
+      },
+      {
+        "level": 3,
+        "title": "Example: Romania",
+        "page": 113
+      },
+      {
+        "level": 3,
+        "title": "Problem Definition: Deterministic, fully observable",
+        "page": 113
+      },
+      {
+        "level": 3,
+        "title": "Basic Tree Search Algorithms",
+        "page": 114
+      },
+      {
+        "level": 3,
+        "title": "Tree search implementation: states vs nodes",
+        "page": 115
+      },
+      {
+        "level": 3,
+        "title": "Tree Search: General Algorithm",
+        "page": 115
+      },
+      {
+        "level": 3,
+        "title": "Breadth-first search (BFS)",
+        "page": 117
+      },
+      {
+        "level": 3,
+        "title": "Complexity of BFS",
+        "page": 117
+      },
+      {
+        "level": 3,
+        "title": "Depth-first search (DFS)",
+        "page": 118
+      },
+      {
+        "level": 3,
+        "title": "Complexity of DFS",
+        "page": 119
+      },
+      {
+        "level": 3,
+        "title": "Complexity of Iterative Deepening Search",
+        "page": 120
+      },
+      {
+        "level": 3,
+        "title": "Graph search and repeated states",
+        "page": 121
+      },
+      {
+        "level": 3,
+        "title": "A* Search",
+        "page": 122
+      },
+      {
+        "level": 3,
+        "title": "Best-first Search",
+        "page": 122
+      },
+      {
+        "level": 3,
+        "title": "A* search",
+        "page": 123
+      },
+      {
+        "level": 3,
+        "title": "A* Optimality",
+        "page": 124
+      },
+      {
+        "level": 3,
+        "title": "Complexity of A*",
+        "page": 125
+      },
+      {
+        "level": 3,
+        "title": "A* Optimality",
+        "page": 125
+      },
+      {
+        "level": 3,
+        "title": "Admissible heuristics",
+        "page": 126
+      },
+      {
+        "level": 3,
+        "title": "Memory-bounded A*",
+        "page": 127
+      },
+      {
+        "level": 2,
+        "title": "4.2 Constraint Satisfaction Problems",
+        "page": 128
+      },
+      {
+        "level": 3,
+        "title": "Problem Formulation & Examples",
+        "page": 128
+      },
+      {
+        "level": 3,
+        "title": "Inference",
+        "page": 128
+      },
+      {
+        "level": 3,
+        "title": "Constraint satisfaction problems (CSPs): Definition",
+        "page": 129
+      },
+      {
+        "level": 3,
+        "title": "Map-Coloring Problem",
+        "page": 129
+      },
+      {
+        "level": 3,
+        "title": "Methods for solving CSPs",
+        "page": 131
+      },
+      {
+        "level": 3,
+        "title": "Backtracking",
+        "page": 131
+      },
+      {
+        "level": 3,
+        "title": "Variable order: Minimum remaining values",
+        "page": 133
+      },
+      {
+        "level": 3,
+        "title": "Variable order: Degree heuristic",
+        "page": 133
+      },
+      {
+        "level": 3,
+        "title": "Value order: Least constraining value",
+        "page": 134
+      },
+      {
+        "level": 3,
+        "title": "Constraint propagation",
+        "page": 134
+      },
+      {
+        "level": 3,
+        "title": "Tree-structured CSPs",
+        "page": 137
+      },
+      {
+        "level": 2,
+        "title": "4.3 Graphical Models",
+        "page": 138
+      },
+      {
+        "level": 3,
+        "title": "Bayes Nets and Conditional Independence",
+        "page": 139
+      },
+      {
+        "level": 3,
+        "title": "Bayesian Network",
+        "page": 140
+      },
+      {
+        "level": 3,
+        "title": "Conditional independence in a Bayes Net",
+        "page": 140
+      },
+      {
+        "level": 3,
+        "title": "Inference: general meaning",
+        "page": 142
+      },
+      {
+        "level": 3,
+        "title": "Inference Methods in Graphical Models",
+        "page": 145
+      },
+      {
+        "level": 3,
+        "title": "Inference in graphical models: overview",
+        "page": 145
+      },
+      {
+        "level": 3,
+        "title": "Variable elimination",
+        "page": 146
+      },
+      {
+        "level": 3,
+        "title": "Factor graph",
+        "page": 146
+      },
+      {
+        "level": 3,
+        "title": "Belief propagation",
+        "page": 150
+      },
+      {
+        "level": 3,
+        "title": "Message passing",
+        "page": 150
+      },
+      {
+        "level": 3,
+        "title": "Loopy belief propagation",
+        "page": 151
+      },
+      {
+        "level": 3,
+        "title": "Maximum a-posteriori (MAP) inference",
+        "page": 152
+      },
+      {
+        "level": 3,
+        "title": "Conditional random field",
+        "page": 152
+      },
+      {
+        "level": 3,
+        "title": "Junction Tree Algorithm",
+        "page": 152
+      },
+      {
+        "level": 3,
+        "title": "Junction tree algorithm",
+        "page": 152
+      },
+      {
+        "level": 3,
+        "title": "Sampling",
+        "page": 154
+      },
+      {
+        "level": 3,
+        "title": "Monte Carlo",
+        "page": 154
+      },
+      {
+        "level": 3,
+        "title": "Rejection sampling",
+        "page": 154
+      },
+      {
+        "level": 3,
+        "title": "Importance Sampling",
+        "page": 155
+      },
+      {
+        "level": 3,
+        "title": "Gibbs Sampling",
+        "page": 156
+      },
+      {
+        "level": 2,
+        "title": "4.4 Dynamic Models",
+        "page": 157
+      },
+      {
+        "level": 3,
+        "title": "Markov Process",
+        "page": 157
+      },
+      {
+        "level": 3,
+        "title": "Hidden Markov Model",
+        "page": 157
+      },
+      {
+        "level": 3,
+        "title": "Filtering, Smoothing, Prediction",
+        "page": 158
+      },
+      {
+        "level": 3,
+        "title": "HMM: Inference",
+        "page": 158
+      },
+      {
+        "level": 3,
+        "title": "HMM inference",
+        "page": 159
+      },
+      {
+        "level": 3,
+        "title": "Kalman filter",
+        "page": 160
+      },
+      {
+        "level": 2,
+        "title": "4.5 Propositional Logic",
+        "page": 163
+      },
+      {
+        "level": 3,
+        "title": "Syntax & Semantics",
+        "page": 163
+      },
+      {
+        "level": 3,
+        "title": "Knowledge base: Definition",
+        "page": 163
+      },
+      {
+        "level": 3,
+        "title": "Wumpus World example",
+        "page": 164
+      },
+      {
+        "level": 3,
+        "title": "Logic: Definition, Syntax, Semantics",
+        "page": 167
+      },
+      {
+        "level": 3,
+        "title": "Propositional logic: Syntax",
+        "page": 168
+      },
+      {
+        "level": 3,
+        "title": "Propositional logic: Semantics",
+        "page": 168
+      },
+      {
+        "level": 3,
+        "title": "Logical equivalence",
+        "page": 169
+      },
+      {
+        "level": 3,
+        "title": "Inference Methods",
+        "page": 171
+      },
+      {
+        "level": 3,
+        "title": "Inference",
+        "page": 171
+      },
+      {
+        "level": 3,
+        "title": "Horn Form",
+        "page": 172
+      },
+      {
+        "level": 3,
+        "title": "Modus Ponens",
+        "page": 172
+      },
+      {
+        "level": 3,
+        "title": "Forward chaining",
+        "page": 173
+      },
+      {
+        "level": 3,
+        "title": "Completeness of Forward Chaining",
+        "page": 176
+      },
+      {
+        "level": 3,
+        "title": "Backward Chaining",
+        "page": 176
+      },
+      {
+        "level": 3,
+        "title": "Conjunctive Normal Form",
+        "page": 180
+      },
+      {
+        "level": 3,
+        "title": "Resolution",
+        "page": 180
+      },
+      {
+        "level": 3,
+        "title": "Conversion to CNF",
+        "page": 180
+      },
+      {
+        "level": 2,
+        "title": "4.6 First-Order Logic",
+        "page": 182
+      },
+      {
+        "level": 3,
+        "title": "The FOL language",
+        "page": 182
+      },
+      {
+        "level": 3,
+        "title": "FOL: Syntax",
+        "page": 183
+      },
+      {
+        "level": 3,
+        "title": "Universal quantification",
+        "page": 183
+      },
+      {
+        "level": 3,
+        "title": "Existential quantification",
+        "page": 183
+      },
+      {
+        "level": 3,
+        "title": "FOL Inference",
+        "page": 185
+      },
+      {
+        "level": 3,
+        "title": "Reduction to propositional inference",
+        "page": 186
+      },
+      {
+        "level": 3,
+        "title": "Unification",
+        "page": 187
+      },
+      {
+        "level": 3,
+        "title": "Generalized Modus Ponens",
+        "page": 187
+      },
+      {
+        "level": 3,
+        "title": "Forward Chaining",
+        "page": 188
+      },
+      {
+        "level": 3,
+        "title": "Backward Chaining",
+        "page": 190
+      },
+      {
+        "level": 3,
+        "title": "Conversion to CNF",
+        "page": 193
+      },
+      {
+        "level": 3,
+        "title": "Resolution",
+        "page": 194
+      },
+      {
+        "level": 2,
+        "title": "4.7 Relational Probabilistic Modelling and Learning",
+        "page": 195
+      },
+      {
+        "level": 3,
+        "title": "STRIPS-like rules to model MDP transitions",
+        "page": 195
+      },
+      {
+        "level": 3,
+        "title": "Markov Decision Process (MDP)",
+        "page": 195
+      },
+      {
+        "level": 3,
+        "title": "STRIPS rules",
+        "page": 195
+      },
+      {
+        "level": 3,
+        "title": "Planning Domain Definition Language (PDDL)",
+        "page": 195
+      },
+      {
+        "level": 3,
+        "title": "Learning probabilistic rules",
+        "page": 197
+      },
+      {
+        "level": 3,
+        "title": "Planning with probabilistic rules",
+        "page": 198
+      },
+      {
+        "level": 3,
+        "title": "Relational Graphical Models",
+        "page": 199
+      },
+      {
+        "level": 3,
+        "title": "Probabilistic Relational Models (PRMs)",
+        "page": 200
+      },
+      {
+        "level": 3,
+        "title": "Markov Logic Networks (MLNs)",
+        "page": 202
+      },
+      {
+        "level": 3,
+        "title": "The role of uncertainty in AI",
+        "page": 204
+      },
+      {
+        "level": 1,
+        "title": "5 Exercises",
+        "page": 206
+      },
+      {
+        "level": 2,
+        "title": "5.1 Exercise 1",
+        "page": 206
+      },
+      {
+        "level": 3,
+        "title": "5.1.1 Computation Graphs and Chain Rule (2 Pts)",
+        "page": 206
+      },
+      {
+        "level": 3,
+        "title": "5.1.2 PyTorch Autograd (2 Pts)",
+        "page": 206
+      },
+      {
+        "level": 3,
+        "title": "5.1.3 Marginals & Conditionals (1 Pt)",
+        "page": 207
+      },
+      {
+        "level": 3,
+        "title": "5.1.4 Bayes' Theorem (2 Pts)",
+        "page": 207
+      },
+      {
+        "level": 2,
+        "title": "5.2 Exercise 2",
+        "page": 207
+      },
+      {
+        "level": 3,
+        "title": "5.2.1 Linear Regression with Polynomial Features (2 Pts)",
+        "page": 207
+      },
+      {
+        "level": 3,
+        "title": "5.2.2 Cross entropy loss and its derivatives (7 Pts)",
+        "page": 208
+      },
+      {
+        "level": 3,
+        "title": "5.2.3 Neural Network basics (3 Pts)",
+        "page": 208
+      },
+      {
+        "level": 2,
+        "title": "5.3 Exercise 3",
+        "page": 208
+      },
+      {
+        "level": 3,
+        "title": "5.3.1 Bandits (3 Pts)",
+        "page": 208
+      },
+      {
+        "level": 3,
+        "title": "5.3.2 Bandits & Bayes Rule (4 Pts)",
+        "page": 209
+      },
+      {
+        "level": 3,
+        "title": "5.3.3 Parameters of a Transformer (3 Pts)",
+        "page": 209
+      },
+      {
+        "level": 3,
+        "title": "5.3.4 Voluntary Reading: Pedro Domingos",
+        "page": 210
+      },
+      {
+        "level": 2,
+        "title": "5.4 Exercise 4",
+        "page": 210
+      },
+      {
+        "level": 3,
+        "title": "5.4.1 Decision Tree for a Partially Observable Domain (4 Pts)",
+        "page": 210
+      },
+      {
+        "level": 3,
+        "title": "5.4.2 Decision Tree for a Markov Decision Problem (3 Pts)",
+        "page": 211
+      },
+      {
+        "level": 3,
+        "title": "5.4.3 Linear Regression and Bootstrapping by Hand (4 Pts)",
+        "page": 211
+      },
+      {
+        "level": 2,
+        "title": "5.5 Exercise 5",
+        "page": 211
+      },
+      {
+        "level": 3,
+        "title": "5.5.1 Happy ever after",
+        "page": 211
+      },
+      {
+        "level": 3,
+        "title": "5.5.2 Value Iteration",
+        "page": 212
+      },
+      {
+        "level": 3,
+        "title": "5.5.3 Episodes & terminal states",
+        "page": 212
+      },
+      {
+        "level": 2,
+        "title": "5.6 Exercise 6",
+        "page": 213
+      },
+      {
+        "level": 3,
+        "title": "5.6.1 TD-Learning",
+        "page": 213
+      },
+      {
+        "level": 3,
+        "title": "5.6.2 St. Petersburg paradox",
+        "page": 214
+      },
+      {
+        "level": 1,
+        "title": "6 Literature Pointers",
+        "page": 215
+      },
+      {
+        "level": 2,
+        "title": "6.1 Literature Recommendations",
+        "page": 215
+      },
+      {
+        "level": 1,
+        "title": "Index",
+        "page": 216
+      }
+    ],
+    "extraction": {
+      "avg_chars_per_page": 1255.0,
+      "low_text_page_count": 0,
+      "low_text_pages": [],
+      "likely_scanned_or_image_pages": false,
+      "raw_text_file": "data/source-manifest/raw-text/lecture-ai.md"
+    }
+  },
+  {
+    "source_id": "lecture-machinelearning",
+    "filename": "Lecture-MachineLearning.pdf",
+    "relative_path": "original notes/Lecture-MachineLearning.pdf",
+    "sha256": "be4b7df89376e6427babafe0bcc1f1877c1a8bab16f9750651627d95e595268d",
+    "page_count": 139,
+    "pdf_metadata": {
+      "title": "Introduction to Machine Learning",
+      "author": "Marc Toussaint",
+      "subject": null,
+      "creation_date": "D:20190711202433+02'00'",
+      "mod_date": "D:20190711202433+02'00'",
+      "producer": "pdfTeX-1.40.16"
+    },
+    "embedded_toc": [
+      {
+        "level": 1,
+        "title": "1 Introduction",
+        "page": 4
+      },
+      {
+        "level": 1,
+        "title": "2 Regression",
+        "page": 12
+      },
+      {
+        "level": 1,
+        "title": "3 Classification & Structured Output",
+        "page": 23
+      },
+      {
+        "level": 2,
+        "title": "3.1 The discriminative function",
+        "page": 23
+      },
+      {
+        "level": 2,
+        "title": "3.2 Loss functions for classification",
+        "page": 25
+      },
+      {
+        "level": 2,
+        "title": "3.3 Logistic regression",
+        "page": 27
+      },
+      {
+        "level": 2,
+        "title": "3.4 Conditional Random Fields**",
+        "page": 31
+      },
+      {
+        "level": 1,
+        "title": "4 Neural Networks",
+        "page": 35
+      },
+      {
+        "level": 2,
+        "title": "4.1 Computation Graphs",
+        "page": 44
+      },
+      {
+        "level": 2,
+        "title": "4.2 Images & Time Series",
+        "page": 45
+      },
+      {
+        "level": 1,
+        "title": "5 Kernelization",
+        "page": 50
+      },
+      {
+        "level": 1,
+        "title": "6 Unsupervised Learning",
+        "page": 54
+      },
+      {
+        "level": 2,
+        "title": "6.1 PCA and Embeddings",
+        "page": 54
+      },
+      {
+        "level": 2,
+        "title": "6.2 Clustering",
+        "page": 67
+      },
+      {
+        "level": 1,
+        "title": "7 Local Learning & Emsemble Learning",
+        "page": 72
+      },
+      {
+        "level": 2,
+        "title": "7.1 Local & lazy learning",
+        "page": 72
+      },
+      {
+        "level": 2,
+        "title": "7.2 Combining weak and randomized learners",
+        "page": 75
+      },
+      {
+        "level": 1,
+        "title": "8 Probabilistic Machine Learning",
+        "page": 85
+      },
+      {
+        "level": 2,
+        "title": "8.1 Bayesian [Kernel] Ridge|Logistic Regression & Gaussian Processes",
+        "page": 85
+      },
+      {
+        "level": 2,
+        "title": "8.2 Bayesian Neural Networks",
+        "page": 92
+      },
+      {
+        "level": 2,
+        "title": "8.3 No Free Lunch**",
+        "page": 93
+      },
+      {
+        "level": 1,
+        "title": "A Probability Basics",
+        "page": 95
+      },
+      {
+        "level": 2,
+        "title": "A.1 Basic definitions",
+        "page": 97
+      },
+      {
+        "level": 2,
+        "title": "A.2 Probability distributions",
+        "page": 101
+      },
+      {
+        "level": 2,
+        "title": "A.3 Distributions over continuous domain",
+        "page": 106
+      },
+      {
+        "level": 2,
+        "title": "A.4 Monte Carlo methods",
+        "page": 111
+      },
+      {
+        "level": 1,
+        "title": "9 Exercises",
+        "page": 113
+      },
+      {
+        "level": 2,
+        "title": "9.1 Exercise 1",
+        "page": 113
+      },
+      {
+        "level": 2,
+        "title": "9.2 Exercise 2",
+        "page": 114
+      },
+      {
+        "level": 2,
+        "title": "9.3 Exercise 3",
+        "page": 117
+      },
+      {
+        "level": 2,
+        "title": "9.4 Exercise 4",
+        "page": 118
+      },
+      {
+        "level": 2,
+        "title": "9.5 Exercise 5",
+        "page": 121
+      },
+      {
+        "level": 2,
+        "title": "9.6 Exercise 6",
+        "page": 122
+      },
+      {
+        "level": 2,
+        "title": "9.7 Exercise 7",
+        "page": 126
+      },
+      {
+        "level": 2,
+        "title": "9.8 Exercise 8",
+        "page": 128
+      },
+      {
+        "level": 2,
+        "title": "9.9 Exercise 9",
+        "page": 130
+      },
+      {
+        "level": 2,
+        "title": "9.10 Exercise 10",
+        "page": 133
+      },
+      {
+        "level": 2,
+        "title": "9.11 Exercise 11",
+        "page": 134
+      },
+      {
+        "level": 2,
+        "title": "9.12 Exercise 12",
+        "page": 135
+      },
+      {
+        "level": 1,
+        "title": "Index",
+        "page": 136
+      }
+    ],
+    "extraction": {
+      "avg_chars_per_page": 1159.1,
+      "low_text_page_count": 0,
+      "low_text_pages": [],
+      "likely_scanned_or_image_pages": false,
+      "raw_text_file": "data/source-manifest/raw-text/lecture-machinelearning.md"
+    }
+  },
+  {
+    "source_id": "lecture-maths",
+    "filename": "Lecture-Maths.pdf",
+    "relative_path": "original notes/Lecture-Maths.pdf",
+    "sha256": "e1bb6ef04cb3b88172bc8f73914c5a7289217841bf476d5f2c00417793eb6301",
+    "page_count": 104,
+    "pdf_metadata": {
+      "title": "Maths for Intelligent Systems",
+      "author": "Marc Toussaint",
+      "subject": null,
+      "creation_date": "D:20260421143921+02'00'",
+      "mod_date": "D:20260421143921+02'00'",
+      "producer": "pdfTeX-1.40.25"
+    },
+    "embedded_toc": [
+      {
+        "level": 1,
+        "title": "1 Speaking Maths",
+        "page": 5
+      },
+      {
+        "level": 2,
+        "title": "1.1 Describing systems",
+        "page": 5
+      },
+      {
+        "level": 2,
+        "title": "1.2 Should maths be taught with many application examples? Or abstractly?",
+        "page": 5
+      },
+      {
+        "level": 2,
+        "title": "1.3 Notation: Some seeming trivialities",
+        "page": 6
+      },
+      {
+        "level": 1,
+        "title": "2 Functions & Derivatives",
+        "page": 8
+      },
+      {
+        "level": 2,
+        "title": "2.1 Basics on uni-variate functions",
+        "page": 8
+      },
+      {
+        "level": 3,
+        "title": "2.1.1 Continuous, differentiable, & smooth functions",
+        "page": 8
+      },
+      {
+        "level": 3,
+        "title": "2.1.2 Polynomials, piece-wise, basis functions, splines",
+        "page": 8
+      },
+      {
+        "level": 2,
+        "title": "2.2 Partial vs. total derivative, and chain rules",
+        "page": 9
+      },
+      {
+        "level": 3,
+        "title": "2.2.1 Partial Derivative",
+        "page": 9
+      },
+      {
+        "level": 3,
+        "title": "2.2.2 Total derivative, computation graphs, forward and backward chain rules",
+        "page": 10
+      },
+      {
+        "level": 2,
+        "title": "2.3 Gradient, Jacobian, Hessian, Taylor Expansion",
+        "page": 12
+      },
+      {
+        "level": 3,
+        "title": "2.3.1 Gradient & Jacobian",
+        "page": 12
+      },
+      {
+        "level": 3,
+        "title": "2.3.2 Hessian",
+        "page": 13
+      },
+      {
+        "level": 3,
+        "title": "2.3.3 Taylor expansion",
+        "page": 14
+      },
+      {
+        "level": 2,
+        "title": "2.4 Derivatives with matrices",
+        "page": 15
+      },
+      {
+        "level": 3,
+        "title": "2.4.1 Derivative Rules",
+        "page": 16
+      },
+      {
+        "level": 3,
+        "title": "2.4.2 Example: GP regression",
+        "page": 17
+      },
+      {
+        "level": 3,
+        "title": "2.4.3 Example: Logistic regression",
+        "page": 18
+      },
+      {
+        "level": 2,
+        "title": "2.5 Check your gradients numerically!",
+        "page": 18
+      },
+      {
+        "level": 2,
+        "title": "2.6 Further Examples and Exercises",
+        "page": 19
+      },
+      {
+        "level": 3,
+        "title": "2.6.1 More derivatives",
+        "page": 19
+      },
+      {
+        "level": 2,
+        "title": "2.7 Exercise 4",
+        "page": 19
+      },
+      {
+        "level": 3,
+        "title": "2.7.1 Multivariate Calculus",
+        "page": 19
+      },
+      {
+        "level": 3,
+        "title": "2.7.2 Finite Difference Gradient Checking",
+        "page": 19
+      },
+      {
+        "level": 3,
+        "title": "2.7.3 Backprop in a Neural Net",
+        "page": 20
+      },
+      {
+        "level": 2,
+        "title": "2.8 Exercise 5",
+        "page": 20
+      },
+      {
+        "level": 3,
+        "title": "2.8.1 Backprop in a Neural Net",
+        "page": 20
+      },
+      {
+        "level": 3,
+        "title": "2.8.2 Logistic Regression Gradient & Hessian",
+        "page": 21
+      },
+      {
+        "level": 1,
+        "title": "3 Linear Algebra",
+        "page": 21
+      },
+      {
+        "level": 2,
+        "title": "3.1 Vector Spaces",
+        "page": 21
+      },
+      {
+        "level": 3,
+        "title": "3.1.1 Why should we care for vector spaces in intelligent systems research?",
+        "page": 21
+      },
+      {
+        "level": 3,
+        "title": "3.1.2 What is a vector?",
+        "page": 22
+      },
+      {
+        "level": 3,
+        "title": "3.1.3 What is a vector space?",
+        "page": 22
+      },
+      {
+        "level": 2,
+        "title": "3.2 Vectors, dual vectors, coordinates, matrices, tensors",
+        "page": 23
+      },
+      {
+        "level": 3,
+        "title": "3.2.1 A taxonomy of linear functions",
+        "page": 23
+      },
+      {
+        "level": 3,
+        "title": "3.2.2 Bases and coordinates",
+        "page": 24
+      },
+      {
+        "level": 3,
+        "title": "3.2.3 The dual vector space \u2013 and its coordinates",
+        "page": 25
+      },
+      {
+        "level": 3,
+        "title": "3.2.4 Coordinates for every linear thing: tensors",
+        "page": 26
+      },
+      {
+        "level": 3,
+        "title": "3.2.5 Finally: Matrices",
+        "page": 26
+      },
+      {
+        "level": 3,
+        "title": "3.2.6 Coordinate transformations",
+        "page": 28
+      },
+      {
+        "level": 2,
+        "title": "3.3 Scalar product and orthonormal basis",
+        "page": 28
+      },
+      {
+        "level": 3,
+        "title": "3.3.1 Properties of orthonormal bases",
+        "page": 29
+      },
+      {
+        "level": 2,
+        "title": "3.4 The Structure of Transforms & Singular Value Decomposition",
+        "page": 31
+      },
+      {
+        "level": 3,
+        "title": "3.4.1 The Singular Value Decomposition Theorem",
+        "page": 31
+      },
+      {
+        "level": 2,
+        "title": "3.5 Point of departure from the coordinate-free notation",
+        "page": 33
+      },
+      {
+        "level": 2,
+        "title": "3.6 Filling SVD with life",
+        "page": 34
+      },
+      {
+        "level": 3,
+        "title": "3.6.1 Understand v v as a projection",
+        "page": 34
+      },
+      {
+        "level": 3,
+        "title": "3.6.2 SVD for symmetric matrices",
+        "page": 34
+      },
+      {
+        "level": 3,
+        "title": "3.6.3 SVD for general matrices",
+        "page": 35
+      },
+      {
+        "level": 2,
+        "title": "3.7 Eigendecomposition",
+        "page": 37
+      },
+      {
+        "level": 3,
+        "title": "3.7.1 Power Method",
+        "page": 37
+      },
+      {
+        "level": 3,
+        "title": "3.7.2 Power Method including the smallest eigenvalue",
+        "page": 38
+      },
+      {
+        "level": 3,
+        "title": "3.7.3 Why should I care about Eigenvalues and Eigenvectors?",
+        "page": 38
+      },
+      {
+        "level": 2,
+        "title": "3.8 Beyond this script: Numerics to compute these things",
+        "page": 38
+      },
+      {
+        "level": 2,
+        "title": "3.9 Derivatives as 1-forms, steepest descent, and the covariant gradient",
+        "page": 39
+      },
+      {
+        "level": 3,
+        "title": "3.9.1 The coordinate-free view: A derivative takes a change-of-input vector as input, and returns a change of output",
+        "page": 39
+      },
+      {
+        "level": 3,
+        "title": "3.9.2 Contra- and co-variance",
+        "page": 39
+      },
+      {
+        "level": 3,
+        "title": "3.9.3 Steepest descent and the covariant gradient vector",
+        "page": 41
+      },
+      {
+        "level": 2,
+        "title": "3.10 Examples and Exercises",
+        "page": 42
+      },
+      {
+        "level": 2,
+        "title": "3.11 Exercise 1",
+        "page": 42
+      },
+      {
+        "level": 3,
+        "title": "3.11.1 Basis",
+        "page": 42
+      },
+      {
+        "level": 3,
+        "title": "3.11.2 From the Robotics Course",
+        "page": 42
+      },
+      {
+        "level": 3,
+        "title": "3.11.3 Bases for Polynomials",
+        "page": 43
+      },
+      {
+        "level": 2,
+        "title": "3.12 Exercise 2",
+        "page": 44
+      },
+      {
+        "level": 3,
+        "title": "3.12.1 Projections",
+        "page": 44
+      },
+      {
+        "level": 3,
+        "title": "3.12.2 SVD",
+        "page": 44
+      },
+      {
+        "level": 3,
+        "title": "3.12.3 Bonus: Scalar product and Orthogonality",
+        "page": 45
+      },
+      {
+        "level": 2,
+        "title": "3.13 Exercise 3",
+        "page": 45
+      },
+      {
+        "level": 3,
+        "title": "3.13.1 Eigenvectors",
+        "page": 45
+      },
+      {
+        "level": 3,
+        "title": "3.13.2 Covariance and PCA",
+        "page": 46
+      },
+      {
+        "level": 3,
+        "title": "3.13.3 Bonus: RKHS",
+        "page": 46
+      },
+      {
+        "level": 1,
+        "title": "4 Optimization",
+        "page": 47
+      },
+      {
+        "level": 2,
+        "title": "4.1 Downhill algorithms for unconstrained optimization",
+        "page": 47
+      },
+      {
+        "level": 3,
+        "title": "4.1.1 Why you shouldn't trust the magnitude of the gradient",
+        "page": 47
+      },
+      {
+        "level": 3,
+        "title": "4.1.2 Ensuring monotone and sufficient decrease: Backtracking line search, Wolfe conditions, & convergence",
+        "page": 48
+      },
+      {
+        "level": 3,
+        "title": "4.1.3 The Newton direction",
+        "page": 50
+      },
+      {
+        "level": 3,
+        "title": "4.1.4 Least Squares & Gauss-Newton: a very important special case",
+        "page": 53
+      },
+      {
+        "level": 3,
+        "title": "4.1.5 Quasi-Newton & BFGS: approximating the hessian from gradient observations",
+        "page": 55
+      },
+      {
+        "level": 3,
+        "title": "4.1.6 Conjugate Gradient",
+        "page": 56
+      },
+      {
+        "level": 3,
+        "title": "4.1.7 Rprop*",
+        "page": 57
+      },
+      {
+        "level": 2,
+        "title": "4.2 The general optimization problem \u2013 a mathematical program",
+        "page": 58
+      },
+      {
+        "level": 2,
+        "title": "4.3 The KKT conditions",
+        "page": 59
+      },
+      {
+        "level": 2,
+        "title": "4.4 Unconstrained problems to tackle a constrained problem",
+        "page": 60
+      },
+      {
+        "level": 3,
+        "title": "4.4.1 Augmented Lagrangian*",
+        "page": 62
+      },
+      {
+        "level": 2,
+        "title": "4.5 The Lagrangian",
+        "page": 62
+      },
+      {
+        "level": 3,
+        "title": "4.5.1 How the Lagrangian relates to the KKT conditions",
+        "page": 62
+      },
+      {
+        "level": 3,
+        "title": "4.5.2 Solving mathematical programs analytically, on paper.",
+        "page": 63
+      },
+      {
+        "level": 3,
+        "title": "4.5.3 Solving the dual problem, instead of the primal.",
+        "page": 64
+      },
+      {
+        "level": 3,
+        "title": "4.5.4 Finding the ``saddle point'' directly with a primal-dual Newton method.",
+        "page": 65
+      },
+      {
+        "level": 3,
+        "title": "4.5.5 Log Barriers and the Lagrangian",
+        "page": 66
+      },
+      {
+        "level": 2,
+        "title": "4.6 Convex Problems",
+        "page": 67
+      },
+      {
+        "level": 3,
+        "title": "4.6.1 Convex sets, functions, problems",
+        "page": 67
+      },
+      {
+        "level": 3,
+        "title": "4.6.2 Linear and quadratic programs",
+        "page": 68
+      },
+      {
+        "level": 3,
+        "title": "4.6.3 The Simplex Algorithm",
+        "page": 69
+      },
+      {
+        "level": 3,
+        "title": "4.6.4 Sequential Quadratic Programming",
+        "page": 70
+      },
+      {
+        "level": 2,
+        "title": "4.7 Blackbox & Global Optimization: It's all about learning",
+        "page": 71
+      },
+      {
+        "level": 3,
+        "title": "4.7.1 A sequential decision problem formulation",
+        "page": 71
+      },
+      {
+        "level": 3,
+        "title": "4.7.2 Acquisition Functions for Bayesian Global Optimization*",
+        "page": 73
+      },
+      {
+        "level": 3,
+        "title": "4.7.3 Classical model-based blackbox optimization (non-global)*",
+        "page": 74
+      },
+      {
+        "level": 3,
+        "title": "4.7.4 Evolutionary Algorithms*",
+        "page": 75
+      },
+      {
+        "level": 2,
+        "title": "4.8 Examples and Exercises",
+        "page": 75
+      },
+      {
+        "level": 2,
+        "title": "4.9 Exercise 6",
+        "page": 75
+      },
+      {
+        "level": 3,
+        "title": "4.9.1 Convergence proof",
+        "page": 75
+      },
+      {
+        "level": 3,
+        "title": "4.9.2 Backtracking Line Search",
+        "page": 76
+      },
+      {
+        "level": 3,
+        "title": "4.9.3 Gauss-Newton",
+        "page": 77
+      },
+      {
+        "level": 3,
+        "title": "4.9.4 Robust unconstrained optimization",
+        "page": 77
+      },
+      {
+        "level": 2,
+        "title": "4.10 Exercise 7",
+        "page": 78
+      },
+      {
+        "level": 3,
+        "title": "4.10.1 Lagrangian Method of Multipliers",
+        "page": 78
+      },
+      {
+        "level": 3,
+        "title": "4.10.2 Equality Constraint Penalties and Augmented Lagrangian",
+        "page": 79
+      },
+      {
+        "level": 2,
+        "title": "4.11 Exercise 8",
+        "page": 79
+      },
+      {
+        "level": 3,
+        "title": "4.11.1 Lagrangian and dual function",
+        "page": 79
+      },
+      {
+        "level": 3,
+        "title": "4.11.2 Optimize a constrained problem",
+        "page": 79
+      },
+      {
+        "level": 2,
+        "title": "4.12 Exercise 9",
+        "page": 80
+      },
+      {
+        "level": 3,
+        "title": "4.12.1 Network flow problem",
+        "page": 81
+      },
+      {
+        "level": 3,
+        "title": "4.12.2 Minimum fuel optimal control",
+        "page": 81
+      },
+      {
+        "level": 3,
+        "title": "4.12.3 Reformulating an 1-norm",
+        "page": 81
+      },
+      {
+        "level": 2,
+        "title": "4.13 Exercise 10",
+        "page": 81
+      },
+      {
+        "level": 3,
+        "title": "4.13.1 Restarts of Local Optima",
+        "page": 81
+      },
+      {
+        "level": 3,
+        "title": "4.13.2 GP-UCB Bayesian Optimization",
+        "page": 82
+      },
+      {
+        "level": 1,
+        "title": "5 Probabilities & Information",
+        "page": 82
+      },
+      {
+        "level": 2,
+        "title": "5.1 Basics",
+        "page": 82
+      },
+      {
+        "level": 3,
+        "title": "5.1.1 Axioms, definitions, Bayes Rule",
+        "page": 83
+      },
+      {
+        "level": 3,
+        "title": "5.1.2 Standard discrete distributions",
+        "page": 84
+      },
+      {
+        "level": 3,
+        "title": "5.1.3 Conjugate distributions",
+        "page": 84
+      },
+      {
+        "level": 3,
+        "title": "5.1.4 Distributions over continuous domain",
+        "page": 85
+      },
+      {
+        "level": 3,
+        "title": "5.1.5 Gaussian",
+        "page": 86
+      },
+      {
+        "level": 3,
+        "title": "5.1.6 ``Particle distribution''",
+        "page": 87
+      },
+      {
+        "level": 2,
+        "title": "5.2 Between probabilities and optimization: neg-log-probabilities, exp-neg-energies, exponential family, Gibbs and Boltzmann",
+        "page": 88
+      },
+      {
+        "level": 2,
+        "title": "5.3 Information, Entropie & Kullback-Leibler",
+        "page": 91
+      },
+      {
+        "level": 2,
+        "title": "5.4 The Laplace approximation: A 2nd-order Taylor of p",
+        "page": 92
+      },
+      {
+        "level": 2,
+        "title": "5.5 Variational Inference",
+        "page": 93
+      },
+      {
+        "level": 2,
+        "title": "5.6 The Fisher information metric: 2nd-order Taylor of the KLD",
+        "page": 93
+      },
+      {
+        "level": 2,
+        "title": "5.7 Examples and Exercises",
+        "page": 94
+      },
+      {
+        "level": 2,
+        "title": "5.8 Exercise 10",
+        "page": 94
+      },
+      {
+        "level": 3,
+        "title": "5.8.1 Maximum Entropy and Maximum Likelihood",
+        "page": 94
+      },
+      {
+        "level": 2,
+        "title": "5.9 Exercise 11",
+        "page": 95
+      },
+      {
+        "level": 3,
+        "title": "5.9.1 Maximum likelihood and KL-divergence",
+        "page": 95
+      },
+      {
+        "level": 3,
+        "title": "5.9.2 Laplace Approximation",
+        "page": 95
+      },
+      {
+        "level": 3,
+        "title": "5.9.3 Learning = Compression",
+        "page": 96
+      },
+      {
+        "level": 3,
+        "title": "5.9.4 A gzip experiment",
+        "page": 96
+      },
+      {
+        "level": 3,
+        "title": "5.9.5 Maximum Entropy and ML",
+        "page": 96
+      },
+      {
+        "level": 1,
+        "title": "A Gaussian identities",
+        "page": 97
+      },
+      {
+        "level": 1,
+        "title": "B Further",
+        "page": 102
+      },
+      {
+        "level": 1,
+        "title": "Index",
+        "page": 102
+      }
+    ],
+    "extraction": {
+      "avg_chars_per_page": 1802.6,
+      "low_text_page_count": 0,
+      "low_text_pages": [],
+      "likely_scanned_or_image_pages": false,
+      "raw_text_file": "data/source-manifest/raw-text/lecture-maths.md"
+    }
+  },
+  {
+    "source_id": "lecture-optimization",
+    "filename": "Lecture-Optimization.pdf",
+    "relative_path": "original notes/Lecture-Optimization.pdf",
+    "sha256": "f0e811311d81c46eef3614ae71a8919d8dd92883a8cc2ef01b7cbdfe3d8de877",
+    "page_count": 128,
+    "pdf_metadata": {
+      "title": "Introduction to Optimization",
+      "author": "Marc Toussaint",
+      "subject": null,
+      "creation_date": "D:20230207132329+01'00'",
+      "mod_date": "D:20230207132329+01'00'",
+      "producer": "pdfTeX-1.40.18"
+    },
+    "embedded_toc": [
+      {
+        "level": 1,
+        "title": "1 Part 1: Unconstrained Optimization",
+        "page": 5
+      },
+      {
+        "level": 2,
+        "title": "1.1 Overview \u2013 Downhill Algorithms for Unconstrained Optimization",
+        "page": 5
+      },
+      {
+        "level": 2,
+        "title": "1.2 Gradient Descent & Backtracking Line Search",
+        "page": 6
+      },
+      {
+        "level": 3,
+        "title": "Plain gradient descent",
+        "page": 6
+      },
+      {
+        "level": 3,
+        "title": "Stepsize and step direction as core issues",
+        "page": 6
+      },
+      {
+        "level": 3,
+        "title": "Stepsize adaptation",
+        "page": 7
+      },
+      {
+        "level": 3,
+        "title": "Backtracking Line Search",
+        "page": 7
+      },
+      {
+        "level": 3,
+        "title": "Line Search",
+        "page": 7
+      },
+      {
+        "level": 3,
+        "title": "Wolfe conditions",
+        "page": 8
+      },
+      {
+        "level": 3,
+        "title": "Convergence for strong convexity",
+        "page": 9
+      },
+      {
+        "level": 2,
+        "title": "1.3 Steepest Descent & Newton Method",
+        "page": 9
+      },
+      {
+        "level": 3,
+        "title": "Steepest descent direction",
+        "page": 9
+      },
+      {
+        "level": 3,
+        "title": "Covariant gradient descent",
+        "page": 10
+      },
+      {
+        "level": 3,
+        "title": "Newton Method",
+        "page": 10
+      },
+      {
+        "level": 3,
+        "title": "Newton method",
+        "page": 12
+      },
+      {
+        "level": 3,
+        "title": "Newton method with non-pos-def fallback",
+        "page": 13
+      },
+      {
+        "level": 3,
+        "title": "Levenberg-Marquardt",
+        "page": 13
+      },
+      {
+        "level": 3,
+        "title": "Trust Regions",
+        "page": 14
+      },
+      {
+        "level": 2,
+        "title": "1.4 Approximate Newton Methods",
+        "page": 14
+      },
+      {
+        "level": 3,
+        "title": "Least Squares & Gauss-Newton method",
+        "page": 15
+      },
+      {
+        "level": 3,
+        "title": "Quasi-Newton methods",
+        "page": 16
+      },
+      {
+        "level": 3,
+        "title": "Quasi-Newton methods",
+        "page": 16
+      },
+      {
+        "level": 3,
+        "title": "Broyden-Fletcher-Goldfarb-Shanno (BFGS)",
+        "page": 17
+      },
+      {
+        "level": 3,
+        "title": "(Nonlinear) Conjugate Gradient",
+        "page": 18
+      },
+      {
+        "level": 3,
+        "title": "Conjugate gradient",
+        "page": 18
+      },
+      {
+        "level": 1,
+        "title": "2 Part 2: Constrained Optimization",
+        "page": 21
+      },
+      {
+        "level": 2,
+        "title": "2.1 Overview \u2013 Algorithms for Constrained Optimization",
+        "page": 21
+      },
+      {
+        "level": 3,
+        "title": "Constrained optimization",
+        "page": 21
+      },
+      {
+        "level": 3,
+        "title": "Karush-Kuhn-Tucker (KKT) conditions",
+        "page": 22
+      },
+      {
+        "level": 2,
+        "title": "2.2 Log Barrier Method",
+        "page": 23
+      },
+      {
+        "level": 3,
+        "title": "Log barrier method",
+        "page": 23
+      },
+      {
+        "level": 3,
+        "title": "Central path",
+        "page": 25
+      },
+      {
+        "level": 3,
+        "title": "Log barrier as approximate KKT",
+        "page": 25
+      },
+      {
+        "level": 2,
+        "title": "2.3 Augmented Lagrangian",
+        "page": 26
+      },
+      {
+        "level": 3,
+        "title": "Squared penalty method",
+        "page": 26
+      },
+      {
+        "level": 3,
+        "title": "Squared penalty method",
+        "page": 27
+      },
+      {
+        "level": 3,
+        "title": "Augmented Lagrangian method",
+        "page": 28
+      },
+      {
+        "level": 3,
+        "title": "Augmented Lagrangian with Inequalities",
+        "page": 29
+      },
+      {
+        "level": 2,
+        "title": "2.4 The Lagrangian",
+        "page": 30
+      },
+      {
+        "level": 3,
+        "title": "Lagrangian: definition",
+        "page": 30
+      },
+      {
+        "level": 3,
+        "title": "Lagrangian: relation to KKT",
+        "page": 31
+      },
+      {
+        "level": 3,
+        "title": "Lagrange dual problem",
+        "page": 32
+      },
+      {
+        "level": 3,
+        "title": "Strong Duality",
+        "page": 33
+      },
+      {
+        "level": 3,
+        "title": "Log barrier method revisited",
+        "page": 34
+      },
+      {
+        "level": 3,
+        "title": "Log barrier and sub-optimality gap",
+        "page": 34
+      },
+      {
+        "level": 2,
+        "title": "2.5 Convex Optimization",
+        "page": 35
+      },
+      {
+        "level": 3,
+        "title": "Function types: covex, quasi-convex, uni-modal",
+        "page": 35
+      },
+      {
+        "level": 3,
+        "title": "Linear program (LP)",
+        "page": 36
+      },
+      {
+        "level": 3,
+        "title": "Quadratic program (QP)",
+        "page": 36
+      },
+      {
+        "level": 3,
+        "title": "LP in standard form",
+        "page": 36
+      },
+      {
+        "level": 3,
+        "title": "Simplex Algorithm",
+        "page": 39
+      },
+      {
+        "level": 3,
+        "title": "Simplex method",
+        "page": 39
+      },
+      {
+        "level": 3,
+        "title": "Sequential Quadratic Programming",
+        "page": 40
+      },
+      {
+        "level": 3,
+        "title": "Sequential quadratic programming",
+        "page": 40
+      },
+      {
+        "level": 3,
+        "title": "LP-relaxations of discrete problems*",
+        "page": 41
+      },
+      {
+        "level": 3,
+        "title": "LP-relaxations of integer programs",
+        "page": 41
+      },
+      {
+        "level": 2,
+        "title": "2.6 Implicit Functions & Differentiable Optimization",
+        "page": 44
+      },
+      {
+        "level": 3,
+        "title": "Implicit Functions",
+        "page": 44
+      },
+      {
+        "level": 3,
+        "title": "Implicit Functions",
+        "page": 44
+      },
+      {
+        "level": 3,
+        "title": "Implicit Function Theorem",
+        "page": 45
+      },
+      {
+        "level": 3,
+        "title": "Differentiable Optimization",
+        "page": 46
+      },
+      {
+        "level": 3,
+        "title": "Differentiable Optimization",
+        "page": 46
+      },
+      {
+        "level": 2,
+        "title": "2.7 Appendix",
+        "page": 49
+      },
+      {
+        "level": 3,
+        "title": "Phase I Optimization",
+        "page": 49
+      },
+      {
+        "level": 3,
+        "title": "Phase I optimization",
+        "page": 49
+      },
+      {
+        "level": 3,
+        "title": "Bound Constraints",
+        "page": 49
+      },
+      {
+        "level": 3,
+        "title": "Primal-Dual interior-point Newton Method",
+        "page": 54
+      },
+      {
+        "level": 3,
+        "title": "Primal-dual interior-point Newton method",
+        "page": 54
+      },
+      {
+        "level": 3,
+        "title": "KKT Jacobian",
+        "page": 54
+      },
+      {
+        "level": 1,
+        "title": "3 Part 3: Further Topics",
+        "page": 56
+      },
+      {
+        "level": 2,
+        "title": "3.1 Stochastic Gradient Descent",
+        "page": 56
+      },
+      {
+        "level": 3,
+        "title": "Stochastic Gradient Descent Basics & Convergence",
+        "page": 56
+      },
+      {
+        "level": 3,
+        "title": "Stochastic Gradient Descent (SGD)",
+        "page": 57
+      },
+      {
+        "level": 3,
+        "title": "Converenge of SGD",
+        "page": 57
+      },
+      {
+        "level": 3,
+        "title": "How to improve Stochastic Gradient Descent",
+        "page": 60
+      },
+      {
+        "level": 3,
+        "title": "Reducing Gradient Variance",
+        "page": 60
+      },
+      {
+        "level": 3,
+        "title": "RMSprop",
+        "page": 60
+      },
+      {
+        "level": 3,
+        "title": "SGD with Momentum",
+        "page": 61
+      },
+      {
+        "level": 3,
+        "title": "Adam",
+        "page": 62
+      },
+      {
+        "level": 2,
+        "title": "3.2 No Free Lunch",
+        "page": 64
+      },
+      {
+        "level": 3,
+        "title": "No Free Lunch (NFL) Theorem",
+        "page": 64
+      },
+      {
+        "level": 3,
+        "title": "NFL Proof",
+        "page": 65
+      },
+      {
+        "level": 3,
+        "title": "Conclusions from NFL?",
+        "page": 67
+      },
+      {
+        "level": 3,
+        "title": "NFL in continuous domains",
+        "page": 67
+      },
+      {
+        "level": 3,
+        "title": "Gaussian Processes",
+        "page": 67
+      },
+      {
+        "level": 3,
+        "title": "Optimal Optimization",
+        "page": 70
+      },
+      {
+        "level": 2,
+        "title": "3.3 Bayesian Optimization",
+        "page": 71
+      },
+      {
+        "level": 3,
+        "title": "Global Optimization",
+        "page": 72
+      },
+      {
+        "level": 3,
+        "title": "Optimization and Learning",
+        "page": 72
+      },
+      {
+        "level": 3,
+        "title": "Gaussian Processes",
+        "page": 72
+      },
+      {
+        "level": 3,
+        "title": "Heuristics / Acquisition Functions",
+        "page": 74
+      },
+      {
+        "level": 3,
+        "title": "GP-UCB",
+        "page": 75
+      },
+      {
+        "level": 2,
+        "title": "3.4 Evolutionary & Black-Box Methods",
+        "page": 77
+      },
+      {
+        "level": 3,
+        "title": "General stochastic search",
+        "page": 78
+      },
+      {
+        "level": 3,
+        "title": "Evolutionary Algorithms (EAs)",
+        "page": 78
+      },
+      {
+        "level": 3,
+        "title": "Evolution Strategies & EDAs",
+        "page": 79
+      },
+      {
+        "level": 3,
+        "title": "Evolution Strategies",
+        "page": 79
+      },
+      {
+        "level": 3,
+        "title": "Covariance Matrix Adaptation (CMA-ES)",
+        "page": 79
+      },
+      {
+        "level": 3,
+        "title": "Estimation of Distribution Algorithms (EDAs)",
+        "page": 81
+      },
+      {
+        "level": 3,
+        "title": "Estimation of Distribution Algorithms (EDAs)",
+        "page": 82
+      },
+      {
+        "level": 3,
+        "title": "Other Blackbox (Derivative-Free) Methods",
+        "page": 82
+      },
+      {
+        "level": 3,
+        "title": "Stochastic local search",
+        "page": 82
+      },
+      {
+        "level": 3,
+        "title": "Simulated annealing",
+        "page": 83
+      },
+      {
+        "level": 3,
+        "title": "Random restarts",
+        "page": 84
+      },
+      {
+        "level": 3,
+        "title": "Iterated local search",
+        "page": 84
+      },
+      {
+        "level": 3,
+        "title": "Coordinate search",
+        "page": 85
+      },
+      {
+        "level": 3,
+        "title": "Pattern search",
+        "page": 86
+      },
+      {
+        "level": 3,
+        "title": "Nelder-Mead simplex method",
+        "page": 86
+      },
+      {
+        "level": 3,
+        "title": "Model-based optimization",
+        "page": 87
+      },
+      {
+        "level": 3,
+        "title": "Implicit filtering",
+        "page": 88
+      },
+      {
+        "level": 2,
+        "title": "3.5 Structure in AI & Optimization",
+        "page": 89
+      },
+      {
+        "level": 3,
+        "title": "Factored Mathematical Programs",
+        "page": 91
+      },
+      {
+        "level": 3,
+        "title": "Distributed Optimization (ADMM)",
+        "page": 100
+      },
+      {
+        "level": 2,
+        "title": "3.6 Reinforcement Learning & Optimization",
+        "page": 103
+      },
+      {
+        "level": 1,
+        "title": "4 Exercises",
+        "page": 110
+      },
+      {
+        "level": 2,
+        "title": "4.0.1 Reading",
+        "page": 110
+      },
+      {
+        "level": 3,
+        "title": "4.0.2 Matrix equations",
+        "page": 110
+      },
+      {
+        "level": 3,
+        "title": "4.0.3 Multivariate Calculus",
+        "page": 110
+      },
+      {
+        "level": 3,
+        "title": "4.0.4 Minimization",
+        "page": 111
+      },
+      {
+        "level": 3,
+        "title": "4.0.5 Projections",
+        "page": 111
+      },
+      {
+        "level": 2,
+        "title": "4.1 Exercises 1",
+        "page": 111
+      },
+      {
+        "level": 3,
+        "title": "4.1.1 Getting Started with Plotting",
+        "page": 111
+      },
+      {
+        "level": 3,
+        "title": "4.1.2 Your first gradient descent",
+        "page": 112
+      },
+      {
+        "level": 3,
+        "title": "4.1.3 Convergence proof",
+        "page": 112
+      },
+      {
+        "level": 3,
+        "title": "4.1.4 Appendix: Python plotting code example",
+        "page": 113
+      },
+      {
+        "level": 2,
+        "title": "4.2 Exercises 2",
+        "page": 114
+      },
+      {
+        "level": 3,
+        "title": "4.2.1 Gradient Descent",
+        "page": 114
+      },
+      {
+        "level": 3,
+        "title": "4.2.2 Newton Step",
+        "page": 114
+      },
+      {
+        "level": 3,
+        "title": "4.2.3 Gauss-Newton basics",
+        "page": 115
+      },
+      {
+        "level": 2,
+        "title": "4.3 Exercises 3",
+        "page": 115
+      },
+      {
+        "level": 3,
+        "title": "4.3.1 Levenberg-Marquardt regularization",
+        "page": 115
+      },
+      {
+        "level": 3,
+        "title": "4.3.2 Conjugate Gradient",
+        "page": 115
+      },
+      {
+        "level": 3,
+        "title": "4.3.3 Solve by Sketch and check KKT",
+        "page": 116
+      },
+      {
+        "level": 3,
+        "title": "4.3.4 Trivial Log Barrier",
+        "page": 117
+      },
+      {
+        "level": 3,
+        "title": "4.3.5 Optional: Gradient descent with matrices",
+        "page": 117
+      },
+      {
+        "level": 2,
+        "title": "4.4 Exercises 4",
+        "page": 117
+      },
+      {
+        "level": 3,
+        "title": "4.4.1 Equality Constraint Penalties and Augmented Lagrangian",
+        "page": 117
+      },
+      {
+        "level": 3,
+        "title": "4.4.2 Alternative Barriers & Penalties",
+        "page": 118
+      },
+      {
+        "level": 3,
+        "title": "4.4.3 Using the Lagrangian to solve a constrained problem analytically",
+        "page": 118
+      },
+      {
+        "level": 2,
+        "title": "4.5 Exercises 5",
+        "page": 118
+      },
+      {
+        "level": 3,
+        "title": "4.5.1 Lagrangian and dual function",
+        "page": 118
+      },
+      {
+        "level": 2,
+        "title": "4.6 Exercises 6",
+        "page": 119
+      },
+      {
+        "level": 3,
+        "title": "4.6.1 Lagrangian and dual function (from Exercise 5)",
+        "page": 119
+      },
+      {
+        "level": 3,
+        "title": "4.6.2 Problems involving 1- and -norms",
+        "page": 119
+      },
+      {
+        "level": 3,
+        "title": "4.6.3 Minimum fuel optimal control",
+        "page": 120
+      },
+      {
+        "level": 3,
+        "title": "4.6.4 Phase I Optimization",
+        "page": 120
+      },
+      {
+        "level": 2,
+        "title": "4.7 Exercises 7",
+        "page": 121
+      },
+      {
+        "level": 3,
+        "title": "4.7.1 Differentiable Optimization",
+        "page": 121
+      },
+      {
+        "level": 3,
+        "title": "4.7.2 Trust Region",
+        "page": 121
+      },
+      {
+        "level": 2,
+        "title": "4.8 Exercises 8",
+        "page": 122
+      },
+      {
+        "level": 3,
+        "title": "4.8.1 Convergence of Stochastic Gradient Descent",
+        "page": 122
+      },
+      {
+        "level": 3,
+        "title": "4.8.2 Bound Constraints",
+        "page": 122
+      },
+      {
+        "level": 2,
+        "title": "4.9 Exercises 9",
+        "page": 123
+      },
+      {
+        "level": 3,
+        "title": "4.9.1 No Free Lunch",
+        "page": 123
+      },
+      {
+        "level": 3,
+        "title": "4.9.2 Gaussian Process Regression",
+        "page": 124
+      },
+      {
+        "level": 1,
+        "title": "Index",
+        "page": 126
+      }
+    ],
+    "extraction": {
+      "avg_chars_per_page": 1222.9,
+      "low_text_page_count": 0,
+      "low_text_pages": [],
+      "likely_scanned_or_image_pages": false,
+      "raw_text_file": "data/source-manifest/raw-text/lecture-optimization.md"
+    }
+  },
+  {
+    "source_id": "lecture-robotlearning",
+    "filename": "Lecture-RobotLearning.pdf",
+    "relative_path": "original notes/Lecture-RobotLearning.pdf",
+    "sha256": "0a84aff2726465e29abfde98d6884c6950238b5c70a90009b8d9f5a0c9b5f4d8",
+    "page_count": 137,
+    "pdf_metadata": {
+      "title": "Robot Learning",
+      "author": "Marc Toussaint",
+      "subject": null,
+      "creation_date": "D:20250725112918+02'00'",
+      "mod_date": "D:20250725112918+02'00'",
+      "producer": "pdfTeX-1.40.25"
+    },
+    "embedded_toc": [
+      {
+        "level": 1,
+        "title": "1 Lectures",
+        "page": 4
+      },
+      {
+        "level": 2,
+        "title": "1.1 Introduction",
+        "page": 4
+      },
+      {
+        "level": 3,
+        "title": "What is this lecture about?",
+        "page": 4
+      },
+      {
+        "level": 3,
+        "title": "Organization",
+        "page": 6
+      },
+      {
+        "level": 2,
+        "title": "1.2 Mini Taxonomy",
+        "page": 8
+      },
+      {
+        "level": 2,
+        "title": "1.3 Robotics Essentials",
+        "page": 10
+      },
+      {
+        "level": 3,
+        "title": "Articulated Multibody System",
+        "page": 11
+      },
+      {
+        "level": 3,
+        "title": "Forward Kinematics",
+        "page": 12
+      },
+      {
+        "level": 3,
+        "title": "Inverse Dynamics",
+        "page": 13
+      },
+      {
+        "level": 3,
+        "title": "Standard Control Stack",
+        "page": 14
+      },
+      {
+        "level": 3,
+        "title": "Inverse Kinematics",
+        "page": 14
+      },
+      {
+        "level": 3,
+        "title": "Model-Predictive Control (MPC)",
+        "page": 15
+      },
+      {
+        "level": 3,
+        "title": "Challenges",
+        "page": 16
+      },
+      {
+        "level": 2,
+        "title": "1.4 Machine Learning Essentials",
+        "page": 19
+      },
+      {
+        "level": 3,
+        "title": "Supervised ML",
+        "page": 19
+      },
+      {
+        "level": 3,
+        "title": "Unsupervised ML",
+        "page": 21
+      },
+      {
+        "level": 2,
+        "title": "1.5 Dynamics Learning",
+        "page": 23
+      },
+      {
+        "level": 3,
+        "title": "State-based Dynamics Learning",
+        "page": 25
+      },
+      {
+        "level": 3,
+        "title": "Parameter Estimation",
+        "page": 25
+      },
+      {
+        "level": 3,
+        "title": "Dynamics Regression",
+        "page": 26
+      },
+      {
+        "level": 3,
+        "title": "Residual Dynamics",
+        "page": 27
+      },
+      {
+        "level": 3,
+        "title": "Observation-based Dynamics Learning",
+        "page": 27
+      },
+      {
+        "level": 3,
+        "title": "Observation-based models (Autoregression, Recurrent, State-Space)",
+        "page": 27
+      },
+      {
+        "level": 3,
+        "title": "How is the data generated?",
+        "page": 30
+      },
+      {
+        "level": 3,
+        "title": "Data Quality",
+        "page": 30
+      },
+      {
+        "level": 3,
+        "title": "Frequency Excitation",
+        "page": 31
+      },
+      {
+        "level": 3,
+        "title": "Multirotor Examples",
+        "page": 32
+      },
+      {
+        "level": 2,
+        "title": "1.6 Imitation Learning",
+        "page": 35
+      },
+      {
+        "level": 3,
+        "title": "Early Work",
+        "page": 35
+      },
+      {
+        "level": 3,
+        "title": "Behavior Cloning",
+        "page": 37
+      },
+      {
+        "level": 3,
+        "title": "Trajectory Distribution Learning",
+        "page": 37
+      },
+      {
+        "level": 3,
+        "title": "Constraints & Feature Learning",
+        "page": 39
+      },
+      {
+        "level": 3,
+        "title": "Distributional Shift",
+        "page": 40
+      },
+      {
+        "level": 3,
+        "title": "DAgger",
+        "page": 42
+      },
+      {
+        "level": 3,
+        "title": "Data Collection (TeleOp, Kinesthetic, MoCap, Video)",
+        "page": 43
+      },
+      {
+        "level": 3,
+        "title": "Privileged Teacher",
+        "page": 45
+      },
+      {
+        "level": 2,
+        "title": "1.7 Imitation Learning 2",
+        "page": 47
+      },
+      {
+        "level": 3,
+        "title": "GAN",
+        "page": 47
+      },
+      {
+        "level": 3,
+        "title": "VAE",
+        "page": 48
+      },
+      {
+        "level": 3,
+        "title": "Diffusion",
+        "page": 49
+      },
+      {
+        "level": 3,
+        "title": "Case Studies",
+        "page": 52
+      },
+      {
+        "level": 2,
+        "title": "1.8 Reinforcement Learning",
+        "page": 57
+      },
+      {
+        "level": 3,
+        "title": "Markov Decision Process",
+        "page": 57
+      },
+      {
+        "level": 3,
+        "title": "Value Function, Bellman, Q-Iteration",
+        "page": 58
+      },
+      {
+        "level": 3,
+        "title": "Proof of convergence of Q-Iteration",
+        "page": 59
+      },
+      {
+        "level": 3,
+        "title": "Policy Iteration",
+        "page": 59
+      },
+      {
+        "level": 3,
+        "title": "Bellman Residual Loss",
+        "page": 60
+      },
+      {
+        "level": 3,
+        "title": "Policy Gradient",
+        "page": 60
+      },
+      {
+        "level": 3,
+        "title": "Deep RL ``Tricks''",
+        "page": 61
+      },
+      {
+        "level": 3,
+        "title": "Deep RL",
+        "page": 61
+      },
+      {
+        "level": 3,
+        "title": "Discussion",
+        "page": 62
+      },
+      {
+        "level": 3,
+        "title": "Data Collection in RL",
+        "page": 63
+      },
+      {
+        "level": 3,
+        "title": "Reward Engineering",
+        "page": 63
+      },
+      {
+        "level": 3,
+        "title": "Some RL Application Papers",
+        "page": 65
+      },
+      {
+        "level": 2,
+        "title": "1.9 Offline RL & Sim2Real",
+        "page": 66
+      },
+      {
+        "level": 3,
+        "title": "Offline RL",
+        "page": 67
+      },
+      {
+        "level": 3,
+        "title": "Offline RL",
+        "page": 67
+      },
+      {
+        "level": 3,
+        "title": "Regularization",
+        "page": 68
+      },
+      {
+        "level": 3,
+        "title": "Sim2Real",
+        "page": 69
+      },
+      {
+        "level": 3,
+        "title": "Sim2Real",
+        "page": 69
+      },
+      {
+        "level": 3,
+        "title": "Domain Randomization",
+        "page": 70
+      },
+      {
+        "level": 3,
+        "title": "Privileged Teacher & Sensor-Based Student",
+        "page": 71
+      },
+      {
+        "level": 3,
+        "title": "Domain Adaptation",
+        "page": 72
+      },
+      {
+        "level": 2,
+        "title": "1.10 Inverse RL",
+        "page": 73
+      },
+      {
+        "level": 3,
+        "title": "General Approach",
+        "page": 74
+      },
+      {
+        "level": 3,
+        "title": "Max Margin IRL",
+        "page": 74
+      },
+      {
+        "level": 3,
+        "title": "Max Entropy IRL",
+        "page": 75
+      },
+      {
+        "level": 3,
+        "title": "Adversarial IRL",
+        "page": 76
+      },
+      {
+        "level": 3,
+        "title": "Preference-based RL",
+        "page": 78
+      },
+      {
+        "level": 3,
+        "title": "Value Alignment",
+        "page": 80
+      },
+      {
+        "level": 2,
+        "title": "1.11 Manipulation & Grasp Learning",
+        "page": 81
+      },
+      {
+        "level": 3,
+        "title": "Manipulation Intro",
+        "page": 81
+      },
+      {
+        "level": 3,
+        "title": "Manipulation",
+        "page": 81
+      },
+      {
+        "level": 3,
+        "title": "Grasping Background",
+        "page": 82
+      },
+      {
+        "level": 3,
+        "title": "Contacts & Force Closure",
+        "page": 82
+      },
+      {
+        "level": 3,
+        "title": "Grasp Learning",
+        "page": 83
+      },
+      {
+        "level": 3,
+        "title": "Grasp Learning",
+        "page": 83
+      },
+      {
+        "level": 3,
+        "title": "Grasp Data Collection (model- and simulation-based)",
+        "page": 85
+      },
+      {
+        "level": 3,
+        "title": "Manipulation Learning",
+        "page": 86
+      },
+      {
+        "level": 3,
+        "title": "Manipulation Learning",
+        "page": 86
+      },
+      {
+        "level": 2,
+        "title": "1.12 TAMP & Language",
+        "page": 88
+      },
+      {
+        "level": 3,
+        "title": "TAMP Background",
+        "page": 88
+      },
+      {
+        "level": 3,
+        "title": "Task and Motion Planning",
+        "page": 88
+      },
+      {
+        "level": 3,
+        "title": "Logic-Geometric Program",
+        "page": 90
+      },
+      {
+        "level": 3,
+        "title": "Learning in TAMP",
+        "page": 91
+      },
+      {
+        "level": 3,
+        "title": "Learning in TAMP",
+        "page": 91
+      },
+      {
+        "level": 3,
+        "title": "Constraints Learning",
+        "page": 91
+      },
+      {
+        "level": 3,
+        "title": "Learning to predict plans",
+        "page": 93
+      },
+      {
+        "level": 3,
+        "title": "Language in Robotics",
+        "page": 94
+      },
+      {
+        "level": 3,
+        "title": "Language in Robotics",
+        "page": 94
+      },
+      {
+        "level": 3,
+        "title": "LLMs & TAMP",
+        "page": 95
+      },
+      {
+        "level": 3,
+        "title": "Language-Image Models (CLIP, CLIPort, SayCan, PaLM-E, RT-2)",
+        "page": 95
+      },
+      {
+        "level": 2,
+        "title": "1.13 Multi-Robot Learning",
+        "page": 100
+      },
+      {
+        "level": 3,
+        "title": "Deep Sets",
+        "page": 102
+      },
+      {
+        "level": 3,
+        "title": "GNNs",
+        "page": 106
+      },
+      {
+        "level": 3,
+        "title": "MARL",
+        "page": 109
+      },
+      {
+        "level": 3,
+        "title": "DiNNO",
+        "page": 112
+      },
+      {
+        "level": 1,
+        "title": "2 Exercises",
+        "page": 115
+      },
+      {
+        "level": 2,
+        "title": "2.1 Weekly Exercise 1",
+        "page": 115
+      },
+      {
+        "level": 3,
+        "title": "2.1.1 Basic Inverse Kinematics",
+        "page": 115
+      },
+      {
+        "level": 3,
+        "title": "2.1.2 Point mass under PD control",
+        "page": 115
+      },
+      {
+        "level": 3,
+        "title": "2.1.3 BONUS: Fun with Euler-Lagrange",
+        "page": 116
+      },
+      {
+        "level": 3,
+        "title": "2.1.4 Logistic Regression",
+        "page": 116
+      },
+      {
+        "level": 2,
+        "title": "2.2 Weekly Exercise 2",
+        "page": 117
+      },
+      {
+        "level": 3,
+        "title": "2.2.1 Work with the Literature",
+        "page": 117
+      },
+      {
+        "level": 3,
+        "title": "2.2.2 System Identification of a Simple Car",
+        "page": 117
+      },
+      {
+        "level": 3,
+        "title": "2.2.3 Mountain Car Dynamics Learning",
+        "page": 117
+      },
+      {
+        "level": 2,
+        "title": "2.3 Weekly Exercise 3",
+        "page": 119
+      },
+      {
+        "level": 3,
+        "title": "2.3.1 Literature: DAgger",
+        "page": 119
+      },
+      {
+        "level": 3,
+        "title": "2.3.2 Trajectory Distribution  Control",
+        "page": 119
+      },
+      {
+        "level": 3,
+        "title": "2.3.3 Mountain Car Imitation Learning",
+        "page": 120
+      },
+      {
+        "level": 2,
+        "title": "2.4 Weekly Exercise 4",
+        "page": 121
+      },
+      {
+        "level": 3,
+        "title": "2.4.1 Literature: SAC",
+        "page": 121
+      },
+      {
+        "level": 3,
+        "title": "2.4.2 The Reparametrization Trick",
+        "page": 121
+      },
+      {
+        "level": 3,
+        "title": "2.4.3 Robotic RL",
+        "page": 122
+      },
+      {
+        "level": 2,
+        "title": "2.5 Weekly Exercise 5",
+        "page": 122
+      },
+      {
+        "level": 3,
+        "title": "2.5.1 Literature: Privileged Teacher and Sensor-based Student Training",
+        "page": 122
+      },
+      {
+        "level": 3,
+        "title": "2.5.2 Episodes & Terminal States",
+        "page": 123
+      },
+      {
+        "level": 3,
+        "title": "2.5.3 Robotic Offline RL from a Privileged Teacher",
+        "page": 123
+      },
+      {
+        "level": 2,
+        "title": "2.6 Weekly Exercise 6",
+        "page": 124
+      },
+      {
+        "level": 3,
+        "title": "2.6.1 Literature: Adversarial Inverse Reinforcement Learning",
+        "page": 124
+      },
+      {
+        "level": 3,
+        "title": "2.6.2 Inverse RL on a Toy Control Problem",
+        "page": 125
+      },
+      {
+        "level": 3,
+        "title": "2.6.3 Practical Exercise: Inverse RL",
+        "page": 125
+      },
+      {
+        "level": 2,
+        "title": "2.7 Weekly Exercise 7",
+        "page": 125
+      },
+      {
+        "level": 3,
+        "title": "2.7.1 Literature: GraspNet",
+        "page": 125
+      },
+      {
+        "level": 3,
+        "title": "2.7.2 Force Closure",
+        "page": 126
+      },
+      {
+        "level": 3,
+        "title": "2.7.3 Practical Exercise: Grasp Simulation",
+        "page": 126
+      },
+      {
+        "level": 2,
+        "title": "2.8 Weekly Exercise 10",
+        "page": 127
+      },
+      {
+        "level": 3,
+        "title": "2.8.1 Literature: Learning to Plan in TAMP",
+        "page": 127
+      },
+      {
+        "level": 3,
+        "title": "2.8.2 Optimal Sequential Manipulation in TAMP",
+        "page": 128
+      },
+      {
+        "level": 2,
+        "title": "2.9 Weekly Exercise 9",
+        "page": 129
+      },
+      {
+        "level": 3,
+        "title": "2.9.1 Literature: Neural-Swarm2",
+        "page": 129
+      },
+      {
+        "level": 3,
+        "title": "2.9.2 Encodings for Environmental Monitoring",
+        "page": 129
+      }
+    ],
+    "extraction": {
+      "avg_chars_per_page": 1485.4,
+      "low_text_page_count": 0,
+      "low_text_pages": [],
+      "likely_scanned_or_image_pages": false,
+      "raw_text_file": "data/source-manifest/raw-text/lecture-robotlearning.md"
+    }
+  },
+  {
+    "source_id": "lecture-robotics",
+    "filename": "Lecture-Robotics.pdf",
+    "relative_path": "original notes/Lecture-Robotics.pdf",
+    "sha256": "f36e0a2bda971a8ec424b6da170af616a1f28a565fbf570fe4f1858d4b75affb",
+    "page_count": 201,
+    "pdf_metadata": {
+      "title": "Introduction to Robotics",
+      "author": "Marc Toussaint",
+      "subject": null,
+      "creation_date": "D:20161027081845+02'00'",
+      "mod_date": "D:20161027081845+02'00'",
+      "producer": "pdfTeX-1.40.14"
+    },
+    "embedded_toc": [
+      {
+        "level": 1,
+        "title": "1 Introduction",
+        "page": 5
+      },
+      {
+        "level": 1,
+        "title": "2 Kinematics",
+        "page": 13
+      },
+      {
+        "level": 2,
+        "title": "2.1 Basic 3D geometry & notation",
+        "page": 14
+      },
+      {
+        "level": 2,
+        "title": "2.2 Kinematics",
+        "page": 17
+      },
+      {
+        "level": 2,
+        "title": "2.3 Inverse Kinematics",
+        "page": 21
+      },
+      {
+        "level": 2,
+        "title": "2.4 Multiple tasks",
+        "page": 28
+      },
+      {
+        "level": 1,
+        "title": "3 Dynamics",
+        "page": 36
+      },
+      {
+        "level": 2,
+        "title": "3.1 PID and a 1D point mass",
+        "page": 37
+      },
+      {
+        "level": 2,
+        "title": "3.2 Dynamics of mechanical systems",
+        "page": 42
+      },
+      {
+        "level": 2,
+        "title": "3.3 Controlling a dynamic robot",
+        "page": 45
+      },
+      {
+        "level": 1,
+        "title": "4 Path Planning",
+        "page": 50
+      },
+      {
+        "level": 2,
+        "title": "4.1 Background",
+        "page": 52
+      },
+      {
+        "level": 2,
+        "title": "4.2 Sample-based Path Finding",
+        "page": 68
+      },
+      {
+        "level": 2,
+        "title": "4.3 Non-holonomic systems",
+        "page": 81
+      },
+      {
+        "level": 1,
+        "title": "5 Path Optimization \u2013 briefly",
+        "page": 90
+      },
+      {
+        "level": 1,
+        "title": "6 Probabilities",
+        "page": 92
+      },
+      {
+        "level": 2,
+        "title": "6.1 Basic definitions",
+        "page": 93
+      },
+      {
+        "level": 2,
+        "title": "6.2 Probability distributions",
+        "page": 95
+      },
+      {
+        "level": 1,
+        "title": "7 Mobile Robotics",
+        "page": 104
+      },
+      {
+        "level": 2,
+        "title": "7.1 State Estimation",
+        "page": 107
+      },
+      {
+        "level": 2,
+        "title": "7.2 Simultaneous Localization and Mapping (SLAM)",
+        "page": 118
+      },
+      {
+        "level": 1,
+        "title": "8 Control Theory",
+        "page": 126
+      },
+      {
+        "level": 2,
+        "title": "8.1 Optimal control",
+        "page": 127
+      },
+      {
+        "level": 2,
+        "title": "8.2 Controllability",
+        "page": 135
+      },
+      {
+        "level": 2,
+        "title": "8.3 Stability",
+        "page": 137
+      },
+      {
+        "level": 1,
+        "title": "9 Reinforcement Learning in Robotics \u2013 briefly",
+        "page": 143
+      },
+      {
+        "level": 1,
+        "title": "10 SKIPPED THIS TERM \u2013 Grasping (brief intro)",
+        "page": 157
+      },
+      {
+        "level": 1,
+        "title": "11 SKIPPED THIS TERM \u2013 Legged Locomotion (brief intro)",
+        "page": 163
+      },
+      {
+        "level": 1,
+        "title": "12 Exercises",
+        "page": 178
+      },
+      {
+        "level": 2,
+        "title": "12.1 Exercise 1",
+        "page": 178
+      },
+      {
+        "level": 2,
+        "title": "12.2 Exercise 2",
+        "page": 179
+      },
+      {
+        "level": 2,
+        "title": "12.3 Exercise 3",
+        "page": 180
+      },
+      {
+        "level": 2,
+        "title": "12.4 Exercise 4",
+        "page": 181
+      },
+      {
+        "level": 2,
+        "title": "12.5 Exercise 5",
+        "page": 183
+      },
+      {
+        "level": 2,
+        "title": "12.6 Exercise 6",
+        "page": 185
+      },
+      {
+        "level": 2,
+        "title": "12.7 Exercise 7",
+        "page": 186
+      },
+      {
+        "level": 2,
+        "title": "12.8 Exercise 8",
+        "page": 187
+      },
+      {
+        "level": 2,
+        "title": "12.9 Exercise 9",
+        "page": 188
+      },
+      {
+        "level": 2,
+        "title": "12.10 Exercise 10",
+        "page": 189
+      },
+      {
+        "level": 2,
+        "title": "12.11 Exercise 11",
+        "page": 191
+      },
+      {
+        "level": 2,
+        "title": "12.12 Exercise 13",
+        "page": 192
+      },
+      {
+        "level": 2,
+        "title": "12.13 Exercise extra",
+        "page": 194
+      },
+      {
+        "level": 1,
+        "title": "13 Bullet points to help learning",
+        "page": 195
+      },
+      {
+        "level": 2,
+        "title": "13.1 Kinematics",
+        "page": 195
+      },
+      {
+        "level": 2,
+        "title": "13.2 Dynamics",
+        "page": 196
+      },
+      {
+        "level": 2,
+        "title": "13.3 Path planning",
+        "page": 196
+      },
+      {
+        "level": 2,
+        "title": "13.4 Mobile Robotics",
+        "page": 197
+      },
+      {
+        "level": 2,
+        "title": "13.5 Control Theory",
+        "page": 198
+      },
+      {
+        "level": 1,
+        "title": "Index",
+        "page": 198
+      }
+    ],
+    "extraction": {
+      "avg_chars_per_page": 907.5,
+      "low_text_page_count": 0,
+      "low_text_pages": [],
+      "likely_scanned_or_image_pages": false,
+      "raw_text_file": "data/source-manifest/raw-text/lecture-robotics.md"
+    }
+  },
+  {
+    "source_id": "energy",
+    "filename": "energy.pdf",
+    "relative_path": "original notes/energy.pdf",
+    "sha256": "83c3aaa4feb79860aece2bbb98f040c3c2d5329674bfeb0729bb5558f51f5b16",
+    "page_count": 3,
+    "pdf_metadata": {
+      "title": null,
+      "author": "Marc Toussaint",
+      "subject": null,
+      "creation_date": "D:20260512151431+02'00'",
+      "mod_date": "D:20260512151431+02'00'",
+      "producer": "pdfTeX-1.40.25"
+    },
+    "embedded_toc": [
+      {
+        "level": 1,
+        "title": "Probabilities & Energy",
+        "page": 1
+      },
+      {
+        "level": 1,
+        "title": "Partition Function",
+        "page": 2
+      },
+      {
+        "level": 1,
+        "title": "Energy & Probability in Physics",
+        "page": 2
+      }
+    ],
+    "extraction": {
+      "avg_chars_per_page": 2430.3,
+      "low_text_page_count": 0,
+      "low_text_pages": [],
+      "likely_scanned_or_image_pages": false,
+      "raw_text_file": "data/source-manifest/raw-text/energy.md"
+    }
+  },
+  {
+    "source_id": "entropy",
+    "filename": "entropy.pdf",
+    "relative_path": "original notes/entropy.pdf",
+    "sha256": "c94853eede8126dc73ab51b08ac158992bade5e33f16cef9a737ef29deccd30d",
+    "page_count": 2,
+    "pdf_metadata": {
+      "title": null,
+      "author": "Marc Toussaint",
+      "subject": null,
+      "creation_date": "D:20260512151431+02'00'",
+      "mod_date": "D:20260512151431+02'00'",
+      "producer": "pdfTeX-1.40.25"
+    },
+    "embedded_toc": [
+      {
+        "level": 1,
+        "title": "Entropy",
+        "page": 1
+      },
+      {
+        "level": 1,
+        "title": "Cross-Entropy",
+        "page": 2
+      },
+      {
+        "level": 1,
+        "title": "Relative Entropy (KL-divergence)",
+        "page": 2
+      }
+    ],
+    "extraction": {
+      "avg_chars_per_page": 3041.5,
+      "low_text_page_count": 0,
+      "low_text_pages": [],
+      "likely_scanned_or_image_pages": false,
+      "raw_text_file": "data/source-manifest/raw-text/entropy.md"
+    }
+  },
+  {
+    "source_id": "gaussians",
+    "filename": "gaussians.pdf",
+    "relative_path": "original notes/gaussians.pdf",
+    "sha256": "1492c456aed273fb696682ebc6a72dfed72f6ff0d8ecb77adc8a40fcfc975032",
+    "page_count": 4,
+    "pdf_metadata": {
+      "title": null,
+      "author": "Marc Toussaint",
+      "subject": null,
+      "creation_date": "D:20260512151432+02'00'",
+      "mod_date": "D:20260512151432+02'00'",
+      "producer": "pdfTeX-1.40.25"
+    },
+    "embedded_toc": [
+      {
+        "level": 1,
+        "title": "Definitions",
+        "page": 1
+      },
+      {
+        "level": 1,
+        "title": "Matrix Identities",
+        "page": 1
+      },
+      {
+        "level": 1,
+        "title": "Derivatives",
+        "page": 1
+      },
+      {
+        "level": 1,
+        "title": "Product",
+        "page": 2
+      },
+      {
+        "level": 1,
+        "title": "Convolution",
+        "page": 2
+      },
+      {
+        "level": 1,
+        "title": "Division",
+        "page": 2
+      },
+      {
+        "level": 1,
+        "title": "Expectations",
+        "page": 2
+      },
+      {
+        "level": 1,
+        "title": "Linear Transformation",
+        "page": 2
+      },
+      {
+        "level": 1,
+        "title": "``Propagation''",
+        "page": 3
+      },
+      {
+        "level": 1,
+        "title": "Marginal & Conditional",
+        "page": 3
+      },
+      {
+        "level": 1,
+        "title": "Pair-wise Belief",
+        "page": 3
+      },
+      {
+        "level": 1,
+        "title": "Entropy",
+        "page": 3
+      },
+      {
+        "level": 1,
+        "title": "Kullback-Leibler divergence",
+        "page": 4
+      },
+      {
+        "level": 1,
+        "title": "Log-likelihoods",
+        "page": 4
+      },
+      {
+        "level": 1,
+        "title": "Mixture of Gaussians",
+        "page": 4
+      }
+    ],
+    "extraction": {
+      "avg_chars_per_page": 1199.0,
+      "low_text_page_count": 0,
+      "low_text_pages": [],
+      "likely_scanned_or_image_pages": false,
+      "raw_text_file": "data/source-manifest/raw-text/gaussians.md"
+    }
+  },
+  {
+    "source_id": "quaternions",
+    "filename": "quaternions.pdf",
+    "relative_path": "original notes/quaternions.pdf",
+    "sha256": "adba17bbe0e58feb32cd3821403890e52a2636fb60f0542e42582e85d2722fb3",
+    "page_count": 5,
+    "pdf_metadata": {
+      "title": null,
+      "author": "Marc Toussaint",
+      "subject": null,
+      "creation_date": "D:20260512151432+02'00'",
+      "mod_date": "D:20260512151432+02'00'",
+      "producer": "pdfTeX-1.40.25"
+    },
+    "embedded_toc": [
+      {
+        "level": 1,
+        "title": "Reference",
+        "page": 1
+      },
+      {
+        "level": 1,
+        "title": "Continuously moving from I to q \u2013 exponential and log mappings",
+        "page": 2
+      },
+      {
+        "level": 1,
+        "title": "Continuously moving from qA to qB \u2013 interpolation in quaternion space",
+        "page": 2
+      },
+      {
+        "level": 1,
+        "title": "Integrating a differential equation on S3",
+        "page": 3
+      },
+      {
+        "level": 1,
+        "title": "Angular Jacobian w.r.t. Quaternion Parameters",
+        "page": 4
+      },
+      {
+        "level": 1,
+        "title": "Random rotations & ``Gaussians''",
+        "page": 4
+      },
+      {
+        "level": 1,
+        "title": "Similarly: Rotation vector and angular velocity",
+        "page": 5
+      }
+    ],
+    "extraction": {
+      "avg_chars_per_page": 2719.4,
+      "low_text_page_count": 0,
+      "low_text_pages": [],
+      "likely_scanned_or_image_pages": false,
+      "raw_text_file": "data/source-manifest/raw-text/quaternions.md"
+    }
+  },
+  {
+    "source_id": "robotkin",
+    "filename": "robotKin.pdf",
+    "relative_path": "original notes/robotKin.pdf",
+    "sha256": "c4e1651b2e1a322aa88a56a6f603483e6929912ff63ab28f7fdc010602b4bb21",
+    "page_count": 5,
+    "pdf_metadata": {
+      "title": null,
+      "author": "Marc Toussaint",
+      "subject": null,
+      "creation_date": "D:20260512151433+02'00'",
+      "mod_date": "D:20260512151433+02'00'",
+      "producer": "pdfTeX-1.40.25"
+    },
+    "embedded_toc": [
+      {
+        "level": 1,
+        "title": "Articulated Multibody System",
+        "page": 1
+      },
+      {
+        "level": 1,
+        "title": "Forward Kinematics & Jacobian",
+        "page": 1
+      },
+      {
+        "level": 1,
+        "title": "Fundamental Kinematics Concepts",
+        "page": 2
+      },
+      {
+        "level": 1,
+        "title": "``Force Kinematics''",
+        "page": 3
+      },
+      {
+        "level": 1,
+        "title": "Dynamics",
+        "page": 3
+      },
+      {
+        "level": 1,
+        "title": "Standard Control Stack: Waypoint + Reference Motion + Controller",
+        "page": 4
+      },
+      {
+        "level": 1,
+        "title": "Inverse Kinematics",
+        "page": 5
+      }
+    ],
+    "extraction": {
+      "avg_chars_per_page": 3643.6,
+      "low_text_page_count": 0,
+      "low_text_pages": [],
+      "likely_scanned_or_image_pages": false,
+      "raw_text_file": "data/source-manifest/raw-text/robotkin.md"
+    }
+  },
+  {
+    "source_id": "splines",
+    "filename": "splines.pdf",
+    "relative_path": "original notes/splines.pdf",
+    "sha256": "4350576fcccb8da001f774c0f11b988ce0cddb4982e82c03938e8750462dfd15",
+    "page_count": 7,
+    "pdf_metadata": {
+      "title": null,
+      "author": "Marc Toussaint",
+      "subject": null,
+      "creation_date": "D:20260512151433+02'00'",
+      "mod_date": "D:20260512151433+02'00'",
+      "producer": "pdfTeX-1.40.25"
+    },
+    "embedded_toc": [
+      {
+        "level": 1,
+        "title": "Single cubic piece for timing-optimal control to a target",
+        "page": 1
+      },
+      {
+        "level": 2,
+        "title": "Single-piece optimal timing control",
+        "page": 2
+      },
+      {
+        "level": 1,
+        "title": "Hermite Cubic Splines",
+        "page": 3
+      },
+      {
+        "level": 1,
+        "title": "B-Splines",
+        "page": 3
+      },
+      {
+        "level": 2,
+        "title": "Illustration",
+        "page": 4
+      },
+      {
+        "level": 2,
+        "title": "Retrieving the piece-wise polynomials: Convertion to Hermite spline",
+        "page": 4
+      },
+      {
+        "level": 2,
+        "title": "B-spline Matrix for Time Discretized Paths",
+        "page": 6
+      },
+      {
+        "level": 2,
+        "title": "Ensuring B-splines pass through waypoints",
+        "page": 6
+      },
+      {
+        "level": 2,
+        "title": "Ensuring boundary velocities",
+        "page": 7
+      },
+      {
+        "level": 2,
+        "title": "Gradients",
+        "page": 7
+      }
+    ],
+    "extraction": {
+      "avg_chars_per_page": 2482.3,
+      "low_text_page_count": 0,
+      "low_text_pages": [],
+      "likely_scanned_or_image_pages": false,
+      "raw_text_file": "data/source-manifest/raw-text/splines.md"
+    }
+  },
+  {
+    "source_id": "svd",
+    "filename": "svd.pdf",
+    "relative_path": "original notes/svd.pdf",
+    "sha256": "45e55b7393313a6b09712039458c542e567f02832416a3acfd76eb46552fd854",
+    "page_count": 2,
+    "pdf_metadata": {
+      "title": null,
+      "author": "Marc Toussaint",
+      "subject": null,
+      "creation_date": "D:20260512151434+02'00'",
+      "mod_date": "D:20260512151434+02'00'",
+      "producer": "pdfTeX-1.40.25"
+    },
+    "embedded_toc": [],
+    "extraction": {
+      "avg_chars_per_page": 1756.5,
+      "low_text_page_count": 0,
+      "low_text_pages": [],
+      "likely_scanned_or_image_pages": false,
+      "raw_text_file": "data/source-manifest/raw-text/svd.md"
+    }
+  }
+]

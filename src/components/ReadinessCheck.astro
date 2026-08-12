@@ -1,0 +1,29 @@
+---
+interface Props {
+  question: string;
+  answer: string;
+}
+const { question, answer } = Astro.props;
+---
+<div class="readiness-check">
+  <p><strong>Readiness check:</strong> {question}</p>
+  <details>
+    <summary>Show answer</summary>
+    <p set:html={answer} />
+  </details>
+</div>
+
+<style>
+  .readiness-check {
+    border-left: 3px solid var(--accent, #6366f1);
+    background: var(--surface-2, #f5f5f7);
+    padding: 0.75rem 1rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    margin: 1rem 0;
+  }
+  .readiness-check summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--accent, #6366f1);
+  }
+</style>

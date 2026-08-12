@@ -1,0 +1,18 @@
+---
+import { getCollection, render } from 'astro:content';
+import ModuleLayout from '../../../layouts/ModuleLayout.astro';
+
+export async function getStaticPaths() {
+  const modules = await getCollection('course');
+  return modules.map((m) => ({
+    params: { block: m.data.block, id: m.data.id },
+    props: { entry: m },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<ModuleLayout {...entry.data}>
+  <Content />
+</ModuleLayout>

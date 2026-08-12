@@ -1,0 +1,278 @@
+---
+import { getEntry } from 'astro:content';
+
+interface Props { id: string; }
+const { id } = Astro.props;
+
+const question = await getEntry('questions', id);
+const solution = await getEntry('solutions', id);
+
+if (!question) throw new Error(`ExerciseCard: no question found for id "${id}"`);
+const q = question.data;
+const sol = solution?.data;
+
+const difficultyColor: Record<string, string> = {
+  foundation: 'var(--accent-2)',
+  core: 'var(--accent)',
+  challenge: 'var(--danger)',
+};
+
+const inputKind =
+  q.answerType === 'numeric' ? 'number' :
+  q.answerType === 'symbolic' ? 'text' :
+  'textarea';
+
+const expectedJson = sol?.deterministic ? JSON.stringify(sol.deterministic) : '';
+const symbolicJson = sol?.symbolic ? JSON.stringify(sol.symbolic) : '';
+const rubricJson = sol?.rubric ? JSON.stringify(sol.rubric) : '';
+const fullSolution = sol?.fullSolution ?? '';
+const checkMode = sol?.checkMode ?? 'rubric';
+---
+<div
+  class="exercise-card"
+  data-exercise-id={q.id}
+  data-module-id={q.moduleId}
+  data-answer-type={q.answerType}
+  data-check-mode={checkMode}
+  data-expected={expectedJson}
+  data-symbolic={symbolicJson}
+  data-rubric={rubricJson}
+  data-full-solution={fullSolution}
+  data-prompt={q.prompt}
+>
+  <div class="ex-header">
+    <span class="ex-id">{q.id}</span>
+    <span class="ex-badge" style={`background:${difficultyColor[q.difficulty]}22; color:${difficultyColor[q.difficulty]}`}>{q.difficulty}</span>
+    <span class="ex-meta">~{q.estimatedMinutes} min · {q.answerType} · {q.provenance === 'source-adapted' ? `adapted from ${q.sourceRef?.sourceId} (${q.sourceRef?.originalNumber})` : q.provenance}</span>
+  </div>
+
+  <p class="ex-prompt" set:html={q.prompt} />
+
+  <div class="ex-answer">
+    {inputKind === 'textarea' ? (
+      <textarea class="ex-input" rows={q.answerType === 'proof' || q.answerType === 'derivation' ? 6 : 3} placeholder="Your answer..."></textarea>
+    ) : (
+      <input class="ex-input" type={inputKind} step="any" placeholder={q.answerType === 'symbolic' ? 'e.g. exp(-z)/(1+exp(-z))**2' : 'your answer'} />
+    )}
+  </div>
+
+  <div class="ex-actions no-print">
+    <button class="btn-check" type="button">
+      {checkMode === 'deterministic' ? 'Check answer' : checkMode === 'symbolic' ? 'Check (SymPy)' : "I've attempted this"}
+    </button>
+    {checkMode === 'rubric' && <button class="btn-review" type="button">📋 Copy Review-with-Claude packet</button>}
+  </div>
+
+  <div class="ex-feedback" role="status" aria-live="polite"></div>
+
+  <details class="ex-hints">
+    <summary>Hints (tiered — try before opening)</summary>
+    <ol>
+      {q.hints.map((h: string) => <li set:html={h} />)}
+    </ol>
+  </details>
+
+  {checkMode === 'rubric' && sol?.rubric && (
+    <details class="ex-rubric">
+      <summary>Self-check rubric</summary>
+      <ul>
+        {sol.rubric.criteria.map((c: { points: number; description: string }) => (
+          <li>[{c.points} pt] <span set:html={c.description} /></li>
+        ))}
+      </ul>
+      {sol.rubric.commonErrors.length > 0 && (
+        <>
+          <p><strong>Common errors:</strong></p>
+          <ul>{sol.rubric.commonErrors.map((e: string) => <li set:html={e} />)}</ul>
+        </>
+      )}
+    </details>
+  )}
+
+  <details class="ex-solution locked">
+    <summary>🔒 Attempt the exercise first to unlock the full solution</summary>
+    <p set:html={fullSolution} />
+  </details>
+</div>
+
+<style>
+  .exercise-card {
+    border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.1rem 1.3rem;
+    margin: 1.5rem 0; background: var(--surface);
+  }
+  .ex-header { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.5rem; }
+  .ex-id { font-family: ui-monospace, monospace; font-size: 0.8rem; opacity: 0.6; }
+  .ex-badge { font-size: 0.72rem; padding: 0.1rem 0.55rem; border-radius: 999px; font-weight: 600; text-transform: uppercase; }
+  .ex-meta { font-size: 0.78rem; opacity: 0.65; }
+  .ex-prompt { margin: 0.6rem 0; }
+  .ex-input {
+    width: 100%; font: inherit; padding: 0.5rem 0.7rem; border-radius: 0.4rem;
+    border: 1px solid var(--border); background: var(--bg); color: var(--fg);
+  }
+  .ex-actions { display: flex; gap: 0.6rem; margin-top: 0.6rem; flex-wrap: wrap; }
+  button {
+    font: inherit; padding: 0.4rem 0.9rem; border-radius: 0.4rem; border: 1px solid var(--accent);
+    background: transparent; color: var(--accent); cursor: pointer;
+  }
+  button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .ex-feedback { margin-top: 0.6rem; font-size: 0.9rem; min-height: 1.2em; }
+  .ex-feedback.pass { color: var(--accent-2); }
+  .ex-feedback.fail { color: var(--danger); }
+  .ex-hints, .ex-rubric, .ex-solution { margin-top: 0.7rem; font-size: 0.92rem; }
+  .ex-solution.locked summary { opacity: 0.5; cursor: not-allowed; }
+  .ex-solution:not(.locked) summary { opacity: 1; cursor: pointer; color: var(--accent); }
+  .ex-solution.locked[open] { pointer-events: none; }
+  summary { cursor: pointer; }
+</style>
+
+<script>
+  import { recordAttempt } from '../../lib/progress/store';
+
+  function evalNumeric(input: string): number | null {
+    const v = parseFloat(input);
+    return Number.isNaN(v) ? null : v;
+  }
+
+  async function checkSymbolic(expr: string, expected: string, variables: string[]): Promise<{ ok: boolean; message: string }> {
+    try {
+      const res = await fetch('http://localhost:5055/check-symbolic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expr, expected, variables }),
+      });
+      if (!res.ok) throw new Error(`server responded ${res.status}`);
+      const data = await res.json();
+      return data.equivalent
+        ? { ok: true, message: '✓ Symbolically equivalent to the reference expression.' }
+        : { ok: false, message: `✗ Not equivalent (SymPy simplified difference: ${data.difference ?? 'nonzero'}). Try again, or check the hints.` };
+    } catch {
+      return {
+        ok: false,
+        message: 'Could not reach the local grading server. Start it with `npm run grading-server` for automatic symbolic checking — or self-check against the rubric below in the meantime.',
+      };
+    }
+  }
+
+  function unlockSolution(card: HTMLElement) {
+    const details = card.querySelector<HTMLDetailsElement>('.ex-solution');
+    if (!details) return;
+    details.classList.remove('locked');
+    const summary = details.querySelector('summary');
+    if (summary) summary.textContent = 'Show full solution';
+  }
+
+  function buildReviewPacket(card: HTMLElement): string {
+    const moduleId = card.dataset.moduleId ?? '';
+    const exerciseId = card.dataset.exerciseId ?? '';
+    const prompt = card.dataset.prompt ?? '';
+    const rubricJson = card.dataset.rubric ?? '{}';
+    const input = card.querySelector<HTMLTextAreaElement | HTMLInputElement>('.ex-input');
+    const answer = input?.value ?? '';
+    let rubricText = '(no rubric)';
+    try {
+      const rubric = JSON.parse(rubricJson);
+      rubricText = JSON.stringify(rubric, null, 2);
+    } catch { /* no rubric */ }
+    return [
+      `Module: ${moduleId}`,
+      `Exercise: ${exerciseId}`,
+      '',
+      'Question:',
+      prompt,
+      '',
+      'My answer:',
+      answer,
+      '',
+      'Grading rubric:',
+      rubricText,
+      '',
+      'Instruction: please diagnose the first important error in my answer (if any), give me a targeted hint before revealing a full solution, and grade my answer against the rubric above.',
+    ].join('\n');
+  }
+
+  document.querySelectorAll<HTMLElement>('.exercise-card').forEach((card) => {
+    const checkBtn = card.querySelector<HTMLButtonElement>('.btn-check');
+    const reviewBtn = card.querySelector<HTMLButtonElement>('.btn-review');
+    const feedback = card.querySelector<HTMLElement>('.ex-feedback');
+    const input = card.querySelector<HTMLTextAreaElement | HTMLInputElement>('.ex-input');
+    const checkMode = card.dataset.checkMode;
+    const exerciseId = card.dataset.exerciseId ?? '';
+    const moduleId = card.dataset.moduleId ?? '';
+
+    checkBtn?.addEventListener('click', async () => {
+      const answer = input?.value ?? '';
+      const hasContent = answer.trim().length > 0;
+      let passed = false;
+      let message = '';
+
+      if (!hasContent) {
+        message = checkMode === 'deterministic' ? 'Enter a number.' : checkMode === 'symbolic' ? 'Enter an expression.' : 'Write an attempt first — even a partial one.';
+        if (feedback) { feedback.textContent = message; feedback.className = 'ex-feedback fail'; }
+        return; // no recorded attempt for a genuinely empty submission
+      }
+
+      if (checkMode === 'deterministic') {
+        const expected = JSON.parse(card.dataset.expected || '{}');
+        const val = evalNumeric(answer);
+        if (val === null) {
+          message = 'That doesn’t parse as a number — try again.';
+        } else {
+          const tol = expected.tolerance ?? 0.01;
+          passed = Math.abs(val - expected.expected) <= tol;
+          message = passed
+            ? `✓ Correct (within tolerance ±${tol}).`
+            : `✗ Not quite — off by ${Math.abs(val - expected.expected).toFixed(4)}. Check the hints, or try again — your attempt is recorded either way, and the solution is now unlocked below if you want it.`;
+        }
+      } else if (checkMode === 'symbolic') {
+        const symbolic = JSON.parse(card.dataset.symbolic || '{}');
+        if (feedback) feedback.textContent = 'Checking with SymPy…';
+        const result = await checkSymbolic(answer, symbolic.expectedExpr, symbolic.variables ?? []);
+        passed = result.ok;
+        message = result.message;
+      } else {
+        // rubric mode: "I've attempted this" — no auto-grade, just unlocks solution + records attempt
+        passed = true; // no ground truth to grade against; self-check is against the rubric below
+        message = 'Attempt recorded. Self-check against the rubric below, then reveal the full solution when ready.';
+      }
+
+      if (feedback) {
+        feedback.textContent = message;
+        feedback.className = 'ex-feedback ' + (passed ? 'pass' : 'fail');
+      }
+
+      // Any genuine attempt (right or wrong) unlocks the solution and counts as progress —
+      // per spec, progress is attempted-work-based, not correctness-gated.
+      unlockSolution(card);
+      recordAttempt({
+        exerciseId,
+        moduleId,
+        timestamp: Date.now(),
+        answer,
+        checkResult: { passed, mode: checkMode === 'deterministic' ? 'deterministic' : checkMode === 'symbolic' ? 'symbolic' : 'rubric-self' },
+      }).catch(() => {});
+    });
+
+    reviewBtn?.addEventListener('click', async () => {
+      const packet = buildReviewPacket(card);
+      try {
+        await navigator.clipboard.writeText(packet);
+        if (feedback) {
+          feedback.textContent = '📋 Copied — paste into a chat with Claude for review.';
+          feedback.className = 'ex-feedback pass';
+        }
+        unlockSolution(card);
+        recordAttempt({
+          exerciseId,
+          moduleId,
+          timestamp: Date.now(),
+          answer: input?.value ?? '',
+        }).catch(() => {});
+      } catch {
+        if (feedback) {
+          feedback.textContent = 'Clipboard access failed — select and copy the packet manually.';
+          feedback.className = 'ex-feedback fail';
+        }
+      }
+    });
+  });
+</script>
