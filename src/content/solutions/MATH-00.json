@@ -1,0 +1,56 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "MATH-00-ex1-why-second-order",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Identifies that the linear approximation is a straight line (zero curvature) and can only match value+slope at the point." },
+          { "points": 1, "description": "Correctly identifies f''(x) (curvature) as what the second-order term accounts for, and why error grows with distance from the tangent point." }
+        ],
+        "commonErrors": [
+          "Saying 'it's more accurate' without explaining WHY, i.e. without mentioning curvature specifically.",
+          "Confusing the second-order term with a general 'correction factor' rather than identifying it as specifically about curvature/how the slope changes."
+        ]
+      },
+      "fullSolution": "The linear approximation replaces f with its tangent line at x, which by construction matches f's value and slope exactly at x but has zero curvature everywhere. As delta grows, the actual function's curvature (how much its slope is changing) has more room to pull the true value away from the straight tangent line, so the approximation error grows. The second-order term, (1/2) f''(x) delta^2, corrects for exactly this: f''(x) measures curvature (rate of change of the slope), so adding this term lets the approximating polynomial also match how f is bending near x, not just its value and slope, capturing more of the true function's local behavior."
+    },
+    {
+      "exerciseId": "MATH-00-ex2-linear-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly starts from the derivative definition as an approximate equality for finite (not infinitesimal) delta." },
+          { "points": 2, "description": "Correctly rearranges algebraically to isolate f(x+delta) and arrives at the first-order Taylor formula." }
+        ],
+        "commonErrors": [
+          "Trying to derive this via a totally different route (e.g. citing Taylor's theorem itself) rather than the requested direct rearrangement of the derivative definition.",
+          "Being sloppy about the fact that this is only an APPROXIMATE equality for finite delta, exact only in the delta->0 limit."
+        ]
+      },
+      "fullSolution": "For small (not infinitesimal) delta, the definition of the derivative tells us [f(x+delta)-f(x)]/delta is approximately f'(x): [f(x+delta)-f(x)]/delta ~= f'(x). Multiplying both sides by delta: f(x+delta) - f(x) ~= f'(x)*delta. Adding f(x) to both sides: f(x+delta) ~= f(x) + f'(x)*delta. This is exactly the first-order Taylor approximation, derived purely by rearranging the definition of the derivative for finite (rather than infinitesimal) delta."
+    },
+    {
+      "exerciseId": "MATH-00-ex3-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 1.05125, "tolerance": 0.0001 },
+      "fullSolution": "f(0)=e^0=1, f'(0)=e^0=1, f''(0)=e^0=1 (derivative of e^x is e^x, so at x=0 every derivative equals 1). Second-order Taylor: 1 + 1*(0.05) + 0.5*1*(0.05)^2 = 1 + 0.05 + 0.00125 = 1.05125. (True value: e^0.05 = 1.051271..., so the approximation is accurate to about 2e-5, illustrating how fast Taylor approximations improve for small delta.)"
+    },
+    {
+      "exerciseId": "MATH-00-ex4-quadratic-coefficient-challenge",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly notes p(0)=f(x) is automatically satisfied and doesn't constrain a or b." },
+          { "points": 1, "description": "Correctly differentiates p(delta) once and solves p'(0)=f'(x) to get a=f'(x)." },
+          { "points": 2, "description": "Correctly differentiates p(delta) twice and solves p''(0)=f''(x) to get b=f''(x)/2, and states the resulting formula matches the standard second-order Taylor expansion." }
+        ],
+        "commonErrors": [
+          "Forgetting that p''(delta)=2b is constant (not a function of delta), which is why p''(0) is simply 2b.",
+          "Sign or factor-of-2 errors when solving 2b=f''(x) for b."
+        ]
+      },
+      "fullSolution": "p(delta) = f(x) + a*delta + b*delta^2.\np(0) = f(x), automatically matches the required p(0)=f(x) condition regardless of a, b: no information about a or b from this condition.\np'(delta) = a + 2b*delta, so p'(0) = a. Setting p'(0)=f'(x) gives a = f'(x).\np''(delta) = 2b (constant, independent of delta), so p''(0) = 2b. Setting p''(0)=f''(x) gives b = f''(x)/2.\nSubstituting back: p(delta) = f(x) + f'(x)*delta + (1/2)*f''(x)*delta^2, exactly the second-order Taylor expansion formula, derived from the 'match value + first two derivatives at the expansion point' principle rather than assumed."
+    }
+  ]
+}

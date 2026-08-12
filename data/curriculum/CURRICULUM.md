@@ -18,7 +18,7 @@ Generated 2026-08-12. Derived from `data/source-manifest/AUDIT_REPORT.md` (sourc
 
 | Block | Title | Tier | Modules | Est. hours | Key prereq blocks |
 |---|---|---|---|---|---|
-| MATH | Math Foundations Refresher | 1 | 5 | 13–16 | — |
+| MATH | Math Foundations Refresher | 1 | 6 | 15–18 | — |
 | OPT | Optimization | 1 | 6 | 15–18 | MATH |
 | PROB | Probability & Information Theory | 2 (sequenced early) | 6 | 12–15 | MATH |
 | ODE | ODEs & Dynamical Systems Primer | 1 | 3 | 8–10 | MATH |
@@ -32,7 +32,7 @@ Generated 2026-08-12. Derived from `data/source-manifest/AUDIT_REPORT.md` (sourc
 | RLEARN | Robot Learning (capstone-adjacent) | 1 | 8 | 20–24 | DYN, PLAN, ML, RL, SYM, MANIP |
 | CAP | Capstone: Research Bridge | 1 | 1 + final assessment | 6–8 | all of the above |
 
-**Total: ~63 modules, ~152–186 estimated study hours** (roughly 4–5 months at 8–10 hrs/week, or however you choose to pace it — no deadline was set, so treat this purely as a sizing signal). Production happens in batches (Phase 4); you'll never face this whole list as a wall of unstarted content.
+**Total: ~64 modules, ~154–188 estimated study hours** (roughly 4–5 months at 8–10 hrs/week, or however you choose to pace it — no deadline was set, so treat this purely as a sizing signal). Production happens in batches (Phase 4); you'll never face this whole list as a wall of unstarted content.
 
 **Optional/reference-only branches** (reachable via links from the main route, not on it): LM Reasoning/RLHF & Explainable AI (off RL), SLAM & State Estimation (off PLAN), general Search/CSP beyond the MCTS prerequisite (off SYM). These get compact single-module treatments, not full sub-curricula.
 
@@ -44,13 +44,16 @@ Rationale: your Phase 0 background check flagged calculus/linear algebra as rust
 
 | ID | Title | Source & pages | Objective | Prereqs | Hrs | Tier |
 |---|---|---|---|---|---|---|
-| MATH-01 | Functions, Derivatives & the Chain Rule | `lecture-maths` p8–11 | Rebuild fluency computing partial/total derivatives and chain rules by hand, incl. computation-graph view | — | 2.5 | 1 |
+| MATH-00 | Taylor Expansion From Scratch | `lecture-maths` p14 (brief mention only) | Derive first- and second-order Taylor approximations from the definition of the derivative, not just recall the formulas | — | 2 | 1 |
+| MATH-01 | Functions, Derivatives & the Chain Rule | `lecture-maths` p8–11 | Rebuild fluency computing partial/total derivatives and chain rules by hand, incl. computation-graph view | MATH-00 | 2.5 | 1 |
 | MATH-02 | Gradients, Jacobians, Hessians & Taylor Expansion | `lecture-maths` p12–19 | Compute gradients/Jacobians/Hessians of vector-valued and matrix functions from scratch; numerically verify | MATH-01 | 3 | 1 |
 | MATH-03 | Vector Spaces, Bases & Linear Maps | `lecture-maths` p21–30 | Reconstruct vector-space/basis/dual-space concepts and connect to matrices as coordinate representations | MATH-01 | 3 | 1 |
 | MATH-04 | SVD & Eigendecomposition | `svd` [html] (intuition-first) → `lecture-maths` p31–39 + Ex.1–3 | Derive and interpret the SVD theorem geometrically; compute eigendecompositions by hand for small matrices | MATH-03 | 3 | 1 |
 | MATH-05 | Covariant Gradient & Steepest Descent | `lecture-maths` p39–42 | Distinguish contravariant/covariant vectors; derive the steepest-descent direction under a metric | MATH-04 | 1.5 | 1 |
 
 **Milestone**: Math Foundations Exam (see Assessment Schedule).
+
+**Production note (Phase 4, post-batch-1)**: MATH-00 (Taylor Expansion From Scratch) was added after batch 1 shipped, once the user flagged that Taylor expansion was used as a derivation tool in both MATH-01 and MATH-02 without ever being taught from scratch. Inserted as "00" rather than renumbering MATH-01 through MATH-05, to avoid churning already-published IDs/cross-references for a late addition.
 
 **Production note (Phase 4, batch 1)**: `lecture-maths` Exercises 4 and 5 (§2.7–2.8, "Backprop in a Neural Net") were originally scoped as MATH-02's own exercises but ended up used in [ML-03](/course/ML/ML-03) instead, since they fit thematically better alongside neural-network content and ML-03 was built first as a pilot. MATH-02 as actually authored uses newly-written exercises instead, covering the same gradient/Jacobian/Hessian mechanics without duplicating ML-03's material.
 

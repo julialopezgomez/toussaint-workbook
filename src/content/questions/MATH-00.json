@@ -1,0 +1,69 @@
+{
+  "moduleId": "MATH-00",
+  "exercises": [
+    {
+      "id": "MATH-00-ex1-why-second-order",
+      "objective": "Explain why a linear approximation degrades and what the quadratic term corrects.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "A first-order (linear) Taylor approximation $f(x+\\delta) \\approx f(x) + f'(x)\\delta$ is exact only in the limit $\\delta \\to 0$; for any nonzero $\\delta$ it has some error. In your own words: why does this error tend to grow as $\\delta$ gets bigger, and what specific property of $f$ does the second-order term $\\tfrac12 f''(x)\\delta^2$ account for that the linear term completely ignores?",
+      "hints": [
+        "The linear approximation replaces $f$ near $x$ with its tangent line, a straight line has zero curvature, so it can only ever match $f$'s *value* and *slope* at the point, not how the slope itself is changing.",
+        "The further you move from $x$ (bigger $\\delta$), the more the actual function's curvature has a chance to pull it away from the straight tangent line.",
+        "$f''(x)$ measures exactly that: how fast the slope is changing (curvature). The $\\tfrac12 f''(x)\\delta^2$ term corrects the straight-line approximation to also match how $f$ is bending near $x$, which is why it captures more of the true function's behavior at each additional order."
+      ],
+      "reviewCardIds": ["RC-MATH-00-01"]
+    },
+    {
+      "id": "MATH-00-ex2-linear-derivation",
+      "objective": "Derive the first-order Taylor approximation directly from the definition of the derivative.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["MATH-00-ex1-why-second-order"],
+      "answerType": "derivation",
+      "prompt": "The derivative of $f$ at $x$ is defined as $f'(x) = \\lim_{\\delta \\to 0} \\dfrac{f(x+\\delta)-f(x)}{\\delta}$. Starting from this definition alone (no other Taylor-expansion facts assumed), derive the first-order approximation $f(x+\\delta) \\approx f(x) + f'(x)\\delta$, valid for small $\\delta$.",
+      "hints": [
+        "The definition says: for small $\\delta$, the ratio $\\dfrac{f(x+\\delta)-f(x)}{\\delta}$ is *approximately* $f'(x)$ (it becomes exactly $f'(x)$ only in the limit).",
+        "Write this approximate equality as $\\dfrac{f(x+\\delta)-f(x)}{\\delta} \\approx f'(x)$, then just rearrange algebraically: multiply both sides by $\\delta$.",
+        "$f(x+\\delta) - f(x) \\approx f'(x)\\delta$, so $f(x+\\delta) \\approx f(x) + f'(x)\\delta$. That's the entire derivation: the first-order Taylor approximation isn't a separate fact to memorize, it's the definition of the derivative, rearranged."
+      ],
+      "reviewCardIds": ["RC-MATH-00-02"]
+    },
+    {
+      "id": "MATH-00-ex3-numeric",
+      "objective": "Compute a second-order Taylor approximation and quantify its error.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["MATH-00-ex2-linear-derivation"],
+      "answerType": "numeric",
+      "prompt": "Approximate $e^{0.05}$ using a second-order Taylor expansion of $f(x)=e^x$ around $x_0=0$ (recall $\\frac{d}{dx}e^x = e^x$, so all derivatives of $e^x$ at $0$ equal $e^0=1$). Enter your approximation to 4 decimal places.",
+      "hints": [
+        "$f(0)=1$, $f'(0)=1$, $f''(0)=1$ (every derivative of $e^x$ is $e^x$ itself, and $e^0=1$).",
+        "Second-order Taylor: $f(x_0+\\delta) \\approx f(x_0) + f'(x_0)\\delta + \\tfrac12 f''(x_0)\\delta^2$, with $\\delta=0.05$.",
+        "$1 + 1(0.05) + \\tfrac12(1)(0.05)^2 = 1 + 0.05 + 0.00125 = 1.05125$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-00-ex4-quadratic-coefficient-challenge",
+      "objective": "Derive the second-order Taylor coefficient by matching derivatives.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": ["MATH-00-ex3-numeric"],
+      "answerType": "proof",
+      "prompt": "Suppose you want to approximate $f$ near $x$ with a quadratic polynomial in $\\delta$: $p(\\delta) = f(x) + a\\delta + b\\delta^2$, chosen so that $p$ matches $f(x+\\delta)$'s value, first derivative, and second derivative at $\\delta=0$ (i.e. $p(0)=f(x)$, $p'(0)=f'(x)$, $p''(0)=f''(x)$, where derivatives of $p$ are taken with respect to $\\delta$). Derive $a$ and $b$ from these three matching conditions, and confirm they give the familiar second-order Taylor formula.",
+      "hints": [
+        "$p(0) = f(x) + a(0) + b(0)^2 = f(x)$ automatically, this condition is already satisfied for any $a,b$, so it doesn't pin down $a$ or $b$.",
+        "$p'(\\delta) = a + 2b\\delta$, so $p'(0) = a$. Setting this equal to $f'(x)$ gives $a=f'(x)$ directly.",
+        "$p''(\\delta) = 2b$ (constant), so $p''(0)=2b$. Setting this equal to $f''(x)$ gives $b = f''(x)/2$. So $p(\\delta) = f(x) + f'(x)\\delta + \\tfrac12 f''(x)\\delta^2$, exactly the second-order Taylor formula, derived from nothing but 'match the value and first two derivatives at the expansion point.'"
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

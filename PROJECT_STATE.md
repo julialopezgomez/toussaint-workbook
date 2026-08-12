@@ -1,7 +1,10 @@
 # Project State — Toussaint Workbook
 
 ## Current phase
-**Phase 4 in progress: batch 1 (rest of Block MATH, 5 modules) complete, self-tested, and pushed. 7 of ~63 planned modules now exist across MATH/KIN/ML blocks. Ready to scope batch 2 pending user input.**
+**Phase 4 in progress: Block MATH complete (6 modules, including a user-requested addition), batch 2 (Block OPT) starting now. 8 of ~64 planned modules exist across MATH/KIN/ML blocks.**
+
+## Resolved (2026-08-12, sixth pass): added MATH-00 (Taylor Expansion From Scratch)
+User flagged, after reviewing batch 1, that Taylor expansion was used as a derivation tool in both MATH-01 (chain rule) and MATH-02 (second-order Taylor for Hessians) without ever being taught from scratch, and the user is specifically rusty on it. Added as **MATH-00** (not a renumber of MATH-01-05, to avoid churning already-published IDs) with a from-scratch derivation of both first- and second-order Taylor approximations (first order from the derivative definition directly, second order from matching-derivatives against a quadratic polynomial), two worked examples (sin/cos series, both independently verified), and 4 exercises. MATH-01's prerequisites and readiness check updated to point to it; MATH-01 and MATH-02's prose updated with explicit cross-references back to MATH-00 rather than leaving Taylor expansion as an unexplained tool. `CURRICULUM.md` updated (new row, module/hour counts, a production note explaining the insertion). Tested live, build clean (10 pages).
 
 ## Approved decisions
 See `docs/decisions/0000-requirements.md`, `0001-corpus-update-and-priorities.md`, `0002-phase2-and-pilot-approval.md` for full records. Summary:

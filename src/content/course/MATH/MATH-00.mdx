@@ -1,0 +1,112 @@
+---
+id: MATH-00
+block: MATH
+title: "Taylor Expansion From Scratch"
+tier: 1
+estimatedHours: 2
+prerequisites: []
+objectives:
+  - "Derive the first-order (linear) Taylor approximation directly from the definition of the derivative."
+  - "Derive the second-order (quadratic) Taylor approximation by matching derivatives at the expansion point."
+  - "Compute Taylor approximations numerically and quantify their error."
+  - "Explain why each additional order captures more of a function's local behavior (slope, then curvature, ...)."
+sources:
+  - { sourceId: "lecture-maths", pages: "p14 (§2.3.3, brief mention)", role: "supplementary" }
+concepts:
+  - "Taylor approximation / Taylor series"
+  - "Linear (tangent-line) approximation"
+  - "Quadratic approximation and curvature"
+  - "Approximation error"
+notation:
+  - { symbol: "$f(x+\\delta)$", meaning: "the function evaluated a small step $\\delta$ away from $x$" }
+  - { symbol: "$f'(x), f''(x)$", meaning: "first and second derivatives of $f$ at $x$" }
+  - { symbol: "$\\approx$", meaning: "approximately equal (exact only as $\\delta \\to 0$, for a truncated expansion)" }
+cheatsheetLinks: []
+nextModules: ["MATH-01"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Taylor expansion is one of those tools that quietly underlies almost everything else in this course, before it's ever named explicitly: it's the actual mechanism behind the chain-rule derivation in the next module, the second-order optimality conditions and Newton's method later in the Optimization block, the Gauss-Newton and Laplace approximations, and every "linearize around the current estimate" step in a robotics controller or planner. If Taylor expansion itself feels shaky, everything built on top of it will too, so this module isolates it and derives it from first principles before it gets used as a tool elsewhere.
+
+## Prerequisites & readiness check
+
+Just single-variable derivatives: what a derivative *is* (a limit of a difference quotient), and how to compute derivatives of standard functions ($\sin$, $\cos$, $e^x$, polynomials).
+
+<ReadinessCheck
+  question="What is the definition of the derivative $f'(x)$, as a limit?"
+  answer="$f'(x) = \lim_{\delta \to 0} \dfrac{f(x+\delta)-f(x)}{\delta}$"
+/>
+
+## The idea: approximate a function with a polynomial
+
+Many functions are hard to work with directly (nonlinear, expensive to evaluate, or you only know their value and a few derivatives at one point). Taylor expansion answers: near a specific point $x$, can I approximate $f$ with a simple polynomial in the step size $\delta$, using only information available *at* $x$ (its value and derivatives there)?
+
+**Zeroth order** (the crudest possible approximation): $f(x+\delta) \approx f(x)$. This ignores everything about how $f$ changes, it's only good if $\delta$ is tiny and you don't need much precision.
+
+## First order: the linear approximation
+
+The natural next step is to also account for $f$'s slope at $x$. This isn't a new idea bolted on, it's a direct, algebraic rearrangement of the definition of the derivative itself.
+
+<ExerciseCard id="MATH-00-ex2-linear-derivation" />
+
+**Worked example**: approximate $\sin(0.1)$ using the linear Taylor expansion around $x_0=0$. Since $\sin(0)=0$ and $\cos(0)=1$ (recall $\frac{d}{dx}\sin(x)=\cos(x)$):
+
+$$\sin(0.1) \approx \sin(0) + \cos(0)(0.1) = 0 + 1(0.1) = 0.1$$
+
+The true value is $\sin(0.1) = 0.09983...$, an error of about $0.00017$, small, but not zero: the linear approximation is only exact in the limit $\delta \to 0$.
+
+## Second order: accounting for curvature
+
+<ExerciseCard id="MATH-00-ex1-why-second-order" />
+
+The fix is to add a quadratic term that captures curvature (how the slope itself is changing), giving the second-order Taylor approximation:
+
+$$f(x+\delta) \approx f(x) + f'(x)\delta + \frac12 f''(x)\delta^2$$
+
+<ExerciseCard id="MATH-00-ex4-quadratic-coefficient-challenge" />
+
+**Worked example**: approximate $\cos(0.2)$ around $x_0=0$. We have $f(0)=\cos(0)=1$, $f'(0)=-\sin(0)=0$, $f''(0)=-\cos(0)=-1$.
+
+$$\cos(0.2) \approx 1 + 0(0.2) + \frac12(-1)(0.2)^2 = 1 - 0.02 = 0.98$$
+
+True value: $\cos(0.2) = 0.980067...$, error about $0.000067$, roughly **300 times smaller** than the linear-only approximation's error would have been for this same function ($1 - 0.980067 \approx 0.0199$, from stopping at $f(0)=1$ alone since $f'(0)=0$ here). Adding one more term made a large practical difference: exactly the pattern you should expect increasingly often as you go from zeroth to first to second order.
+
+<ExerciseCard id="MATH-00-ex3-numeric" />
+
+## Beyond second order (briefly)
+
+The pattern continues: each additional term uses one more derivative at $x$, with a $1/n!$ coefficient, $f(x+\delta) \approx f(x) + f'(x)\delta + \frac{1}{2!}f''(x)\delta^2 + \frac{1}{3!}f'''(x)\delta^3 + \cdots$. This course will almost never need third order or higher (second order is already enough to capture curvature, which is as far as most of optimization and control theory needs to go), so we won't derive the general $n$-th order coefficient formally here, the same matching-derivatives argument from the challenge exercise generalizes directly if you ever need it.
+
+**Looking ahead**: everything above was for a function of *one* variable. For a function of several variables $f(x_1,\dots,x_n)$, the same idea generalizes by replacing $f'(x)\delta$ with $\nabla f(x)^\top \delta$ (the gradient, dotted with the step direction) and $f''(x)\delta^2$ with $\delta^\top H(x) \delta$ (the Hessian, sandwiching the step direction). MATH-02 introduces the gradient and Hessian properly and builds that generalization once that vocabulary exists.
+
+## Summary
+
+- Taylor expansion approximates $f$ near $x$ using only $f$'s value and derivatives *at* $x$, no other information about $f$ elsewhere.
+- First order (linear): $f(x+\delta)\approx f(x)+f'(x)\delta$, derived by rearranging the definition of the derivative itself.
+- Second order (quadratic): $f(x+\delta)\approx f(x)+f'(x)\delta+\tfrac12f''(x)\delta^2$, derived by requiring a quadratic polynomial to match $f$'s value, slope, and curvature at $x$.
+- Each additional order typically shrinks the approximation error substantially for small $\delta$; this course mostly stops at second order.
+
+## Retrieval questions
+
+1. Derive the first-order Taylor approximation from the definition of the derivative, without looking back at this module.
+2. What does the second-order term specifically correct for, that the first-order term completely misses?
+3. What will the gradient and Hessian replace in the multivariable generalization of this formula?
+
+## Mastery checklist
+
+- [ ] Derived the first-order Taylor approximation from the derivative's definition, not just recalled the formula.
+- [ ] Derived the second-order coefficient via the matching-derivatives argument.
+- [ ] Computed a numeric Taylor approximation and compared it to the true value.
+- [ ] Can explain, in one sentence, what curvature has to do with the second-order term.
+
+## Source note
+
+`lecture-maths` mentions Taylor expansion briefly in §2.3.3 (p. 14) as part of introducing gradients/Hessians, without a from-scratch derivation. Everything in this module (the derivations, both worked examples, and all exercises) is newly authored for this workbook, added specifically to give the ground-up treatment the source assumes as background.
+
+---
+
+**Next**: [MATH-01: Functions, Derivatives & the Chain Rule](/course/MATH/MATH-01)

@@ -52,7 +52,9 @@ For a vector-valued function $f:\mathbb{R}^n\to\mathbb{R}^m$, the **Jacobian** $
 
 The **Hessian** $H(x) \in \mathbb{R}^{n\times n}$ collects second derivatives: $H_{ij} = \partial^2 f/\partial x_i \partial x_j$. It's symmetric whenever $f$ is twice continuously differentiable (mixed partials commute).
 
-These feed directly into the **second-order Taylor expansion**, which you'll use throughout the Optimization block: $f(x+\delta) \approx f(x) + \nabla f(x)^\top \delta + \tfrac12 \delta^\top H(x) \delta$.
+These feed directly into the **second-order Taylor expansion**, the direct multivariable generalization of what you derived from scratch in [MATH-00](/course/MATH/MATH-00): the scalar $f'(x)\delta$ becomes $\nabla f(x)^\top\delta$ (dot the gradient with the step direction), and $\tfrac12 f''(x)\delta^2$ becomes $\tfrac12 \delta^\top H(x)\delta$ (sandwich the step direction between the Hessian). You'll use this constantly throughout the Optimization block:
+
+$$f(x+\delta) \approx f(x) + \nabla f(x)^\top \delta + \tfrac12 \delta^\top H(x) \delta$$
 
 ## Checking your gradients numerically
 

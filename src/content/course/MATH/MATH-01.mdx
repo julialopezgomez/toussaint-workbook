@@ -4,7 +4,7 @@ block: MATH
 title: "Functions, Derivatives & the Chain Rule"
 tier: 1
 estimatedHours: 2.5
-prerequisites: []
+prerequisites: ["MATH-00"]
 objectives:
   - "Distinguish partial and total derivatives, and explain why they differ."
   - "Derive the multivariable chain rule for a total derivative from a first-order Taylor expansion."
@@ -36,11 +36,11 @@ Every gradient you'll ever compute, whether it's a robot dynamics Jacobian, a lo
 
 ## Prerequisites & readiness check
 
-This is the first module in the course, so there's no formal prerequisite, just ordinary single-variable calculus (derivatives of polynomials, sin/cos, products).
+You should have just come from [MATH-00](/course/MATH/MATH-00) (Taylor expansion), which this module's chain-rule derivation leans on directly, plus ordinary single-variable calculus (derivatives of polynomials, sin/cos, products).
 
 <ReadinessCheck
-  question="What is $\frac{d}{dx}\left[x^3 \sin(x)\right]$?"
-  answer="By the product rule: $3x^2\sin(x) + x^3\cos(x)$."
+  question="What is the first-order Taylor approximation $f(x+\delta) \approx {}?$, and where does it come from?"
+  answer="$f(x+\delta) \approx f(x) + f'(x)\delta$, derived by rearranging the definition of the derivative, $f'(x) = \lim_{\delta\to0}[f(x+\delta)-f(x)]/\delta$, for finite (not infinitesimal) $\delta$."
 />
 
 ## Partial vs. total derivatives
@@ -57,7 +57,7 @@ The total derivative isn't a new kind of derivative, it's built entirely out of 
 
 $$\frac{dz}{dt} = \frac{\partial f}{\partial x}\frac{dx}{dt} + \frac{\partial f}{\partial y}\frac{dy}{dt}$$
 
-This is worth deriving properly once, rather than just memorizing, because the *reasoning* (a first-order Taylor expansion) is exactly the reasoning you'll reuse for every multivariable derivative in this course.
+This is worth deriving properly once, rather than just memorizing, because the *reasoning* (a first-order Taylor expansion, the same one you derived from scratch in [MATH-00](/course/MATH/MATH-00)) is exactly the reasoning you'll reuse for every multivariable derivative in this course.
 
 <ExerciseCard id="MATH-01-ex2-chainrule-derivation" />
 
