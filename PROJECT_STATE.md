@@ -1,7 +1,7 @@
 # Project State — Toussaint Workbook
 
 ## Current phase
-**Phase 3 (pilot module) built and self-tested end-to-end. Awaiting user review of the pedagogical style and interaction design before Phase 4 (batch production).**
+**Phase 3 complete: both pilot modules (ML-03, KIN-02) built, self-tested, and approved by the user (style/depth confirmed acceptable, bugs found and fixed). Repository is public on GitHub. Ready to scope the first real batch for Phase 4, pending user input on batch size/order.**
 
 ## Approved decisions
 See `docs/decisions/0000-requirements.md`, `0001-corpus-update-and-priorities.md`, `0002-phase2-and-pilot-approval.md` for full records. Summary:
@@ -37,22 +37,26 @@ See `docs/decisions/0000-requirements.md`, `0001-corpus-update-and-priorities.md
 - **Local git repo initialized** at `workbook/` (not the parent folder), so the source PDFs (`../original notes/`) are structurally outside the repo entirely. `.gitignore` additionally excludes `data/source-manifest/raw-text/` and `html-text/` (full extracted text of Toussaint's copyrighted lecture notes) even though they're inside `workbook/`. Initial commit made, 38 files, no remote configured yet, nothing pushed anywhere.
 - Style note from user: avoid em/en-dash asides going forward, prefer colons/semicolons/commas/parentheses. Applying from here on.
 
-## Pending — user review of the pilot
-- Read `src/content/course/ML/ML-03.mdx` at `http://localhost:4321/course/ML/ML-03` (dev server: `npm run dev`; symbolic checking needs `npm run grading-server` running too) and confirm: pedagogical style, exercise difficulty/tiering, hint quality, whether the manual-derivation depth matches what you actually want.
-- Confirm the Review-with-Claude clipboard button actually copies for you (couldn't be verified in the automated browser tool).
-- Once approved: build **KIN-02** (quaternions) as the second pilot-style module, per your Phase 2 "either or both" answer, then move to Phase 4 batch production.
+## Resolved (2026-08-12, fourth pass): repo made public, KIN-02 built
+- **Repository is now public**: `https://github.com/julialopezgomez/toussaint-workbook`, at user's explicit request. See `docs/decisions/0003-public-repo.md`. README has a prominent "Credit and source material" section attributing Marc Toussaint with a link to his teaching page, before anything was pushed.
+- **KIN-02 (Quaternions: Exponential/Log Maps, Interpolation & Jacobians) built as the second pilot module**, full-length per the Phase 2 plan (user's confirmed weak spot). 5 exercises (short-text/derivation/symbolic/numeric/proof), all worked-example and exercise numbers independently verified with NumPy (including a finite-difference check on the angular Jacobian) before writing them into the lesson. Tested live: numeric checker ✓, symbolic checker (including a different valid algebraic form, `(1-q0**2)**0.5` vs `sqrt(1-q0**2)`) ✓, KaTeX rendering (174 spans) ✓. Production build clean, 4 pages.
+- **Real bug found and fixed**: after adding KIN-02, the dev server briefly served an empty `<article>` for its page. Traced to leftover duplicate `astro dev` processes from earlier in the session competing for/rebinding ports; NOT a content or code bug (the production build had rendered KIN-02 correctly the whole time). Fixed by fully clearing all stale processes on ports 4321-4325 before restarting. Worth remembering for future sessions: always `lsof -ti:<port> | xargs kill -9` before restarting the dev server if multiple restarts have happened in one session.
+
+## Pending — next action needed from user
+- **Scope batch 1 of Phase 4.** Both pilot modules are approved and pushed; the two-module-at-a-time pace doesn't scale to ~61 remaining modules. Before generating more content unsupervised, propose a concrete batch (e.g. "finish Block MATH, 5 modules" or "finish Block KIN, 1 more module") and confirm size/order with the user rather than silently producing the whole curriculum. Default recommendation if not specified: proceed block-by-block in the Tier-1 main-route order from `CURRICULUM.md`, starting with the rest of Block MATH (foundational, blocks everything else), in batches of roughly 4-6 modules with a validation/report checkpoint after each, per the original spec's batch-production process.
+- Confirm the Review-with-Claude clipboard button and the progress-import file upload actually work for the user (neither could be verified in the automated browser testing tool).
 
 ## Known uncertainties
-- ~598 pages of the 4 large lecture PDFs were not visually spot-checked as rendered images — deferred to per-module authoring time, per `AUDIT_REPORT.md` §6.
-- Cross-reference numbers (`\ref`/`\eqref`) extract as `??` in PDF text — resolve against the live PDF when a module cites them (not needed for ML-03, which drew from `lecture-maths` pages without such references, and from HTML-sourced short notes).
-- Review-with-Claude clipboard behavior unverified in a real browser (see above).
+- ~598 pages of the 4 large lecture PDFs were not visually spot-checked as rendered images: deferred to per-module authoring time, per `AUDIT_REPORT.md` §6.
+- Cross-reference numbers (`\ref`/`\eqref`) extract as `??` in PDF text: resolve against the live PDF when a module cites them (not needed for ML-03 or KIN-02, both of which drew from sources without such references, or from HTML-sourced notes).
+- Review-with-Claude clipboard behavior and progress-import file upload: unverified in a real browser (see above).
 
 ## Validation status
 - Extraction pipeline: clean, 0 errors, 13/13 sources.
 - Astro type check (`npx astro check`): 0 errors.
-- Production build: succeeds, 3 pages.
-- Manual + automated interaction testing: numeric checker ✓, symbolic checker (live SymPy round-trip) ✓, rubric/attempt flow ✓, IndexedDB progress ✓, KaTeX rendering (132 spans, correct `katex-sizing` classes and 0.7em scaling after the dedup fix) ✓, cheat sheet page ✓, homepage ✓, progress export ✓. Clipboard copy and progress import: not independently exercised in the automated browser tool (see caveats above); user should verify both themselves.
-- Git: local repo initialized at `workbook/`, initial commit made (38 files), source PDFs and extracted text excluded, no remote configured.
+- Production build: succeeds, 4 pages (index, ML-03, KIN-02, 1 cheatsheet).
+- Manual + automated interaction testing across both modules: numeric checker ✓, symbolic checker (live SymPy round-trip, including alternate algebraic forms) ✓, rubric/attempt flow ✓, IndexedDB progress ✓, KaTeX rendering (correct `katex-sizing` classes and 0.7em scaling after the dedup fix) ✓, cheat sheet page ✓, homepage ✓, progress export ✓. Clipboard copy and progress import: not independently exercised in the automated browser tool; user should verify both themselves.
+- Git: public repo at `https://github.com/julialopezgomez/toussaint-workbook`, 5 commits, source PDFs and extracted text excluded throughout.
 
 ## Next exact action
-Wait for user review of the ML-03 pilot (style/depth/interaction approval), then build KIN-02 as the second pilot module, then move to Phase 4 (batch production) once both are approved.
+Propose and confirm the scope of Phase 4 batch 1 with the user (see "Pending" above), then produce that batch, validate it, and report before starting the next one.

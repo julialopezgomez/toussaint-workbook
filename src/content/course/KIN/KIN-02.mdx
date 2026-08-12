@@ -1,0 +1,125 @@
+---
+id: KIN-02
+block: KIN
+title: "Quaternions: Exponential/Log Maps, Interpolation & Jacobians"
+tier: 1
+estimatedHours: 3
+prerequisites: ["KIN-01"]
+objectives:
+  - "Explain why rotations live on $S^3$ (via quaternions) rather than a minimal 3-parameter space."
+  - "Derive the quaternion exponential map and its relationship to angular velocity."
+  - "Compute SLERP interpolation between two quaternions by hand."
+  - "Derive the angular Jacobian of a quaternion parameterization, $w = J(q)\\dot q$."
+sources:
+  - { sourceId: "quaternions", pages: "p1-4 (full note, HTML-sourced)", role: "primary" }
+concepts:
+  - "SO(3) and its double cover S^3"
+  - "Quaternion exponential and log maps"
+  - "SLERP (spherical linear interpolation)"
+  - "Angular Jacobian w.r.t. quaternion parameters"
+  - "Rodrigues' formula"
+notation:
+  - { symbol: "$q = (q_0, \\bar q)$", meaning: "quaternion as a 4-vector: scalar part $q_0$, vector part $\\bar q \\in \\mathbb{R}^3$" }
+  - { symbol: "$\\theta$", meaning: "rotation angle, $\\theta = 2\\arccos(q_0)$" }
+  - { symbol: "$\\hat w$", meaning: "normalized rotation axis, $\\hat w = \\bar q / |\\bar q|$" }
+  - { symbol: "$\\circ$", meaning: "quaternion concatenation (Hamilton product)" }
+  - { symbol: "$q^{-1}$", meaning: "quaternion inverse, $(q_0, -\\bar q)$ for a unit quaternion" }
+  - { symbol: "$\\exp, \\log$", meaning: "quaternion exponential/log maps between $\\mathbb{R}^3$ (rotation vectors) and $S^3$" }
+  - { symbol: "$w$", meaning: "angular velocity vector, $w \\in \\mathbb{R}^3$" }
+cheatsheetLinks: []
+nextModules: ["KIN-03"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Every rigid-body pose in your planner, every rotation your manipulation planner reasons about, and every orientation state in a trajectory optimizer eventually needs a concrete rotation representation. Rotation matrices are 9 numbers with 6 redundant constraints; Euler angles have gimbal lock. Quaternions are the representation almost every real robotics/optimization codebase (including the convex-decomposition planner you're building for your own research) actually uses under the hood, precisely because they avoid both problems. This is also the module you flagged as your own weaker spot, so it gets full-length treatment rather than the revision pace of the rest of this block.
+
+## Prerequisites & readiness check
+
+You should be comfortable with rotation matrices, $SO(3)$, and basic vector/cross-product algebra from KIN-01.
+
+<ReadinessCheck
+  question="What does it mean for a matrix $R$ to be a valid rotation matrix (two conditions)?"
+  answer="$R$ must be orthogonal ($R^\top R = I$) and have determinant $+1$ (not $-1$, which would be a reflection)."
+/>
+
+## From $S^1$ to $S^3$: why quaternions
+
+$SO(2)$ (2D rotations) can be described by an angle $\alpha \in [0, 2\pi)$, but it's often more useful to represent it as a point on the circle $S^1$: $e^{i\alpha} \in \mathbb{C}$. Why bother, when the angle already has 1 number for 1 degree of freedom? Because the angle representation has a discontinuity ($\alpha=0$ and $\alpha = 2\pi{-}\epsilon$ are nearly the same rotation but far apart as numbers), while $S^1$ has none.
+
+$SO(3)$ (3D rotations) has exactly the same issue, but worse: a direct 3-parameter representation (Euler angles, or a raw rotation vector without an exponential-map structure) suffers not just from discontinuity but from **gimbal lock**, losing a degree of freedom locally at certain orientations. Quaternions represent $SO(3)$ as points on $S^3$ (the sphere in $\mathbb{R}^4$), exactly analogous to $S^1$ for $SO(2)$: a normalized 4-vector $q \in \mathbb{R}^4$, $|q|=1$.
+
+<ExerciseCard id="KIN-02-ex1-why-s3" />
+
+## Reference: quaternion definitions
+
+Write $q = (q_0, \bar q)$ with $q_0 \in \mathbb{R}$ the scalar part and $\bar q = q_{1:3} \in \mathbb{R}^3$ the vector part.
+
+$$\theta = 2\arccos(q_0) \qquad \hat w = \frac{\bar q}{|\bar q|} = \frac{\bar q}{\sin(\theta/2)} \qquad w = \log(q) = \theta\,\hat w$$
+
+$$q = \exp(w) = \big(\cos(\theta/2),\ \sin(\theta/2)\,\hat w\big) \qquad q^{-1} = (q_0, -\bar q)$$
+
+Concatenation (composing two rotations): $q \circ q' = \big(q_0 q_0' - \bar q^\top \bar q',\ \ q_0 \bar q' + q_0'\bar q + \bar q \times \bar q'\big)$
+
+**Stop and try**: using the concatenation rule, convince yourself that $q \circ q^{-1} = (1, \bar 0) = I$ (the identity) for any unit quaternion $q$. (Substitute $q_0'=q_0, \bar q' = -\bar q$ and check both the scalar and vector parts come out to $1$ and $\bar 0$.)
+
+## The exponential map as a geodesic
+
+The path $q(t) = (\cos(t/2), \sin(t/2)\,\hat w)$, $t \in [0,\theta]$, traces the shortest path (geodesic) on $S^3$ from the identity $I$ to $q$, moving at constant speed about the fixed axis $\hat w$. This is exactly the quaternion exponential map: $\exp(t\hat w) = q(t)$.
+
+<ExerciseCard id="quaternions-ex-qdot-derivation" />
+
+The relation you just derived, $\dot q(t) = q(t) \circ \tfrac12(0,\hat w)$, is the key structural fact this whole module builds on: **a quaternion's velocity is itself, concatenated with a fixed tangent vector.** This is what makes the angular Jacobian derivation later in this module work out so cleanly.
+
+<ExerciseCard id="KIN-02-ex-halfangle-symbolic" />
+
+## Interpolating between two orientations: SLERP
+
+Given two orientations $q_A, q_B \in S^3$, the **proper** interpolation (constant angular speed, shortest path) is:
+
+$$q(t) = q_A \circ \exp\!\big(t\,\log(q_A^{-1}\circ q_B)\big), \qquad t \in [0,1]$$
+
+This is called SLERP (spherical linear interpolation). Read it right to left: $q_A^{-1}\circ q_B$ is the *relative* rotation from $A$ to $B$; $\log(\cdot)$ turns that into a rotation vector; $\exp(t \cdot)$ scales it down to a fraction $t$ of the way there; then concatenating with $q_A$ from the left makes it relative to $A$'s own orientation again.
+
+There's a tempting shortcut, the **embedded interpolation** $q(t) = \text{normalize}\big((1-t)q_A + t q_B\big)$, which traces the *same path* on $S^3$ but does **not** move at constant angular speed (it's faster in the middle, slower at the ends) unless $t$ is near $0$ or $1$. Use proper SLERP whenever constant angular velocity actually matters (e.g. a reference trajectory for a controller); the embedded form is a fine cheap approximation otherwise.
+
+<ExerciseCard id="KIN-02-ex-slerp-numeric" />
+
+## The angular Jacobian
+
+In an optimization problem (trajectory optimization, IK) where $q$ is a decision variable, you'll need the Jacobian relating a small change $\dot q$ to the angular velocity $w$ it induces: $w = J(q)\,\dot q$, $J(q) \in \mathbb{R}^{3\times 4}$.
+
+<ExerciseCard id="quaternions-ex-jacobian-challenge" />
+
+The resulting formula, $J_{\cdot i}(q) = 2\,[q^{-1}\circ e_i]_{1:3}$, is exactly what a KOMO-style trajectory optimizer (or your own manipulation planner) needs whenever quaternions parameterize orientation decision variables: it converts a raw gradient/step in quaternion-parameter space into a physically meaningful angular velocity.
+
+## Summary
+
+- Quaternions represent $SO(3)$ as $S^3 \subset \mathbb{R}^4$, avoiding both the discontinuity and gimbal-lock problems of minimal 3-parameter representations.
+- The exponential map $q(t)=(\cos(t/2),\sin(t/2)\hat w)$ traces a constant-speed geodesic on $S^3$; its velocity satisfies the clean structural identity $\dot q = q \circ \tfrac12(0,w)$.
+- SLERP ($q_A \circ \exp(t\log(q_A^{-1}\circ q_B))$) is the constant-angular-speed interpolation between two orientations; the naive normalized-linear-combination shortcut traces the same path but not at constant speed.
+- The angular Jacobian $J(q)$, derived directly from the $\dot q = q\circ\tfrac12(0,w)$ identity, converts a quaternion-parameter velocity into a physical angular velocity: exactly what's needed when quaternions are optimization variables.
+
+## Retrieval questions
+
+1. Why does representing $SO(3)$ with only 3 parameters inevitably run into gimbal lock somewhere, while $S^3$ doesn't?
+2. Write the SLERP formula from memory, and explain in one sentence why each piece is there.
+3. What is $\sigma(z)(1-\sigma(z))$'s quaternion-module analogue, i.e. what's the one identity from this module worth memorizing the way you memorized the sigmoid derivative in ML-03?
+
+## Mastery checklist
+
+- [ ] Can explain why quaternions use 4 numbers with a constraint, not 3 numbers directly.
+- [ ] Derived $\dot q(t) = q(t)\circ\tfrac12(0,\hat w)$ from the definition of $q(t)$, not just recalled it.
+- [ ] Computed a SLERP interpolation by hand between two concrete quaternions.
+- [ ] Derived the angular Jacobian formula $J_{\cdot i}(q) = 2[q^{-1}\circ e_i]_{1:3}$ from the $\dot q$ identity.
+
+## Source note
+
+All definitions, the exponential/log map derivation, SLERP, and the angular Jacobian derivation are adapted from Marc Toussaint's `quaternions` lecture note (HTML-sourced, matching the identical PDF), used here with attribution per this repository's README. The $S^1$/gimbal-lock motivating discussion, the half-angle symbolic exercise, and all specific worked numbers are newly authored for this workbook, not present in the source.
+
+---
+
+**Next**: KIN-03 (Forward/Inverse Kinematics & Jacobians)

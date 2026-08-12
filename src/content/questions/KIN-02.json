@@ -1,0 +1,87 @@
+{
+  "moduleId": "KIN-02",
+  "exercises": [
+    {
+      "id": "KIN-02-ex1-why-s3",
+      "objective": "Explain why rotations are represented as points on S^3 rather than a minimal 3-parameter set.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "SO(3) is a 3-dimensional space (3 degrees of freedom), yet quaternions represent rotations using 4 numbers constrained to $|q|=1$ (a 3-dimensional surface, $S^3$), not 3 numbers directly. In your own words, what problem would a direct 3-parameter representation (like Euler angles or a raw 3-vector) run into that the 4-parameter constrained representation avoids? (Hint: think about what happened with $SO(2)$ and $S^1$ vs. an angle in $[0,2\\pi]$ in the lesson's opening analogy.)",
+      "hints": [
+        "Re-read the analogy at the top of the lesson: why represent 2D rotations as points on the circle $S^1$ instead of just an angle $\\alpha \\in [0,2\\pi]$?",
+        "An angle in $[0,2\\pi]$ has a discontinuity: $\\alpha=0$ and $\\alpha=2\\pi$ are the same rotation but far apart as numbers. A 3-parameter rotation representation (e.g. Euler angles) has an analogous problem, plus a worse one at certain configurations.",
+        "The specific worse problem is gimbal lock: at certain orientations, two of the three Euler-angle axes become aligned and a degree of freedom is lost locally, even though SO(3) itself is perfectly smooth there. $S^3$ (via quaternions) has no such singular points anywhere."
+      ],
+      "reviewCardIds": ["RC-KIN-02-01"]
+    },
+    {
+      "id": "quaternions-ex-qdot-derivation",
+      "objective": "Derive the relation between the quaternion exponential map and its velocity.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "quaternions", "page": 2, "originalNumber": "Section 2 (Continuously moving from I to q)" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["KIN-02-ex1-why-s3"],
+      "answerType": "derivation",
+      "prompt": "Given the geodesic $q(t) = (\\cos(t/2), \\sin(t/2)\\,\\hat w)$ moving from the identity $I=(1,\\bar 0)$ towards $q$ along a fixed axis $\\hat w$, derive $\\dot q(t)$ directly by differentiating each component, then show that $\\dot q(t) = q(t) \\circ \\tfrac12(0,\\hat w)$ (i.e. the velocity equals $q(t)$ concatenated with a fixed tangent vector at the identity). You'll need the quaternion concatenation rule $q \\circ q' = (q_0 q_0' - \\bar q^\\top \\bar q',\\ q_0 \\bar q' + q_0' \\bar q + \\bar q \\times \\bar q')$.",
+      "hints": [
+        "First just differentiate component-wise: $\\dot q(t) = (-\\tfrac12\\sin(t/2),\\ \\tfrac12\\cos(t/2)\\,\\hat w)$.",
+        "Now compute the right-hand side $q(t) \\circ \\tfrac12(0,\\hat w)$ using the concatenation rule, with $q_0'=0$, $\\bar q' = \\tfrac12 \\hat w$. The cross term $\\bar q \\times \\bar q'$ involves $\\hat w \\times \\hat w$, which is zero since a vector crossed with itself vanishes.",
+        "Working it through: $q(t)\\circ\\tfrac12(0,\\hat w) = (-\\tfrac12\\sin(t/2)\\hat w^\\top \\hat w,\\ \\tfrac12\\cos(t/2)\\hat w + 0) = (-\\tfrac12\\sin(t/2),\\ \\tfrac12\\cos(t/2)\\hat w)$, using $\\hat w^\\top \\hat w=1$ since $\\hat w$ is a unit vector. This matches $\\dot q(t)$ from hint 1 exactly."
+      ],
+      "reviewCardIds": ["RC-KIN-02-02"]
+    },
+    {
+      "id": "KIN-02-ex-halfangle-symbolic",
+      "objective": "Derive sin(theta/2) in terms of q0 using the half-angle identity.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "symbolic",
+      "prompt": "The rotation angle is $\\theta = 2\\arccos(q_0)$. Using the half-angle identity $\\sin(\\arccos(x)) = \\sqrt{1-x^2}$, write $\\sin(\\theta/2)$ as an explicit expression in $q_0$ alone (no trig/inverse-trig functions in your answer). Enter your expression in Python-style syntax with `q0` as the variable, e.g. `sqrt(1-q0**2)`.",
+      "hints": [
+        "$\\sin(\\theta/2) = \\sin(\\arccos(q_0))$, since $\\theta/2 = \\arccos(q_0)$ directly from the definition.",
+        "Apply the identity given in the prompt directly: $\\sin(\\arccos(q_0)) = \\sqrt{1-q_0^2}$.",
+        "So $\\sin(\\theta/2) = \\sqrt{1-q_0^2}$. As a sanity check, this should also equal $|\\bar q|$ (the norm of the vector part) since $q_0^2 + |\\bar q|^2 = 1$ for a unit quaternion, i.e. $|\\bar q| = \\sqrt{1-q_0^2}$ too."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "KIN-02-ex-slerp-numeric",
+      "objective": "Compute a SLERP interpolation between two quaternions by hand.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 20,
+      "prerequisites": ["quaternions-ex-qdot-derivation"],
+      "answerType": "numeric",
+      "prompt": "Let $q_A = (\\cos45°,\\ \\sin45°,\\ 0,\\ 0)$ (a $90°$ rotation about the x-axis) and $q_B = (\\cos45°,\\ 0,\\ \\sin45°,\\ 0)$ (a $90°$ rotation about the y-axis). Using proper SLERP interpolation $q(t) = q_A \\circ \\exp(t\\,\\log(q_A^{-1}\\circ q_B))$, compute the **first component** ($q_0$) of $q(0.5)$. Enter a decimal to 3 decimal places.",
+      "hints": [
+        "First compute $q_{AB} = q_A^{-1} \\circ q_B$ using the concatenation and inverse rules from the reference section. $q_A^{-1} = (\\cos45°, -\\sin45°, 0, 0)$.",
+        "Once you have $q_{AB}$, compute its rotation angle $\\theta_{AB} = 2\\arccos(q_{AB,0})$ and axis, then $\\exp(0.5\\,\\log(q_{AB})) = (\\cos(\\theta_{AB}/4), \\sin(\\theta_{AB}/4)\\,\\hat w_{AB})$.",
+        "Finally concatenate $q_A \\circ \\exp(0.5\\log(q_{AB}))$ and read off the first component. If your arithmetic is right you should land on approximately $q_0 = 0.816$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "quaternions-ex-jacobian-challenge",
+      "objective": "Derive the angular Jacobian w.r.t. quaternion parameters.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "quaternions", "page": 4, "originalNumber": "Section 5 (Angular Jacobian w.r.t. Quaternion Parameters)" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 20,
+      "prerequisites": ["quaternions-ex-qdot-derivation", "KIN-02-ex-slerp-numeric"],
+      "answerType": "proof",
+      "prompt": "Starting from $\\dot q = q \\circ \\tfrac12(0,w)$ (the relation you derived earlier, generalized from a fixed axis $\\hat w$ to an arbitrary angular velocity vector $w \\in \\mathbb{R}^3$), derive the formula $w = 2\\,[q^{-1}\\circ \\dot q]_{1:3}$, then explain how this gives you the $i$-th column of the angular Jacobian $J(q) \\in \\mathbb{R}^{3\\times 4}$ when you set $\\dot q = e_i$ (the $i$-th standard basis vector of $\\mathbb{R}^4$).",
+      "hints": [
+        "Left-multiply both sides of $\\dot q = q \\circ \\tfrac12(0,w)$ by $q^{-1}$: since quaternion concatenation is associative and $q^{-1}\\circ q = I$ (the identity), you get $q^{-1}\\circ \\dot q = \\tfrac12(0,w)$.",
+        "The left-hand side is a quaternion whose vector part (components 1:3) equals $\\tfrac12 w$. Multiply both sides by 2 to isolate $w$: $w = 2\\,[q^{-1}\\circ\\dot q]_{1:3}$.",
+        "This formula is linear in $\\dot q$: if you plug in $\\dot q = e_i$ for $i=0,..,3$, you get $w_i = 2\\,[q^{-1}\\circ e_i]_{1:3}$, which is by definition the $i$-th column of the matrix $J(q)$ satisfying $w = J(q)\\dot q$ for any $\\dot q$."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}
