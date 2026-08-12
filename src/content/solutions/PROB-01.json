@@ -1,0 +1,46 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "PROB-01-ex1-joint-vs-conditional",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly distinguishes joint (both together), marginal (one ignoring the other), and conditional (one given a specific value of the other)." },
+          { "points": 1, "description": "Correctly states how marginal (sum over joint) and conditional (slice + renormalize) are each computed from the joint." }
+        ],
+        "commonErrors": [
+          "Confusing marginal with conditional (or vice versa).",
+          "Forgetting the renormalization step (dividing by P(y)) when computing a conditional from a joint slice."
+        ]
+      },
+      "fullSolution": "P(X,Y) describes X and Y together, the most complete description of their relationship. The marginal P(X) ignores Y entirely, obtained by summing the joint over all Y values: P(X)=sum_y P(X,y). The conditional P(X|Y=y) describes X given that Y is known to equal y specifically, obtained by taking the joint's slice at Y=y and renormalizing (dividing by P(y)=sum_x P(x,y)) so it sums to 1 over X."
+    },
+    {
+      "exerciseId": "PROB-01-ex2-bayes-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly rearranges both conditional-probability definitions to isolate P(A,B)." },
+          { "points": 2, "description": "Correctly sets the two expressions for P(A,B) equal and divides through to get Bayes' rule." }
+        ],
+        "commonErrors": [
+          "Trying to derive this a different way (e.g. citing Bayes' rule as already known) rather than the requested direct algebraic route.",
+          "Sign or division errors when isolating P(A|B) at the end."
+        ]
+      },
+      "fullSolution": "From P(A|B)=P(A,B)/P(B): P(A,B) = P(A|B)*P(B). From P(B|A)=P(A,B)/P(A): P(A,B) = P(B|A)*P(A). Both expressions equal the same joint P(A,B), so: P(A|B)*P(B) = P(B|A)*P(A). Dividing both sides by P(B): P(A|B) = P(B|A)*P(A)/P(B), Bayes' rule."
+    },
+    {
+      "exerciseId": "PROB-01-ex3-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.1552, "tolerance": 0.001 },
+      "fullSolution": "P(pos) = P(pos|disease)*P(disease) + P(pos|no disease)*P(no disease) = 0.9*0.02 + 0.1*0.98 = 0.018+0.098 = 0.116. P(disease|pos) = 0.018/0.116 = 0.1552. Despite a 90% true-positive rate, the posterior probability of disease given a positive test is only about 15.5%, because the disease is rare (2% prior) so false positives from the much larger healthy population outnumber true positives."
+    },
+    {
+      "exerciseId": "PROB-01-ex4-marginalization-challenge",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.65, "tolerance": 0.001 },
+      "fullSolution": "P(X=1) = P(X=1,Y=0)+P(X=1,Y=1)+P(X=1,Y=2) = 0.15+0.3+0.2 = 0.65."
+    }
+  ]
+}

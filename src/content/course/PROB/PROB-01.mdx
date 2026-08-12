@@ -1,0 +1,96 @@
+---
+id: PROB-01
+block: PROB
+title: "Probability Foundations"
+tier: 2
+estimatedHours: 3
+prerequisites: ["MATH-01"]
+objectives:
+  - "Distinguish joint, marginal, and conditional probability."
+  - "Derive Bayes' rule from the definition of conditional probability."
+  - "Apply Bayes' rule to compute a posterior probability, and recognize the base-rate effect."
+  - "Compute a marginal distribution from a joint distribution table."
+sources:
+  - { sourceId: "lecture-ai", pages: "p10-17 (§1.2, through Multivariate Distributions)", role: "primary" }
+concepts:
+  - "Joint, marginal, conditional probability"
+  - "Bayes' rule"
+  - "Base rate"
+  - "Standard distribution families"
+notation:
+  - { symbol: "$P(X,Y)$", meaning: "joint distribution" }
+  - { symbol: "$P(X)$", meaning: "marginal distribution" }
+  - { symbol: "$P(X\\mid Y)$", meaning: "conditional distribution" }
+  - { symbol: "$P(A\\mid B)=P(B\\mid A)P(A)/P(B)$", meaning: "Bayes' rule" }
+cheatsheetLinks: []
+nextModules: ["PROB-02"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Probability is the language every uncertainty-aware method in this course speaks: Bayesian optimization, state estimation, learned probabilistic models, and the sampling-based planning methods central to your own research all reduce to careful bookkeeping with joint/marginal/conditional distributions and Bayes' rule. This module rebuilds that bookkeeping precisely, since sloppy probability reasoning is a common, hard-to-notice source of bugs.
+
+## Prerequisites & readiness check
+
+Just basic algebra; this is a fresh start on probability, assuming only that you've seen the concept of probability before, not that you remember the details.
+
+<ReadinessCheck
+  question="For a fair six-sided die, what is $P(\text{roll}=3)$?"
+  answer="$1/6$."
+/>
+
+## Joint, marginal, conditional
+
+<ExerciseCard id="PROB-01-ex1-joint-vs-conditional" />
+
+## Bayes' rule
+
+<ExerciseCard id="PROB-01-ex2-bayes-derivation" />
+
+**Stop and try**: before continuing, notice that Bayes' rule is really just "the same joint probability, factored two different ways, set equal to each other." This is the same trick you'll see again when the Lagrangian's two forms of stationarity condition line up, or when a joint Gaussian's marginal and conditional turn out to be consistent (PROB-05): a recurring theme in this course is exploiting the fact that one quantity can be computed multiple ways, and equating those ways.
+
+## Worked example: the base-rate effect
+
+A classic, important illustration of Bayes' rule: a diagnostic test with prior disease prevalence $P(\text{disease})=0.01$, true-positive rate $P(\text{pos}\mid\text{disease})=0.95$, false-positive rate $P(\text{pos}\mid\text{no disease})=0.05$.
+
+$$P(\text{pos}) = 0.95(0.01) + 0.05(0.99) = 0.0095+0.0495 = 0.059$$
+
+$$P(\text{disease}\mid\text{pos}) = \frac{0.95(0.01)}{0.059} \approx 0.161$$
+
+Despite a 95% accurate test, a positive result only means about a 16% chance of actually having the disease, because the disease is rare, so the (much larger) healthy population still contributes more false positives in absolute terms than the small diseased population contributes true positives. *(Verified numerically while authoring this module.)* This "base-rate effect" comes up constantly in any Bayesian reasoning involving a rare prior.
+
+<ExerciseCard id="PROB-01-ex3-numeric" />
+
+## Marginalization
+
+<ExerciseCard id="PROB-01-ex4-marginalization-challenge" />
+
+## Summary
+
+- Joint $P(X,Y)$ is the complete description; marginal $P(X)$ sums out $Y$; conditional $P(X\mid Y{=}y)$ slices at $Y{=}y$ and renormalizes.
+- Bayes' rule follows directly from writing the same joint two ways via the two conditional-probability definitions.
+- A rare prior can make even an accurate test's positive result much less conclusive than it first appears, always check the base rate.
+
+## Retrieval questions
+
+1. Derive Bayes' rule from the definition of conditional probability, without looking back.
+2. Why did the diagnostic test example's posterior come out so much lower than the test's stated accuracy?
+3. How do you compute a marginal from a joint distribution table?
+
+## Mastery checklist
+
+- [ ] Can distinguish joint, marginal, and conditional probability precisely.
+- [ ] Derived Bayes' rule from the definition of conditional probability.
+- [ ] Computed a posterior probability via Bayes' rule and can explain the base-rate effect.
+- [ ] Computed a marginal from a joint distribution table.
+
+## Source note
+
+This module's topic and page range are from `lecture-ai`, §1.2 (pp. 10-17), which covers standard distribution families (Bernoulli, Binomial, Beta, Multinomial, Dirichlet, conjugate priors) in more depth than this module does (not yet incorporated). All exposition, the worked example, and every exercise here are newly authored, paraphrasing the source's topic coverage.
+
+---
+
+**Next**: [PROB-02: Monte Carlo & Sampling Methods](/course/PROB/PROB-02)

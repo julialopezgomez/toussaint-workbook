@@ -1,0 +1,99 @@
+---
+id: PROB-05
+block: PROB
+title: "Gaussians: Identities & Manipulation"
+tier: 2
+estimatedHours: 2
+prerequisites: ["PROB-01"]
+objectives:
+  - "Explain why the Gaussian's closure under products/marginals/conditionals is practically valuable."
+  - "Derive the mean and variance of the product of two 1D Gaussians."
+  - "Compute the product of two concrete Gaussians by hand."
+  - "Know where to find the fuller set of Gaussian identities (product, marginal, conditional, KL) for later reference."
+sources:
+  - { sourceId: "gaussians", pages: "p1-4 (HTML-sourced)", role: "primary" }
+concepts:
+  - "Gaussian distribution (moment and canonical form)"
+  - "Product of Gaussians"
+  - "Marginal and conditional of a joint Gaussian"
+  - "Precision (inverse variance/covariance)"
+notation:
+  - { symbol: "$N(x\\mid a,A)$", meaning: "Gaussian, moment form: mean $a$, covariance $A$" }
+  - { symbol: "$N[x\\mid a,A]$", meaning: "Gaussian, canonical form: $a,A$ are now precision-weighted mean and precision matrix" }
+  - { symbol: "$\\sigma_c^2$", meaning: "combined variance of a product of two Gaussians" }
+cheatsheetLinks: []
+nextModules: ["PROB-06"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Gaussians are the workhorse distribution of robotics and ML: Kalman filters, Gaussian processes, variational inference, and the Laplace approximation (next module) all lean on the specific algebraic identities this module covers. Because these identities get used constantly but are easy to misremember under pressure, this module is deliberately reference-style, expect to come back to it.
+
+## Prerequisites & readiness check
+
+You should have basic probability (PROB-01) fresh; matrix algebra from MATH-02/MATH-03 helps for the general (non-scalar) versions, though this module works mostly in 1D.
+
+<ReadinessCheck
+  question="What does it mean for a covariance matrix $A$ to be symmetric positive-definite?"
+  answer="$A=A^\top$ and $x^\top A x>0$ for every nonzero $x$ (from MATH-05)."
+/>
+
+## Why closure matters
+
+<ExerciseCard id="PROB-05-ex1-why-closed-family" />
+
+## The product of two Gaussians
+
+<ExerciseCard id="PROB-05-ex2-product-derivation" />
+
+The full result (mean and variance both) for 1D Gaussians $N(x\mid a,A)$, $N(x\mid b,B)$:
+
+$$\sigma_c^2 = \left(\frac1A+\frac1B\right)^{-1}, \qquad \mu_c = \sigma_c^2\left(\frac{a}{A}+\frac{b}{B}\right)$$
+
+This is a **precision-weighted average**: the combined mean leans toward whichever input has the tighter (smaller) variance, i.e. more confidence. The multivariable generalization replaces $1/A$ with $A^{-1}$ throughout (matrix inverse instead of scalar reciprocal); the reference identities for that general case are collected below.
+
+## Worked example
+
+$N(x\mid 2,1)$ and $N(x\mid 4,2)$: $\sigma_c^2 = (1/1+1/2)^{-1} = 0.6\overline{6}$, $\mu_c = 0.6\overline{6}(2/1+4/2) = 0.6\overline{6}(4) \approx 2.667$. *(Verified with NumPy while authoring this module.)* The combined mean sits closer to $2$ than to $4$, since the first Gaussian ($A=1$) is more confident (tighter) than the second ($B=2$).
+
+<ExerciseCard id="PROB-05-ex3-numeric" />
+
+## Reference: further Gaussian identities
+
+The source note collects a larger set of identities than this module derives in full; these are worth knowing exist so you can look them up precisely when needed, rather than re-deriving them each time:
+
+- **Marginal & conditional** of a jointly-Gaussian $(x,y)$: both are Gaussian, with the conditional's mean shifted by a term proportional to the cross-covariance (this is the exact mechanism behind the Kalman filter's update step).
+- **Convolution**: $\int_x N(x\mid a,A)\,N(y-x\mid b,B)\,dx = N(y\mid a+b, A+B)$, variances add under convolution.
+- **Expectations**: $\mathbb{E}_x\{x\}=a$, $\mathbb{E}_x\{xx^\top\}=A+aa^\top$.
+- **Entropy**: $H(N(a,A)) = \tfrac12\log|2\pi e A|$.
+- **KL divergence between two Gaussians**: a closed form in terms of $a,A,b,B$ (no sampling needed).
+
+## Summary
+
+- Gaussians are closed under products, marginals, and conditionals, the property that makes sequential Bayesian filtering with fixed-size representations possible.
+- Product of two Gaussians: precisions add ($1/\sigma_c^2 = 1/A+1/B$); the combined mean is a precision-weighted average.
+- A fuller reference set of identities (marginal/conditional, convolution, expectations, entropy, KL) exists in the source note for lookup as needed.
+
+## Retrieval questions
+
+1. Derive the combined variance of a product of two 1D Gaussians, without looking back.
+2. Why does the combined mean lean toward the more confident (lower-variance) input?
+3. What property of Gaussians makes the Kalman filter possible?
+
+## Mastery checklist
+
+- [ ] Can explain why closure under products/marginals/conditionals matters practically.
+- [ ] Derived the product-of-Gaussians variance formula.
+- [ ] Computed a product of two concrete Gaussians by hand.
+- [ ] Knows where to look up the fuller set of Gaussian identities when needed.
+
+## Source note
+
+This module's definitions, the closure motivation, and the product derivation are adapted from Marc Toussaint's `gaussians` lecture note (HTML-sourced, identical to the PDF, itself written in a reference/cheat-sheet style), used with attribution per this repository's README. The reference section above summarizes further identities from that same source without full derivation. The worked example and numeric exercise are newly authored.
+
+---
+
+**Next**: [PROB-06: Laplace Approximation, Variational Inference & Fisher Information](/course/PROB/PROB-06)

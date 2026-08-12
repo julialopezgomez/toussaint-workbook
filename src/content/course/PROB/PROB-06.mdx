@@ -1,0 +1,89 @@
+---
+id: PROB-06
+block: PROB
+title: "Laplace Approximation, Variational Inference & Fisher Information"
+tier: 2
+estimatedHours: 1.5
+prerequisites: ["PROB-05", "MATH-00"]
+objectives:
+  - "Explain why approximating a complicated distribution with a Gaussian at its mode is useful."
+  - "Derive the Laplace approximation as a second-order Taylor expansion of the log-density."
+  - "Compute a Laplace approximation's variance for a concrete unnormalized density."
+  - "Understand variational inference and Fisher information at a conceptual level."
+sources:
+  - { sourceId: "lecture-maths", pages: "p92-96 (§5.4-5.6)", role: "primary" }
+concepts:
+  - "Laplace approximation"
+  - "Variational inference"
+  - "Fisher information"
+notation:
+  - { symbol: "$x^*$", meaning: "the mode of $p$ (or of $\\log p$, equivalently)" }
+  - { symbol: "$\\sigma^2 = \\left(-\\log p''(x^*)\\right)^{-1}$", meaning: "Laplace-approximation variance" }
+cheatsheetLinks: []
+nextModules: ["ODE-01"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+This module closes the loop between three things you now have separately: Taylor expansion (MATH-00), the Gaussian identities (PROB-05), and the energy/log-probability view (PROB-04). The Laplace approximation is literally "apply MATH-00's second-order Taylor expansion to $\log p$ instead of $p$", a satisfying payoff for having derived Taylor expansion properly from scratch rather than just memorizing it.
+
+## Prerequisites & readiness check
+
+You should have the Gaussian product derivation (PROB-05) and Taylor expansion (MATH-00) fresh.
+
+<ReadinessCheck
+  question="From MATH-00, what is the second-order Taylor approximation $f(x+\delta) \approx {}?$"
+  answer="$f(x+\delta) \approx f(x) + f'(x)\delta + \tfrac12 f''(x)\delta^2$"
+/>
+
+## Why approximate with a Gaussian?
+
+<ExerciseCard id="PROB-06-ex1-why-gaussian-approximation" />
+
+## The Laplace approximation
+
+<ExerciseCard id="PROB-06-ex2-laplace-derivation" />
+
+The result, $p(x) \approx N(x\mid x^*, \sigma^2)$ with $\sigma^2 = \left(-\dfrac{d^2\log p}{dx^2}\Big|_{x^*}\right)^{-1}$, is the **Laplace approximation**: literally MATH-00's second-order Taylor expansion, applied to $\log p$ rather than $p$, then exponentiated and matched to a Gaussian's exponent form. The multivariable version replaces the second derivative with (negative) the Hessian of $\log p$ at the mode: $\Sigma = \left(-H_{\log p}(x^*)\right)^{-1}$.
+
+## Worked example
+
+For $\log \tilde p(x) = -\tfrac14x^4+\tfrac12x^2$ (an unnormalized, actually bimodal density with modes at $x=\pm1$), at the mode $x^*=1$: $\dfrac{d^2}{dx^2}\log\tilde p\Big|_{x=1} = -3(1)^2+1 = -2$, so $\sigma^2 = (-(-2))^{-1}=0.5$. The Laplace approximation there is $N(x\mid 1, 0.5)$. *(Verified with SymPy while authoring this module.)* Note this is only a *local* approximation around the mode at $x=1$, it says nothing about the second mode at $x=-1$, an important limitation: Laplace approximation assumes (or picks) a single dominant mode.
+
+<ExerciseCard id="PROB-06-ex3-numeric" />
+
+## Variational inference and Fisher information, briefly
+
+**Variational inference** generalizes the same underlying idea (approximate a hard-to-work-with distribution with an easy one) beyond just a local Taylor expansion at a mode: it poses the approximation as an explicit optimization problem, choosing the easy distribution (e.g. from a Gaussian family) that minimizes $D(q\|p)$ (the KL divergence from PROB-03) over the whole distribution, not just locally.
+
+**Fisher information** measures how sharply peaked a distribution's log-likelihood is around its mode, formally, it's (the negative expectation of) the same second-derivative-of-log-probability quantity that appears in the Laplace approximation's variance formula, connecting "how much information a sample carries about a parameter" directly to "how tightly the Laplace-approximated posterior would be concentrated."
+
+## Summary
+
+- Laplace approximation: $p(x)\approx N(x\mid x^*,\sigma^2)$ with $\sigma^2=(-\log p''(x^*))^{-1}$, a direct application of MATH-00's second-order Taylor expansion to $\log p$.
+- It's a *local* approximation around a single chosen mode; multimodal distributions need care (which mode, or a mixture of local approximations).
+- Variational inference generalizes the same idea to a global (not just local) optimization over an approximating family; Fisher information formalizes "how peaked is the log-likelihood" and appears directly in the Laplace variance formula.
+
+## Retrieval questions
+
+1. Derive the Laplace approximation's variance formula from a second-order Taylor expansion of $\log p$, without looking back.
+2. Why does the Laplace approximation only capture local behavior around one mode?
+3. What's the key difference between the Laplace approximation and full variational inference?
+
+## Mastery checklist
+
+- [ ] Can explain why approximating a hard distribution with a Gaussian at its mode is useful.
+- [ ] Derived the Laplace approximation from a second-order Taylor expansion of $\log p$.
+- [ ] Computed a Laplace approximation's variance for a concrete example.
+- [ ] Can explain, conceptually, what variational inference and Fisher information each capture.
+
+## Source note
+
+This module's topic and page range are from `lecture-maths`, §5.4-5.6 (pp. 92-96). All exposition, the worked example, and every exercise here are newly authored, built explicitly from MATH-00's Taylor-expansion machinery rather than quoting the source, and deliberately connecting back to PROB-04's energy/log-probability framing and PROB-03's KL divergence.
+
+---
+
+**Next**: ODE-01 (First-Order ODEs): not yet built, the one confirmed content gap from Phase 1.

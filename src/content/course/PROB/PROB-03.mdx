@@ -1,0 +1,95 @@
+---
+id: PROB-03
+block: PROB
+title: "Entropy, Cross-Entropy & KL Divergence"
+tier: 2
+estimatedHours: 2
+prerequisites: ["PROB-01"]
+objectives:
+  - "Explain why $-\\log p(x)$ is a sensible measure of surprise."
+  - "Derive the relationship $D(p\\|q) = H(p,q) - H(p)$ between KL divergence, cross-entropy, and entropy."
+  - "Compute entropy, cross-entropy, and KL divergence for a discrete distribution."
+  - "Prove KL divergence is always non-negative, via Jensen's inequality."
+sources:
+  - { sourceId: "entropy", pages: "p1-2 (HTML-sourced)", role: "primary" }
+  - { sourceId: "lecture-ai", pages: "p12-14 (§1.2)", role: "supplementary" }
+concepts:
+  - "Entropy (expected surprise)"
+  - "Cross-entropy"
+  - "KL divergence (relative entropy)"
+  - "Minimal description length"
+notation:
+  - { symbol: "$H(p)$", meaning: "entropy: $\\mathbb{E}_{p(x)}\\{-\\log p(x)\\}$" }
+  - { symbol: "$H(p,q)$", meaning: "cross-entropy: $\\mathbb{E}_{p(x)}\\{-\\log q(x)\\}$" }
+  - { symbol: "$D(p\\|q)$", meaning: "KL divergence: $\\mathbb{E}_{p(x)}\\{\\log(p(x)/q(x))\\}$" }
+cheatsheetLinks: []
+nextModules: ["PROB-04"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Cross-entropy is the loss function behind essentially every classifier you'll ever train (including the manual-MLP module in ML-03, where a square-error loss was used, itself a special case of cross-entropy, as this module makes precise). KL divergence shows up throughout variational inference, model comparison, and the Laplace approximation later in this block.
+
+## Prerequisites & readiness check
+
+You should have Bayes' rule and basic distributions (PROB-01) fresh.
+
+<ReadinessCheck
+  question="What is $\log_2(0.25)$?"
+  answer="$-2$, since $0.25 = 2^{-2}$."
+/>
+
+## Entropy as expected surprise
+
+<ExerciseCard id="PROB-03-ex1-why-expected-surprise" />
+
+The **entropy** $H(p) = \mathbb{E}_{p(x)}\{-\log p(x)\}$ is the *expected* surprise: how much, on average, samples from $p$ surprise you. Using $\log_2$, entropy is measured in **bits**: the average optimal code length for encoding samples from $p$ (a distribution concentrated on few outcomes has low entropy, easy to compress; a spread-out distribution has high entropy, hard to compress).
+
+## Cross-entropy: surprise under the wrong model
+
+If samples actually come from $p$, but you're using a *different* model $q$ to encode/predict them, your expected surprise is the **cross-entropy** $H(p,q) = \mathbb{E}_{p(x)}\{-\log q(x)\}$. In ML, $p$ is typically the true (one-hot, for classification) label distribution and $q$ the model's predicted distribution, exactly the cross-entropy loss used to train classifiers. A square-error loss (as used in ML-03) is a special case: if $q$ is Gaussian around a predicted mean and $p$ is a point mass at the true value, the cross-entropy reduces exactly to squared error.
+
+## KL divergence: how much worse is $q$ than $p$?
+
+<ExerciseCard id="PROB-03-ex2-kl-derivation" />
+
+$D(p\|q) = H(p,q) - H(p)$: the extra expected code length you pay for using $q$ instead of the (best possible) $p$ itself. Since $H(p)$ is the minimum possible expected code length, $D(p\|q)\ge0$ always: you can never do *better* than $p$'s own entropy by using a different model, only worse or equal.
+
+<ExerciseCard id="PROB-03-ex4-nonneg-challenge" />
+
+## Worked example
+
+Let $p=[0.7,0.1,0.1,0.1]$ over 4 outcomes. Using $\log_2$: since $p$ is concentrated (one outcome much more likely than the others), $H(p)$ is relatively low, samples are on average not very surprising, since the most likely outcome dominates. Contrast with a uniform $p=[0.25,0.25,0.25,0.25]$: $H(p) = -4(0.25)\log_2(0.25) = -4(0.25)(-2) = 2$ bits, the maximum possible entropy for 4 outcomes (uniform distributions maximize entropy among all distributions on a fixed set of outcomes, the least predictable case).
+
+<ExerciseCard id="PROB-03-ex3-numeric" />
+
+## Summary
+
+- $-\log p(x)$ measures surprise: near 0 for near-certain events, unbounded for rare events.
+- $H(p)$ is expected surprise (entropy); $H(p,q)$ is expected surprise under a mismatched model $q$ (cross-entropy).
+- $D(p\|q) = H(p,q)-H(p) \ge 0$ always (proved via Jensen's inequality): the "extra cost" of using $q$ instead of $p$.
+- Cross-entropy is the standard ML classification loss; square-error loss is a special case for Gaussian-around-a-mean predictions.
+
+## Retrieval questions
+
+1. Derive $D(p\|q) = H(p,q)-H(p)$ from the entropy/cross-entropy/KL definitions, without looking back.
+2. Why must $D(p\|q)\ge0$, in one sentence referencing Jensen's inequality?
+3. What distribution maximizes entropy among all distributions over a fixed, finite set of outcomes?
+
+## Mastery checklist
+
+- [ ] Can explain why $-\log p(x)$ is a sensible surprise measure.
+- [ ] Derived $D(p\|q)=H(p,q)-H(p)$ from the definitions.
+- [ ] Computed entropy, cross-entropy, and KL divergence for a concrete example.
+- [ ] Proved $D(p\|q)\ge0$ via Jensen's inequality.
+
+## Source note
+
+This module's definitions, the surprise/entropy motivation, and the Jensen's-inequality non-negativity argument are adapted from Marc Toussaint's `entropy` lecture note (HTML-sourced, identical to the PDF), used with attribution per this repository's README. `lecture-ai` §1.2 (pp. 12-14) covers the same material in a more compressed form. The worked example and numeric exercise are newly authored.
+
+---
+
+**Next**: [PROB-04: Energy-Based Views & the Boltzmann Distribution](/course/PROB/PROB-04)

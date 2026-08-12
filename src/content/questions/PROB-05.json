@@ -1,0 +1,55 @@
+{
+  "moduleId": "PROB-05",
+  "exercises": [
+    {
+      "id": "PROB-05-ex1-why-closed-family",
+      "objective": "Explain why the Gaussian's closure under products/marginals/conditionals matters practically.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "gaussians", "page": 1, "originalNumber": "Definitions/Product sections" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "The Gaussian distribution has a special property: the product of two Gaussians is (proportional to) another Gaussian, and the marginal or conditional of a jointly-Gaussian distribution is also Gaussian. Explain why this \"closure\" property is practically valuable, particularly for something like a Bayesian filter that repeatedly combines a prior with new observations.",
+      "hints": [
+        "If you start with a Gaussian belief and combine it with Gaussian-shaped evidence (e.g. via Bayes' rule, which involves a product of a prior and a likelihood), closure guarantees the result is *still* Gaussian, describable by just a mean and covariance.",
+        "Without closure, each update could produce a distribution of increasing complexity (e.g. a mixture with more and more components), needing more and more parameters to describe as updates accumulate.",
+        "Because Gaussians stay Gaussian under exactly the operations a sequential Bayesian update needs (product for combining prior+likelihood, marginalization/conditioning for propagating through a linear model), a filter can run indefinitely while only ever needing to track a fixed-size mean and covariance, this is exactly the structure behind the Kalman filter."
+      ],
+      "reviewCardIds": ["RC-PROB-05-01"]
+    },
+    {
+      "id": "PROB-05-ex2-product-derivation",
+      "objective": "Derive the mean and variance of the product of two 1D Gaussians.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "gaussians", "page": 2, "originalNumber": "Product section" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["PROB-05-ex1-why-closed-family"],
+      "answerType": "derivation",
+      "prompt": "For two 1D Gaussians $N(x\\mid a,A)$ and $N(x\\mid b,B)$ (mean, variance notation), their product is proportional to a Gaussian $N(x\\mid \\mu_c, \\sigma_c^2)$. Using the fact that multiplying two Gaussian densities means *adding* their exponents (both are $\\propto\\exp(-\\tfrac12(\\cdot))$ forms), and that the result must again be a quadratic in $x$ (hence Gaussian-shaped), derive $\\sigma_c^2 = \\left(\\dfrac1A+\\dfrac1B\\right)^{-1}$ by matching the coefficient of $x^2$ in the combined exponent.",
+      "hints": [
+        "$N(x\\mid a,A) \\propto \\exp\\left(-\\dfrac{(x-a)^2}{2A}\\right)$, similarly for $B$. Multiplying: $N(x|a,A)N(x|b,B) \\propto \\exp\\left(-\\dfrac{(x-a)^2}{2A}-\\dfrac{(x-b)^2}{2B}\\right)$.",
+        "Expand the $x^2$ terms only (ignore linear/constant terms for now, they determine the mean, not the variance): from $\\dfrac{(x-a)^2}{2A}$, the $x^2$ coefficient is $\\dfrac{1}{2A}$; from $\\dfrac{(x-b)^2}{2B}$, it's $\\dfrac{1}{2B}$. Combined: the exponent's $x^2$ coefficient is $-\\left(\\dfrac{1}{2A}+\\dfrac{1}{2B}\\right)$.",
+        "A Gaussian $N(x\\mid\\mu_c,\\sigma_c^2)$ has exponent $-\\dfrac{x^2}{2\\sigma_c^2}$ (among other terms), so matching $x^2$ coefficients: $\\dfrac{1}{2\\sigma_c^2} = \\dfrac{1}{2A}+\\dfrac{1}{2B}$, giving $\\dfrac{1}{\\sigma_c^2} = \\dfrac1A+\\dfrac1B$, i.e. $\\sigma_c^2 = \\left(\\dfrac1A+\\dfrac1B\\right)^{-1}$. Precisions (inverse variances) simply add when multiplying Gaussians."
+      ],
+      "reviewCardIds": ["RC-PROB-05-02"]
+    },
+    {
+      "id": "PROB-05-ex3-numeric",
+      "objective": "Compute the mean and variance of the product of two concrete 1D Gaussians.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["PROB-05-ex2-product-derivation"],
+      "answerType": "numeric",
+      "prompt": "For $N(x\\mid 2,1)$ and $N(x\\mid 4,2)$ (mean, variance), compute the mean $\\mu_c$ of their product (a precision-weighted average: $\\mu_c = \\sigma_c^2\\left(\\dfrac{a}{A}+\\dfrac{b}{B}\\right)$, using the $\\sigma_c^2$ formula from the previous exercise). Enter a decimal to 3 decimal places.",
+      "hints": [
+        "First compute $\\sigma_c^2 = (1/1+1/2)^{-1} = (1.5)^{-1} = 0.6667$.",
+        "$\\mu_c = \\sigma_c^2(a/A+b/B) = 0.6667(2/1+4/2) = 0.6667(2+2) = 0.6667(4)$.",
+        "$\\mu_c \\approx 2.667$. Notice this is a weighted average of the two means (2 and 4), pulled slightly toward $a=2$ since $A=1$ is a tighter (more confident) variance than $B=2$: the product favors the more confident input, exactly as you'd want for combining a prior and a likelihood."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

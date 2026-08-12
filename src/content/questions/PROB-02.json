@@ -1,0 +1,53 @@
+{
+  "moduleId": "PROB-02",
+  "exercises": [
+    {
+      "id": "PROB-02-ex1-why-sampling",
+      "objective": "Explain when sampling methods are needed instead of direct computation.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Computing an expectation $\\mathbb{E}_p[f(x)] = \\int f(x)p(x)\\,dx$ exactly requires solving that integral in closed form. Explain a realistic situation where this isn't possible, and how sampling ($\\mathbb{E}_p[f(x)] \\approx \\frac1S\\sum_{s=1}^S f(x_s)$, $x_s\\sim p$) sidesteps the problem.",
+      "hints": [
+        "Many useful $p$ and $f$ combinations (high-dimensional distributions, complicated non-linear $f$, distributions only known up to normalization) have no closed-form integral, even though $p$ and $f$ are individually easy to evaluate pointwise.",
+        "Sampling replaces 'solve the integral' with 'draw many samples from $p$ and average $f$ over them', which only requires being able to *sample from* $p$ (or evaluate it pointwise, for rejection/importance sampling) and evaluate $f$, not integrate anything symbolically.",
+        "By the law of large numbers, the sample average converges to the true expectation as $S\\to\\infty$, so this gives an approximate but computable answer to a problem that might have no closed form at all."
+      ],
+      "reviewCardIds": ["RC-PROB-02-01"]
+    },
+    {
+      "id": "PROB-02-ex2-importance-sampling-derivation",
+      "objective": "Derive the importance sampling identity.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["PROB-02-ex1-why-sampling"],
+      "answerType": "derivation",
+      "prompt": "Suppose you can't easily sample from $p$ directly, but can sample from a different, more convenient distribution $q$ (with $q(x)>0$ wherever $p(x)>0$). Derive the importance sampling identity $\\mathbb{E}_p[f(x)] = \\mathbb{E}_q\\left[f(x)\\dfrac{p(x)}{q(x)}\\right]$, starting from the definition $\\mathbb{E}_p[f(x)] = \\int f(x)p(x)\\,dx$.",
+      "hints": [
+        "Multiply and divide the integrand by $q(x)$ (valid since $q(x)>0$ wherever the integral has support): $\\int f(x)p(x)\\,dx = \\int f(x)\\dfrac{p(x)}{q(x)}q(x)\\,dx$.",
+        "Now look at the right-hand side: it's an integral of some function, $f(x)\\dfrac{p(x)}{q(x)}$, weighted by $q(x)$.",
+        "That's exactly the definition of $\\mathbb{E}_q\\left[f(x)\\dfrac{p(x)}{q(x)}\\right]$: an expectation under $q$ of the quantity $f(x)p(x)/q(x)$. So $\\mathbb{E}_p[f(x)] = \\mathbb{E}_q[f(x)p(x)/q(x)]$, letting you estimate an expectation under $p$ using only samples from $q$, reweighted by the **importance weight** $p(x)/q(x)$."
+      ],
+      "reviewCardIds": ["RC-PROB-02-02"]
+    },
+    {
+      "id": "PROB-02-ex3-numeric",
+      "objective": "Compute importance weights and verify the importance sampling identity on a discrete example.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["PROB-02-ex2-importance-sampling-derivation"],
+      "answerType": "numeric",
+      "prompt": "Let target $p=[0.2,0.5,0.3]$ and proposal $q=[0.4,0.2,0.4]$ over $x\\in\\{1,2,3\\}$. Compute the importance weight $w(x)=p(x)/q(x)$ for $x=2$. Enter a decimal.",
+      "hints": [
+        "The importance weight is just the ratio of the target probability to the proposal probability, evaluated at the specific value of $x$.",
+        "$w(2) = p(2)/q(2) = 0.5/0.2$.",
+        "$w(2) = 2.5$."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

@@ -74,7 +74,7 @@ Rationale: Tier 1, directly matches your report's optimal-control formalism (Eq.
 
 **Milestone**: Optimization Exam. **Obsidian**: `antonova_Rethinking_2023` (differentiable optimization) and `amos_Differentiable_2019` (differentiable MPC) are high-confidence connections for OPT-04/OPT-01 respectively — flagged for linking at authoring time.
 
-**Production note (Phase 4, batch 2)**: OPT-01 through OPT-05 built; OPT-06 (Bayesian Optimization & Bandits) deliberately deferred, since it depends on PROB-01 (Probability Foundations), which doesn't exist yet. Will be picked up once Block PROB is built.
+**Production note (Phase 4, batch 2)**: OPT-01 through OPT-05 built; OPT-06 (Bayesian Optimization & Bandits) deliberately deferred, since it depends on PROB-01 (Probability Foundations), which doesn't exist yet. **Update (batch 3): Block PROB is now built, so OPT-06 is unblocked** — a good candidate for the start of batch 4.
 
 ---
 

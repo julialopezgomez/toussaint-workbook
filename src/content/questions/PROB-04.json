@@ -1,0 +1,55 @@
+{
+  "moduleId": "PROB-04",
+  "exercises": [
+    {
+      "id": "PROB-04-ex1-why-partition-function-hard",
+      "objective": "Explain why the partition function is a fundamentally global, hard quantity.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "energy", "page": 2, "originalNumber": "Partition Function section" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "For an energy function $E(x)$ (e.g. from a physical system, or an unnormalized model score), the corresponding density is $p(x) = \\frac1Z\\exp(-E(x))$, with partition function $Z=\\int_x \\exp(-E(x))\\,dx$. The energy $E(x)$ at a single point $x$ is typically easy to evaluate (a local, pointwise quantity), but $Z$ is typically very hard. Explain why, and what that implies about the difficulty of sampling from $p$ using only $E(x)$ evaluations.",
+      "hints": [
+        "$E(x)$ only requires evaluating properties of $x$ itself, a local computation. $Z$ requires integrating (summing) over the *entire* space of possible $x$ values, a fundamentally global quantity depending on the whole function $E(\\cdot)$, not just one point.",
+        "Without $Z$, you know the *relative* energy of different points ($E(x_1)$ vs $E(x_2)$) but have no absolute reference for how much total probability mass exists, or whether some unexplored region of $x$-space might have very low energy (high probability) that you haven't found yet.",
+        "This is exactly why sampling methods that only use $E(x)$ (e.g. Metropolis-Hastings, comparing energies before/after a proposed step) are inherently local: they can only make relative comparisons near where they currently are, and can have very long mixing times if the probability mass is split across multiple far-apart modes, since there's no global information available to guide them."
+      ],
+      "reviewCardIds": ["RC-PROB-04-01"]
+    },
+    {
+      "id": "PROB-04-ex2-energy-equivalence-derivation",
+      "objective": "Show the equivalence between the energy-function and Boltzmann-distribution forms.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "energy", "page": 1, "originalNumber": "Probabilities & Energy section" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["PROB-04-ex1-why-partition-function-hard"],
+      "answerType": "derivation",
+      "prompt": "Given the energy function definition $E(x) = -\\log p(x) + c$ (for a constant offset $c\\in\\mathbb{R}$), derive the Boltzmann distribution form $p(x) = \\frac1Z\\exp(-E(x))$, identifying what $Z$ must equal in terms of $c$.",
+      "hints": [
+        "Start from $E(x) = -\\log p(x)+c$ and solve for $p(x)$ directly: isolate $\\log p(x)$ first.",
+        "$\\log p(x) = c - E(x)$, so $p(x) = \\exp(c-E(x)) = \\exp(c)\\exp(-E(x))$.",
+        "Comparing to $p(x) = \\frac1Z\\exp(-E(x))$: $\\frac1Z = \\exp(c)$, i.e. $Z=\\exp(-c)$, or equivalently $c=-\\log Z$. The two forms are the same statement, just solved for different variables ($p$ vs. $E$)."
+      ],
+      "reviewCardIds": ["RC-PROB-04-02"]
+    },
+    {
+      "id": "PROB-04-ex3-numeric",
+      "objective": "Compute Boltzmann probabilities for a simple two-state system.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["PROB-04-ex2-energy-equivalence-derivation"],
+      "answerType": "numeric",
+      "prompt": "A two-state system has energies $E(x_1)=0$, $E(x_2)=2$ (in units where $\\beta=1$, i.e. $p(x)\\propto\\exp(-E(x))$). Compute $p(x_1)$. Enter a decimal to 4 decimal places.",
+      "hints": [
+        "First compute the (unnormalized) Boltzmann factors: $\\exp(-E(x_1))=\\exp(0)=1$, $\\exp(-E(x_2))=\\exp(-2)\\approx0.1353$.",
+        "$Z = \\exp(-E(x_1))+\\exp(-E(x_2)) = 1+0.1353 = 1.1353$.",
+        "$p(x_1) = \\exp(-E(x_1))/Z = 1/1.1353 \\approx 0.8808$. The lower-energy state is much more probable, as expected (lower energy = higher probability under the Boltzmann distribution)."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

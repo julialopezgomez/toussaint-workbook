@@ -1,7 +1,7 @@
 # Project State — Toussaint Workbook
 
 ## Current phase
-**Phase 4 in progress: Blocks MATH (6 modules) and OPT (5 of 6 modules, OPT-06 deferred pending Block PROB) complete. 13 of ~64 planned modules exist across MATH/OPT/KIN/ML blocks.**
+**Phase 4 in progress: Blocks MATH (6), OPT (5 of 6), and PROB (6 of 6) complete. 19 of ~64 planned modules exist across MATH/OPT/PROB/KIN/ML blocks. OPT-06 now unblocked (Block PROB done) — good candidate for the start of batch 4.**
 
 ## Resolved (2026-08-12, sixth pass): added MATH-00 (Taylor Expansion From Scratch)
 User flagged, after reviewing batch 1, that Taylor expansion was used as a derivation tool in both MATH-01 (chain rule) and MATH-02 (second-order Taylor for Hessians) without ever being taught from scratch, and the user is specifically rusty on it. Added as **MATH-00** (not a renumber of MATH-01-05, to avoid churning already-published IDs) with a from-scratch derivation of both first- and second-order Taylor approximations (first order from the derivative definition directly, second order from matching-derivatives against a quadratic polynomial), two worked examples (sin/cos series, both independently verified), and 4 exercises. MATH-01's prerequisites and readiness check updated to point to it; MATH-01 and MATH-02's prose updated with explicit cross-references back to MATH-00 rather than leaving Taylor expansion as an unexplained tool. `CURRICULUM.md` updated (new row, module/hour counts, a production note explaining the insertion). Tested live, build clean (10 pages).
@@ -60,8 +60,16 @@ See `docs/decisions/0000-requirements.md`, `0001-corpus-update-and-priorities.md
 - Tested live: numeric checkers (OPT-01, OPT-03) ✓. Type check and production build both clean (15 pages, 0 errors).
 - Pushed to the public repo.
 
+## Completed — Phase 4, batch 3 (2026-08-12, eighth pass)
+- **PROB-01 through PROB-06 built**, completing Block PROB: probability foundations/Bayes' rule, Monte Carlo/importance sampling, entropy/cross-entropy/KL (source-adapted from `entropy` note), energy-based views/Boltzmann distribution (source-adapted from `energy` note), Gaussian identities (source-adapted from `gaussians` note), Laplace approximation (built explicitly on MATH-00's Taylor expansion, closing the loop between three earlier modules). 21 exercises total.
+- Leveraged verbatim text already read from the `entropy`/`energy`/`gaussians` HTML notes during Phase 1 for higher-fidelity source-adapted content than the pure-paraphrase modules in MATH/OPT.
+- All worked-example numbers verified with NumPy/SymPy first (Bayes' rule base-rate example, importance-sampling identity, entropy/cross-entropy/KL values, Boltzmann probabilities, Gaussian product mean/variance, Laplace approximation variance on a genuinely bimodal test density).
+- Tested live: numeric checkers (PROB-03, PROB-06) ✓. Type check and production build both clean (21 pages, 0 errors).
+- `CURRICULUM.md` updated: OPT-06 (Bayesian Optimization & Bandits) is now unblocked, since it needed PROB-01.
+- Pushed to the public repo.
+
 ## Pending — next action needed from user
-- **Scope batch 3 of Phase 4.** Options: Block PROB (6 modules — unblocks OPT-06 and is itself a prerequisite for ML/RL blocks), or something closer to the user's actual research (Block DYN, or the TAMP-related RLEARN modules, though those need PROB/DYN groundwork first regardless). Recommend PROB next, same reasoning as OPT: it's the more efficient next dependency.
+- **Scope batch 4 of Phase 4.** OPT-06 is now unblocked and would close out Block OPT entirely (small batch, 1 module). After that, recommend Block ODE (3 modules, the one confirmed real content gap from Phase 1, needed before Block DYN) or Block KIN's remaining 2 modules (KIN-01, KIN-03, revision-paced) as the next natural steps, unless the user wants to jump toward research-relevant material (DYN/RLEARN) sooner.
 - Confirm the Review-with-Claude clipboard button and the progress-import file upload actually work for the user (neither could be verified in the automated browser testing tool).
 
 ## Known uncertainties

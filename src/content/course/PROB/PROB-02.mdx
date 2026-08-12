@@ -1,0 +1,85 @@
+---
+id: PROB-02
+block: PROB
+title: "Monte Carlo & Sampling Methods"
+tier: 2
+estimatedHours: 2
+prerequisites: ["PROB-01"]
+objectives:
+  - "Explain when sampling methods are needed instead of exact integration."
+  - "Derive the importance sampling identity from the definition of expectation."
+  - "Compute importance weights and verify the identity on a discrete example."
+  - "Understand rejection sampling's acceptance-rate tradeoff."
+sources:
+  - { sourceId: "lecture-ai", pages: "p18-19, p24-26 (§1.2, Monte Carlo/sampling subsections)", role: "primary" }
+concepts:
+  - "Monte Carlo estimation"
+  - "Rejection sampling"
+  - "Importance sampling"
+  - "Importance weight"
+notation:
+  - { symbol: "$\\mathbb{E}_p[f(x)]$", meaning: "expectation of $f$ under distribution $p$" }
+  - { symbol: "$w(x) = p(x)/q(x)$", meaning: "importance weight, correcting for sampling from $q$ instead of $p$" }
+  - { symbol: "$M$", meaning: "rejection sampling bound: $p(x)\\le Mq(x)$ for all $x$" }
+cheatsheetLinks: []
+nextModules: ["PROB-03"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Sampling-based methods are directly relevant to your own research area: your advisor's own work on constrained sampling (combining MCMC and NLP methods) builds on exactly this foundation, and Monte Carlo Tree Search (which shows up later in the RL block, tied to literature you're reading) is a direct descendant of the ideas here.
+
+## Prerequisites & readiness check
+
+You should have Bayes' rule and marginalization (PROB-01) fresh.
+
+<ReadinessCheck
+  question="What is the law of large numbers, informally?"
+  answer="As you average more independent samples of a random quantity, the sample average converges to the true expected value."
+/>
+
+## Why sample at all?
+
+<ExerciseCard id="PROB-02-ex1-why-sampling" />
+
+## Importance sampling
+
+<ExerciseCard id="PROB-02-ex2-importance-sampling-derivation" />
+
+**Worked example**: target $p=[0.1,0.6,0.3]$ over $x\in\{1,2,3\}$ (with values $[1,2,3]$), proposal $q=[0.3,0.3,0.4]$. True mean $\mathbb{E}_p[x] = 0.1(1)+0.6(2)+0.3(3) = 2.2$. Importance weights: $w=[0.333, 2.0, 0.75]$. Checking the identity: $\mathbb{E}_q[x\cdot w(x)] = 0.3(1\cdot0.333)+0.3(2\cdot2.0)+0.4(3\cdot0.75) = 0.1+1.2+0.9 = 2.2$. *(Verified with NumPy while authoring this module: matches exactly, as the derivation guarantees.)*
+
+<ExerciseCard id="PROB-02-ex3-numeric" />
+
+## Rejection sampling, briefly
+
+An alternative when you can evaluate $p(x)$ pointwise but not sample from it directly: find a constant $M$ such that $p(x)\le Mq(x)$ for all $x$ (using an easy-to-sample proposal $q$), then sample $x\sim q$ and accept it with probability $p(x)/(Mq(x))$, rejecting (and resampling) otherwise. The accepted samples are then genuinely distributed according to $p$. The overall acceptance rate works out to exactly $1/M$, so a tight bound $M$ (as close to the true worst-case ratio $\max_x p(x)/q(x)$ as possible) matters a great deal for efficiency: a loose $M$ wastes most proposed samples on rejection.
+
+## Summary
+
+- Sampling replaces symbolic integration with drawing samples and averaging, converging via the law of large numbers, useful whenever exact integration isn't feasible.
+- Importance sampling reweights samples from a convenient proposal $q$ by $p(x)/q(x)$ to estimate expectations under a less-convenient target $p$.
+- Rejection sampling accepts proposal samples with probability $p(x)/(Mq(x))$; overall acceptance rate is $1/M$, so a tight bound matters for efficiency.
+
+## Retrieval questions
+
+1. Derive the importance sampling identity, without looking back.
+2. Why does a loose rejection-sampling bound $M$ hurt efficiency specifically?
+3. What's the practical requirement on $q$ relative to $p$ for importance sampling to be well-defined everywhere?
+
+## Mastery checklist
+
+- [ ] Can explain when sampling is needed instead of exact integration.
+- [ ] Derived the importance sampling identity from the definition of expectation.
+- [ ] Computed importance weights and verified the identity on a concrete example.
+- [ ] Can explain the rejection sampling acceptance-rate tradeoff.
+
+## Source note
+
+This module's topic and page range are from `lecture-ai`, §1.2 (pp. 18-19, 24-26). All exposition, the worked example, and every exercise here are newly authored, paraphrasing the source's topic coverage.
+
+---
+
+**Next**: [PROB-03: Entropy, Cross-Entropy & KL Divergence](/course/PROB/PROB-03)

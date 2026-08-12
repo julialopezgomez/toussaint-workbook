@@ -1,0 +1,56 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "PROB-03-ex1-why-expected-surprise",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly explains the low-probability -> high surprise direction (-log p(x) -> infinity as p(x) -> 0)." },
+          { "points": 1, "description": "Correctly explains the near-certain -> near-zero surprise direction (-log p(x) -> 0 as p(x) -> 1)." }
+        ],
+        "commonErrors": [
+          "Only covering one of the two directions.",
+          "Not connecting this to everyday intuition about surprise."
+        ]
+      },
+      "fullSolution": "As p(x) -> 0 (a rare event), -log p(x) -> infinity: an extremely unlikely event is maximally surprising, matching everyday intuition. As p(x) -> 1 (a near-certain event), -log p(x) -> 0: an event you already expected shouldn't surprise you at all. This tracks the everyday notion of surprise directly: rare things surprise us more than expected things. The specific -log(.) form (rather than e.g. 1-p(x)) has the further property of being additive across independent events, which is what makes entropy interpretable as an expected code length."
+    },
+    {
+      "exerciseId": "PROB-03-ex2-kl-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly splits log(p(x)/q(x)) = log p(x) - log q(x)." },
+          { "points": 1, "description": "Correctly uses linearity of expectation to split the difference." },
+          { "points": 2, "description": "Correctly identifies each expectation term as -H(p) and -H(p,q) respectively, and combines to get H(p,q)-H(p)." }
+        ],
+        "commonErrors": [
+          "Sign errors when identifying E_p{log p(x)} = -H(p) (easy to drop the negative sign since H is DEFINED with a minus sign already).",
+          "Not using linearity of expectation explicitly to justify splitting the expectation of a difference."
+        ]
+      },
+      "fullSolution": "D(p||q) = E_p{log(p(x)/q(x))} = E_p{log p(x) - log q(x)} (splitting the log of a ratio) = E_p{log p(x)} - E_p{log q(x)} (linearity of expectation).\n\nE_p{log p(x)} = -H(p) by definition (H(p) is defined as E_p{-log p(x)}, so E_p{log p(x)} is its negative). Similarly E_p{log q(x)} = -H(p,q) (H(p,q) is defined as E_p{-log q(x)}).\n\nSo D(p||q) = -H(p) - (-H(p,q)) = H(p,q) - H(p)."
+    },
+    {
+      "exerciseId": "PROB-03-ex3-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.0294, "tolerance": 0.001 },
+      "fullSolution": "H(p) = -[0.5*log2(0.5)+0.25*log2(0.25)+0.25*log2(0.25)] = -[0.5*(-1)+0.25*(-2)+0.25*(-2)] = 0.5+0.5+0.5 = 1.5 bits.\nH(p,q) = -[0.5*log2(0.4)+0.25*log2(0.3)+0.25*log2(0.3)] = -[0.5*(-1.32193)+0.5*(-1.73697)] = 0.66096+0.86848 = 1.52944 bits.\nD(p||q) = H(p,q)-H(p) = 1.52944-1.5 = 0.02945 bits (matches NumPy computation of 0.029447 to displayed precision)."
+    },
+    {
+      "exerciseId": "PROB-03-ex4-nonneg-challenge",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly applies Jensen's inequality with the convex function -log to the ratio q(x)/p(x)." },
+          { "points": 2, "description": "Correctly computes E_p{q(x)/p(x)} = sum_x q(x) = 1 and concludes D(p||q) >= -log(1) = 0." }
+        ],
+        "commonErrors": [
+          "Using the concave-Jensen direction instead of the convex-Jensen direction (since -log is convex, the inequality direction flips relative to a concave function).",
+          "Not recognizing that E_p{q(x)/p(x)} simplifies to sum_x q(x) = 1 specifically because p(x) cancels in the expectation weighting."
+        ]
+      },
+      "fullSolution": "D(p||q) = E_p{-log[q(x)/p(x)]}. Since -log(.) is convex, Jensen's inequality (for a convex function psi: E[psi(X)] >= psi(E[X])) gives:\nE_p{-log[q(x)/p(x)]} >= -log(E_p{q(x)/p(x)}).\n\nCompute the inner expectation: E_p{q(x)/p(x)} = sum_x p(x) * q(x)/p(x) = sum_x q(x) = 1, since q is a valid probability distribution (sums to 1) and p(x) cancels exactly.\n\nSo D(p||q) >= -log(1) = 0. Equality in Jensen's inequality holds only when the random quantity (here q(x)/p(x)) is constant, i.e. when p=q everywhere, matching the source's stated equality condition."
+    }
+  ]
+}

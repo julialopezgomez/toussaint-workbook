@@ -1,0 +1,53 @@
+{
+  "moduleId": "PROB-06",
+  "exercises": [
+    {
+      "id": "PROB-06-ex1-why-gaussian-approximation",
+      "objective": "Explain the motivation for approximating a complicated distribution with a Gaussian.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Many distributions of practical interest (e.g. a Bayesian posterior over model parameters) are only known up to normalization, $p(x) = \\frac1Z\\tilde p(x)$ with $\\tilde p$ easy to evaluate but $Z$ unknown and hard (recall PROB-04). Explain why approximating such a $p$ with a Gaussian, centered at $p$'s mode, is a useful strategy, even though $p$ generally isn't exactly Gaussian.",
+      "hints": [
+        "A Gaussian is fully specified by just a mean and covariance, both cheap to work with (sample from, integrate against, combine with other Gaussians via PROB-05's identities), unlike an arbitrary unnormalized $\\tilde p$.",
+        "Near its mode (highest point), a well-behaved unimodal distribution's log-density often looks locally quadratic, exactly the shape of a Gaussian's log-density, so a Gaussian can be a good LOCAL approximation even if $p$ isn't Gaussian globally.",
+        "Practically: this approximation sidesteps ever needing to compute the hard normalization constant $Z$ directly, the Gaussian approximation's own normalization is automatic (Gaussians always integrate to a known, closed-form value), trading an intractable exact answer for a cheap, often-good-enough approximate one."
+      ],
+      "reviewCardIds": ["RC-PROB-06-01"]
+    },
+    {
+      "id": "PROB-06-ex2-laplace-derivation",
+      "objective": "Derive the Laplace approximation from a second-order Taylor expansion of the log-density.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["PROB-06-ex1-why-gaussian-approximation"],
+      "answerType": "derivation",
+      "prompt": "Let $x^*$ be the mode of $p(x)$ (so $\\frac{d}{dx}\\log p(x)\\big|_{x^*}=0$). Using the second-order Taylor expansion of $\\log p(x)$ around $x^*$ (from MATH-00, applied to $\\log p$ instead of $p$ directly), show that $p(x)$ is approximately proportional to a Gaussian $N(x\\mid x^*, \\sigma^2)$ with $\\sigma^2 = \\left(-\\dfrac{d^2}{dx^2}\\log p(x)\\Big|_{x^*}\\right)^{-1}$.",
+      "hints": [
+        "Taylor-expand $\\log p(x)$ to second order around $x^*$: $\\log p(x) \\approx \\log p(x^*) + \\left.\\dfrac{d\\log p}{dx}\\right|_{x^*}(x-x^*) + \\tfrac12\\left.\\dfrac{d^2\\log p}{dx^2}\\right|_{x^*}(x-x^*)^2$.",
+        "The linear term vanishes, since $x^*$ is the mode (the first derivative of $\\log p$ is zero there, same as it being zero for $p$ itself). So $\\log p(x) \\approx \\log p(x^*) + \\tfrac12\\left.\\dfrac{d^2\\log p}{dx^2}\\right|_{x^*}(x-x^*)^2$.",
+        "Exponentiating: $p(x) \\approx p(x^*)\\exp\\left(\\tfrac12\\left.\\dfrac{d^2\\log p}{dx^2}\\right|_{x^*}(x-x^*)^2\\right)$. Comparing to a Gaussian's exponent $-\\dfrac{(x-x^*)^2}{2\\sigma^2}$: matching gives $\\dfrac{d^2\\log p}{dx^2}\\Big|_{x^*} = -\\dfrac{1}{\\sigma^2}$, i.e. $\\sigma^2 = \\left(-\\left.\\dfrac{d^2\\log p}{dx^2}\\right|_{x^*}\\right)^{-1}$. Note the second derivative of $\\log p$ at a mode is negative (it's a maximum), so this variance is correctly positive."
+      ],
+      "reviewCardIds": ["RC-PROB-06-02"]
+    },
+    {
+      "id": "PROB-06-ex3-numeric",
+      "objective": "Compute the Laplace approximation for a concrete unnormalized density.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["PROB-06-ex2-laplace-derivation"],
+      "answerType": "numeric",
+      "prompt": "Let $\\log \\tilde p(x) = -\\tfrac14 x^4 + \\tfrac12 x^2$ (unnormalized log-density). This has a mode at $x^*=1$ (you can verify $\\tfrac{d}{dx}\\log\\tilde p\\big|_{x=1} = -x^3+x\\big|_{x=1}=0$). Compute the Laplace-approximation variance $\\sigma^2$ at this mode. Enter a decimal.",
+      "hints": [
+        "$\\dfrac{d}{dx}\\log\\tilde p(x) = -x^3+x$. $\\dfrac{d^2}{dx^2}\\log\\tilde p(x) = -3x^2+1$.",
+        "At $x^*=1$: $\\dfrac{d^2}{dx^2}\\log\\tilde p\\big|_{x=1} = -3(1)^2+1 = -2$.",
+        "$\\sigma^2 = (-(-2))^{-1} = (2)^{-1} = 0.5$."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

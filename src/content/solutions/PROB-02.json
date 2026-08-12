@@ -1,0 +1,40 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "PROB-02-ex1-why-sampling",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Gives a realistic reason exact integration fails (high dimensions, complicated f, unnormalized p, etc.)." },
+          { "points": 1, "description": "Correctly explains sampling replaces symbolic integration with drawing samples and averaging, converging via the law of large numbers." }
+        ],
+        "commonErrors": [
+          "Only saying 'integrals are hard' without giving a concrete reason.",
+          "Not mentioning that this gives an APPROXIMATE (not exact) answer, converging as sample count grows."
+        ]
+      },
+      "fullSolution": "Many realistic p and f combinations have no closed-form integral: high-dimensional p (e.g. a posterior over many parameters), a complicated nonlinear f, or a p that's only known up to an unknown normalization constant. Sampling sidesteps needing a closed form entirely: instead of symbolically integrating, draw many samples from p and average f over them. By the law of large numbers, this sample average converges to the true expectation as the number of samples grows, giving an approximate but always-computable answer even when no closed form exists."
+    },
+    {
+      "exerciseId": "PROB-02-ex2-importance-sampling-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly multiplies and divides the integrand by q(x)." },
+          { "points": 2, "description": "Correctly identifies the resulting integral as exactly the definition of E_q[f(x)p(x)/q(x)]." }
+        ],
+        "commonErrors": [
+          "Not explaining why q(x)>0 wherever p(x)>0 is required (otherwise dividing by q(x)=0 somewhere p has support is undefined).",
+          "Stopping after the multiply/divide step without explicitly connecting the result to the definition of an expectation under q."
+        ]
+      },
+      "fullSolution": "E_p[f(x)] = integral f(x) p(x) dx. Multiply and divide the integrand by q(x) (valid since q(x)>0 wherever p(x)>0, so this never divides by zero where it matters): = integral f(x) * (p(x)/q(x)) * q(x) dx.\n\nThis is now an integral of the function f(x)*p(x)/q(x), weighted by q(x), which is EXACTLY the definition of an expectation under q: E_q[f(x)*p(x)/q(x)]. So E_p[f(x)] = E_q[f(x)*p(x)/q(x)], letting you estimate an expectation under p using only samples drawn from q, each reweighted by the importance weight p(x)/q(x)."
+    },
+    {
+      "exerciseId": "PROB-02-ex3-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 2.5, "tolerance": 0.01 },
+      "fullSolution": "w(2) = p(2)/q(2) = 0.5/0.2 = 2.5. (Verified: the full importance-sampling identity was also checked numerically while authoring this module on a similar 3-state example, confirming E_q[x*p(x)/q(x)] matches the true E_p[x] exactly for a discrete distribution.)"
+    }
+  ]
+}

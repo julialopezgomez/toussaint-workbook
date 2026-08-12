@@ -1,0 +1,40 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "PROB-04-ex1-why-partition-function-hard",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly identifies E(x) as local/pointwise and Z as global (integrates over the whole space)." },
+          { "points": 1, "description": "Correctly explains the sampling implication: only relative/local comparisons are possible without Z, risking missed modes and long mixing times." }
+        ],
+        "commonErrors": [
+          "Only saying 'Z is an integral so it's hard' without explaining WHY that makes it fundamentally different from evaluating E(x) pointwise.",
+          "Not connecting this to the practical sampling implication (Metropolis-Hastings style local comparison, mixing time issues)."
+        ]
+      },
+      "fullSolution": "E(x) only needs properties of x itself, a local, pointwise computation. Z = integral of exp(-E(x)) over all x requires summing over the ENTIRE space of possible x values, a fundamentally global quantity depending on the whole function E(.), not just one point. Without Z, you know relative energies (E(x1) vs E(x2)) but have no absolute reference for how much total probability mass exists anywhere, including in regions you haven't explored. This is exactly why energy-only sampling methods (like Metropolis-Hastings, which only ever compares energies before/after a proposed step) are inherently local: they can make relative comparisons near their current position, but have no global information to tell them whether a distant, unexplored region might contain much lower energy (higher probability) mass, which is exactly what causes long mixing times when probability mass is split across multiple far-apart modes."
+    },
+    {
+      "exerciseId": "PROB-04-ex2-energy-equivalence-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly isolates log p(x) = c - E(x) from the energy definition." },
+          { "points": 2, "description": "Correctly exponentiates and identifies Z = exp(-c), showing the two forms are equivalent." }
+        ],
+        "commonErrors": [
+          "Sign errors when isolating log p(x) from E(x) = -log p(x) + c.",
+          "Not explicitly stating the correspondence Z = exp(-c) / c = -log Z."
+        ]
+      },
+      "fullSolution": "From E(x) = -log p(x) + c: log p(x) = c - E(x). Exponentiating both sides: p(x) = exp(c - E(x)) = exp(c) * exp(-E(x)).\n\nComparing to p(x) = (1/Z) exp(-E(x)): 1/Z = exp(c), so Z = exp(-c), equivalently c = -log Z. The two forms (energy function E(x)=-log p(x)+c, and Boltzmann distribution p(x)=(1/Z)exp(-E(x))) are algebraically the same statement, just solved for different variables."
+    },
+    {
+      "exerciseId": "PROB-04-ex3-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.8808, "tolerance": 0.001 },
+      "fullSolution": "exp(-E(x1)) = exp(0) = 1. exp(-E(x2)) = exp(-2) = 0.1353. Z = 1 + 0.1353 = 1.1353. p(x1) = 1/1.1353 = 0.8808. (Verified with NumPy while authoring this module.) The lower-energy state x1 is about 6.6x more probable than x2, consistent with lower energy corresponding to higher probability."
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+---
+id: PROB-04
+block: PROB
+title: "Energy-Based Views & the Boltzmann Distribution"
+tier: 2
+estimatedHours: 1.5
+prerequisites: ["PROB-03"]
+objectives:
+  - "Explain why the partition function is a fundamentally global (and hard) quantity, unlike the energy function itself."
+  - "Derive the equivalence between the energy-function and Boltzmann-distribution forms."
+  - "Compute Boltzmann probabilities for a simple discrete system."
+sources:
+  - { sourceId: "energy", pages: "p1-3 (HTML-sourced)", role: "primary" }
+concepts:
+  - "Energy function"
+  - "Boltzmann distribution"
+  - "Partition function"
+notation:
+  - { symbol: "$E(x)$", meaning: "energy function: $E(x)=-\\log p(x)+c$" }
+  - { symbol: "$Z$", meaning: "partition function (normalization constant)" }
+  - { symbol: "$\\beta$", meaning: "inverse temperature, $\\beta=1/(k_BT)$ in physics; a free scale parameter in AI" }
+cheatsheetLinks: []
+nextModules: ["PROB-05"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+The energy/probability correspondence underlies a huge range of models (Boltzmann machines, energy-based generative models, the Gibbs/Boltzmann connection in statistical mechanics) and reframes "define a probability distribution" as "define any function you like as an energy, exponentiate and normalize." Understanding exactly what's easy (evaluating energy) versus hard (the partition function) about this framing is directly relevant to sampling-based methods in your own research.
+
+## Prerequisites & readiness check
+
+You should have entropy/cross-entropy (PROB-03) fresh, since neg-log-likelihood shows up in both.
+
+<ReadinessCheck
+  question="What is $\exp(-2)$, approximately?"
+  answer="$\approx 0.135$."
+/>
+
+## From probability to energy
+
+Given any density $p(x)$, define $E(x) = -\log p(x) + c$ for an arbitrary constant offset $c$. This is the **energy function**. The motivation (from the source note): probabilities are inherently multiplicative (independent events' probabilities multiply), but it's often more convenient to work additively, taking a $-\log$ converts multiplication into addition ($-\log[p(x_1)p(x_2)] = -\log p(x_1) - \log p(x_2)$), and the source shows this specific transform is in fact the *only* way to convert a multiplicative quantity into an additive one, up to the choice of constant.
+
+## The Boltzmann distribution
+
+<ExerciseCard id="PROB-04-ex2-energy-equivalence-derivation" />
+
+Conventionally written with the constant absorbed into a normalizer: $p(x) = \frac1Z\exp(-E(x))$, the **Boltzmann distribution**, with $Z=\int_x\exp(-E(x))\,dx$ the **partition function**.
+
+## Why the partition function is hard
+
+<ExerciseCard id="PROB-04-ex1-why-partition-function-hard" />
+
+## Worked example
+
+For a two-state system with $E(x_1)=0$, $E(x_2)=2$: $\exp(-E(x_1))=1$, $\exp(-E(x_2))=\exp(-2)\approx0.1353$, so $Z\approx1.1353$ and $p(x_1) = 1/1.1353 \approx 0.8808$, $p(x_2)\approx0.1192$. *(Verified with NumPy while authoring this module.)* Notice: computing $p(x_1)$ required knowing $Z$, which required evaluating the energy at *every* state, not just $x_1$, exactly the "global" property from the derivation above, made concrete even in this trivial 2-state case.
+
+<ExerciseCard id="PROB-04-ex3-numeric" />
+
+## Physical origin, briefly
+
+In statistical mechanics, this exact form arises from a system of many particles with additive energies and multiplicative combinatorics: the Boltzmann distribution $p(i)\propto\exp(-\beta E_i)$ describes how likely a single particle is to occupy energy level $i$, with $\beta=1/(k_BT)$ relating temperature to the typical particle energy. In AI/ML contexts, $\beta$ (or equivalently $t=1/\beta$ from the log-barrier method in OPT-04) is usually just a free scaling parameter you choose, not tied to physical temperature.
+
+## Summary
+
+- $E(x)=-\log p(x)+c$ and $p(x)=\frac1Z\exp(-E(x))$ are the same statement, solved for different variables; $Z=\exp(-c)$.
+- $E(x)$ is a local, pointwise quantity (easy); $Z$ is a global quantity requiring integration over the whole space (hard).
+- Sampling methods using only energy evaluations (e.g. Metropolis-Hastings) are inherently local, risking long mixing times across well-separated modes, precisely because they lack the global information $Z$ would provide.
+
+## Retrieval questions
+
+1. Derive $Z=\exp(-c)$ from the energy function definition, without looking back.
+2. Why can't you compute $p(x_1)$ for a specific state without implicitly knowing about every other state's energy too?
+3. What physical quantity does $\beta$ correspond to, and what does it correspond to in a typical AI/ML use of this framework instead?
+
+## Mastery checklist
+
+- [ ] Can explain why the partition function is fundamentally global while the energy function is local.
+- [ ] Derived the equivalence between the energy-function and Boltzmann-distribution forms.
+- [ ] Computed Boltzmann probabilities for a concrete discrete system.
+
+## Source note
+
+This module's definitions, the multiplicative-to-additive motivation, and the partition-function discussion are adapted from Marc Toussaint's `energy` lecture note (HTML-sourced, identical to the PDF), used with attribution per this repository's README. The worked example and numeric exercise are newly authored.
+
+---
+
+**Next**: [PROB-05: Gaussians: Identities & Manipulation](/course/PROB/PROB-05)

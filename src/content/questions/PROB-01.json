@@ -1,0 +1,69 @@
+{
+  "moduleId": "PROB-01",
+  "exercises": [
+    {
+      "id": "PROB-01-ex1-joint-vs-conditional",
+      "objective": "Distinguish joint, marginal, and conditional probability.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "For two random variables $X,Y$, explain in your own words the difference between the joint distribution $P(X,Y)$, the marginal $P(X)$, and the conditional $P(X\\mid Y)$, and how the marginal and conditional are each obtained from the joint.",
+      "hints": [
+        "$P(X,Y)$ describes the probability of $X$ and $Y$ taking specific values *together*, it's the most complete description of how the two variables relate.",
+        "The marginal $P(X)$ answers 'what's the probability of $X$, ignoring $Y$ entirely?' It's obtained by summing (or integrating) the joint over all values of $Y$: $P(X) = \\sum_y P(X,y)$.",
+        "The conditional $P(X\\mid Y=y)$ answers 'what's the probability of $X$, given that we've observed $Y=y$ specifically?' It's obtained by taking the joint's slice at $Y=y$ and renormalizing: $P(X\\mid Y=y) = P(X,y)/P(y)$, dividing by $P(y)=\\sum_x P(x,y)$ so the conditional sums to 1 over $X$."
+      ],
+      "reviewCardIds": ["RC-PROB-01-01"]
+    },
+    {
+      "id": "PROB-01-ex2-bayes-derivation",
+      "objective": "Derive Bayes' rule from the definition of conditional probability.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["PROB-01-ex1-joint-vs-conditional"],
+      "answerType": "derivation",
+      "prompt": "Starting from the definition $P(A\\mid B) = P(A,B)/P(B)$ (and the symmetric $P(B\\mid A)=P(A,B)/P(A)$), derive Bayes' rule: $P(A\\mid B) = \\dfrac{P(B\\mid A)P(A)}{P(B)}$.",
+      "hints": [
+        "Both definitions involve the same joint $P(A,B)$. Rearrange each to isolate $P(A,B)$.",
+        "From $P(A\\mid B) = P(A,B)/P(B)$: $P(A,B) = P(A\\mid B)P(B)$. From $P(B\\mid A)=P(A,B)/P(A)$: $P(A,B) = P(B\\mid A)P(A)$.",
+        "Since both expressions equal $P(A,B)$, set them equal: $P(A\\mid B)P(B) = P(B\\mid A)P(A)$. Dividing both sides by $P(B)$ gives Bayes' rule directly: $P(A\\mid B) = P(B\\mid A)P(A)/P(B)$."
+      ],
+      "reviewCardIds": ["RC-PROB-01-02"]
+    },
+    {
+      "id": "PROB-01-ex3-numeric",
+      "objective": "Apply Bayes' rule to compute a posterior probability.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["PROB-01-ex2-bayes-derivation"],
+      "answerType": "numeric",
+      "prompt": "A diagnostic test for a rare condition (prior prevalence $P(\\text{disease})=0.02$) has $P(\\text{positive}\\mid\\text{disease})=0.9$ (true positive rate) and $P(\\text{positive}\\mid\\text{no disease})=0.1$ (false positive rate). Using Bayes' rule, compute $P(\\text{disease}\\mid\\text{positive})$. Enter a decimal to 4 decimal places.",
+      "hints": [
+        "First compute $P(\\text{positive})$ via the law of total probability: $P(\\text{pos}) = P(\\text{pos}\\mid\\text{disease})P(\\text{disease}) + P(\\text{pos}\\mid\\text{no disease})P(\\text{no disease})$.",
+        "$P(\\text{pos}) = 0.9(0.02) + 0.1(0.98) = 0.018+0.098 = 0.116$.",
+        "$P(\\text{disease}\\mid\\text{pos}) = \\dfrac{P(\\text{pos}\\mid\\text{disease})P(\\text{disease})}{P(\\text{pos})} = \\dfrac{0.018}{0.116} \\approx 0.1552$. Notice how low this is despite a 90% true-positive rate, a direct consequence of the disease being rare (a classic illustration of why the prior/base rate matters so much)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "PROB-01-ex4-marginalization-challenge",
+      "objective": "Compute a marginal distribution from a joint distribution table.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 12,
+      "prerequisites": ["PROB-01-ex3-numeric"],
+      "answerType": "numeric",
+      "prompt": "A joint distribution $P(X,Y)$ over $X\\in\\{0,1\\}$, $Y\\in\\{0,1,2\\}$ is given by $P(X{=}0,Y{=}0)=0.1$, $P(X{=}0,Y{=}1)=0.2$, $P(X{=}0,Y{=}2)=0.05$, $P(X{=}1,Y{=}0)=0.15$, $P(X{=}1,Y{=}1)=0.3$, $P(X{=}1,Y{=}2)=0.2$ (these sum to 1). Compute the marginal $P(X{=}1)$. Enter a decimal.",
+      "hints": [
+        "The marginal $P(X{=}1)$ sums the joint over all values of $Y$, at $X=1$: $P(X{=}1) = P(X{=}1,Y{=}0)+P(X{=}1,Y{=}1)+P(X{=}1,Y{=}2)$.",
+        "Add the three relevant entries: $0.15+0.3+0.2$.",
+        "$P(X{=}1) = 0.65$."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

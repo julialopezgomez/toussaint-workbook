@@ -1,0 +1,72 @@
+{
+  "moduleId": "PROB-03",
+  "exercises": [
+    {
+      "id": "PROB-03-ex1-why-expected-surprise",
+      "objective": "Explain why entropy is described as expected surprise.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "entropy", "page": 1, "originalNumber": "opening motivation" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "The neg-log-likelihood $-\\log p(x)$ is called the \"surprise\" of observing $x$, and entropy $H(p) = \\mathbb{E}_{p(x)}\\{-\\log p(x)\\}$ is the *expected* surprise. Explain why $-\\log p(x)$ is a sensible measure of surprise: why should a low-probability event have high $-\\log p(x)$, and a near-certain event have $-\\log p(x)$ near zero?",
+      "hints": [
+        "As $p(x) \\to 0$ (a very unlikely event), $-\\log p(x) \\to \\infty$: an extremely rare event is maximally surprising, matching intuition.",
+        "As $p(x) \\to 1$ (a near-certain event), $-\\log p(x) \\to 0$: an event you were already nearly sure would happen shouldn't surprise you much at all.",
+        "This matches the everyday sense of 'surprise' directly: rare, unexpected things surprise us more than things we already expected. The specific choice of $-\\log(\\cdot)$ (rather than, say, $1-p(x)$) additionally makes surprise *additive* across independent events, which is what makes entropy interpretable as an expected code length (see the summary)."
+      ],
+      "reviewCardIds": ["RC-PROB-03-01"]
+    },
+    {
+      "id": "PROB-03-ex2-kl-derivation",
+      "objective": "Derive the relationship between KL divergence, cross-entropy, and entropy.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "entropy", "page": 2, "originalNumber": "Relative Entropy (KL-divergence) section" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["PROB-03-ex1-why-expected-surprise"],
+      "answerType": "derivation",
+      "prompt": "Given the definitions $H(p) = \\mathbb{E}_{p(x)}\\{-\\log p(x)\\}$ (entropy), $H(p,q) = \\mathbb{E}_{p(x)}\\{-\\log q(x)\\}$ (cross-entropy), and $D(p\\|q) = \\mathbb{E}_{p(x)}\\left\\{\\log\\dfrac{p(x)}{q(x)}\\right\\}$ (KL divergence), derive $D(p\\|q) = H(p,q) - H(p)$.",
+      "hints": [
+        "Split the log of a ratio inside the KL expectation: $\\log\\dfrac{p(x)}{q(x)} = \\log p(x) - \\log q(x)$.",
+        "Substitute this into the expectation: $D(p\\|q) = \\mathbb{E}_{p(x)}\\{\\log p(x) - \\log q(x)\\} = \\mathbb{E}_{p(x)}\\{\\log p(x)\\} - \\mathbb{E}_{p(x)}\\{\\log q(x)\\}$ (expectation is linear, so it splits over the subtraction).",
+        "$\\mathbb{E}_{p(x)}\\{\\log p(x)\\} = -H(p)$ (negative of the entropy definition) and $\\mathbb{E}_{p(x)}\\{\\log q(x)\\} = -H(p,q)$ (negative of the cross-entropy definition). So $D(p\\|q) = -H(p) - (-H(p,q)) = H(p,q) - H(p)$."
+      ],
+      "reviewCardIds": ["RC-PROB-03-02"]
+    },
+    {
+      "id": "PROB-03-ex3-numeric",
+      "objective": "Compute entropy, cross-entropy, and KL divergence for a small discrete distribution.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["PROB-03-ex2-kl-derivation"],
+      "answerType": "numeric",
+      "prompt": "Let $p=[0.5,0.25,0.25]$ and $q=[0.4,0.3,0.3]$ over 3 outcomes. Using $\\log_2$ (units of bits), compute $H(p)$, then $D(p\\|q)$. Report $D(p\\|q)$ to 4 decimal places.",
+      "hints": [
+        "$H(p) = -\\sum_x p(x)\\log_2 p(x) = -[0.5\\log_2(0.5) + 0.25\\log_2(0.25)+0.25\\log_2(0.25)] = -[0.5(-1)+0.25(-2)+0.25(-2)] = 0.5+0.5+0.5=1.5$ bits.",
+          "$H(p,q) = -\\sum_x p(x)\\log_2 q(x) = -[0.5\\log_2(0.4)+0.25\\log_2(0.3)+0.25\\log_2(0.3)]$. Compute each term: $\\log_2(0.4)\\approx-1.3219$, $\\log_2(0.3)\\approx-1.7370$.",
+        "$H(p,q) \\approx -[0.5(-1.3219)+0.5(-1.7370)] = 0.6610+0.8685 = 1.5294$ bits. $D(p\\|q) = H(p,q)-H(p) = 1.5294-1.5 = 0.0294$ bits (small but positive, as it must always be)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "PROB-03-ex4-nonneg-challenge",
+      "objective": "Explain why KL divergence is always non-negative.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "entropy", "page": 2, "originalNumber": "KL non-negativity remark" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 10,
+      "prerequisites": ["PROB-03-ex3-numeric"],
+      "answerType": "proof",
+      "prompt": "The source note states that $D(p\\|q)\\ge0$ always, with equality only when $p=q$, and that this follows from Jensen's inequality (for a concave function $\\phi$, $\\mathbb{E}[\\phi(X)] \\le \\phi(\\mathbb{E}[X])$). Using $D(p\\|q) = \\mathbb{E}_{p(x)}\\{-\\log[q(x)/p(x)]\\}$ (an equivalent rewriting of the KL definition) and the fact that $-\\log(\\cdot)$ is convex (equivalently, $\\log(\\cdot)$ is concave), sketch why Jensen's inequality gives $D(p\\|q)\\ge 0$.",
+      "hints": [
+        "Jensen's inequality for a convex function $\\psi$ goes the other way from the concave case: $\\mathbb{E}[\\psi(X)] \\ge \\psi(\\mathbb{E}[X])$. Here $\\psi=-\\log$ is convex, and $X = q(x)/p(x)$ (a ratio, random under $p$).",
+        "Apply Jensen: $\\mathbb{E}_{p(x)}\\{-\\log[q(x)/p(x)]\\} \\ge -\\log\\left(\\mathbb{E}_{p(x)}\\{q(x)/p(x)\\}\\right)$.",
+        "The right-hand side's inner expectation is $\\mathbb{E}_{p(x)}\\{q(x)/p(x)\\} = \\sum_x p(x)\\cdot q(x)/p(x) = \\sum_x q(x) = 1$ (since $q$ is a valid probability distribution, it sums to 1). So the right-hand side is $-\\log(1) = 0$, giving $D(p\\|q) \\ge 0$ directly."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

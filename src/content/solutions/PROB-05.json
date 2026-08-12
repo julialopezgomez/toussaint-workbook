@@ -1,0 +1,41 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "PROB-05-ex1-why-closed-family",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly explains that closure guarantees the result stays Gaussian (fixed-size mean+covariance representation), not growing in complexity." },
+          { "points": 1, "description": "Connects this to sequential Bayesian updating / Kalman-filter-style repeated combination." }
+        ],
+        "commonErrors": [
+          "Only saying 'it's convenient' without explaining what specifically would go wrong without closure (growing representational complexity).",
+          "Not connecting to the Kalman filter or sequential updating use case."
+        ]
+      },
+      "fullSolution": "If you start with a Gaussian belief and repeatedly combine it with Gaussian-shaped evidence (product for Bayes' rule, marginalization/conditioning for propagating through a linear model), closure guarantees the result stays Gaussian at every step, describable by just a mean and covariance, no matter how many updates accumulate. Without closure, each update could produce increasingly complex distributions (e.g. more and more mixture components), needing ever-growing storage to describe exactly. Because Gaussians are closed under exactly the operations a sequential Bayesian filter needs, such a filter can run indefinitely while only ever tracking a fixed-size mean and covariance, this is precisely the structure underlying the Kalman filter."
+    },
+    {
+      "exerciseId": "PROB-05-ex2-product-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly multiplies the two Gaussian densities by adding their exponents." },
+          { "points": 2, "description": "Correctly extracts and combines the x^2 coefficients from both exponents." },
+          { "points": 1, "description": "Correctly matches to the standard Gaussian exponent form and solves for sigma_c^2." }
+        ],
+        "commonErrors": [
+          "Forgetting the factor of 2 in the denominator of a Gaussian exponent (-(x-a)^2/(2A), not -(x-a)^2/A).",
+          "Trying to also track the linear/constant terms when only the x^2 coefficient is needed for the variance."
+        ]
+      },
+      "fullSolution": "N(x|a,A)N(x|b,B) is proportional to exp(-(x-a)^2/(2A) - (x-b)^2/(2B)). Expanding just the x^2 terms: from -(x-a)^2/(2A), the x^2 coefficient is -1/(2A); from -(x-b)^2/(2B), it's -1/(2B). Combined coefficient of x^2 in the total exponent: -(1/(2A)+1/(2B)).\n\nA Gaussian N(x|mu_c, sigma_c^2) has exponent -x^2/(2*sigma_c^2) + (linear and constant terms). Matching the x^2 coefficients: 1/(2*sigma_c^2) = 1/(2A)+1/(2B), so 1/sigma_c^2 = 1/A+1/B, i.e. sigma_c^2 = (1/A+1/B)^-1. Precisions (inverse variances) add when Gaussians are multiplied."
+    },
+    {
+      "exerciseId": "PROB-05-ex3-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 2.667, "tolerance": 0.01 },
+      "fullSolution": "sigma_c^2 = (1/1 + 1/2)^-1 = 1.5^-1 = 0.6667. mu_c = sigma_c^2 * (a/A + b/B) = 0.6667*(2/1+4/2) = 0.6667*4 = 2.667. (Verified with NumPy while authoring this module.) The combined mean sits closer to a=2 (the tighter/more confident input, A=1) than to b=4 (the looser input, B=2), a precision-weighted average."
+    }
+  ]
+}
