@@ -1,15 +1,16 @@
 # CLAUDE.md — Toussaint Workbook
 
-Private, local-first learning workbook built from Marc Toussaint's TU Berlin course PDFs. Full context in `PROJECT_STATE.md` (resumable ledger) and `docs/decisions/` (decision records). Read those before making changes if resuming after a gap.
+Local-first learning workbook built from Marc Toussaint's TU Berlin course PDFs. The source code and authored content live in a **public** git repo (user's explicit decision, 2026-08-12, see `docs/decisions/0003-public-repo.md`), but the site itself is still local-only: no hosted/deployed version. Full context in `PROJECT_STATE.md` (resumable ledger) and `docs/decisions/` (decision records). Read those before making changes if resuming after a gap.
 
 ## Non-negotiable rules
 
-1. **Source PDFs are read-only, always.** `../original notes/` — never move, rename, overwrite, or edit. Same for any Obsidian vault content under `VAULT_ROOT` — read-only, inspect only within folders the user has approved.
-2. **No content generation ahead of an approval gate.** Gates: (1) requirements + source audit, (2) curriculum + architecture, (3) pilot module, (4) batch production, (5) final QA. Each ends with a report and an explicit wait for user approval — do not skip ahead, even if the next step seems obvious.
-3. **No API keys, no deployment, no accounts, no analytics, no database** in this project, ever, unless the user explicitly reverses that decision in a new decision record.
-4. **Every source-derived claim, equation, example, or exercise must cite `filename + page range`.** Distinguish paraphrased-from-source vs. adapted-from-source vs. newly authored vs. external-sourced (with its own citation) in every module.
-5. **No exercise solutions exist in the source corpus.** Every rubric/solution/answer key in this workbook is newly authored — mark it as such, don't imply it came from Toussaint's materials.
+1. **Source PDFs are read-only, always.** `../original notes/` (never move, rename, overwrite, or edit) and are never committed to the repo. Same for any Obsidian vault content under `VAULT_ROOT` (read-only, inspect only within folders the user has approved).
+2. **No content generation ahead of an approval gate.** Gates: (1) requirements + source audit, (2) curriculum + architecture, (3) pilot module, (4) batch production, (5) final QA. Each ends with a report and an explicit wait for user approval; do not skip ahead, even if the next step seems obvious.
+3. **No API keys, no hosted deployment, no accounts, no analytics, no database** in this project, ever, unless the user explicitly reverses that decision in a new decision record. (The repo being public is a separate decision from deployment; see `docs/decisions/0003-public-repo.md`, it does not reverse this rule.)
+4. **Every source-derived claim, equation, example, or exercise must cite `filename + page range`, with a visible provenance tag** (source-adapted / newly-authored / external-sourced) since the content is now public: see the README's "Credit and source material" section, which every module's citations must stay consistent with.
+5. **No exercise solutions exist in the source corpus.** Every rubric/solution/answer key in this workbook is newly authored: mark it as such, don't imply it came from Toussaint's materials.
 6. **Don't show a complete solution before an attempt** unless the user explicitly asks.
+7. **Full extracted text of the source PDFs never gets committed**, even though the workbook content derived from them does. `data/source-manifest/raw-text/` and `html-text/` stay in `.gitignore` permanently.
 
 ## Paths
 - `PDF_SOURCE_DIR`: `../original notes/`
