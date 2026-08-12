@@ -30,6 +30,13 @@ See `docs/decisions/0000-requirements.md`, `0001-corpus-update-and-priorities.md
 - **Production build verified**: `npm run build` succeeds cleanly, 3 static pages, 0 errors.
 - Two real bugs were also hit and fixed purely from getting the toolchain working (not content bugs): Astro 7's `mdx({remarkPlugins})` is silently deprecated/non-functional — plugins must go through `markdown.processor`; and raw LaTeX braces in MDX prose need `remark-math` specifically to avoid being misparsed as JSX expressions, not just for rendering.
 
+## Resolved after user review of the pilot (2026-08-12, third pass)
+- **Real bug found and fixed**: `rehype-katex` bundled its own separate copy of KaTeX (0.16.47) distinct from the directly-installed one (0.18.4), and the two versions use different CSS class-naming conventions (`sizing` vs `katex-sizing`). Build-time-rendered math (all MDX prose, including the cheat sheet's equation table and part of ML-03's own worked example) was rendering with unscaled sub/superscripts as a result, since `katex.min.css` only matched one of the two conventions. Fixed via an `npm overrides` pin (`"katex": "$katex"`) forcing a single KaTeX version across the whole dependency tree, confirmed with a full clean reinstall (deleted `node_modules`/`package-lock.json`). Verified fixed on both the cheat sheet and ML-03 pages; production build still succeeds.
+- Root cause of the user's other report (raw `$...$` text, dead buttons) was confirmed to be opening the `.mdx` source file directly (`file://`) instead of through the dev server, not a real defect. `README.md` added with explicit "don't double-click the file" setup/run instructions.
+- **Progress export/import UI added**: `store.ts`'s `exportProgress`/`importProgress` functions existed since the pilot build but had no UI. Added `src/components/ProgressControls.astro` (download-as-JSON / upload-to-restore) on the homepage, plus a "Where your answers live" explainer (IndexedDB, browser-local, never touches git-tracked files). Export tested live and works; import wasn't independently exercised with a real file upload in the automated browser tool (same class of limitation as the earlier clipboard-copy caveat), but the code path is small and symmetric with the tested export path.
+- **Local git repo initialized** at `workbook/` (not the parent folder), so the source PDFs (`../original notes/`) are structurally outside the repo entirely. `.gitignore` additionally excludes `data/source-manifest/raw-text/` and `html-text/` (full extracted text of Toussaint's copyrighted lecture notes) even though they're inside `workbook/`. Initial commit made, 38 files, no remote configured yet, nothing pushed anywhere.
+- Style note from user: avoid em/en-dash asides going forward, prefer colons/semicolons/commas/parentheses. Applying from here on.
+
 ## Pending — user review of the pilot
 - Read `src/content/course/ML/ML-03.mdx` at `http://localhost:4321/course/ML/ML-03` (dev server: `npm run dev`; symbolic checking needs `npm run grading-server` running too) and confirm: pedagogical style, exercise difficulty/tiering, hint quality, whether the manual-derivation depth matches what you actually want.
 - Confirm the Review-with-Claude clipboard button actually copies for you (couldn't be verified in the automated browser tool).
@@ -44,7 +51,8 @@ See `docs/decisions/0000-requirements.md`, `0001-corpus-update-and-priorities.md
 - Extraction pipeline: clean, 0 errors, 13/13 sources.
 - Astro type check (`npx astro check`): 0 errors.
 - Production build: succeeds, 3 pages.
-- Manual + automated interaction testing: numeric checker ✓, symbolic checker (live SymPy round-trip) ✓, rubric/attempt flow ✓, IndexedDB progress ✓, KaTeX rendering (132 spans confirmed rendered) ✓, cheat sheet page ✓, homepage ✓. Clipboard copy: untested (see above).
+- Manual + automated interaction testing: numeric checker ✓, symbolic checker (live SymPy round-trip) ✓, rubric/attempt flow ✓, IndexedDB progress ✓, KaTeX rendering (132 spans, correct `katex-sizing` classes and 0.7em scaling after the dedup fix) ✓, cheat sheet page ✓, homepage ✓, progress export ✓. Clipboard copy and progress import: not independently exercised in the automated browser tool (see caveats above); user should verify both themselves.
+- Git: local repo initialized at `workbook/`, initial commit made (38 files), source PDFs and extracted text excluded, no remote configured.
 
 ## Next exact action
 Wait for user review of the ML-03 pilot (style/depth/interaction approval), then build KIN-02 as the second pilot module, then move to Phase 4 (batch production) once both are approved.

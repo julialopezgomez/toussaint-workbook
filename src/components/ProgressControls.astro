@@ -1,0 +1,60 @@
+---
+---
+<div class="progress-controls">
+  <button id="export-progress-btn" type="button">⬇ Export my progress</button>
+  <label class="import-label">
+    ⬆ Import progress
+    <input id="import-progress-input" type="file" accept="application/json" hidden />
+  </label>
+  <span id="progress-status" role="status" aria-live="polite"></span>
+</div>
+
+<style>
+  .progress-controls { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin: 1rem 0; }
+  button, .import-label {
+    font: inherit; padding: 0.4rem 0.9rem; border-radius: 0.4rem; border: 1px solid var(--accent, #4f46e5);
+    background: transparent; color: var(--accent, #4f46e5); cursor: pointer;
+  }
+  button:hover, .import-label:hover { background: color-mix(in srgb, var(--accent, #4f46e5) 12%, transparent); }
+  #progress-status { font-size: 0.85rem; opacity: 0.75; }
+</style>
+
+<script>
+  import { exportProgress, importProgress } from '../lib/progress/store';
+
+  const exportBtn = document.getElementById('export-progress-btn');
+  const importInput = document.getElementById('import-progress-input') as HTMLInputElement | null;
+  const status = document.getElementById('progress-status');
+
+  exportBtn?.addEventListener('click', async () => {
+    try {
+      const json = await exportProgress();
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const date = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `toussaint-workbook-progress-${date}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      if (status) status.textContent = 'Downloaded.';
+    } catch (e) {
+      if (status) status.textContent = 'Export failed: ' + (e instanceof Error ? e.message : String(e));
+    }
+  });
+
+  importInput?.addEventListener('change', async () => {
+    const file = importInput.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      await importProgress(text);
+      if (status) status.textContent = 'Imported. Reloading…';
+      setTimeout(() => location.reload(), 800);
+    } catch (e) {
+      if (status) status.textContent = 'Import failed: ' + (e instanceof Error ? e.message : String(e));
+    } finally {
+      importInput.value = '';
+    }
+  });
+</script>

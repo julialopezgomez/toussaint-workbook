@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ProgressControls from '../components/ProgressControls.astro';
 import { getCollection } from 'astro:content';
 
 const modules = await getCollection('course');
@@ -8,7 +9,7 @@ const modules = await getCollection('course');
   <h1>Toussaint Workbook</h1>
   <p>
     A private, self-paced course built from Marc Toussaint's TU Berlin lecture notes, sequenced and
-    prioritized for one specific PhD research direction. This is a <strong>pilot build</strong> — only
+    prioritized for one specific PhD research direction. This is a <strong>pilot build</strong>: only
     one module exists so far, to validate the pedagogical style and interaction design before the rest
     of the course is produced in batches.
   </p>
@@ -17,15 +18,38 @@ const modules = await getCollection('course');
   <ul>
     {modules.map((m) => (
       <li>
-        <a href={`/course/${m.data.block}/${m.data.id}`}><strong>{m.data.id}</strong> — {m.data.title}</a>
+        <a href={`/course/${m.data.block}/${m.data.id}`}><strong>{m.data.id}</strong>: {m.data.title}</a>
         {' '}<span style="opacity:0.6">(~{m.data.estimatedHours} hrs, block {m.data.block})</span>
       </li>
     ))}
   </ul>
 
+  <h2>My progress</h2>
+  <p>
+    Your answers and check results are saved automatically in this browser as you use the site (see
+    "Where your answers live" below). Use these to back up or move your progress to another browser or
+    machine.
+  </p>
+  <ProgressControls />
+
+  <h2>Where your answers live</h2>
+  <p>
+    Everything you type into an exercise, and every check/attempt result, is saved locally in this
+    browser's storage (IndexedDB) the moment you click "Check", "I've attempted this", or the review
+    button. Nothing is sent to a server: this site has no backend and no database of its own.
+  </p>
+  <p>
+    That means: progress is tied to <em>this browser on this machine</em>. It will not appear in a
+    different browser, a different machine, or if someone clones the underlying git repository: no
+    progress data is ever written into a file that git tracks, so cloning the code gives zero access to
+    your answers. Clearing this browser's site data (or using a private/incognito window) will erase
+    progress for this site, so use "Export my progress" above to keep a backup, or before switching
+    machines.
+  </p>
+
   <h2>Full curriculum</h2>
   <p>
-    The complete 13-block, ~63-module plan lives in <code>data/curriculum/CURRICULUM.md</code> — not yet
+    The complete 13-block, ~63-module plan lives in <code>data/curriculum/CURRICULUM.md</code>: not yet
     wired into this site's navigation, since only the pilot module has been authored. The roadmap/search/
     index pages described in <code>data/curriculum/ARCHITECTURE.md</code> get built once real content
     exists to index.
