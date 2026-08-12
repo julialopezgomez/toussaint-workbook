@@ -1,0 +1,53 @@
+{
+  "moduleId": "OPT-04",
+  "exercises": [
+    {
+      "id": "OPT-04-ex1-why-convexity-matters",
+      "objective": "Explain why convexity guarantees global optimality of a local minimum.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "A function $f$ is convex if, for any two points $x_1,x_2$ and $t\\in[0,1]$, $f(tx_1+(1-t)x_2) \\le t f(x_1)+(1-t)f(x_2)$ (the function lies below the straight line connecting any two of its points). For a general (non-convex) function, a local minimum found by gradient descent or Newton's method might not be the global minimum. Explain why convexity rules this out: why must a local minimum of a convex function also be a global minimum?",
+      "hints": [
+        "Suppose, for contradiction, that $x^*$ is a local minimum but not global: there's some other point $\\hat x$ with $f(\\hat x) < f(x^*)$.",
+        "Consider the straight line segment from $x^*$ to $\\hat x$: by convexity, $f$ along this segment lies below (or on) the straight line connecting $f(x^*)$ and $f(\\hat x)$. Since $f(\\hat x) < f(x^*)$, that straight line is strictly decreasing as you move from $x^*$ toward $\\hat x$.",
+        "So arbitrarily close to $x^*$ along that segment (small $t$), $f$ must be strictly less than $f(x^*)$, contradicting $x^*$ being a LOCAL minimum (which requires $f(x^*)$ to be the smallest value in some neighborhood around $x^*$). So no such $\\hat x$ can exist: every local minimum of a convex function is automatically global."
+      ],
+      "reviewCardIds": ["RC-OPT-04-01"]
+    },
+    {
+      "id": "OPT-04-ex2-log-barrier-derivation",
+      "objective": "Derive the log-barrier gradient and explain its behavior near the constraint boundary.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["OPT-04-ex1-why-convexity-matters"],
+      "answerType": "derivation",
+      "prompt": "The log-barrier method replaces an inequality constraint $g(x)\\le 0$ with a penalty term added to the objective: $f_t(x) = f(x) - \\dfrac{1}{t}\\log(-g(x))$, for a parameter $t>0$ (larger $t$ means a weaker barrier). Derive $\\nabla_x f_t(x)$ in terms of $\\nabla f(x)$, $\\nabla g(x)$, and $g(x)$, and explain what happens to the magnitude of the barrier's gradient contribution as $x$ approaches the constraint boundary ($g(x)\\to 0^-$).",
+      "hints": [
+        "Differentiate $-\\frac1t\\log(-g(x))$ using the chain rule: $\\frac{d}{dx}\\log(u) = \\frac{1}{u}\\frac{du}{dx}$, here $u=-g(x)$, so $\\frac{du}{dx}=-\\nabla g(x)$.",
+        "$\\nabla_x\\left[-\\frac1t\\log(-g(x))\\right] = -\\frac1t \\cdot \\frac{1}{-g(x)}\\cdot(-\\nabla g(x)) = -\\frac{1}{t\\,(-g(x))}\\nabla g(x)$. Combined with $\\nabla f(x)$: $\\nabla_x f_t(x) = \\nabla f(x) - \\dfrac{1}{t\\,g(x)}\\nabla g(x)$ (note $g(x)<0$ inside the feasible region, so this term is well-defined and finite there).",
+        "As $x$ approaches the boundary, $g(x)\\to 0^-$, so $\\dfrac{1}{t\\,g(x)} \\to -\\infty$ (a large negative number divided by a small negative number), meaning the barrier's gradient contribution grows without bound. This is exactly the intended behavior: it creates an increasingly strong 'repulsive force' pushing $x$ back into the strict interior as it approaches the boundary, which is why the log-barrier method never actually reaches an infeasible point despite operating on an unconstrained problem."
+      ],
+      "reviewCardIds": ["RC-OPT-04-02"]
+    },
+    {
+      "id": "OPT-04-ex3-lp-recognition",
+      "objective": "Recognize and write a problem in standard LP form.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["OPT-04-ex1-why-convexity-matters"],
+      "answerType": "short-text",
+      "prompt": "A linear program (LP) in standard form is $\\min_x c^\\top x$ s.t. $Ax\\le b$ (linear objective, linear inequality constraints). Consider: $\\max_x (2x_1+3x_2)$ s.t. $x_1+x_2\\le 10$, $x_1\\ge0$, $x_2\\ge0$. Rewrite this as a standard-form LP (i.e. as a minimization with $Ax\\le b$), being explicit about how you handle the fact that it's originally a maximization and that $x_1\\ge0,x_2\\ge0$ are also inequality constraints that need to fit the $Ax\\le b$ pattern.",
+      "hints": [
+        "Maximizing $c^\\top x$ is the same as minimizing $-c^\\top x$: so the objective becomes $\\min_x (-2x_1-3x_2)$.",
+        "$x_1\\ge 0$ needs to be rewritten in the $\\le$ form to fit the pattern: $-x_1 \\le 0$. Similarly $x_2\\ge0$ becomes $-x_2\\le0$.",
+        "Full standard form: $c=\\begin{pmatrix}-2\\\\-3\\end{pmatrix}$, $A=\\begin{pmatrix}1&1\\\\-1&0\\\\0&-1\\end{pmatrix}$, $b=\\begin{pmatrix}10\\\\0\\\\0\\end{pmatrix}$, i.e. $\\min_x c^\\top x$ s.t. $Ax\\le b$ with these three stacked inequality rows."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

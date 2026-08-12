@@ -1,0 +1,96 @@
+---
+id: OPT-05
+block: OPT
+title: "Stochastic & Blackbox Optimization"
+tier: 1
+estimatedHours: 2.5
+prerequisites: ["OPT-02"]
+objectives:
+  - "Explain the speed/accuracy tradeoff stochastic gradient descent makes relative to full-batch gradient descent."
+  - "Compute an SGD step using a mini-batch gradient estimate."
+  - "Understand momentum/Adam as refinements that reduce gradient-estimate noise or adapt per-parameter step sizes."
+  - "Explain the No Free Lunch theorem's actual practical implication (not \"nothing matters\")."
+sources:
+  - { sourceId: "lecture-optimization", pages: "p56-89 (Part 3, §3.1-3.2)", role: "primary" }
+concepts:
+  - "Stochastic Gradient Descent (SGD)"
+  - "Mini-batch gradient estimate"
+  - "Momentum / Adam"
+  - "No Free Lunch (NFL) theorem"
+  - "Evolutionary / blackbox optimization"
+notation:
+  - { symbol: "$\\widehat{\\nabla f}(x)$", meaning: "a noisy, unbiased estimate of the true gradient, e.g. from a mini-batch" }
+  - { symbol: "$N$", meaning: "dataset size" }
+cheatsheetLinks: []
+nextModules: ["OPT-06"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Every neural network you'll ever train (including the manual-MLP-to-PyTorch bridge in ML-03) uses SGD or one of its refinements, not full-batch gradient descent or Newton's method, precisely because real datasets are too large for exact per-step gradients to be affordable. Separately, the No Free Lunch theorem is worth understanding properly once, since it's frequently misquoted to mean something far more nihilistic than what it actually says.
+
+## Prerequisites & readiness check
+
+You should have Gauss-Newton (OPT-02) fresh, as context for "why would you ever accept a noisier gradient estimate instead of a better one."
+
+<ReadinessCheck
+  question="Why is the Gauss-Newton Hessian approximation $J^\top J$ preferred over the true Hessian even when the true Hessian is affordable?"
+  answer="It's always positive semi-definite, avoiding the risk of an indefinite Hessian sending a Newton step in an ascending direction, on top of being cheaper."
+/>
+
+## The full-batch vs. mini-batch tradeoff
+
+<ExerciseCard id="OPT-05-ex1-why-sgd" />
+
+## Worked example
+
+Let $f_i(x) = \tfrac12(x-a_i)^2$ over dataset $a=[1,3,5,2,4]$, so the full-batch gradient at $x_0=0$ is $\tfrac15\sum_i(0-a_i) = \tfrac15(-15) = -3$.
+
+Using a mini-batch $\{a_1,a_4\}=\{1,2\}$ instead: $\widehat{\nabla f}(0) = \tfrac12[(0-1)+(0-2)] = -1.5$, noticeably different from the true $-3$. With $\alpha=0.1$: $x_1 = 0 - 0.1(-1.5) = 0.15$, versus $x_1=0.3$ if the full-batch gradient had been used instead.
+
+*(Both gradients verified with NumPy while authoring this module.)* Neither mini-batch estimate is "wrong", each is an unbiased sample of the true gradient, just one particular noisy realization of it. Averaged over many random mini-batches, the estimate converges to the true gradient.
+
+<ExerciseCard id="OPT-05-ex2-numeric" />
+
+## Momentum and Adam, briefly
+
+Two widely-used refinements reduce the practical impact of gradient noise:
+
+- **Momentum** accumulates a running average of recent gradients (rather than using only the current step's noisy estimate), smoothing out the noise and helping push through shallow regions consistently pointing the same general direction.
+- **Adam** additionally adapts a per-parameter step size based on a running estimate of each parameter's gradient variance, taking smaller steps for noisy/high-variance parameters and larger steps for consistently-informative ones.
+
+Both are covered here conceptually; you'll use them directly (via PyTorch's built-in optimizers) rather than re-deriving them from scratch, when you get to training networks in later modules.
+
+## The No Free Lunch theorem
+
+<ExerciseCard id="OPT-05-ex3-nfl-conceptual" />
+
+## Summary
+
+- SGD trades exact per-step gradients for many more, cheaper, noisy-but-unbiased steps, a good trade whenever the dataset is large.
+- Momentum smooths gradient noise via a running average; Adam additionally adapts per-parameter step sizes.
+- The No Free Lunch theorem is about averaging over ALL possible objective functions (including ones with no real-world analogue), not a statement that optimization method choice doesn't matter on the structured problems you'll actually encounter.
+
+## Retrieval questions
+
+1. What specifically does a mini-batch gradient estimate get right (in expectation) and wrong (on any single step)?
+2. What's the practical difference between what momentum and Adam each adapt?
+3. State the No Free Lunch theorem's actual scope (what it averages over), and why that scope doesn't include most real optimization problems.
+
+## Mastery checklist
+
+- [ ] Can explain the SGD speed/accuracy tradeoff precisely.
+- [ ] Computed an SGD step using a mini-batch gradient estimate.
+- [ ] Can distinguish what momentum and Adam each do.
+- [ ] Can explain why NFL doesn't imply "optimizer choice doesn't matter in practice."
+
+## Source note
+
+This module's topic and page range are from `lecture-optimization`, §3.1-3.2 (pp. 56-89), which also covers evolutionary/blackbox methods in more depth than this module does (not yet incorporated). All exposition, the worked example, and every exercise here are newly authored, paraphrasing the source's topic coverage.
+
+---
+
+**Next**: OPT-06 (Bayesian Optimization & Bandits): deferred, needs Probability foundations (Block PROB) not yet built.

@@ -1,0 +1,53 @@
+{
+  "moduleId": "OPT-02",
+  "exercises": [
+    {
+      "id": "OPT-02-ex1-why-approximate-hessian",
+      "objective": "Explain why approximating the Hessian is often necessary in practice.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Newton's method (OPT-01) needs the full Hessian $H(x) \\in \\mathbb{R}^{n\\times n}$ at every step. For $n$ in the thousands or millions (e.g. a neural network's parameters, or a fine-grained robot trajectory), explain why computing and storing (let alone inverting) the exact Hessian at every step becomes impractical, and what general strategy the methods in this module use instead.",
+      "hints": [
+        "The Hessian has $n^2$ entries, and computing each one generally requires differentiating the gradient again; storing it needs $O(n^2)$ memory, and inverting/solving with it costs $O(n^3)$ in general, all of which quickly become infeasible as $n$ grows.",
+        "The general strategy this module covers: approximate the Hessian (or its inverse, or its action on a vector) using cheaper information, either structure specific to the problem (Gauss-Newton), a running history of gradient observations (quasi-Newton/BFGS), or an iterative method that never forms the Hessian explicitly at all (conjugate gradient).",
+        "This is the same theme as MATH-05's covariant gradient: correct the plain gradient direction using curvature information, but here the emphasis shifts to how to get a USABLE approximation of that curvature information cheaply, rather than assuming you already have it."
+      ],
+      "reviewCardIds": ["RC-OPT-02-01"]
+    },
+    {
+      "id": "OPT-02-ex2-gauss-newton-derivation",
+      "objective": "Derive the Gauss-Newton Hessian approximation from the exact Hessian of a least-squares objective.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 18,
+      "prerequisites": ["OPT-02-ex1-why-approximate-hessian"],
+      "answerType": "derivation",
+      "prompt": "For a least-squares objective $f(x) = \\tfrac12 \\|r(x)\\|^2 = \\tfrac12 r(x)^\\top r(x)$, where $r:\\mathbb{R}^n\\to\\mathbb{R}^m$ is a (possibly nonlinear) residual with Jacobian $J(x) = \\partial r/\\partial x$: (a) derive $\\nabla f(x) = J(x)^\\top r(x)$, and (b) show that the exact Hessian has the form $H(x) = J(x)^\\top J(x) + \\sum_i r_i(x)\\nabla^2 r_i(x)$, and explain which term the **Gauss-Newton approximation** $H(x) \\approx J(x)^\\top J(x)$ drops, and why that's often a reasonable approximation.",
+      "hints": [
+        "For the gradient: use the chain rule on $f(x) = \\tfrac12\\sum_i r_i(x)^2$. $\\partial f/\\partial x_k = \\sum_i r_i(x) \\partial r_i/\\partial x_k$, which in matrix form is exactly $J(x)^\\top r(x)$ (each column of $J^\\top$, i.e. row of $J$, dotted with $r$).",
+        "For the Hessian, differentiate $\\nabla f(x) = J(x)^\\top r(x)$ once more w.r.t. $x$, using the product rule: one term comes from differentiating $J(x)^\\top$ (holding $r$ fixed), giving $J^\\top J$; the other comes from differentiating $r(x)$ (holding $J^\\top$ fixed), giving a term involving each residual $r_i$ weighted by its own second derivative $\\nabla^2 r_i(x)$.",
+          "The dropped term $\\sum_i r_i(x)\\nabla^2 r_i(x)$ requires the second derivatives of the residuals AND is weighted by how large the residuals themselves are. Near a good fit (small residuals $r_i(x) \\approx 0$), this term is small regardless of how curved each $r_i$ is, so dropping it (the Gauss-Newton approximation) is reasonable precisely when the fit is already decent, which is usually true near convergence, exactly when you need the Hessian approximation to be good."
+      ],
+      "reviewCardIds": ["RC-OPT-02-02"]
+    },
+    {
+      "id": "OPT-02-ex3-numeric",
+      "objective": "Compute a Gauss-Newton step for a small least-squares problem.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["OPT-02-ex2-gauss-newton-derivation"],
+      "answerType": "numeric",
+      "prompt": "Let $r(x) = \\begin{pmatrix}x_1 - 1\\\\ x_2 - 2\\\\ x_1+x_2-2\\end{pmatrix}$ (a linear residual, so $J$ is constant), starting at $x_0=\\begin{pmatrix}0\\\\0\\end{pmatrix}$. Compute the Gauss-Newton step $\\delta = -(J^\\top J)^{-1}J^\\top r(x_0)$, and report the **second component** of $x_1=x_0+\\delta$. Enter a decimal to 3 decimal places.",
+      "hints": [
+        "$J = \\begin{pmatrix}1&0\\\\0&1\\\\1&1\\end{pmatrix}$ (each row is $\\partial r_i/\\partial x$). $r(x_0) = \\begin{pmatrix}-1\\\\-2\\\\-2\\end{pmatrix}$.",
+        "$J^\\top J = \\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}$, $J^\\top r(x_0) = \\begin{pmatrix}1(-1)+0(-2)+1(-2)\\\\0(-1)+1(-2)+1(-2)\\end{pmatrix} = \\begin{pmatrix}-3\\\\-4\\end{pmatrix}$.",
+        "Solve $\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}\\delta = \\begin{pmatrix}3\\\\4\\end{pmatrix}$ (note the sign flip from $-J^\\top r$): $\\delta \\approx \\begin{pmatrix}0.667\\\\1.667\\end{pmatrix}$. Since the residual is linear here, Gauss-Newton is exact (not approximate), so $x_1$ is the true least-squares solution: second component $\\approx 1.667$."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+---
+id: OPT-02
+block: OPT
+title: "Gauss-Newton, Quasi-Newton & Conjugate Gradient"
+tier: 1
+estimatedHours: 2.5
+prerequisites: ["OPT-01"]
+objectives:
+  - "Explain why the exact Hessian is often impractical to compute for large problems."
+  - "Derive the Gauss-Newton Hessian approximation from the exact Hessian of a least-squares objective."
+  - "Compute a Gauss-Newton step for a small least-squares problem."
+  - "Understand BFGS and conjugate gradient as alternative ways to avoid forming the exact Hessian."
+sources:
+  - { sourceId: "lecture-optimization", pages: "p14-20 (§1.4)", role: "primary" }
+concepts:
+  - "Least-squares objective"
+  - "Gauss-Newton approximation"
+  - "Quasi-Newton methods (BFGS)"
+  - "Conjugate gradient"
+notation:
+  - { symbol: "$r(x)$", meaning: "residual vector, $f(x)=\\tfrac12\\|r(x)\\|^2$" }
+  - { symbol: "$J(x)$", meaning: "Jacobian of the residual, $J=\\partial r/\\partial x$" }
+  - { symbol: "$J^\\top J$", meaning: "Gauss-Newton Hessian approximation" }
+cheatsheetLinks: []
+nextModules: ["OPT-03"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Least-squares objectives are everywhere in robotics: trajectory optimization costs, sensor calibration, system identification, and the convex-decomposition manipulation planner from your own research are all, underneath, repeatedly solving least-squares-flavored subproblems. Gauss-Newton is the standard workhorse for exactly this reason: it gets most of Newton's fast convergence without needing the true, expensive Hessian.
+
+## Prerequisites & readiness check
+
+You should have Newton's method (OPT-01) fresh.
+
+<ReadinessCheck
+  question="What is Newton's step $\delta^*$ in terms of the gradient and Hessian?"
+  answer="$\delta^* = -H(x)^{-1}\nabla f(x)$"
+/>
+
+## The cost of the exact Hessian
+
+<ExerciseCard id="OPT-02-ex1-why-approximate-hessian" />
+
+## Gauss-Newton: exploiting least-squares structure
+
+When the objective has the specific form $f(x)=\tfrac12\|r(x)\|^2$ (a sum of squared residuals), there's a cheap, structured Hessian approximation available.
+
+<ExerciseCard id="OPT-02-ex2-gauss-newton-derivation" />
+
+The Gauss-Newton approximation $H(x)\approx J(x)^\top J(x)$ has a big practical advantage beyond just being cheaper to compute: $J^\top J$ is automatically positive semi-definite (for any real matrix $J$), so unlike the true Hessian, it can never be indefinite in a way that would send a naive Newton step in a wrong (ascending) direction. This is a large part of why Gauss-Newton is preferred over plain Newton for least-squares problems even when the true Hessian is affordable.
+
+## Worked example
+
+Let $r(x) = \begin{pmatrix}x_1-2\\x_2-3\\x_1+x_2-4\end{pmatrix}$ (linear, so $J$ is constant: $J=\begin{pmatrix}1&0\\0&1\\1&1\end{pmatrix}$), starting at $x_0=\begin{pmatrix}0\\0\end{pmatrix}$. Then $r(x_0)=\begin{pmatrix}-2\\-3\\-4\end{pmatrix}$, $J^\top J = \begin{pmatrix}2&1\\1&2\end{pmatrix}$, $J^\top r(x_0) = \begin{pmatrix}-6\\-7\end{pmatrix}$, giving $\delta = -(J^\top J)^{-1}J^\top r(x_0) \approx \begin{pmatrix}1.667\\2.667\end{pmatrix}$.
+
+*(Verified with NumPy against the true least-squares solution via `lstsq`: they match exactly, since Gauss-Newton is exact, not approximate, whenever the residual $r(x)$ is linear.)*
+
+<ExerciseCard id="OPT-02-ex3-numeric" />
+
+## Quasi-Newton (BFGS) and conjugate gradient, briefly
+
+Two other strategies avoid the exact Hessian without relying on least-squares structure:
+
+- **Quasi-Newton methods (BFGS)** build up an approximation of the Hessian (or its inverse) incrementally, using only the gradients observed at each step, no second derivatives computed at all. Each step's gradient difference gives one new piece of curvature information, refining the approximation as optimization proceeds.
+- **Conjugate gradient (CG)** never forms an explicit Hessian approximation at all; it only ever needs the Hessian's *action on a vector* ($Hv$, cheap to compute directly for many problems without forming $H$), and constructs a sequence of search directions that are mutually "conjugate" (non-interfering) under $H$, converging in at most $n$ steps for an exact quadratic.
+
+Both are covered at this conceptual level in this course; their full derivations are a natural next step if you need them for a specific research problem, but aren't required for the rest of this curriculum.
+
+## Summary
+
+- The exact Hessian costs $O(n^2)$ memory and $O(n^3)$ to solve with, impractical for large problems.
+- For least-squares objectives, $H(x) = J^\top J + \sum_i r_i \nabla^2 r_i$; Gauss-Newton drops the second term, exact when residuals are linear, and a good approximation near a good fit generally.
+- $J^\top J$ is always positive semi-definite, an important practical advantage over the true Hessian.
+- BFGS and CG are alternative ways to get curvature information cheaply, without least-squares structure: BFGS builds an approximation from gradient history, CG avoids forming a Hessian approximation at all.
+
+## Retrieval questions
+
+1. Derive $\nabla f(x) = J(x)^\top r(x)$ from $f(x)=\tfrac12\|r(x)\|^2$, without looking back.
+2. Why is $J^\top J$ always positive semi-definite, and why does that matter practically?
+3. What's the key difference in what BFGS and conjugate gradient each need access to (compared to forming an explicit Hessian approximation)?
+
+## Mastery checklist
+
+- [ ] Can explain why the exact Hessian becomes impractical for large problems.
+- [ ] Derived the Gauss-Newton Hessian approximation from the exact least-squares Hessian.
+- [ ] Computed a Gauss-Newton step by hand.
+- [ ] Can explain, at a conceptual level, what BFGS and CG each avoid computing.
+
+## Source note
+
+This module's topic and page range are from `lecture-optimization`, §1.4 (pp. 14-20). All exposition, the worked example, and every exercise here are newly authored, paraphrasing the source's topic coverage with the Gauss-Newton derivation built explicitly from first principles rather than quoted.
+
+---
+
+**Next**: [OPT-03: Constrained Optimization: KKT & the Lagrangian](/course/OPT/OPT-03)

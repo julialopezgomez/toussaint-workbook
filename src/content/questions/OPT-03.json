@@ -1,0 +1,69 @@
+{
+  "moduleId": "OPT-03",
+  "exercises": [
+    {
+      "id": "OPT-03-ex1-why-not-just-zero-gradient",
+      "objective": "Explain why setting the gradient to zero doesn't work for constrained problems.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "For an unconstrained problem, $\\nabla f(x)=0$ characterizes a stationary point. For a constrained problem $\\min_x f(x)$ s.t. $h(x)=0$, explain why $\\nabla f(x)=0$ is generally the *wrong* condition to look for at the constrained optimum (give a concrete geometric reason, not just \"there's a constraint now\").",
+      "hints": [
+        "The constrained optimum is only required to be optimal among points satisfying $h(x)=0$, not among all points in $\\mathbb{R}^n$. There's no reason $\\nabla f$ should vanish at a point that's merely optimal *restricted to a surface*.",
+        "Picture $f$ as a bowl-shaped surface and $h(x)=0$ as a curve carved onto the ground. Walking along that curve, the point where $f$ is smallest along the curve generally isn't the unconstrained bottom of the bowl, and the gradient of $f$ there generally points in some direction, just not purely along the curve.",
+        "The actual condition (which you'll derive in this module) is that at the constrained optimum, $\\nabla f(x)$ has no component *along* the constraint surface, only a component perpendicular to it (along $\\nabla h(x)$), which is a much weaker condition than $\\nabla f(x)=0$ entirely."
+      ],
+      "reviewCardIds": ["RC-OPT-03-01"]
+    },
+    {
+      "id": "OPT-03-ex2-lagrangian-derivation",
+      "objective": "Derive the KKT stationarity condition for an equality-constrained problem.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["OPT-03-ex1-why-not-just-zero-gradient"],
+      "answerType": "derivation",
+      "prompt": "For $\\min_x f(x)$ s.t. $h(x)=0$ (a single scalar equality constraint), the Lagrangian is $L(x,\\kappa) = f(x) + \\kappa\\, h(x)$. Using the geometric argument that, at a constrained optimum $x^*$, $\\nabla f(x^*)$ must be *parallel* to $\\nabla h(x^*)$ (i.e. $\\nabla f(x^*) = -\\kappa \\nabla h(x^*)$ for some scalar $\\kappa$, since otherwise you could improve $f$ by moving slightly along the constraint surface), show that this condition is exactly equivalent to $\\nabla_x L(x^*,\\kappa)=0$.",
+      "hints": [
+        "Compute $\\nabla_x L(x,\\kappa)$ by differentiating $L(x,\\kappa)=f(x)+\\kappa h(x)$ with respect to $x$ (treating $\\kappa$ as a constant).",
+        "$\\nabla_x L(x,\\kappa) = \\nabla f(x) + \\kappa \\nabla h(x)$.",
+        "Setting this to zero: $\\nabla f(x) + \\kappa \\nabla h(x) = 0$, i.e. $\\nabla f(x) = -\\kappa \\nabla h(x)$, exactly the parallel-gradients condition stated in the prompt. So 'stationarity of the Lagrangian w.r.t. $x$' and 'gradient of $f$ parallel to gradient of the constraint' are the same statement, just written two different ways, and the Lagrangian packages both the objective and the constraint-parallelism condition into a single unconstrained stationarity condition."
+      ],
+      "reviewCardIds": ["RC-OPT-03-02"]
+    },
+    {
+      "id": "OPT-03-ex3-numeric",
+      "objective": "Solve a small equality-constrained problem using the Lagrangian.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["OPT-03-ex2-lagrangian-derivation"],
+      "answerType": "numeric",
+      "prompt": "Solve $\\min_x \\tfrac12(x_1^2+x_2^2)$ s.t. $x_1+2x_2=3$ using the Lagrangian $L(x,\\kappa) = \\tfrac12(x_1^2+x_2^2) + \\kappa(x_1+2x_2-3)$. Set $\\nabla_x L=0$ and use the constraint to solve for $\\kappa$, then report the value of $x_1^*$ at the optimum. Enter a decimal.",
+      "hints": [
+        "$\\nabla_x L = \\begin{pmatrix}x_1+\\kappa\\\\x_2+2\\kappa\\end{pmatrix}=0$ gives $x_1=-\\kappa$, $x_2=-2\\kappa$.",
+        "Substitute into the constraint $x_1+2x_2=3$: $-\\kappa + 2(-2\\kappa) = 3$, i.e. $-5\\kappa=3$, so $\\kappa=-0.6$.",
+        "$x_1^* = -\\kappa = 0.6$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-03-ex4-complementary-slackness-challenge",
+      "objective": "Explain complementary slackness for inequality constraints.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 12,
+      "prerequisites": ["OPT-03-ex3-numeric"],
+      "answerType": "short-text",
+      "prompt": "For an inequality-constrained problem $\\min_x f(x)$ s.t. $g(x)\\le 0$, the full KKT conditions include **complementary slackness**: $\\lambda\\, g(x^*) = 0$, where $\\lambda\\ge0$ is the multiplier for $g$. Explain in your own words what this condition means for the two possible cases, $g(x^*)<0$ (the constraint is \"inactive\"/\"slack\") and $g(x^*)=0$ (the constraint is \"active\"/\"tight\"), and why it makes intuitive sense in each case.",
+      "hints": [
+        "If $g(x^*)<0$ strictly (the constraint isn't touching its boundary), complementary slackness forces $\\lambda=0$. Intuitively: a constraint that isn't binding shouldn't have any effect on where the optimum sits, an inactive constraint might as well not exist at that point, so its multiplier should be zero.",
+        "If $\\lambda>0$ (the constraint IS actively influencing the solution, pushing $x^*$ against it), complementary slackness forces $g(x^*)=0$: the constraint must be exactly tight, since a multiplier can only be positive if the constraint is genuinely restricting where the optimum can be.",
+        "This is exactly analogous to the equality-constraint case (where the multiplier is always 'active' since the constraint always holds exactly): complementary slackness generalizes that idea to inequality constraints, which might or might not be 'engaged' at the optimum."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

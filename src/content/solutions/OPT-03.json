@@ -1,0 +1,55 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "OPT-03-ex1-why-not-just-zero-gradient",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly identifies that the constrained optimum is only optimal relative to points on the constraint surface, not all of R^n." },
+          { "points": 1, "description": "Gives the correct geometric picture: gradient of f need not vanish, only its component along the constraint surface needs to vanish." }
+        ],
+        "commonErrors": [
+          "Just restating 'there's a constraint' without explaining geometrically why that changes the stationarity condition.",
+          "Confusing this with penalty methods (adding a penalty term) rather than the exact geometric argument being asked for."
+        ]
+      },
+      "fullSolution": "The constrained optimum only needs to be the best point AMONG those satisfying h(x)=0, not the best point in all of R^n, so there's no reason the unconstrained stationarity condition should hold there. Geometrically: picture f as a bowl and h(x)=0 as a curve carved on the ground. The point where f is smallest ALONG that curve generally isn't the unconstrained bottom of the bowl, and the gradient of f there generally still points somewhere (just not along a direction that would let you improve f while staying on the curve). The actual condition is that grad f(x) has no component tangent to the constraint surface at the optimum (only a component perpendicular to it, along grad h(x)), which is a much weaker condition than grad f(x)=0 everywhere."
+    },
+    {
+      "exerciseId": "OPT-03-ex2-lagrangian-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly computes grad_x L(x,kappa) = grad f(x) + kappa grad h(x)." },
+          { "points": 2, "description": "Correctly shows setting this to zero is exactly the parallel-gradients condition, and explicitly connects the two forms of the same statement." }
+        ],
+        "commonErrors": [
+          "Differentiating L w.r.t. kappa instead of x (that gives the constraint itself, h(x)=0, a different KKT condition, not stationarity).",
+          "Not explicitly closing the loop back to the geometric parallel-gradients statement from the prompt."
+        ]
+      },
+      "fullSolution": "grad_x L(x,kappa) = grad_x [f(x) + kappa h(x)] = grad f(x) + kappa grad h(x) (kappa treated as a constant when differentiating w.r.t. x).\n\nSetting grad_x L(x*,kappa) = 0: grad f(x*) + kappa grad h(x*) = 0, i.e. grad f(x*) = -kappa grad h(x*). This is exactly the parallel-gradients condition from the prompt (grad f is a scalar multiple of grad h). So 'stationarity of the Lagrangian w.r.t. x' is literally the same statement as 'gradient of f parallel to gradient of the constraint', just packaged as a single equation via the Lagrangian rather than stated geometrically."
+    },
+    {
+      "exerciseId": "OPT-03-ex3-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.6, "tolerance": 0.01 },
+      "fullSolution": "grad_x L = [x1+kappa, x2+2*kappa] = 0 gives x1=-kappa, x2=-2*kappa. Substituting into the constraint x1+2*x2=3: -kappa + 2*(-2*kappa) = -5*kappa = 3, so kappa=-0.6. Then x1* = -kappa = 0.6 (and x2*=-2*kappa=1.2; check: 0.6+2*1.2=0.6+2.4=3, correct). Verified with a direct linear-system solve of the full KKT system."
+    },
+    {
+      "exerciseId": "OPT-03-ex4-complementary-slackness-challenge",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains the inactive case: g(x*)<0 forces lambda=0, since a non-binding constraint shouldn't influence the solution." },
+          { "points": 2, "description": "Correctly explains the active case: lambda>0 forces g(x*)=0, since a positive multiplier means the constraint is genuinely restricting the optimum." }
+        ],
+        "commonErrors": [
+          "Getting the direction backwards (e.g. saying lambda=0 implies the constraint is active).",
+          "Not explaining WHY each case makes sense, just restating the mathematical condition lambda*g(x*)=0."
+        ]
+      },
+      "fullSolution": "If g(x*) < 0 strictly (the constraint isn't touching its boundary, it's slack), complementary slackness forces lambda=0: intuitively, a constraint that isn't binding at the optimum shouldn't have any effect on where that optimum sits, so it makes sense its multiplier (which measures how much the constraint is 'pushing' on the solution) is zero.\n\nIf lambda > 0 (the multiplier is genuinely positive, meaning the constraint IS actively influencing the solution), complementary slackness forces g(x*)=0: the constraint must be exactly tight/active, since a nonzero multiplier only makes sense if the constraint is actually restricting where the optimum can be; if the constraint weren't tight, there'd be no reason for it to be exerting any 'force' on the solution at all."
+    }
+  ]
+}

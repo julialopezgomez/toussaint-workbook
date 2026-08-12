@@ -1,0 +1,50 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "OPT-04-ex1-why-convexity-matters",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly sets up the proof-by-contradiction: assume a better global point exists and consider the segment to it." },
+          { "points": 2, "description": "Correctly uses convexity to show f is strictly decreasing arbitrarily close to x* along that segment, contradicting local minimality." }
+        ],
+        "commonErrors": [
+          "Only restating the definition of convexity without connecting it to the contradiction argument.",
+          "Not clearly identifying WHERE the contradiction arises (arbitrarily close to x*, not just 'somewhere on the segment')."
+        ]
+      },
+      "fullSolution": "Suppose x* is a local minimum but not global: there exists some x-hat with f(x-hat) < f(x*). By convexity, for any t in [0,1], f(t*x-hat + (1-t)*x*) <= t*f(x-hat) + (1-t)*f(x*). Since f(x-hat) < f(x*), the right-hand side is a straight line that strictly decreases as t increases from 0. So for any small t>0, f at the point t*x-hat+(1-t)*x* (which is arbitrarily close to x* as t->0) is strictly less than f(x*). This contradicts x* being a local minimum (which requires f(x*) to be the smallest value in some neighborhood around x*). So no such x-hat can exist: every local minimum of a convex function must also be global."
+    },
+    {
+      "exerciseId": "OPT-04-ex2-log-barrier-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly applies the chain rule to differentiate -log(-g(x))/t, arriving at grad f(x) - (1/(t*g(x))) grad g(x)." },
+          { "points": 2, "description": "Correctly explains the blow-up as g(x) -> 0^-, connecting it to a repulsive force keeping x strictly feasible." }
+        ],
+        "commonErrors": [
+          "Sign errors in the chain rule (there are two nested minus signs: the overall -1/t factor, and the -g(x) inside the log).",
+          "Not explicitly connecting the blow-up to WHY it's useful (preventing the unconstrained method from ever reaching infeasibility)."
+        ]
+      },
+      "fullSolution": "d/dx[-log(-g(x))/t] = -(1/t) * (1/(-g(x))) * (-grad g(x)) = -(1/(t*(-g(x)))) * grad g(x) * (-1) ... carefully: let u=-g(x), du/dx=-grad g(x). d/dx log(u) = (1/u) du/dx = (1/(-g(x))) * (-grad g(x)) = grad g(x)/g(x). So d/dx[-log(-g(x))/t] = -(1/t) * grad g(x)/g(x) = -grad g(x)/(t*g(x)).\n\nCombined with grad f(x): grad_x f_t(x) = grad f(x) - grad g(x)/(t*g(x)).\n\nAs x approaches the boundary, g(x) -> 0^- (a small negative number), so 1/(t*g(x)) -> -infinity, meaning the barrier gradient term's magnitude grows without bound. This creates an increasingly strong repulsive push away from the boundary as x approaches it, which is exactly why the log-barrier method, despite being an unconstrained optimization technique, never actually crosses into the infeasible region: the gradient itself prevents it."
+    },
+    {
+      "exerciseId": "OPT-04-ex3-lp-recognition",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly negates the objective to convert maximization to minimization." },
+          { "points": 2, "description": "Correctly rewrites both non-negativity constraints as <= inequalities with a negative sign." },
+          { "points": 1, "description": "Correctly assembles the full standard-form A, b, c." }
+        ],
+        "commonErrors": [
+          "Forgetting to negate the objective coefficients (leaving it as a maximization, which doesn't fit the min c^Tx template).",
+          "Writing x1>=0 directly instead of converting it to -x1<=0."
+        ]
+      },
+      "fullSolution": "max(2x1+3x2) = -min(-2x1-3x2), so the objective in standard min form is c = [-2,-3].\nx1>=0 becomes -x1<=0; x2>=0 becomes -x2<=0.\nFull standard form: min c^T x s.t. Ax<=b, with c=[-2,-3], A=[[1,1],[-1,0],[0,-1]], b=[10,0,0] (three stacked rows: the original constraint, and the two rewritten non-negativity constraints)."
+    }
+  ]
+}

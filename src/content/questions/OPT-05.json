@@ -1,0 +1,53 @@
+{
+  "moduleId": "OPT-05",
+  "exercises": [
+    {
+      "id": "OPT-05-ex1-why-sgd",
+      "objective": "Explain the tradeoff SGD makes relative to full-batch gradient descent.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "For an objective that's an average over a large dataset, $f(x) = \\frac1N\\sum_{i=1}^N f_i(x)$ (e.g. a loss averaged over $N$ training examples), computing the full gradient $\\nabla f(x)$ requires touching every one of the $N$ terms. Stochastic gradient descent (SGD) instead estimates the gradient using only a small random subset (\"mini-batch\") of the data at each step. Explain the tradeoff this makes: what do you gain, and what do you give up?",
+      "hints": [
+        "What you gain: each step is far cheaper to compute (only touching a mini-batch, not all $N$ examples), so you can take many more steps in the same amount of time, especially valuable when $N$ is huge.",
+        "What you give up: each individual step's gradient estimate is noisy, a random mini-batch's average gradient generally isn't exactly equal to the true full-batch gradient, just an unbiased estimate of it (correct on average, across many mini-batches).",
+        "The net effect: SGD trades gradient accuracy per-step for many more (cheaper) steps, which in practice is usually a good trade for large datasets, since the noise tends to average out over many steps, while full-batch gradient descent would spend all its time computing one (expensive) exact gradient per step."
+      ],
+      "reviewCardIds": ["RC-OPT-05-01"]
+    },
+    {
+      "id": "OPT-05-ex2-numeric",
+      "objective": "Compute an SGD step using a mini-batch gradient estimate.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["OPT-05-ex1-why-sgd"],
+      "answerType": "numeric",
+      "prompt": "Let $f_i(x) = \\tfrac12(x-a_i)^2$ for a dataset $a = [1,3,5,2,4]$, so $f_i'(x) = x-a_i$. Starting at $x_0=0$, using the mini-batch $\\{a_2,a_5\\} = \\{3,4\\}$ (i.e. the 2nd and 5th data points) and step size $\\alpha=0.2$, compute $x_1 = x_0 - \\alpha \\cdot \\widehat{\\nabla f}(x_0)$, where $\\widehat{\\nabla f}(x_0)$ is the mini-batch gradient estimate (the average of $f_i'(x_0)$ over just the mini-batch). Enter a decimal.",
+      "hints": [
+        "$\\widehat{\\nabla f}(x_0) = \\tfrac12[(x_0-3)+(x_0-4)] = \\tfrac12[(0-3)+(0-4)] = \\tfrac12(-7) = -3.5$.",
+        "Compare this to the true full-batch gradient at $x_0=0$: $\\tfrac15\\sum_i(0-a_i) = \\tfrac15(-15)=-3$. The mini-batch estimate ($-3.5$) is noisy, in the right ballpark but not exact, exactly the tradeoff from the previous exercise.",
+        "$x_1 = x_0 - \\alpha\\widehat{\\nabla f}(x_0) = 0 - 0.2(-3.5) = 0.7$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-05-ex3-nfl-conceptual",
+      "objective": "Explain the No Free Lunch theorem's practical implication.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 8,
+      "prerequisites": ["OPT-05-ex2-numeric"],
+      "answerType": "short-text",
+      "prompt": "The No Free Lunch (NFL) theorem for optimization states, roughly: averaged across *all possible* objective functions, every optimization algorithm performs identically (including random search). Given this, explain why it still makes sense to have this whole course full of specialized optimization methods (Newton, Gauss-Newton, SGD, ...) rather than concluding \"nothing matters, just use random search.\"",
+      "hints": [
+        "NFL's averaging is over ALL conceivable objective functions, including wildly adversarial, discontinuous, or random ones that have no relationship between nearby points at all.",
+        "Real optimization problems (robot dynamics costs, loss functions, physical systems) are never drawn uniformly from 'all possible functions', they have structure: smoothness, some form of convexity or near-convexity locally, gradients that actually correlate with nearby function values, etc.",
+        "The specialized methods in this course work precisely because they exploit that structure (using local gradient/curvature information, assuming smoothness for Taylor expansions to be valid, etc.). NFL just says there's no method that's simultaneously good at exploiting structure AND good on structureless adversarial problems, it doesn't say structure-exploiting methods are useless on the structured problems that actually arise in practice, which is nearly everything you'll actually optimize."
+      ],
+      "reviewCardIds": ["RC-OPT-05-02"]
+    }
+  ]
+}

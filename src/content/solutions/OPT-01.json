@@ -1,0 +1,55 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "OPT-01-ex1-why-stepsize-matters",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly explains the too-large failure mode: overshooting beyond where the linear/local approximation is valid, risking increase or divergence." },
+          { "points": 1, "description": "Correctly explains the too-small failure mode: safe but impractically slow convergence." }
+        ],
+        "commonErrors": [
+          "Only discussing one of the two failure modes.",
+          "Attributing the too-large failure to 'the gradient being wrong' rather than the step exceeding where the local approximation remains valid."
+        ]
+      },
+      "fullSolution": "The gradient is only a local, first-order (linear) approximation of f, accurate close to the current point. If alpha is too large, the step can move far enough that this local approximation no longer holds, potentially landing at a point with HIGHER f than the start, or causing oscillation/divergence across iterations. If alpha is too small, each step is safe (the local approximation holds fine) but makes only tiny progress toward the minimum, so the algorithm needs an impractically large number of iterations to converge, technically correct but practically useless."
+    },
+    {
+      "exerciseId": "OPT-01-ex2-newton-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly differentiates the quadratic model w.r.t. delta using the quadratic-form gradient rule, getting grad f(x) + H(x) delta." },
+          { "points": 2, "description": "Correctly sets this to zero and solves for delta* = -H(x)^-1 grad f(x)." }
+        ],
+        "commonErrors": [
+          "Forgetting H(x) is symmetric when applying the quadratic-form gradient rule from MATH-02 (the rule (A+A^T)x simplifies to 2Ax only for symmetric A; here it's just H(x)delta since H is already symmetric).",
+          "Sign errors when setting the derivative to zero and solving."
+        ]
+      },
+      "fullSolution": "Treating the quadratic model m(delta) = f(x) + grad f(x)^T delta + (1/2) delta^T H(x) delta as a function of delta, differentiate w.r.t. delta: dm/d(delta) = grad f(x) + H(x) delta (using that H(x) is symmetric, so the quadratic-form gradient rule from MATH-02 gives H(x)delta directly, not (H+H^T)delta/2 or similar).\n\nSetting this to zero: grad f(x) + H(x) delta* = 0, so H(x) delta* = -grad f(x), giving delta* = -H(x)^-1 grad f(x). This is Newton's method: the step that would be exactly optimal if f really were the quadratic model, and in practice a very good step whenever the quadratic model is a good local approximation of f."
+    },
+    {
+      "exerciseId": "OPT-01-ex3-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 1.5, "tolerance": 0.01 },
+      "fullSolution": "grad f(x0) = A x0 - b = [2,5] - [3,1] = [-1,4]. A^-1 = [[0.5,0],[0,0.2]] (diagonal, reciprocals). delta = -A^-1 grad = -[0.5*(-1), 0.2*4] = -[-0.5, 0.8] = [0.5,-0.8]. x1 = x0+delta = [1.5, 0.2]. First component: 1.5."
+    },
+    {
+      "exerciseId": "OPT-01-ex4-armijo-challenge",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly interprets the right-hand side as a 'lowered bar' relative to the true tangent line, using c<1." },
+          { "points": 2, "description": "Correctly explains that Armijo guarantees a minimum guaranteed fraction of decrease relative to the step taken, preventing negligible-progress steps from being accepted." }
+        ],
+        "commonErrors": [
+          "Thinking Armijo requires decrease equal to the FULL linear prediction (c=1); the whole point of c<1 is to require only a fraction of it, since the full linear prediction is generally unachievable for a nonlinear f.",
+          "Not connecting this back to the too-small-progress failure mode from the first exercise."
+        ]
+      },
+      "fullSolution": "The right-hand side f(x) + c*alpha*grad_f(x)^T d, with 0<c<1, is a line through (0, f(x)) with a shallower slope than the true tangent line (slope grad_f(x)^T d), a 'lowered bar' that the actual function value after the step must clear. This guarantees the step achieves at least a small guaranteed FRACTION (c) of the decrease predicted by the local linear model, not just some arbitrarily tiny decrease. Without this, a line search could accept steps whose actual decrease is minuscule relative to the size of the step taken, i.e. steps that make negligible real progress while technically satisfying 'f decreased'), leading to extremely slow or effectively stalled convergence: the same failure mode as choosing alpha too small directly, just hidden behind an 'accepted' step."
+    }
+  ]
+}

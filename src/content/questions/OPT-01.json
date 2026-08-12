@@ -1,0 +1,69 @@
+{
+  "moduleId": "OPT-01",
+  "exercises": [
+    {
+      "id": "OPT-01-ex1-why-stepsize-matters",
+      "objective": "Explain the failure modes of a poorly chosen fixed step size in gradient descent.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Plain gradient descent updates $x \\leftarrow x - \\alpha \\nabla f(x)$ for a fixed step size $\\alpha$. Explain what goes wrong if $\\alpha$ is chosen too large, and separately, what goes wrong (in a different way) if it's chosen too small.",
+      "hints": [
+        "Think about what the gradient tells you: a local, first-order approximation of $f$, valid only very close to the current point.",
+        "If $\\alpha$ is too large, the step can overshoot past the region where the local linear approximation is valid, potentially landing somewhere with a *higher* $f$ value, or oscillating/diverging entirely.",
+        "If $\\alpha$ is too small, each step makes only tiny progress, so convergence takes an impractically large number of iterations, even though each individual step is 'safe.'"
+      ],
+      "reviewCardIds": ["RC-OPT-01-01"]
+    },
+    {
+      "id": "OPT-01-ex2-newton-derivation",
+      "objective": "Derive Newton's method from the second-order Taylor expansion.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["OPT-01-ex1-why-stepsize-matters"],
+      "answerType": "derivation",
+      "prompt": "Using the second-order Taylor expansion from MATH-02, $f(x+\\delta) \\approx f(x) + \\nabla f(x)^\\top \\delta + \\tfrac12 \\delta^\\top H(x) \\delta$, derive Newton's method: the step $\\delta^*$ that minimizes this quadratic model exactly (treating it as if it were exact, not just an approximation).",
+      "hints": [
+        "Treat the right-hand side as a function of $\\delta$ alone (with $x$ fixed), and find its minimum by setting the derivative with respect to $\\delta$ to zero.",
+        "$\\dfrac{\\partial}{\\partial \\delta}\\left[\\nabla f(x)^\\top \\delta + \\tfrac12 \\delta^\\top H(x) \\delta\\right] = \\nabla f(x) + H(x)\\delta$ (using the quadratic-form gradient rule from MATH-02, with $H(x)$ symmetric).",
+        "Setting this to zero: $H(x)\\delta^* = -\\nabla f(x)$, so $\\delta^* = -H(x)^{-1}\\nabla f(x)$. This is the Newton step: instead of just following the gradient, it's corrected by the inverse Hessian, exactly analogous to the covariant gradient from MATH-05, but using the *local curvature itself* as the metric, rather than an externally chosen one."
+      ],
+      "reviewCardIds": ["RC-OPT-01-02"]
+    },
+    {
+      "id": "OPT-01-ex3-numeric",
+      "objective": "Compute a Newton step for a quadratic objective.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["OPT-01-ex2-newton-derivation"],
+      "answerType": "numeric",
+      "prompt": "Let $f(x) = \\tfrac12 x^\\top A x - b^\\top x$ with $A=\\begin{pmatrix}2&0\\\\0&5\\end{pmatrix}$, $b=\\begin{pmatrix}3\\\\1\\end{pmatrix}$, starting at $x_0=\\begin{pmatrix}1\\\\1\\end{pmatrix}$. Compute the Newton step $\\delta = -H^{-1}\\nabla f(x_0)$ (note $H=A$ for this quadratic $f$, and $\\nabla f(x)=Ax-b$), and report the **first component** of $x_1 = x_0+\\delta$. Enter a decimal.",
+      "hints": [
+        "$\\nabla f(x_0) = Ax_0 - b = \\begin{pmatrix}2&0\\\\0&5\\end{pmatrix}\\begin{pmatrix}1\\\\1\\end{pmatrix} - \\begin{pmatrix}3\\\\1\\end{pmatrix} = \\begin{pmatrix}2\\\\5\\end{pmatrix}-\\begin{pmatrix}3\\\\1\\end{pmatrix} = \\begin{pmatrix}-1\\\\4\\end{pmatrix}$.",
+        "Since $A$ is diagonal, $A^{-1}=\\begin{pmatrix}0.5&0\\\\0&0.2\\end{pmatrix}$. $\\delta = -A^{-1}\\nabla f(x_0) = -\\begin{pmatrix}0.5(-1)\\\\0.2(4)\\end{pmatrix} = \\begin{pmatrix}0.5\\\\-0.8\\end{pmatrix}$.",
+        "$x_1 = x_0+\\delta = \\begin{pmatrix}1+0.5\\\\1-0.8\\end{pmatrix} = \\begin{pmatrix}1.5\\\\0.2\\end{pmatrix}$. First component: $1.5$. (For a quadratic $f$, a single Newton step always lands exactly on the true minimizer, since the quadratic model is exact, not an approximation, for a quadratic $f$.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-01-ex4-armijo-challenge",
+      "objective": "Apply the Armijo backtracking line search condition.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 12,
+      "prerequisites": ["OPT-01-ex3-numeric"],
+      "answerType": "short-text",
+      "prompt": "Backtracking line search accepts a step size $\\alpha$ only if it satisfies the Armijo condition $f(x+\\alpha d) \\le f(x) + c\\,\\alpha\\, \\nabla f(x)^\\top d$ for some small constant $c \\in (0,1)$ (typically $c=10^{-4}$), where $d$ is the descent direction. In your own words, what does this condition guarantee, and why is requiring merely $f(x+\\alpha d) < f(x)$ (any decrease at all) not sufficient on its own?",
+      "hints": [
+        "The right-hand side $f(x) + c\\alpha \\nabla f(x)^\\top d$ is a line with a shallower slope than the true tangent line at $x$ (since $0<c<1$), it's a 'lowered bar' the actual decrease must clear.",
+        "Armijo guarantees the step achieves at least a small guaranteed fraction of the decrease predicted by the linear approximation, not just some arbitrarily tiny decrease.",
+        "Without this, an algorithm could accept steps with decrease so small (relative to the step size taken) that it makes negligible progress per iteration while still 'technically decreasing', leading to extremely slow or stalled convergence, exactly the 'too small effectively' failure mode from the first exercise, but now hidden inside an accepted step rather than an explicit step-size choice."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

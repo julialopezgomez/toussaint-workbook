@@ -1,0 +1,40 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "OPT-05-ex1-why-sgd",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly identifies the gain: much cheaper per-step cost, more steps in the same time." },
+          { "points": 1, "description": "Correctly identifies the cost: noisy, unbiased-but-not-exact gradient estimates per step." }
+        ],
+        "commonErrors": [
+          "Saying SGD is 'always better' or 'always worse' without articulating the actual tradeoff.",
+          "Not mentioning the unbiasedness (correct on average) property of the mini-batch estimate."
+        ]
+      },
+      "fullSolution": "You gain speed: each step only touches a small mini-batch instead of all N data points, so each step is far cheaper, letting you take many more steps in the same wall-clock time, which matters enormously when N is large. You give up per-step accuracy: a mini-batch's average gradient is a noisy estimate of the true full-batch gradient, correct only on average (unbiased) across many different random mini-batches, not exactly equal to the true gradient on any single step. In practice, for large datasets, trading per-step accuracy for many more (cheap) steps usually wins, since the noise tends to average out over the course of optimization."
+    },
+    {
+      "exerciseId": "OPT-05-ex2-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.7, "tolerance": 0.01 },
+      "fullSolution": "Mini-batch gradient estimate using {3,4}: (1/2)[(0-3)+(0-4)] = (1/2)(-7) = -3.5. x1 = x0 - alpha * (-3.5) = 0 - 0.2*(-3.5) = 0.7. (For comparison, the true full-batch gradient using all 5 points is -3, so the mini-batch estimate of -3.5 is noisy but in the right ballpark, illustrating the tradeoff from the previous exercise.)"
+    },
+    {
+      "exerciseId": "OPT-05-ex3-nfl-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly notes NFL's averaging is over ALL possible functions, including structureless/adversarial ones that never arise in practice." },
+          { "points": 2, "description": "Correctly connects this to: specialized methods work by exploiting real structure present in actual problems, which is exactly what NFL doesn't rule out." }
+        ],
+        "commonErrors": [
+          "Concluding NFL means optimization method choice doesn't matter in practice (missing the key distinction between 'all possible functions' and 'the structured functions that actually arise').",
+          "Not identifying WHAT structure the specialized methods actually exploit (smoothness, local curvature, convexity, etc.)."
+        ]
+      },
+      "fullSolution": "NFL's averaging is over the space of ALL conceivable objective functions, including wildly adversarial, discontinuous, or effectively random ones where knowing f at one point tells you nothing about f nearby. Real optimization problems (robot dynamics costs, training losses, physical systems) are never drawn uniformly from that space; they have real structure: smoothness (so Taylor expansions are valid), often local or global convexity, gradients that genuinely correlate with nearby behavior. The specialized methods in this course (Newton, Gauss-Newton, SGD, etc.) work precisely because they exploit that structure. NFL says there's no single method that's simultaneously good at exploiting structure on structured problems AND good on structureless adversarial ones; it does NOT say structure-exploiting methods are useless on the structured problems that actually show up in practice, which is nearly everything you'll ever optimize."
+    }
+  ]
+}

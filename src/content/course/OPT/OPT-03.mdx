@@ -1,0 +1,103 @@
+---
+id: OPT-03
+block: OPT
+title: "Constrained Optimization: KKT & the Lagrangian"
+tier: 1
+estimatedHours: 3
+prerequisites: ["OPT-01"]
+objectives:
+  - "Explain geometrically why the unconstrained stationarity condition doesn't apply to constrained problems."
+  - "Derive the KKT stationarity condition from the Lagrangian for equality constraints."
+  - "Solve a small equality-constrained problem using the Lagrangian."
+  - "Explain complementary slackness for inequality constraints."
+sources:
+  - { sourceId: "lecture-optimization", pages: "p21-34 (Part 2, §2.1-2.4)", role: "primary" }
+  - { sourceId: "lecture-maths", pages: "p58-67 (§4.2-4.5)", role: "supplementary" }
+concepts:
+  - "Equality/inequality constraints"
+  - "Lagrangian"
+  - "KKT conditions"
+  - "Complementary slackness"
+notation:
+  - { symbol: "$h(x)=0$", meaning: "equality constraint" }
+  - { symbol: "$g(x)\\le 0$", meaning: "inequality constraint" }
+  - { symbol: "$L(x,\\lambda,\\kappa)$", meaning: "Lagrangian: $f(x) + \\kappa h(x) + \\lambda g(x)$" }
+  - { symbol: "$\\kappa, \\lambda$", meaning: "Lagrange multipliers for equality/inequality constraints (dual variables)" }
+cheatsheetLinks: []
+nextModules: ["OPT-04"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Almost every real robotics optimization problem has constraints: joint limits, collision avoidance, dynamics feasibility, contact conditions. The Lagrangian and KKT conditions are the foundation every constrained solver (interior point, SQP, augmented Lagrangian, all covered later) builds on. Getting comfortable solving small constrained problems by hand here makes those later methods feel like variations on one idea, rather than a new toolbox each time.
+
+## Prerequisites & readiness check
+
+You should have gradients (MATH-02) and Newton's method (OPT-01) fresh.
+
+<ReadinessCheck
+  question="What characterizes a stationary point of an unconstrained $f$?"
+  answer="$\nabla f(x) = 0$."
+/>
+
+## Why $\nabla f(x)=0$ isn't the right condition anymore
+
+<ExerciseCard id="OPT-03-ex1-why-not-just-zero-gradient" />
+
+## The Lagrangian
+
+The Lagrangian packages the objective and constraint into a single function whose *unconstrained* stationarity condition captures the correct geometric picture:
+
+$$L(x,\kappa) = f(x) + \kappa\, h(x)$$
+
+<ExerciseCard id="OPT-03-ex2-lagrangian-derivation" />
+
+**Stop and try**: before continuing, note what makes this trick work: $\nabla_\kappa L(x,\kappa) = h(x)$, so setting *that* to zero recovers the constraint itself. The Lagrangian's full stationarity conditions ($\nabla_x L=0$ and $\nabla_\kappa L=0$ together) exactly recover both the parallel-gradients condition and the original constraint, as a single unconstrained problem in $(x,\kappa)$.
+
+## Worked example
+
+Minimize $f(x)=\tfrac12(x_1^2+x_2^2)$ subject to $x_1-x_2=1$. Lagrangian: $L(x,\kappa) = \tfrac12(x_1^2+x_2^2)+\kappa(x_1-x_2-1)$.
+
+$$\nabla_x L = \begin{pmatrix}x_1+\kappa\\x_2-\kappa\end{pmatrix}=0 \implies x_1=-\kappa,\ x_2=\kappa$$
+
+Substituting into the constraint: $-\kappa-\kappa=1 \implies \kappa=-0.5$, giving $x_1^*=0.5$, $x_2^*=-0.5$.
+
+*(Check: $0.5-(-0.5)=1$ ✓. Verified with a direct linear solve of the full KKT system while authoring this module.)*
+
+<ExerciseCard id="OPT-03-ex3-numeric" />
+
+## Inequality constraints and complementary slackness
+
+For $g(x)\le 0$, the full KKT conditions add a subtlety: the constraint might or might not be "touching" its boundary at the optimum. **Complementary slackness**, $\lambda\, g(x^*)=0$, handles both cases in one equation.
+
+<ExerciseCard id="OPT-03-ex4-complementary-slackness-challenge" />
+
+## Summary
+
+- The constrained stationarity condition is that $\nabla f(x^*)$ is parallel to $\nabla h(x^*)$ (perpendicular to the constraint surface), not zero.
+- The Lagrangian $L=f+\kappa h$ packages this into an ordinary unconstrained stationarity condition, $\nabla_x L=0$ recovers the parallel-gradients condition, $\nabla_\kappa L=0$ recovers the constraint itself.
+- For inequality constraints, complementary slackness ($\lambda g(x^*)=0$) enforces: inactive constraints have zero multiplier, active constraints (positive multiplier) must be exactly tight.
+
+## Retrieval questions
+
+1. Derive the KKT stationarity condition from the Lagrangian, without looking back.
+2. Why does $\nabla_\kappa L(x,\kappa)=0$ recover the original constraint?
+3. If a Lagrange multiplier for an inequality constraint comes out negative in a proposed solution, what does that tell you (hint: multipliers for $g(x)\le0$ must satisfy $\lambda\ge0$)?
+
+## Mastery checklist
+
+- [ ] Can explain geometrically why $\nabla f(x)=0$ is the wrong condition for a constrained optimum.
+- [ ] Derived the KKT stationarity condition from the Lagrangian.
+- [ ] Solved a small equality-constrained problem by hand using the Lagrangian.
+- [ ] Can explain complementary slackness for both the active and inactive cases.
+
+## Source note
+
+This module's topic and page range are from `lecture-optimization`, §2.1-2.4 (pp. 21-34), with `lecture-maths` §4.2-4.5 (pp. 58-67) as a shorter parallel treatment. All exposition, the worked example, and every exercise here are newly authored, paraphrasing the sources' topic coverage.
+
+---
+
+**Next**: [OPT-04: Convex Problems, LP/QP, SQP & Log Barriers](/course/OPT/OPT-04)

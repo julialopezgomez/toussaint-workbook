@@ -1,7 +1,7 @@
 # Project State — Toussaint Workbook
 
 ## Current phase
-**Phase 4 in progress: Block MATH complete (6 modules, including a user-requested addition), batch 2 (Block OPT) starting now. 8 of ~64 planned modules exist across MATH/KIN/ML blocks.**
+**Phase 4 in progress: Blocks MATH (6 modules) and OPT (5 of 6 modules, OPT-06 deferred pending Block PROB) complete. 13 of ~64 planned modules exist across MATH/OPT/KIN/ML blocks.**
 
 ## Resolved (2026-08-12, sixth pass): added MATH-00 (Taylor Expansion From Scratch)
 User flagged, after reviewing batch 1, that Taylor expansion was used as a derivation tool in both MATH-01 (chain rule) and MATH-02 (second-order Taylor for Hessians) without ever being taught from scratch, and the user is specifically rusty on it. Added as **MATH-00** (not a renumber of MATH-01-05, to avoid churning already-published IDs) with a from-scratch derivation of both first- and second-order Taylor approximations (first order from the derivative definition directly, second order from matching-derivatives against a quadratic polynomial), two worked examples (sin/cos series, both independently verified), and 4 exercises. MATH-01's prerequisites and readiness check updated to point to it; MATH-01 and MATH-02's prose updated with explicit cross-references back to MATH-00 rather than leaving Taylor expansion as an unexplained tool. `CURRICULUM.md` updated (new row, module/hour counts, a production note explaining the insertion). Tested live, build clean (10 pages).
@@ -53,8 +53,15 @@ See `docs/decisions/0000-requirements.md`, `0001-corpus-update-and-priorities.md
 - Tested live: numeric checkers (3 different modules) ✓, symbolic checker with an alternate valid algebraic form (`s+s` vs `2*s`) ✓, KaTeX rendering (133 spans on MATH-04, correct `katex-sizing` class) ✓. Type check and production build both clean (9 pages, 0 errors).
 - Pushed to the public repo.
 
+## Completed — Phase 4, batch 2 (2026-08-12, seventh pass)
+- **OPT-01 through OPT-05 built**: Newton's method (derived from the 2nd-order Taylor model), Gauss-Newton (derived from the exact least-squares Hessian, dropping the residual-curvature term), KKT/Lagrangian (derived via the parallel-gradients geometric argument), convexity/LP/QP/log-barrier (includes a proof that convex local minima are global), SGD/momentum/Adam/No-Free-Lunch. 17 exercises total.
+- **OPT-06 (Bayesian Optimization & Bandits) deliberately deferred**: depends on PROB-01 (Probability Foundations), which doesn't exist yet. Noted in `CURRICULUM.md`.
+- All worked-example numbers verified with NumPy/SymPy first (Newton step exactness on a quadratic, Gauss-Newton exactness on a linear residual, a full KKT linear-system solve, log-barrier gradient blow-up near the boundary, SGD mini-batch noise vs. full-batch gradient).
+- Tested live: numeric checkers (OPT-01, OPT-03) ✓. Type check and production build both clean (15 pages, 0 errors).
+- Pushed to the public repo.
+
 ## Pending — next action needed from user
-- **Scope batch 2 of Phase 4.** Recommend continuing block-by-block in Tier-1 main-route order: Block OPT next (6 modules, directly builds on MATH, and is itself a prerequisite for much of the rest of the course), unless the user would rather jump to something closer to their research (e.g. Block DYN or the TAMP-related RLEARN modules).
+- **Scope batch 3 of Phase 4.** Options: Block PROB (6 modules — unblocks OPT-06 and is itself a prerequisite for ML/RL blocks), or something closer to the user's actual research (Block DYN, or the TAMP-related RLEARN modules, though those need PROB/DYN groundwork first regardless). Recommend PROB next, same reasoning as OPT: it's the more efficient next dependency.
 - Confirm the Review-with-Claude clipboard button and the progress-import file upload actually work for the user (neither could be verified in the automated browser testing tool).
 
 ## Known uncertainties

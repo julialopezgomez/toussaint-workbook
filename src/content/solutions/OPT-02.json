@@ -1,0 +1,41 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "OPT-02-ex1-why-approximate-hessian",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly identifies the O(n^2) storage / O(n^3) solve cost problem for large n." },
+          { "points": 1, "description": "Correctly identifies the general strategy: approximate curvature information more cheaply, rather than computing the exact Hessian." }
+        ],
+        "commonErrors": [
+          "Only mentioning 'it's expensive' without quantifying why (the n^2/n^3 scaling).",
+          "Not connecting this back to the covariant-gradient theme from MATH-05 (correcting the gradient with curvature information)."
+        ]
+      },
+      "fullSolution": "The exact Hessian has n^2 entries; computing all of them generally costs as much as differentiating the gradient n times, storing it costs O(n^2) memory, and solving a linear system with it (as Newton's method requires) costs O(n^3) in general. For n in the thousands or millions, all three become infeasible. The general strategy in this module: get a useful APPROXIMATION of curvature information cheaply, either by exploiting problem structure (Gauss-Newton, for least-squares problems specifically), building an approximation incrementally from a history of gradient observations (quasi-Newton/BFGS), or avoiding forming the Hessian at all via an iterative method (conjugate gradient). This is the same theme as MATH-05's covariant gradient (correct the plain gradient using curvature), just now focused on how to obtain that curvature information affordably."
+    },
+    {
+      "exerciseId": "OPT-02-ex2-gauss-newton-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly derives grad f(x) = J(x)^T r(x) via the chain rule on the sum-of-squares." },
+          { "points": 2, "description": "Correctly differentiates once more (product rule) to get H(x) = J^T J + sum_i r_i * (Hessian of r_i)." },
+          { "points": 1, "description": "Correctly explains why the dropped term is small specifically when residuals are small, i.e. near a good fit." }
+        ],
+        "commonErrors": [
+          "Forgetting the product rule has TWO terms when differentiating J(x)^T r(x) again (one from J^T changing, one from r changing).",
+          "Not connecting 'residuals near zero' to 'near convergence', missing why this approximation is most accurate exactly when it matters most."
+        ]
+      },
+      "fullSolution": "f(x) = (1/2) sum_i r_i(x)^2. partial f/partial x_k = sum_i r_i(x) * partial r_i/partial x_k = sum_i r_i(x) J_ik = [J(x)^T r(x)]_k. So grad f(x) = J(x)^T r(x).\n\nDifferentiating grad f(x) = J(x)^T r(x) w.r.t. x again, using the product rule (J^T itself depends on x too): H(x) = J(x)^T J(x) + sum_i r_i(x) * Hessian(r_i)(x), where the second term comes from differentiating J(x)^T (each row/column of which depends on x through the second derivatives of each r_i).\n\nGauss-Newton drops the second term, sum_i r_i(x) Hessian(r_i)(x), approximating H(x) ~= J(x)^T J(x). This term is weighted by the residuals r_i(x) themselves, so it vanishes as the fit improves (residuals shrink toward 0), regardless of how curved each r_i is. So the approximation is best exactly near a good fit, i.e. near convergence, which is precisely when an accurate Hessian approximation matters most for fast local convergence."
+    },
+    {
+      "exerciseId": "OPT-02-ex3-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 1.667, "tolerance": 0.01 },
+      "fullSolution": "J = [[1,0],[0,1],[1,1]], r(x0) = [-1,-2,-2]. J^T J = [[2,1],[1,2]]. J^T r(x0) = [-3,-4]. delta = -(J^T J)^-1 (J^T r) solves [[2,1],[1,2]] delta = [3,4], giving delta = [0.667, 1.667]. x1 = x0 + delta = [0.667, 1.667]. Second component: 1.667. (Verified with NumPy; since the residual is linear here, this Gauss-Newton step is exact, landing on the true least-squares solution in one step, not merely an approximation.)"
+    }
+  ]
+}

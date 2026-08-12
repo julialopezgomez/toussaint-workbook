@@ -1,0 +1,96 @@
+---
+id: OPT-04
+block: OPT
+title: "Convex Problems, LP/QP, SQP & Log Barriers"
+tier: 1
+estimatedHours: 3
+prerequisites: ["OPT-03"]
+objectives:
+  - "Prove that a local minimum of a convex function is automatically global."
+  - "Derive the log-barrier method's gradient and explain why it never reaches the constraint boundary."
+  - "Recognize and rewrite a problem in standard linear-program (LP) form."
+  - "Understand quadratic programs (QP) and sequential quadratic programming (SQP) at a conceptual level."
+sources:
+  - { sourceId: "lecture-optimization", pages: "p23-29, p35-48 (§2.2, §2.5)", role: "primary" }
+concepts:
+  - "Convexity"
+  - "Linear program (LP) / Quadratic program (QP)"
+  - "Log-barrier method"
+  - "Sequential Quadratic Programming (SQP)"
+notation:
+  - { symbol: "$f(tx_1+(1-t)x_2)\\le tf(x_1)+(1-t)f(x_2)$", meaning: "definition of convexity" }
+  - { symbol: "$\\min c^\\top x$ s.t. $Ax\\le b$", meaning: "standard-form linear program" }
+  - { symbol: "$t$", meaning: "log-barrier weight parameter (larger $t$ = weaker barrier)" }
+cheatsheetLinks: []
+nextModules: ["OPT-05"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Convexity is the property that separates "optimization problems you can actually solve reliably" from "optimization problems where you're at the mercy of your starting point." Recognizing when a subproblem is convex (or can be made convex, e.g. via a QP approximation) is a constant judgment call in trajectory optimization and motion planning, exactly the kind of problem your own manipulation-planning research deals with.
+
+## Prerequisites & readiness check
+
+You should have the Lagrangian and KKT conditions (OPT-03) fresh.
+
+<ReadinessCheck
+  question="What does complementary slackness say about an inactive inequality constraint's multiplier?"
+  answer="It must be zero: $\lambda\, g(x^*)=0$ with $g(x^*)<0$ forces $\lambda=0$."
+/>
+
+## Convexity: why it matters so much
+
+<ExerciseCard id="OPT-04-ex1-why-convexity-matters" />
+
+This is the single biggest reason convex problems (including LPs and QPs, below) are so valuable: any local optimization method (gradient descent, Newton) that finds *a* local minimum has automatically found *the* global minimum, no need to worry about getting stuck.
+
+## Linear and quadratic programs
+
+A **linear program (LP)** has a linear objective and linear inequality constraints: $\min_x c^\top x$ s.t. $Ax\le b$. A **quadratic program (QP)** allows a quadratic (convex, if the quadratic term's matrix is positive semi-definite) objective with the same linear constraints. Both are convex whenever correctly set up, so local solutions are global.
+
+<ExerciseCard id="OPT-04-ex3-lp-recognition" />
+
+## The log-barrier method
+
+One practical way to solve a constrained convex problem: replace each inequality constraint with a penalty term that blows up near the boundary, turning the constrained problem into a sequence of unconstrained ones.
+
+<ExerciseCard id="OPT-04-ex2-log-barrier-derivation" />
+
+**Worked example**: for $g(x)=x-5$ (constraint $x\le5$) with barrier weight $t=1$, the barrier gradient contribution $-\dfrac{1}{t\,g(x)}$ evaluates to $1$ at $x=4$ but $10$ at $x=4.9$, a tenfold increase for moving just $0.9$ closer to the boundary. *(Verified symbolically with SymPy while authoring this module.)* This is exactly the "increasingly strong repulsion" behavior from the derivation above, made concrete.
+
+In practice, the log-barrier method solves a *sequence* of unconstrained problems with $t$ gradually increased (weakening the barrier), each solution used to warm-start the next, converging toward the true constrained solution as $t\to\infty$.
+
+## SQP, briefly
+
+**Sequential Quadratic Programming (SQP)** handles general (not necessarily convex) constrained problems by repeatedly forming a local QP approximation (linearize the constraints, use a quadratic model of the Lagrangian, exactly the Newton/Gauss-Newton idea from OPT-01/OPT-02 applied to the constrained KKT system) and solving that QP exactly, then repeating at the new point. It's covered here at a conceptual level; a full derivation is a natural extension once you need it for a specific problem.
+
+## Summary
+
+- A local minimum of a convex function is automatically global, this is what makes convex problems tractable.
+- LPs and QPs are convex when correctly formulated (linear or convex-quadratic objective, linear constraints).
+- The log-barrier method converts a constrained problem into a sequence of unconstrained ones, using a penalty that blows up near the constraint boundary, preventing infeasibility by construction.
+- SQP extends the Newton/Gauss-Newton idea to general constrained problems via repeated local QP approximations.
+
+## Retrieval questions
+
+1. Prove (don't just state) that a local minimum of a convex function is global.
+2. Derive the log-barrier gradient formula, without looking back.
+3. What's the standard-form trick for converting a maximization problem, or a $\ge$ constraint, into the $\min c^\top x$ s.t. $Ax\le b$ template?
+
+## Mastery checklist
+
+- [ ] Proved that convexity implies local minima are global.
+- [ ] Derived the log-barrier gradient and can explain its blow-up behavior.
+- [ ] Rewrote a maximization problem with mixed constraint types into standard LP form.
+- [ ] Can explain, conceptually, what SQP does at each iteration.
+
+## Source note
+
+This module's topic and page range are from `lecture-optimization`, §2.2 and §2.5 (pp. 23-29, 35-48). All exposition, the worked example, and every exercise here are newly authored, paraphrasing the source's topic coverage.
+
+---
+
+**Next**: [OPT-05: Stochastic & Blackbox Optimization](/course/OPT/OPT-05)

@@ -1,0 +1,103 @@
+---
+id: OPT-01
+block: OPT
+title: "Unconstrained Optimization: Line Search & Newton"
+tier: 1
+estimatedHours: 3
+prerequisites: ["MATH-02", "MATH-05"]
+objectives:
+  - "Explain the failure modes of gradient descent with a poorly chosen fixed step size."
+  - "Derive Newton's method as the exact minimizer of the second-order Taylor model."
+  - "Compute a Newton step for a quadratic objective by hand."
+  - "Explain what the Armijo backtracking condition guarantees."
+sources:
+  - { sourceId: "lecture-optimization", pages: "p5-20 (Part 1)", role: "primary" }
+  - { sourceId: "lecture-maths", pages: "p47-58 (§4.1)", role: "supplementary" }
+concepts:
+  - "Gradient descent"
+  - "Backtracking line search / Armijo condition"
+  - "Newton's method"
+  - "Quadratic model of an objective"
+notation:
+  - { symbol: "$\\alpha$", meaning: "step size" }
+  - { symbol: "$d$", meaning: "descent direction (e.g. $d=-\\nabla f(x)$ or the Newton direction)" }
+  - { symbol: "$\\delta^*$", meaning: "the optimal step under a local quadratic model" }
+  - { symbol: "$c$", meaning: "Armijo condition constant, typically $10^{-4}$" }
+cheatsheetLinks: []
+nextModules: ["OPT-02"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+This module is where the Math block's tools (gradients, Hessians, Taylor expansion, the covariant gradient) start doing real work: every optimizer used later in this course, from trajectory optimization to training a neural network, is some variation on "take a step informed by the local gradient and curvature." Newton's method, derived properly here, is also the direct ancestor of Gauss-Newton (next module) and the optimal-control formulation your own manipulation-planning research builds on.
+
+## Prerequisites & readiness check
+
+You should have gradients/Hessians (MATH-02), Taylor expansion (MATH-00), and the covariant-gradient idea (MATH-05) fresh.
+
+<ReadinessCheck
+  question="Write the second-order Taylor expansion of $f$ around $x$, as a function of step $\delta$."
+  answer="$f(x+\delta) \approx f(x) + \nabla f(x)^\top \delta + \tfrac12\delta^\top H(x)\delta$"
+/>
+
+## Gradient descent and the step-size problem
+
+The simplest optimizer, gradient descent, updates $x \leftarrow x - \alpha \nabla f(x)$. It's cheap (only needs the gradient) but its performance depends heavily on choosing $\alpha$ well.
+
+<ExerciseCard id="OPT-01-ex1-why-stepsize-matters" />
+
+## Newton's method: use curvature, not just slope
+
+Rather than guessing a step size, use the second-order Taylor model itself to choose the *best* step, assuming (optimistically) that the quadratic model is exact.
+
+<ExerciseCard id="OPT-01-ex2-newton-derivation" />
+
+**Stop and try**: check that Newton's step reduces to something sensible in 1D: for $f:\mathbb{R}\to\mathbb{R}$, $\delta^* = -f'(x)/f''(x)$. Confirm this matches $-H(x)^{-1}\nabla f(x)$ in the $n=1$ case.
+
+## Worked example
+
+Let $f(x) = \tfrac12 x^\top A x - b^\top x$ with $A=\begin{pmatrix}4&1\\1&3\end{pmatrix}$, $b=\begin{pmatrix}1\\-2\end{pmatrix}$, starting at $x_0=\begin{pmatrix}0\\0\end{pmatrix}$. Since $\nabla f(x)=Ax-b$ and $H=A$ (constant, since $f$ is quadratic):
+
+$$\nabla f(x_0) = A(0)-b = \begin{pmatrix}-1\\2\end{pmatrix}, \qquad \delta^* = -A^{-1}\nabla f(x_0)$$
+
+Solving $A\delta^*=-\nabla f(x_0)$ (rather than explicitly inverting $A$) gives $\delta^* \approx \begin{pmatrix}0.4545\\-0.8182\end{pmatrix}$, so $x_1 = x_0+\delta^* \approx \begin{pmatrix}0.4545\\-0.8182\end{pmatrix}$.
+
+*(Verified with NumPy: $x_1$ matches $A^{-1}b$, the exact minimizer, exactly, since a single Newton step on a genuinely quadratic $f$ always lands exactly on the minimizer, not just approximately closer to it.)*
+
+<ExerciseCard id="OPT-01-ex3-numeric" />
+
+## When the quadratic model isn't exact: line search
+
+For a non-quadratic $f$, the quadratic model is only locally accurate, so a full Newton step $\delta^*$ might overshoot. **Backtracking line search** addresses this by trying $\alpha=1$ first, then shrinking $\alpha$ (e.g. by half each time) until the step satisfies the Armijo condition.
+
+<ExerciseCard id="OPT-01-ex4-armijo-challenge" />
+
+## Summary
+
+- Fixed-step gradient descent is fragile: too large risks divergence, too small wastes iterations.
+- Newton's method, $\delta^* = -H(x)^{-1}\nabla f(x)$, is the exact minimizer of the local second-order Taylor model, derived by differentiating that model and setting it to zero, the same "set the derivative to zero" idea from ordinary calculus, applied to a model rather than $f$ itself.
+- Backtracking line search with the Armijo condition guarantees a meaningful fraction of the predicted decrease is actually achieved, protecting against both overshoot and negligible-progress steps.
+
+## Retrieval questions
+
+1. Derive Newton's step from the second-order Taylor model, without looking back.
+2. Why does a single Newton step land exactly on the minimizer for a quadratic $f$, but only approximately for a general $f$?
+3. What does the Armijo constant $c$ control, and what would $c=1$ mean (even though it's not used in practice)?
+
+## Mastery checklist
+
+- [ ] Can explain both step-size failure modes for plain gradient descent.
+- [ ] Derived Newton's method from the second-order Taylor model.
+- [ ] Computed a Newton step by hand for a quadratic objective.
+- [ ] Can explain what the Armijo condition guarantees and why "any decrease" isn't sufficient.
+
+## Source note
+
+This module's topic and page range are from `lecture-optimization`, Part 1 (pp. 5-20), with `lecture-maths` §4.1 (pp. 47-58) as a shorter parallel treatment of the same material. All exposition, the worked example, and every exercise here are newly authored, paraphrasing the sources' topic coverage and building the Newton derivation explicitly from MATH-00/MATH-02's Taylor-expansion machinery rather than quoting either source directly.
+
+---
+
+**Next**: [OPT-02: Gauss-Newton, Quasi-Newton & Conjugate Gradient](/course/OPT/OPT-02)
