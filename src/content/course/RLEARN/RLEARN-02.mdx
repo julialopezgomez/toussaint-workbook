@@ -1,0 +1,138 @@
+---
+id: RLEARN-02
+block: RLEARN
+title: "Imitation Learning"
+tier: 1
+estimatedHours: 4
+prerequisites: ["ML-04", "RL-04", "RLEARN-01"]
+objectives:
+  - "State behavior cloning's formulation, and derive why it is not, despite its supervised-ML formula, actually a supervised learning problem."
+  - "Derive the theoretical magnitude of behavior cloning's compound error, and explain how DAgger addresses it."
+  - "State GAN, VAE, and Diffusion Model formulations, and their imitation-learning instantiations (GAIL, conditional-VAE policies, diffusion policies)."
+sources:
+  - { sourceId: "lecture-robotlearning", pages: "p35-56 (§1.6-1.7)", role: "primary" }
+concepts:
+  - "Behavior cloning, trajectory distribution learning"
+  - "Distributional shift, compound error, DAgger"
+  - "Data collection: teleoperation, kinesthetic teaching, privileged teacher"
+  - "Generative models for imitation: GAN, VAE, Diffusion"
+notation:
+  - { symbol: "$\\pi_\\theta:x\\mapsto u$", meaning: "a deterministic policy mapping states to controls" }
+  - { symbol: "$\\varepsilon$", meaning: "per-step expected loss of the cloned policy relative to the expert" }
+  - { symbol: "$D_\\phi,\\ q_\\phi,\\ p_\\theta$", meaning: "GAN discriminator; VAE encoder; VAE/diffusion decoder distributions" }
+cheatsheetLinks: []
+nextModules: ["RLEARN-03"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Given expert demonstration data $D=\{(x^i_{1:T_i},u^i_{1:T_i})\}_{i=1}^n$, with **no reward signal at all**, how do you extract a policy? This module's real content is a cautionary tale worth taking seriously: the obvious answer (treat it as supervised learning) has a specific, provable failure mode, and most of imitation learning's actual machinery exists to fix exactly that failure.
+
+## Prerequisites & readiness check
+
+You should have ML-04's supervised-learning loss framing fresh.
+
+<ReadinessCheck
+  question="From ML-04, what does empirical risk minimization look like for a parameterized model?"
+  answer="min_θ Σᵢ ℓ(yᵢ, f_θ(xᵢ)), a data loss plus (implicitly) regularization."
+/>
+
+## A landscape of imitation learning
+
+Four genuinely distinct strategies answer "how do I reproduce demonstrations":
+
+| Strategy | Idea |
+|---|---|
+| **Behavior cloning** | Directly fit $\pi_\theta:x\mapsto u$ as supervised regression on $(x,u)$ pairs |
+| **Trajectory distribution learning** | Fit a *distribution* $p_\theta(x_{1:T})$ over demonstrated trajectories |
+| **Direct/interactive policy learning** | Iteratively collect more expert data at the states the *current* policy actually visits (DAgger) |
+| **Inverse RL** | Infer the reward function the demonstrations are (approximately) optimal for (RLEARN-05, not developed here) |
+
+## Behavior cloning
+
+$$\min_\theta\sum_{i,t}\ell\big(u_t^i,\pi_\theta(x_t^i)\big)$$
+
+Literally ML-04's supervised regression, with $\pi_\theta$ the model. Simple, and it works, but three open questions immediately: does it capture the *long-term effect* of the demonstrated behavior, does it capture the demonstration's "essence," and can it handle genuinely multi-modal demonstrations (two equally-good ways to do the same thing)?
+
+## Trajectory distribution learning
+
+A different answer to "essence": fit $p_\theta(x_{1:T})$ via likelihood maximization, $\max_\theta\prod_ip_\theta(x^i_{1:T_i})$, then read off a policy from the fitted distribution. Two concrete instances:
+
+- **GMMs** (Calinon & Billard, 2007): embed trajectories in "space-time" $\{(t,x_t)\}$, fit a Gaussian Mixture density $p(t,x_t)$; the learned variance of $p(x\mid t)$ captures "consistent bottlenecks" (parts of the demonstrations that varied little, likely genuinely important), and reading off $p(x\mid t)$ plus DYN-01's inverse dynamics gives a controller.
+- **ProMPs** (Paraschos, Daniel, Peters & Neumann, 2013): nothing more than probabilistic linear regression $t\mapsto x_t$ with basis-function features (ML-02's exact machinery), offering great flexibility to condition, compose, and blend multiple learned movement primitives.
+
+<ExerciseCard id="RLEARN-02-ex1-trajectory-distribution-conceptual" />
+
+For manipulation specifically, a related question is *what feature or constraint* should actually be extracted from demonstrations (e.g. keypoint affordances, SE(3)-equivariant object descriptors, neural implicit constraints, DYN-03's task-space $\phi(x)$ generalized and *learned* rather than hand-specified); genuinely active research, flagged here rather than developed in depth.
+
+## Distributional shift: behavior cloning's real problem
+
+Standard supervised ML assumes train and test data come from the *same* distribution $p(x,y)$. In a **sequential decision process**, the policy's own choices determine which states get visited, so the *test-time* state distribution $p^\pi(x_t)$ depends on $\pi$ itself, fundamentally different from ordinary supervised learning (and the same issue underlies off-policy/offline RL, RLEARN-04).
+
+<ExerciseCard id="RLEARN-02-ex2-distributional-shift-derivation" />
+
+Behavior cloning trains $\min_\theta\mathbb{E}_{\pi^*}\{\ell(u,\pi_\theta(x))\}$ (expectation under the *expert's* state distribution), but what actually matters at test time is $\min_\theta\mathbb{E}_{\pi_\theta}\{\ell(\pi^*(x),\pi_\theta(x))\}$ (expectation under the *trained policy's own* state distribution): a small training error under $\pi^*$'s states says nothing about behavior once $\pi_\theta$'s own small errors compound and drift it into states the expert never demonstrated, the **compound error**.
+
+**Theorem** (Ross, Gordon & Bagnell, 2011): if $\mathbb{E}_{\pi^*}\{\ell(u,\pi_\theta(x))\}=\varepsilon$, then $J(\pi_\theta)\leq J(\pi^*)+T^2\varepsilon$ (cost over a $T$-step rollout). **The cost gap grows *quadratically* with horizon $T$**, not linearly: a tiny per-step training error can compound into an arbitrarily bad rollout as $T$ grows, purely from distributional shift, with no additional per-step mistakes needed.
+
+<ExerciseCard id="RLEARN-02-ex3-compound-error-conceptual" />
+
+## Fixing distributional shift
+
+Two families of fix, both about making the *training* distribution look more like the *test-time* distribution:
+
+- **Perturb the expert**: occasionally add noise to the demonstrated actions, forcing the expert (or the collected data) to cover some non-optimal, "recovery" states too, not just the pristine optimal trajectory.
+- **DAgger** (Dataset Aggregation, Ross, Gordon & Bagnell, 2011): interactively collect data *at exactly the states the current $\pi_\theta$ visits*, not just the original expert states: roll out $\pi_\theta$, query the expert for the correct action at the states actually reached, aggregate this into the training set, retrain, repeat. This directly approximates the correct objective $\min_\theta\mathbb{E}_{\pi_\theta}\{\ell(\pi^*(x),\pi_\theta(x))\}$ instead of the naive one, at the cost of needing *interactive* access to the expert (and the real environment) during training, not just a fixed dataset.
+
+## Data collection
+
+Five practical sources, each with a different cost/quality tradeoff: **teleoperation** (a human directly drives the robot, e.g. ALOHA's low-cost bimanual setup), **kinesthetic teaching** (a human physically moves the robot's own body through the task), **motion capture** (record human motion, retarget to the robot), **video only** (learn from human videos with no robot involved at all, requiring some form of embodiment translation), and **privileged teacher**: first train a policy $\pi_{\theta_1}:z\mapsto u$ using *privileged* information $z$ (e.g. full simulation ground truth) unavailable at deployment, use it to generate data, then train a deployment policy $\pi_{\theta_2}:x\mapsto u$ on only the actually-available observations $x$ (a hierarchical pattern that pairs naturally with DAgger for the second stage, at the cost of requiring a simulator or other privileged-information source).
+
+<ExerciseCard id="RLEARN-02-ex4-privileged-teacher-conceptual" />
+
+## Generative models for imitation
+
+A **generative model**, given data $D=\{d_i\}$, learns $p_\theta$ with $d_i\sim p_\theta$, then generates novel $d^*\sim p_\theta$. Applied to IL data $\{(x_{1:T},u_{1:T})\}$, this learns $p_\theta(u_t\mid x_t)$ directly, naturally handling multi-modal demonstrations (behavior cloning's third open question) in a way a single deterministic $\pi_\theta$ cannot.
+
+- **GAN**: train a generator $g_\omega$ and discriminator $d_\phi$ adversarially, $\max_\omega\min_\phi-\frac{1}{N_\text{data}}\sum\ln d_\phi(x_n)-\frac{1}{N_\text{gen}}\sum\ln(1-d_\phi(g_\omega(z_n)))$. **GAIL** (Ho & Ermon, 2016) applies this to IL directly: the generator *is* the policy $x\mapsto u$, the discriminator takes $(x,u)$ pairs, and training alternates rolling out the policy, updating the discriminator, updating the policy.
+- **VAE**: train an encoder $q_\phi(z\mid x)$ and decoder $p_\theta(x\mid z)$, loss $\min_{\theta,\phi}-\mathbb{E}_{z\sim q_\phi(z\mid x)}\log p_\theta(x\mid z)+D_\text{KL}(q_\phi(z\mid x)\,\|\,p_\theta(z))$ (PROB-03's KL divergence, now regularizing a learned latent-variable model rather than comparing two given distributions). ALOHA's ACT policy is a **conditional VAE**: encoder takes joint positions and an expert action chunk, decoder takes observations plus a "style" latent $z$ and outputs a planned action sequence; at inference, $z$ is fixed to $0$ (deterministic generation).
+- **Diffusion**: train a single network to *remove* noise. Forward process adds Gaussian noise step by step, $q(x_t\mid x_{t-1})=\mathcal{N}(x_t;\sqrt{1-\beta_t}x_{t-1},\beta_tI)$; the reverse process $p_\theta(x_{t-1}\mid x_t)=\mathcal{N}(x_{t-1};\mu_\theta(x_t,t),\Sigma_\theta(x_t,t))$ is learned to undo it, generating samples by iterated denoising from pure noise. **Diffusion Policy** (Chi et al., 2023) applies this directly to action-sequence generation, currently a leading approach for visuomotor manipulation policies.
+
+<ExerciseCard id="RLEARN-02-ex5-generative-model-conceptual" />
+
+## Case studies (brief)
+
+**Deep Drone Acrobatics** (Kaufmann et al., 2020): trains entirely in simulation, with a privileged expert (an optimization-based MPC controller) and DAgger, transferring to real drone acrobatics via careful sim-to-real input preprocessing. **Domain Adaptive Imitation Learning** (Kim et al., 2020): given *unpaired* demonstrations of the same tasks on two different robots/embodiments, learns state and action mappings between them (via an adversarial alignment approach, GAMA) to transfer a new task's demonstration to an unseen robot zero-shot, a genuinely different problem from everything above: not "learn from demonstrations on this robot," but "translate demonstrations meant for a different embodiment."
+
+## Summary
+
+- **Behavior cloning** is literally supervised regression on $(x,u)$ pairs, but its loss doesn't match what actually happens at test time; **trajectory distribution learning** (GMM, ProMP) instead fits a distribution over whole demonstrated trajectories.
+- **Distributional shift**: a policy's own errors compound because its test-time state distribution depends on itself; the compound-error bound $J(\pi_\theta)\leq J(\pi^*)+T^2\varepsilon$ grows *quadratically* in horizon.
+- **DAgger** fixes this by interactively querying the expert at states the current policy actually visits, directly approximating the correct training objective.
+- **Data collection** spans teleoperation, kinesthetic teaching, motion capture, video, and the privileged-teacher pattern (train with privileged info, then distill to a deployable policy).
+- **GAN/VAE/Diffusion** generative models handle multi-modal demonstrations naturally; GAIL, conditional-VAE policies (ALOHA/ACT), and Diffusion Policy are each a direct IL instantiation.
+
+## Retrieval questions
+
+1. State behavior cloning's formula, and its three open questions.
+2. Derive why behavior cloning's training objective doesn't match its test-time objective, and state the compound-error bound.
+3. State DAgger's algorithm, and explain why it approximates the correct objective.
+4. State the GAN, VAE, and Diffusion Model loss formulas, and their IL instantiations.
+
+## Mastery checklist
+
+- [ ] Can state behavior cloning and trajectory distribution learning's formulations.
+- [ ] Derived the distributional-shift mismatch and can state the compound-error bound.
+- [ ] Can state DAgger's algorithm and explain the fix it provides.
+- [ ] Can state GAN/VAE/Diffusion formulas and name their IL instantiations.
+
+## Source note
+
+This module's exposition, behavior cloning, trajectory distribution learning (GMM/ProMP), the distributional-shift analysis and compound-error theorem (Ross, Gordon & Bagnell, 2011), DAgger, data collection methods (including the privileged-teacher pattern), and the GAN/VAE/Diffusion formulations (including GAIL, ALOHA's conditional-VAE policy, and Diffusion Policy) are adapted from `lecture-robotlearning`, §1.6-1.7 (pp. 35-56). The compound-error theorem's proof is cited, not re-derived, matching the source's own level of detail. All exercises are newly authored.
+
+---
+
+**Next**: [RLEARN-03: RL in Robotics: Reward Engineering & Deep RL Tricks](/course/RLEARN/RLEARN-03)

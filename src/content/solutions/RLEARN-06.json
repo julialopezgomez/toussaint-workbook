@@ -1,0 +1,46 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RLEARN-06-ex1-privileged-teacher-grasp-labels",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies the force-closure metric with privileged pose/shape info as the teacher." },
+          { "points": 2, "description": "Correctly identifies the RGB-D-trained network as the student." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "The teacher is the force-closure metric, computed offline with privileged exact shape/pose knowledge, generating grasp-quality labels for many candidates. The student is the trained network, seeing only realistic RGB-D input at training and deployment, learning to predict what the privileged computation would say without needing exact poses/shapes itself."
+    },
+    {
+      "exerciseId": "RLEARN-06-ex2-simulation-labels-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 10506000, "tolerance": 5000 },
+      "fullSolution": "17,744,000 * 0.5921 ~= 10,506,000."
+    },
+    {
+      "exerciseId": "RLEARN-06-ex3-architecture-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains wasted capacity on non-viable points if not staged." },
+          { "points": 2, "description": "Correctly explains the benefit of tailored per-stage losses and cleaner training signal." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Most scene points aren't viable grasp locations; predicting detailed geometry for all of them regardless would waste capacity/signal. Staging separates viability (classification loss) from geometry (regression losses), each with its own tailored loss, and geometric capacity only ever trains on already-plausible points, a cleaner signal than mixing viable/non-viable points in one target."
+    },
+    {
+      "exerciseId": "RLEARN-06-ex4-beyond-mdp-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly contrasts MDP policies (sequential, reward-driven) with structured one-shot prediction." },
+          { "points": 2, "description": "Correctly explains that classical control executes the predicted target." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "An MDP policy outputs low-level controls at every state, trained against reward accumulated over a trajectory. Grasp/flow-field prediction outputs a single structured target from one observation, no sequential decision-making or reward accumulation. That target is then executed by classical model-based control (operational-space control, IK), so the learning problem is one-shot structured prediction, not a sequential MDP."
+    }
+  ]
+}

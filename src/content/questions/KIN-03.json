@@ -1,0 +1,71 @@
+{
+  "moduleId": "KIN-03",
+  "exercises": [
+    {
+      "id": "KIN-03-ex1-fk-chain",
+      "objective": "Compute forward kinematics for a small planar kinematic chain.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "A 2-link planar arm has link lengths $L_1=L_2=1$, both joints revolute about $z$. Joint 1 is at the origin; joint 2's position is $p_1=(L_1\\cos q_1,\\,L_1\\sin q_1)$; the end-effector position is $p_{\\text{eff}} = p_1 + (L_2\\cos(q_1+q_2),\\,L_2\\sin(q_1+q_2))$. At $q_1=0,\\,q_2=\\pi/2$, compute $p_{\\text{eff}}$'s **second component** ($y$). Enter a decimal.",
+      "hints": [
+        "$p_1 = (1\\cos0,\\,1\\sin0) = (1,0)$.",
+        "$p_{\\text{eff},y} = p_{1,y} + L_2\\sin(q_1+q_2) = 0 + \\sin(0+\\pi/2) = \\sin(\\pi/2)$.",
+        "$p_{\\text{eff},y} = 1$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "KIN-03-ex2-jacobian-column",
+      "objective": "Construct a Jacobian column geometrically from a joint's axis and location.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 21, "originalNumber": "§2.2:22" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["KIN-03-ex1-fk-chain"],
+      "answerType": "numeric",
+      "prompt": "For the same arm at $q_1=0,q_2=\\pi/2$ (so $p_1=(1,0,0)$, $p_{\\text{eff}}=(1,1,0)$), both joint axes are $a_i=(0,0,1)$ (world $z$, since $q_1=0$ means no rotation has happened yet at joint 2 either). Using $J^{\\text{pos}}_{\\cdot 2}=a_2\\times(p_{\\text{eff}}-p_2)$ (with $p_2=p_1$, joint 2's location), compute the **first component** ($x$) of $J^{\\text{pos}}_{\\cdot 2}$. Enter a decimal.",
+      "hints": [
+        "$p_{\\text{eff}}-p_2 = (1,1,0)-(1,0,0) = (0,1,0)$.",
+        "$a_2\\times(p_{\\text{eff}}-p_2) = (0,0,1)\\times(0,1,0)$. Using the determinant/component formula for a cross product: $(0\\cdot0-1\\cdot1,\\ 1\\cdot0-0\\cdot0,\\ 0\\cdot1-0\\cdot0) = (-1,0,0)$.",
+        "First component: $-1$. (Independently verified against a finite-difference derivative of the forward-kinematics formula while authoring this module: matched exactly.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "KIN-03-ex3-gauss-newton-ik-numeric",
+      "objective": "Apply the Gauss-Newton IK closed form numerically.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "robotkin", "page": 1, "originalNumber": "Inverse Kinematics section" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": ["KIN-03-ex2-jacobian-column"],
+      "answerType": "numeric",
+      "prompt": "For the same arm, $q_0=(0,\\pi/2)$, $\\phi(q_0)=(1,1)$, $J=\\begin{pmatrix}-1&-1\\\\1&0\\end{pmatrix}$ (rows $x,y$; columns joint 1, joint 2). Target $y^*=(1.2,1.2)$, $C=I$, $W=0.1I$. Using $\\delta = (J^\\top CJ+W)^{-1}J^\\top C(y^*-\\phi(q_0))$, compute $\\delta_1$ (the first component). Enter a decimal to 3 decimal places.",
+      "hints": [
+        "$J^\\top J = \\begin{pmatrix}-1&1\\\\-1&0\\end{pmatrix}\\begin{pmatrix}-1&-1\\\\1&0\\end{pmatrix} = \\begin{pmatrix}2&1\\\\1&1\\end{pmatrix}$. Adding $W=0.1I$: $\\begin{pmatrix}2.1&1\\\\1&1.1\\end{pmatrix}$.",
+        "$y^*-\\phi(q_0) = (0.2,0.2)$. $J^\\top(y^*-\\phi(q_0)) = \\begin{pmatrix}-1&1\\\\-1&0\\end{pmatrix}\\begin{pmatrix}0.2\\\\0.2\\end{pmatrix} = \\begin{pmatrix}0\\\\-0.2\\end{pmatrix}$.",
+        "Solve $\\begin{pmatrix}2.1&1\\\\1&1.1\\end{pmatrix}\\delta=\\begin{pmatrix}0\\\\-0.2\\end{pmatrix}$: determinant $=2.1(1.1)-1=1.31$. $\\delta_1 = (0(1.1)-(-0.2)(1))/1.31 = 0.2/1.31 \\approx 0.153$. (Independently verified with NumPy while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "KIN-03-ex4-singularity-conceptual",
+      "objective": "Explain Jacobian singularity and why regularization fixes the pseudo-inverse blowup.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain, geometrically, why a robot arm's Jacobian becomes singular when the arm is fully outstretched (at the boundary of its reachable workspace), and explain why using $J^\\sharp=(J^\\top CJ+W)^{-1}J^\\top C$ with $W\\succ0$ (rather than the naive pseudo-inverse $J^\\top(JJ^\\top)^{-1}$) avoids the resulting numerical blowup.",
+      "hints": [
+        "At full stretch, every joint's rotation moves the end-effector in the same tangential direction (perpendicular to the fully-extended arm) — there's no combination of joint velocities that can move the end-effector directly outward/inward along the arm's own direction at that instant. This is exactly a rank deficiency: the columns of $J$ no longer span all $d$ output dimensions.",
+        "When $\\text{rank}(J)<d$, $JJ^\\top$ becomes singular (non-invertible), so the naive pseudo-inverse $J^\\top(JJ^\\top)^{-1}$ requires inverting a singular matrix, blowing up numerically (an IK step could request an 'infinite' joint velocity).",
+        "Adding $W\\succ0$ inside $(J^\\top CJ+W)^{-1}$ (or equivalently, per MATH-04's shift-invariance fact, shifting $J^\\top CJ$'s eigenvalues up by at least $W$'s smallest eigenvalue) guarantees $J^\\top CJ+W$ stays strictly positive definite and invertible even when $J^\\top CJ$ alone is singular, exactly the same ridge-regression/Levenberg-Marquardt fix seen elsewhere in this course, here protecting IK from ever requesting an unbounded joint velocity near a singularity."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

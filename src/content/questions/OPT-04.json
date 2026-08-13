@@ -48,6 +48,40 @@
         "Full standard form: $c=\\begin{pmatrix}-2\\\\-3\\end{pmatrix}$, $A=\\begin{pmatrix}1&1\\\\-1&0\\\\0&-1\\end{pmatrix}$, $b=\\begin{pmatrix}10\\\\0\\\\0\\end{pmatrix}$, i.e. $\\min_x c^\\top x$ s.t. $Ax\\le b$ with these three stacked inequality rows."
       ],
       "reviewCardIds": []
+    },
+    {
+      "id": "OPT-04-ex4-central-path-check",
+      "objective": "Apply the log-barrier method's relaxed-complementarity condition numerically.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-optimization", "page": 26, "originalNumber": "§2.2:7-8" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["OPT-04-ex2-log-barrier-derivation"],
+      "answerType": "numeric",
+      "prompt": "At a centering solution $x^*(\\mu)$ with barrier weight $\\mu=0.01$, one active-ish constraint has $g(x^*(\\mu))=-0.02$. Using $\\lambda=-\\mu/g(x^*(\\mu))$, compute $\\lambda$, then verify the relaxed complementarity condition $\\lambda\\,g(x^*(\\mu))=-\\mu$ holds. Enter $\\lambda$ as a decimal.",
+      "hints": [
+        "$\\lambda = -\\mu/g(x^*(\\mu)) = -0.01/(-0.02)$.",
+        "$\\lambda = 0.5$.",
+        "Check: $\\lambda\\,g(x^*(\\mu)) = 0.5\\times(-0.02) = -0.01 = -\\mu$. Confirmed: this is exactly the relaxed complementarity condition, which becomes exact complementarity ($\\lambda g=0$) only in the limit $\\mu\\to0$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-04-ex5-auglag-update",
+      "objective": "Apply the augmented Lagrangian multiplier update rule.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-optimization", "page": 29, "originalNumber": "§2.3:6" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["OPT-04-ex1-why-convexity-matters"],
+      "answerType": "numeric",
+      "prompt": "Using the augmented Lagrangian equality-constraint update $\\kappa^{\\text{new}}=\\kappa^{\\text{old}}+2\\nu h(x')$, with $\\kappa^{\\text{old}}=0.5$, $\\nu=2$, and $h(x')=0.1$ (a small residual constraint violation at the new minimizer), compute $\\kappa^{\\text{new}}$. Enter a decimal.",
+      "hints": [
+        "Substitute directly: $\\kappa^{\\text{new}} = 0.5 + 2\\times2\\times0.1$.",
+        "$2\\times2\\times0.1 = 0.4$.",
+        "$\\kappa^{\\text{new}} = 0.5+0.4 = 0.9$. Note this update doesn't require $\\nu\\to\\infty$: as long as $h(x')$ is shrinking toward zero across iterations, $\\kappa$ converges to the correct Lagrange multiplier at a fixed, moderate $\\nu$, avoiding the ill-conditioning that comes from sending a pure penalty weight to infinity."
+      ],
+      "reviewCardIds": []
     }
   ]
 }

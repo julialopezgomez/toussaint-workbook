@@ -1,0 +1,52 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RL-04-ex1-bellman-residual-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly shows the gradient of the squared loss matches the TD update for one tabular entry." },
+          { "points": 2, "description": "Correctly explains why summing over a replay buffer turns this into a genuine ML training problem." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Differentiating (1/2)[r+gamma*Q(s',pi(s'))-Q(s,a)]^2 w.r.t. a tabular Q(s,a) entry gives -[r+gamma*Q(s',pi(s'))-Q(s,a)]; a gradient step of size alpha on this loss is exactly the Q-learning update. For a table, loss and TD error are the same computation viewed two ways. Once Q is a neural network, you can't update one entry in isolation; summing squared TD error over the whole replay buffer (Bellman residual) gives an ordinary supervised regression loss that SGD can train against directly."
+    },
+    {
+      "exerciseId": "RL-04-ex2-log-derivative-trick",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly applies the chain rule to d(log P)/d(theta)." },
+          { "points": 2, "description": "Correctly rearranges to get dP/dtheta = P * d(log P)/dtheta." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "d(log P_theta(xi))/d(theta) = (1/P_theta(xi)) * dP_theta(xi)/d(theta) by the chain rule. Multiplying both sides by P_theta(xi): P_theta(xi) * d(log P_theta(xi))/d(theta) = dP_theta(xi)/d(theta). (Independently verified symbolically with SymPy.)"
+    },
+    {
+      "exerciseId": "RL-04-ex3-trajectory-factorization-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly takes log of the product to get a sum of log terms." },
+          { "points": 2, "description": "Correctly identifies that only the policy terms depend on theta, so the dynamics terms vanish." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "log P_theta(xi) = log P(s0) + sum_t log pi_theta(a_t|s_t) + sum_t log P(s_{t+1}|s_t,a_t). Differentiating w.r.t theta: P(s0) and P(s'|s,a) are environment properties, not functions of theta, so their derivatives are zero. Only sum_t log pi_theta(a_t|s_t) depends on theta, giving d(log P_theta(xi))/d(theta) = sum_t d(log pi_theta(a_t|s_t))/d(theta). The dynamics never appear because they were never a function of theta."
+    },
+    {
+      "exerciseId": "RL-04-ex4-target-network-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains the moving-target feedback-loop problem." },
+          { "points": 2, "description": "Correctly explains how freezing/delaying the target fixes it." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "If the target uses the same live Q_theta being trained, every gradient step that changes theta immediately changes the target the next step chases: the loss landscape shifts as theta updates, unlike ordinary regression with fixed targets, causing oscillation or divergence. Freezing Q_bar to a delayed/low-pass-filtered copy breaks this loop: for many consecutive steps the target is effectively constant, turning training back into well-behaved regression, at the cost of a slightly lagging target."
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+---
+id: DYN-04
+block: DYN
+title: "Optimal Control & Trajectory Optimization"
+tier: 1
+estimatedHours: 6
+prerequisites: ["DYN-03", "OPT-04"]
+objectives:
+  - "State the discrete- and continuous-time optimal control problem, and derive the Bellman/HJB equations from Bellman's principle."
+  - "Derive the Riccati differential equation for linear-quadratic (LQ) control."
+  - "Show that LQR reduces to PD control for the 1D point mass, and verify it numerically."
+  - "Recognize optimal control, inverse kinematics, operational space control, and trajectory optimization as instances of the same underlying mathematical structure."
+sources:
+  - { sourceId: "lecture-robotics", pages: "p90-91, p127-135 (§5, §8.1)", role: "primary" }
+concepts:
+  - "Bellman principle, value function, Bellman equation"
+  - "Hamilton-Jacobi-Bellman (HJB) equation"
+  - "Linear-Quadratic (LQ) control, Riccati equation"
+  - "LQR as PD control"
+  - "Trajectory optimization, $k$-order cost terms"
+notation:
+  - { symbol: "$J^\\pi$", meaning: "total cost under policy $\\pi$" }
+  - { symbol: "$V_t(x)$ or $V(x,t)$", meaning: "value function / optimal cost-to-go from state $x$" }
+  - { symbol: "$P(t)$", meaning: "Riccati matrix; the value function is $V(x,t)=x^\\top P(t)x$ in the LQ case" }
+  - { symbol: "$K=R^{-1}B^\\top P$", meaning: "LQR gain matrix, $u^*=-Kx$" }
+cheatsheetLinks: []
+nextModules: ["DYN-05"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+This is the module your own thesis report's Chapter 2.2 builds on directly: optimal control and trajectory optimization are, formally, the same regularized-least-squares/dynamic-programming machinery you've now seen four times (OPT-04's SQP, KIN-03's IK, DYN-03's operational-space control), applied to a whole trajectory instead of a single decision. Seeing the Bellman/Riccati derivations once, properly, pays off directly when reading control-theory papers in your area.
+
+## Prerequisites & readiness check
+
+You should have operational-space control (DYN-03) and constrained/SQP optimization (OPT-04) fresh.
+
+<ReadinessCheck
+  question="From OPT-04, what does SQP do at each iteration?"
+  answer="Taylor-expands the cost to 2nd order and the constraints to 1st order around the current point, then solves the resulting QP exactly for the step."
+/>
+
+## Optimal control: problem formulation
+
+**Discrete time**: given a controlled dynamic system $x_{t+1}=f(x_t,u_t)$ (state $x_t$, e.g. $(q_t,\dot q_t)$; control $u_t$), define a cost $J^\pi=\sum_{t=0}^Tc(x_t,u_t)+\phi(x_T)$ under a policy $\pi:(x,t)\mapsto u$; find $\pi^*=\operatorname*{argmin}_\pi J^\pi$.
+
+**Continuous time**: the same idea with $\dot x=f(x,u)$ and $J^\pi=\int_0^Tc(x(t),u(t))\,dt+\phi(x(T))$.
+
+## The Bellman principle and the Bellman equation
+
+> **Bellman's principle.** An optimal policy has the property that, whatever the initial state and initial decision are, the *remaining* decisions must themselves constitute an optimal policy with regard to the state resulting from that first decision.
+
+Define the **value function** (optimal cost-to-go) $V_t(x)=\min_\pi\left[\sum_{s=t}^Tc(x_s,u_s)+\phi(x_T)\right]_{x_t=x}$. Bellman's principle turns this into a recursive equation:
+
+<ExerciseCard id="DYN-04-ex1-bellman-derivation" />
+
+$$\boxed{V_t(x) = \min_u\big[c(x,u)+V_{t+1}(f(x,u))\big]}$$
+
+the **Bellman equation**, solved backward in time from $V_T(x)=\phi(x)$ (dynamic programming). The $\operatorname*{argmin}$ at each state gives the optimal control, $\pi_t^*(x)=\operatorname*{argmin}_u[\,\cdots]$.
+
+## Continuous time: the Hamilton-Jacobi-Bellman equation
+
+The exact same idea, continuous version: $V(x,t)=\min_\pi\left[\int_t^Tc(x(s),u(s))\,ds+\phi(x(T))\right]_{x(t)=x}$. Applying the discrete Bellman equation over an infinitesimal step $dt$ and Taylor-expanding $V$ to first order gives:
+
+$$-\frac{\partial}{\partial t}V(x,t) = \min_u\Big[c(x,u)+\frac{\partial V}{\partial x}f(x,u)\Big] \qquad\textbf{(Hamilton-Jacobi-Bellman, HJB)}$$
+
+(Applying the discrete Bellman equation at $V_t$ and $V_{t+dt}$, expanding $V(x(t+dt),t+dt)\approx V(x,t)+\frac{\partial V}{\partial t}dt+\frac{\partial V}{\partial x}\dot x\,dt$, and cancelling $V(x,t)$ from both sides, leaves exactly this equation in the $dt\to0$ limit, mirroring MATH-00's Taylor-expansion-based derivations throughout this whole workbook.)
+
+For an **infinite horizon** ($J^\pi=\int_0^\infty c\,dt$, time-invariant cost), the optimal value function and policy become **stationary** ($V(x,t)=V(x)$, no explicit $t$-dependence), and the HJB/Bellman equations simplify to $0=\min_u[c(x,u)+\frac{\partial V}{\partial x}f(x,u)]$ / $V(x)=\min_u[c(x,u)+V(f(x,u))]$.
+
+## Linear-Quadratic control and the Riccati equation
+
+The HJB equation is a hard PDE in general, but becomes tractable for **linear dynamics** $\dot x=Ax+Bu$ and **quadratic costs** $c(x,u)=x^\top Qx+u^\top Ru$, $\phi(x_T)=x_T^\top Fx_T$ (constant/linear cost terms are dropped: constants are irrelevant to the argmin, linear terms can be absorbed by redefining $x$ or $u$). In this **LQ case**, the value function is *always* exactly quadratic, $V(x,t)=x^\top P(t)x$:
+
+<ExerciseCard id="DYN-04-ex2-riccati-derivation" />
+
+$$\boxed{-\dot P = A^\top P+PA-PBR^{-1}B^\top P+Q} \qquad\textbf{(Riccati differential equation)}, \qquad u^* = -R^{-1}B^\top Px$$
+
+solved backward from $P(T)=F$. The optimal controller $u^*=-Kx$ with $K=R^{-1}B^\top P$ is the **Linear Quadratic Regulator (LQR)**; for the infinite-horizon case, $\dot P=0$ gives the (usually numerically-solved) **Algebraic Riccati Equation (ARE)**: $0=A^\top P+PA-PBR^{-1}B^\top P+Q$.
+
+## LQR *is* PD control
+
+<ExerciseCard id="DYN-04-ex3-lqr-point-mass" />
+
+For state $x=(q-r,\dot q-\dot r)$ (tracking a reference $r(t)$), the LQR gain matrix splits naturally as $K=[K_p\ K_d]$, giving $u^*=K_p(r-q)+K_d(\dot r-\dot q)$: **LQR is exactly PD control**, with the gains derived from first principles (via the cost weights $Q,R$) rather than hand-tuned. This is a genuinely satisfying closure: DYN-02 introduced PD control as a reasonable heuristic; here it falls out as the mathematically optimal controller for a natural quadratic-cost objective.
+
+## The grand unification: one structure, four names
+
+<ExerciseCard id="DYN-04-ex4-unification-conceptual" />
+
+$$
+\begin{aligned}
+\textbf{Optimal control:}&\quad \min_\pi\ J^\pi=\int_0^Tc(x(t),u(t))\,dt+\phi(x(T))\\
+\textbf{Inverse kinematics (KIN-03):}&\quad \min_q\ \|q-q_0\|_W^2+\|\phi(q)-y^*\|_C^2\\
+\textbf{Operational space control (DYN-03):}&\quad \min_u\ \|u\|_H^2+\|\ddot\phi(q)-\ddot y^*\|_C^2\\
+\textbf{Trajectory optimization:}&\quad \min_{q_{0:T}}\ \sum_t\|\Psi_t(q_{t-k:t})\|^2+\sum_t\|\Phi_t(q_t)\|^2
+\end{aligned}
+$$
+
+All four are "minimize a sum of squared control/deviation costs plus squared task costs," at different levels of a hierarchy (single configuration, single acceleration/torque, whole trajectory); all four are solvable by the same Gauss-Newton/SQP machinery from [OPT-04](/course/OPT/OPT-04).
+
+## Trajectory optimization: $k$-order cost terms
+
+Generalizing DYN-01's discretized-path idea properly: a trajectory $q_{0:T}$, cost $f(q_{0:T})=\sum_t\|q_{t-1}-q_t\|_W^2+\sum_t\|\Phi_t(q_t)\|^2$ (control costs plus task costs). More generally, a **$k$-order cost term** $f_t(x_{t-k:t})$ penalizes a $k$-th order finite difference of the trajectory:
+
+| $k$ | $f_t(x_{t-k:t})$ | Penalizes |
+|---|---|---|
+| 1 | $x_t-x_{t-1}$ | velocity |
+| 2 | $x_t-2x_{t-1}+x_{t-2}$ | acceleration |
+| 3 | $x_t-3x_{t-1}+3x_{t-2}-x_{t-3}$ | jerk |
+
+(or the same finite differences applied to a task-space feature $\phi_t$ instead of $x_t$ directly, e.g. penalizing task-space *acceleration*, exactly DYN-03's $\ddot\phi$). Terms of any order stack arbitrarily, and constraints $g_t(x_{t-k:t})\le0,h_t(x_{t-k:t})=0$ can be included directly: $\min_{x_{0:T}}\sum_tf_t(x_{t-k:t})^\top f_t(x_{t-k:t})$ s.t. $\forall t:g_t\le0,h_t=0$, again exactly the Gauss-Newton-shaped NLP from OPT-04, now over an entire trajectory at once rather than one step.
+
+## Summary
+
+- Bellman's principle turns optimal control into a backward recursion (the Bellman/HJB equations), solving for the value function (optimal cost-to-go) and reading off the optimal policy at each state.
+- Linear dynamics + quadratic costs make the value function exactly quadratic, giving the Riccati (differential/algebraic) equation and the LQR controller $u^*=-Kx$, $K=R^{-1}B^\top P$.
+- For the 1D point mass, LQR's gain matrix splits into exactly $K_p,K_d$: LQR *is* optimal PD control, verified numerically.
+- Optimal control, IK, operational space control, and trajectory optimization are the same "control cost + task cost" structure at different levels of a hierarchy, all solvable by the same Gauss-Newton/SQP machinery.
+- Trajectory optimization generalizes this to a whole path, with $k$-order finite-difference cost terms penalizing velocity/acceleration/jerk (in configuration or task space) and constraints included directly.
+
+## Retrieval questions
+
+1. State Bellman's principle and derive the Bellman equation from it, without looking back.
+2. Sketch the HJB equation's derivation from the discrete Bellman equation via a Taylor expansion.
+3. Derive the Riccati differential equation from substituting $V(x,t)=x^\top P(t)x$ into the HJB equation, without looking back.
+4. Why does LQR reduce to PD control for the 1D point mass, and what determines the specific gain values?
+5. Write all four "unification" cost functions from memory, and explain what's shared and what differs between them.
+
+## Mastery checklist
+
+- [ ] Can state the discrete/continuous optimal control problem and derive the Bellman/HJB equations.
+- [ ] Derived the Riccati differential equation from the LQ-case HJB equation.
+- [ ] Verified numerically that LQR reduces to PD control for the 1D point mass.
+- [ ] Can state all four "unification" formulations and explain their shared structure.
+- [ ] Can state the $k$-order trajectory-optimization cost terms and what each penalizes.
+
+## Source note
+
+This module's exposition, the Bellman/HJB derivations, the Riccati equation derivation, the LQR-as-PD-control connection, the "relation to other topics" unification, and the $k$-order trajectory-optimization cost terms are adapted from `lecture-robotics`, §5 (pp. 90-91) and §8.1 (pp. 127-135). The 1D point-mass ARE's exact closed form is presented in its independently-verified form (matching a direct numeric solve of the ARE), which differs by a small factor from one coefficient in the source's own closed-form expression; the verified version is used throughout. All exercises are newly authored.
+
+---
+
+**Next**: [DYN-05: Splines & Motion Primitives](/course/DYN/DYN-05)

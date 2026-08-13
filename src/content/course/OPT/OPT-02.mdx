@@ -3,24 +3,28 @@ id: OPT-02
 block: OPT
 title: "Gauss-Newton, Quasi-Newton & Conjugate Gradient"
 tier: 1
-estimatedHours: 2.5
+estimatedHours: 4.5
 prerequisites: ["OPT-01"]
 objectives:
   - "Explain why the exact Hessian is often impractical to compute for large problems."
-  - "Derive the Gauss-Newton Hessian approximation from the exact Hessian of a least-squares objective."
-  - "Compute a Gauss-Newton step for a small least-squares problem."
-  - "Understand BFGS and conjugate gradient as alternative ways to avoid forming the exact Hessian."
+  - "Derive the Gauss-Newton Hessian approximation from the exact Hessian of a least-squares objective, and explain its PSD guarantee and Riemannian-metric interpretation."
+  - "Compute a Gauss-Newton step for a small least-squares problem, including a robotics path-optimization instance."
+  - "State the secant equation and the BFGS update rule; explain what L-BFGS trades off."
+  - "Derive the conjugate-gradient search-direction update and state its finite-convergence property."
 sources:
   - { sourceId: "lecture-optimization", pages: "p14-20 (§1.4)", role: "primary" }
 concepts:
   - "Least-squares objective"
   - "Gauss-Newton approximation"
-  - "Quasi-Newton methods (BFGS)"
+  - "Secant equation"
+  - "Quasi-Newton methods (BFGS, L-BFGS)"
   - "Conjugate gradient"
 notation:
-  - { symbol: "$r(x)$", meaning: "residual vector, $f(x)=\\tfrac12\\|r(x)\\|^2$" }
-  - { symbol: "$J(x)$", meaning: "Jacobian of the residual, $J=\\partial r/\\partial x$" }
+  - { symbol: "$\\phi(x)$", meaning: "feature/residual vector, $f(x)=\\phi(x)^\\top\\phi(x)$" }
+  - { symbol: "$J(x)$", meaning: "Jacobian of the features, $J=\\partial\\phi/\\partial x \\in \\mathbb{R}^{d\\times n}$" }
   - { symbol: "$J^\\top J$", meaning: "Gauss-Newton Hessian approximation" }
+  - { symbol: "$\\hat H, \\hat H^{-1}$", meaning: "BFGS's running approximations of the Hessian / inverse Hessian" }
+  - { symbol: "$y,\\delta$", meaning: "gradient difference and step, related by the secant equation $\\hat H\\delta=y$" }
 cheatsheetLinks: []
 nextModules: ["OPT-03"]
 ---
@@ -30,7 +34,7 @@ import ReadinessCheck from '../../../components/ReadinessCheck.astro';
 
 ## Why this matters
 
-Least-squares objectives are everywhere in robotics: trajectory optimization costs, sensor calibration, system identification, and the convex-decomposition manipulation planner from your own research are all, underneath, repeatedly solving least-squares-flavored subproblems. Gauss-Newton is the standard workhorse for exactly this reason: it gets most of Newton's fast convergence without needing the true, expensive Hessian.
+Least-squares objectives are everywhere in robotics: trajectory optimization costs, sensor calibration, system identification, and the convex-decomposition manipulation planner from your own research are all, underneath, repeatedly solving least-squares-flavored subproblems. Gauss-Newton is the standard workhorse for exactly this reason: it gets most of Newton's fast convergence without needing the true, expensive Hessian. BFGS and conjugate gradient extend the same idea to problems that *don't* have least-squares structure.
 
 ## Prerequisites & readiness check
 
@@ -47,52 +51,121 @@ You should have Newton's method (OPT-01) fresh.
 
 ## Gauss-Newton: exploiting least-squares structure
 
-When the objective has the specific form $f(x)=\tfrac12\|r(x)\|^2$ (a sum of squared residuals), there's a cheap, structured Hessian approximation available.
+Consider a least-squares problem, cost as a sum-of-squares: $\min_xf(x)=\phi(x)^\top\phi(x)=\sum_{i=1}^d\phi_i(x)^2$, with features $\phi(x)\in\mathbb{R}^d$ and Jacobian $J=\frac{\partial}{\partial x}\phi(x)\in\mathbb{R}^{d\times n}$. The gradient and exact Hessian of $f$ are:
+
+$$\nabla f(x) = 2\frac{\partial}{\partial x}\phi(x)^\top\phi(x) = 2J^\top\phi(x)$$
+
+$$\nabla^2f(x) = 2\frac{\partial}{\partial x}\phi(x)^\top\frac{\partial}{\partial x}\phi(x) + 2\phi(x)^\top\nabla^2\phi(x) = 2J^\top J + 2\sum_i\phi_i(x)\nabla^2\phi_i(x)$$
+
+**The Gauss-Newton method is exactly the Newton method for this $f$, while approximating the second term as zero**, i.e. $\nabla^2\phi(x)\approx 0$:
+
+$$\nabla^2f(x) \approx 2J^\top J$$
 
 <ExerciseCard id="OPT-02-ex2-gauss-newton-derivation" />
 
-The Gauss-Newton approximation $H(x)\approx J(x)^\top J(x)$ has a big practical advantage beyond just being cheaper to compute: $J^\top J$ is automatically positive semi-definite (for any real matrix $J$), so unlike the true Hessian, it can never be indefinite in a way that would send a naive Newton step in a wrong (ascending) direction. This is a large part of why Gauss-Newton is preferred over plain Newton for least-squares problems even when the true Hessian is affordable.
+Two structural facts make this approximation especially good, not just cheap:
+
+- **$J^\top J$ is always positive semi-definite** (for any real matrix $J$): it's a sum of rank-1 PSD terms, $J^\top J = \sum_i\nabla\phi_i(x)\nabla\phi_i(x)^\top$ (each $\nabla\phi_i\nabla\phi_i^\top$ PSD by [MATH-04](/course/MATH/MATH-04)'s covariance-matrix argument). So unlike the true Hessian, it can never be indefinite in a way that sends a naive Newton step in a wrong (ascending) direction, exactly the failure mode from [OPT-01](/course/OPT/OPT-01).
+- **If the Jacobian $J$ is sparse, so is $J^\top J$**, giving useful graphical/factor-graph structure for large problems (bundle adjustment, SLAM, structured robotics path optimization).
+- $J^\top J$ can be interpreted as the **pullback of the Euclidean norm in feature space**, $\phi^\top\phi$: since $\phi$ is $x$-dependent, this defines a **non-constant (Riemannian) metric** in $x$-space, exactly the "metric" idea from OPT-01's steepest-descent section and MATH-05's covariant gradient, but now the metric itself varies smoothly with $x$ rather than being fixed.
 
 ## Worked example
 
-Let $r(x) = \begin{pmatrix}x_1-2\\x_2-3\\x_1+x_2-4\end{pmatrix}$ (linear, so $J$ is constant: $J=\begin{pmatrix}1&0\\0&1\\1&1\end{pmatrix}$), starting at $x_0=\begin{pmatrix}0\\0\end{pmatrix}$. Then $r(x_0)=\begin{pmatrix}-2\\-3\\-4\end{pmatrix}$, $J^\top J = \begin{pmatrix}2&1\\1&2\end{pmatrix}$, $J^\top r(x_0) = \begin{pmatrix}-6\\-7\end{pmatrix}$, giving $\delta = -(J^\top J)^{-1}J^\top r(x_0) \approx \begin{pmatrix}1.667\\2.667\end{pmatrix}$.
+Let $\phi(x) = \begin{pmatrix}x_1-2\\x_2-3\\x_1+x_2-4\end{pmatrix}$ (linear, so $J$ is constant: $J=\begin{pmatrix}1&0\\0&1\\1&1\end{pmatrix}$), starting at $x_0=\begin{pmatrix}0\\0\end{pmatrix}$. Then $\phi(x_0)=\begin{pmatrix}-2\\-3\\-4\end{pmatrix}$, $J^\top J = \begin{pmatrix}2&1\\1&2\end{pmatrix}$, $J^\top \phi(x_0) = \begin{pmatrix}-6\\-7\end{pmatrix}$, giving (the factor of 2 cancels between $\nabla f$ and $\nabla^2f$, so the step formula is exactly $\delta=-(J^\top J)^{-1}J^\top\phi(x_0)$):
 
-*(Verified with NumPy against the true least-squares solution via `lstsq`: they match exactly, since Gauss-Newton is exact, not approximate, whenever the residual $r(x)$ is linear.)*
+$$\delta = -(J^\top J)^{-1}J^\top \phi(x_0) \approx \begin{pmatrix}1.667\\2.667\end{pmatrix}$$
+
+*(Verified with NumPy against the true least-squares solution via `lstsq`: they match exactly, since Gauss-Newton is exact, not approximate, whenever $\phi(x)$ is linear.)*
 
 <ExerciseCard id="OPT-02-ex3-numeric" />
 
-## Quasi-Newton (BFGS) and conjugate gradient, briefly
+## A robotics instance: discretized path optimization
 
-Two other strategies avoid the exact Hessian without relying on least-squares structure:
+Path optimization discretizes a trajectory $x=(x_1,..,x_T)$, $x_t\in\mathbb{R}^n$, and penalizes both smoothness (via a discrete acceleration-like term) and reaching a target configuration:
 
-- **Quasi-Newton methods (BFGS)** build up an approximation of the Hessian (or its inverse) incrementally, using only the gradients observed at each step, no second derivatives computed at all. Each step's gradient difference gives one new piece of curvature information, refining the approximation as optimization proceeds.
-- **Conjugate gradient (CG)** never forms an explicit Hessian approximation at all; it only ever needs the Hessian's *action on a vector* ($Hv$, cheap to compute directly for many problems without forming $H$), and constructs a sequence of search directions that are mutually "conjugate" (non-interfering) under $H$, converging in at most $n$ steps for an exact quadratic.
+$$\min_x \sum_{t=1}^T\|x_t+x_{t-2}-2x_{t-1}\|^2 + \|\phi(x_T)\|^2$$
 
-Both are covered at this conceptual level in this course; their full derivations are a natural next step if you need them for a specific research problem, but aren't required for the rest of this curriculum.
+where $x_0,x_{-1}$ are given (boundary/start conditions) and $\phi(x_T)$ are features of the final configuration (e.g. end-effector position error). This is *exactly* the sum-of-squares form Gauss-Newton is built for: the smoothness terms are linear in $x$ (quadratic cost, Gauss-Newton exact there), while $\phi(x_T)$ may be a nonlinear function of the final configuration alone (e.g. forward kinematics), contributing the only place the Gauss-Newton approximation is actually approximate. This structure, and the sparsity of its Jacobian (each smoothness term only touches 3 consecutive time steps), is exactly what makes trajectory optimization tractable at scale, and is the same structural idea behind bundle adjustment and factor-graph SLAM.
+
+<ExerciseCard id="OPT-02-ex4-path-opt-structure" />
+
+## Quasi-Newton methods: BFGS
+
+If you *cannot* evaluate $\nabla^2f(x)$ at all (no least-squares structure to exploit), can you still get 2nd-order behavior? Yes: approximate $\nabla^2f(x)$ from data $\{(x_i,\nabla f(x_i))\}$ collected along the optimization path. Given two gradient evaluations at $x_1,x_2$, with $y=\nabla f(x_2)-\nabla f(x_1)$ and $\delta=x_2-x_1$, what matrix $H$ (or $H^{-1}$) satisfies
+
+$$H\delta \overset{!}{=} y \qquad\text{(the secant equation)}$$
+
+The "simplest" symmetric rank-1-per-update solutions, updating an existing estimate $\hat H\approx H$ (or $\hat H^{-1}\approx H^{-1}$) with each new $(\delta,y)$ pair, are the **Broyden-Fletcher-Goldfarb-Shanno (BFGS)** update:
+
+```
+BFGS
+Input:    initial x ∈ ℝⁿ, functions f(x), ∇f(x), tolerance θ
+Output:   x
+1: initialize Ĥ⁻¹ = Iₙ
+2: repeat
+3:   compute δ = -Ĥ⁻¹∇f(x)
+4:   perform a line search  min_α f(x+αδ)
+5:   δ ← αδ
+6:   y ← ∇f(x+δ) - ∇f(x)
+7:   x ← x + δ
+8:   update Ĥ⁻¹ ← (I - δyᵀ/yᵀδ) Ĥ⁻¹ (I - yδᵀ/yᵀδ) + δδᵀ/yᵀδ
+9: until ‖δ‖∞ < θ
+```
+*(Marc Toussaint, `lecture-optimization.pdf`, p.18. The two outer bracket terms "delete" old Ĥ⁻¹-components along δ; the trailing δδᵀ/yᵀδ term "inserts" the newly measured curvature. Equivalent to the Sherman-Morrison formula.)*
+
+This update is a genuine rank-2 correction each step: it "deletes" old $\hat H^{-1}$-components along $\delta$ (the two outer bracket terms) and "inserts" the newly measured curvature $\delta\delta^\top/y^\top\delta$. In high dimensions, storing the dense $\hat H^{-1}$ is itself expensive; **L-BFGS** (limited-memory BFGS) instead stores only a handful of the most recent rank-1 update vectors and reconstructs $\hat H^{-1}$'s action on a vector on the fly, trading a little accuracy for $O(n)$ (not $O(n^2)$) memory. BFGS is, in practice, a default general-purpose solver across science and ML whenever gradients (but not Hessians) are available.
+
+<ExerciseCard id="OPT-02-ex5-secant-check" />
+
+## Conjugate gradient
+
+**Conjugate gradient (CG)** takes a different approach again: it never forms *any* explicit Hessian approximation, only ever using the gradient itself, and builds search directions that are mutually **conjugate** (non-interfering) under the true Hessian $H$: $\delta_i^\top H\delta_j=0$ for $i\ne j$. The motivating picture: after an exact line search to $x_2$ along direction $\delta_1$, the iso-lines of $f$ at $x_2$ are tangential to $\delta_1$; the *next* search direction should be "orthogonal" to $\delta_1$, but orthogonal w.r.t. the Hessian metric ($\delta_2^\top H\delta_1=0$), which is exactly what "conjugate" means.
+
+```
+Conjugate Gradient
+Input:    initial x ∈ ℝⁿ, functions f(x), ∇f(x), tolerance θ
+Output:   x
+1: initialize descent direction δ = g = -∇f(x)
+2: repeat
+3:   α ← argmin_α f(x+αδ)                    // line search
+4:   x ← x + αδ
+5:   g' ← g,  g ← -∇f(x)                       // store and compute grad
+6:   β ← max{ gᵀ(g-g') / g'ᵀg' , 0 }
+7:   δ ← g + βδ                                // conjugate descent direction
+8: until |Δx| < θ
+```
+*(Marc Toussaint, `lecture-optimization.pdf`, p.19. β > 0: the new descent direction always adds a bit of the old direction — this momentum essentially provides 2nd-order information. The β update is by Polak-Ribière.)*
+
+The new direction $\delta\leftarrow g+\beta\delta$ always adds a bit of the *old* search direction, momentum that essentially provides 2nd-order information without ever computing $H$ explicitly. On a genuinely quadratic $f(x)=x^\top Ax+b^\top x$, the Polak-Ribière $\beta$ leads exactly to conjugate directions $\delta_i^\top A\delta_j=0$, and **CG converges in at most $n$ iterations** for such a quadratic (each new direction eliminates error along a new, non-interfering axis), though this requires an *exact* line search at each step, in practice usually approximated.
+
+<ExerciseCard id="OPT-02-ex6-cg-quadratic" />
 
 ## Summary
 
 - The exact Hessian costs $O(n^2)$ memory and $O(n^3)$ to solve with, impractical for large problems.
-- For least-squares objectives, $H(x) = J^\top J + \sum_i r_i \nabla^2 r_i$; Gauss-Newton drops the second term, exact when residuals are linear, and a good approximation near a good fit generally.
-- $J^\top J$ is always positive semi-definite, an important practical advantage over the true Hessian.
-- BFGS and CG are alternative ways to get curvature information cheaply, without least-squares structure: BFGS builds an approximation from gradient history, CG avoids forming a Hessian approximation at all.
+- For $f(x)=\phi(x)^\top\phi(x)$, $\nabla^2f(x) = 2J^\top J + 2\sum_i\phi_i\nabla^2\phi_i$; Gauss-Newton drops the second term. $J^\top J$ is always PSD, sparse when $J$ is sparse, and interpretable as a pullback (Riemannian) metric.
+- The Gauss-Newton step formula $\delta=-(J^\top J)^{-1}J^\top\phi(x)$ is exact when $\phi$ is linear, and a good approximation near a good fit generally; discretized path/trajectory optimization is a direct instance of this structure.
+- BFGS approximates the Hessian (or its inverse) from gradient history alone, via a rank-2 update satisfying the secant equation $\hat H\delta=y$; L-BFGS trades exactness for $O(n)$ memory.
+- Conjugate gradient builds Hessian-conjugate search directions using only gradients, converging in at most $n$ steps on an exact quadratic with exact line search.
 
 ## Retrieval questions
 
-1. Derive $\nabla f(x) = J(x)^\top r(x)$ from $f(x)=\tfrac12\|r(x)\|^2$, without looking back.
+1. Derive $\nabla f(x) = 2J(x)^\top\phi(x)$ and the exact Hessian (both terms) from $f(x)=\phi(x)^\top\phi(x)$, without looking back.
 2. Why is $J^\top J$ always positive semi-definite, and why does that matter practically?
-3. What's the key difference in what BFGS and conjugate gradient each need access to (compared to forming an explicit Hessian approximation)?
+3. State the secant equation, and explain what "conjugate" means for a pair of CG search directions.
+4. Why does L-BFGS trade off accuracy for memory, and what exactly does it choose not to store?
 
 ## Mastery checklist
 
 - [ ] Can explain why the exact Hessian becomes impractical for large problems.
-- [ ] Derived the Gauss-Newton Hessian approximation from the exact least-squares Hessian.
-- [ ] Computed a Gauss-Newton step by hand.
-- [ ] Can explain, at a conceptual level, what BFGS and CG each avoid computing.
+- [ ] Derived the Gauss-Newton Hessian approximation from the exact least-squares Hessian, including why $J^\top J$ is always PSD.
+- [ ] Computed a Gauss-Newton step by hand, and can identify the sum-of-squares structure in a robotics path-optimization objective.
+- [ ] Can state the secant equation and the BFGS update, and explain what L-BFGS trades off.
+- [ ] Can state the conjugate-gradient update and its finite-convergence property for quadratics.
 
 ## Source note
 
-This module's topic and page range are from `lecture-optimization`, §1.4 (pp. 14-20). All exposition, the worked example, and every exercise here are newly authored, paraphrasing the source's topic coverage with the Gauss-Newton derivation built explicitly from first principles rather than quoted.
+This module's exposition, the exact/approximate Hessian derivation, the PSD/sparsity/Riemannian-metric discussion, the robotics path-optimization objective, the BFGS secant equation and update rule, L-BFGS, and the conjugate gradient algorithm (including the Polak-Ribière formula and finite-convergence property) are all adapted from `lecture-optimization`, §1.4 (pp. 14-20). The worked example and exercises are newly authored and independently verified (NumPy `lstsq` cross-check for the Gauss-Newton worked example).
 
 ---
 

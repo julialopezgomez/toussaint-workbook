@@ -1,0 +1,98 @@
+---
+id: SYM-01
+block: SYM
+title: "Propositional Logic Essentials"
+tier: 2
+estimatedHours: 1.5
+prerequisites: []
+objectives:
+  - "State propositional logic's syntax and semantics, and evaluate a sentence's truth under a model."
+  - "Define entailment, equivalence, validity, and satisfiability, and distinguish soundness from completeness."
+  - "State Modus Ponens for Horn-form knowledge bases, and derive one step of forward chaining."
+sources:
+  - { sourceId: "lecture-ai", pages: "p163-181 (§4.5, scoped: syntax/semantics/inference basics only)", role: "primary" }
+concepts:
+  - "Propositional syntax and semantics"
+  - "Entailment, equivalence, validity, satisfiability"
+  - "Horn clauses, Modus Ponens"
+  - "Soundness and completeness"
+notation:
+  - { symbol: "$\\alpha\\models\\beta$", meaning: "entailment: every model of $\\alpha$ is a model of $\\beta$" }
+  - { symbol: "$KB\\vdash_i\\alpha$", meaning: "$\\alpha$ is derivable from $KB$ by inference procedure $i$" }
+cheatsheetLinks: []
+nextModules: ["SYM-02"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+This module is deliberately narrow, scoped as the minimum precursor to SYM-02's first-order logic, which is what actually feeds TAMP (task-and-motion planning): STRIPS operators, PDDL, and Toussaint's own long-horizon planning approach. Propositional logic's job here is just to introduce the vocabulary (entailment, soundness, completeness, Horn clauses) cleanly, in the simplest possible setting, before FOL adds quantifiers and objects on top.
+
+## Prerequisites & readiness check
+
+No formal prerequisites; basic familiarity with logical connectives ($\wedge,\vee,\neg$) is assumed.
+
+<ReadinessCheck
+  question="Informally, what does it mean for a knowledge base to 'entail' a sentence?"
+  answer="Every situation consistent with the knowledge base is also a situation where the sentence is true; the sentence necessarily follows."
+/>
+
+## Syntax and semantics
+
+A **logic** is a formal language (its **syntax** defines valid sentences) together with a definition of truth (its **semantics** defines when a sentence is true in a **model**, a world/state description). Propositional logic's syntax: atomic sentences are `true`, `false`, or a proposition symbol ($P,Q,R,\ldots$); complex sentences combine them via $\neg,\wedge,\vee,\Rightarrow,\Leftrightarrow$. Semantics: each model assigns true/false to every proposition symbol, and truth of a complex sentence follows the standard recursive rules ($\neg S$ true iff $S$ false; $S_1\wedge S_2$ true iff both true; $S_1\Rightarrow S_2$ true iff $S_1$ false or $S_2$ true; etc.).
+
+<ExerciseCard id="SYM-01-ex1-truth-evaluation" />
+
+## Entailment, equivalence, validity, satisfiability
+
+Writing $M(\alpha):=\{m:\alpha(m)=\text{true}\}$ (the set of models where $\alpha$ holds):
+
+- **Entailment** $\alpha\models\beta$: $M(\alpha)\subseteq M(\beta)$ (every model of $\alpha$ is also a model of $\beta$).
+- **Equivalence** $\alpha\equiv\beta$: $\alpha\models\beta$ and $\beta\models\alpha$.
+- **Valid**: true in every model (e.g. $A\vee\neg A$). **Unsatisfiable**: true in no model (e.g. $A\wedge\neg A$).
+- A **knowledge base (KB)** is a conjunction of sentences; an **inference procedure** $i$ derives $KB\vdash_i\alpha$. $i$ is **sound** iff $KB\vdash_i\alpha\Rightarrow KB\models\alpha$ (it never derives anything false); **complete** iff $KB\models\alpha\Rightarrow KB\vdash_i\alpha$ (it can derive everything true). Useful reformulation: $KB\models\alpha$ iff $(KB\wedge\neg\alpha)$ is unsatisfiable, the basis of proof-by-contradiction inference methods.
+
+<ExerciseCard id="SYM-01-ex2-entailment-conceptual" />
+
+## Horn clauses and Modus Ponens
+
+A **literal** is $A$ or $\neg A$; a **clause** is a disjunction of literals; a **Horn clause** is either a single symbol or $(\text{conjunction of symbols})\Rightarrow\text{symbol}$ (at most one positive literal). A KB in **Horn form** (a conjunction of Horn clauses) admits a simple, complete inference rule, **Modus Ponens**:
+
+$$\frac{\alpha_1,\ldots,\alpha_n,\quad\alpha_1\wedge\cdots\wedge\alpha_n\Rightarrow\beta}{\beta}$$
+
+("given $\alpha_1,\ldots,\alpha_n$ all true, and the rule that their conjunction implies $\beta$, conclude $\beta$".) Applying Modus Ponens repeatedly, always deriving new facts from rules whose premises are already known, is **forward chaining**; running it backward from a query, checking whether its premises can themselves be established, is **backward chaining** (developed fully for the richer first-order case in SYM-02). Both run in time *linear* in KB size for Horn-form KBs, a major reason Horn clauses are so widely used in practice (e.g. Prolog).
+
+<ExerciseCard id="SYM-01-ex3-modus-ponens-derivation" />
+
+For KBs not restricted to Horn form, **resolution** (converting sentences to Conjunctive Normal Form, a conjunction of disjunctive clauses, then repeatedly combining clauses containing complementary literals) is sound and complete for all of propositional logic, a strictly more general (but more expensive) tool than Modus Ponens; SYM-02 develops resolution's first-order generalization in more depth, so it isn't developed further here.
+
+## Summary
+
+- A logic's **syntax** defines sentences; its **semantics** defines truth under a **model**; **entailment** ($\alpha\models\beta$) means every model of $\alpha$ is a model of $\beta$.
+- **Soundness** (never derives anything false) and **completeness** (can derive everything true) are the two properties any inference procedure is judged by.
+- **Horn clauses** (at most one positive literal) admit **Modus Ponens**-based forward/backward chaining, sound, complete for Horn KBs, and linear-time.
+- **Resolution** is the more general (but more expensive) tool for arbitrary propositional sentences, developed further in SYM-02's first-order setting.
+
+## Retrieval questions
+
+1. Define entailment, equivalence, validity, and satisfiability precisely.
+2. State the soundness and completeness properties of an inference procedure.
+3. State Modus Ponens, and explain why it suffices for Horn-form KBs specifically.
+4. What is a Horn clause, and why does restricting to Horn form make inference efficient?
+
+## Mastery checklist
+
+- [ ] Can evaluate a propositional sentence's truth under a given model.
+- [ ] Can define entailment/equivalence/validity/satisfiability and soundness/completeness.
+- [ ] Can state Modus Ponens and apply one step of forward chaining.
+- [ ] Can explain why Horn clauses admit efficient (linear-time) inference.
+
+## Source note
+
+This module's exposition, the propositional syntax/semantics, entailment/equivalence/validity/satisfiability definitions, soundness/completeness, Horn clauses, and Modus Ponens are adapted from `lecture-ai`, §4.5 (pp. 163-181), deliberately scoped to syntax/semantics/inference basics only per this module's curriculum-assigned role as a precursor to SYM-02's first-order logic (the wumpus-world worked example, full resolution algorithm, and CNF-conversion procedure are covered in more depth in that first-order setting instead, avoiding duplication). All exercises are newly authored.
+
+---
+
+**Next**: [SYM-02: First-Order Logic & Inference](/course/SYM/SYM-02)

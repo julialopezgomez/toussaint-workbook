@@ -1,0 +1,46 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RLEARN-01-ex1-pe-vs-regression-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly chooses parameter estimation." },
+          { "points": 2, "description": "Correctly justifies via known functional form + few unknown constants." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Parameter estimation: the physics functional form (Newton-Euler/Euler-Lagrange) is known, only specific constants (masses, inertias) are unknown. A handful of trials can pin down few physical constants precisely; full regression would need to learn the entire functional form from scratch, needing far more data."
+    },
+    {
+      "exerciseId": "RLEARN-01-ex2-residual-dynamics-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly reframes the loss in terms of a residual target delta_t." },
+          { "points": 2, "description": "Correctly explains why this is an easier learning problem." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Define delta_t = x_t - f_M(x_{t-1},u_{t-1}). Then L(theta) = sum_t ||delta_t - f_theta(x_{t-1},u_{t-1})||^2, an ordinary regression with target delta_t. If f_M is reasonable, delta_t is small and structurally simple (e.g. a smooth aerodynamic correction), so f_theta only needs to learn a small correction rather than the full dynamics from scratch, easier to fit from limited data."
+    },
+    {
+      "exerciseId": "RLEARN-01-ex3-observation-model-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly contrasts autoregression's fixed window vs recurrent's implicit latent summary." },
+          { "points": 2, "description": "Correctly explains state-space models' explicit state commitment." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Autoregression uses a fixed explicit window of past observations directly, no learned latent summary. A generic recurrent model learns an implicit latent summary h_t with no particular structural assumption. A state-space model is also recurrent but explicitly commits the latent variable to be a genuine system state x_t, jointly training decoding g and dynamics f, giving an interpretable representation rather than an arbitrary hidden state."
+    },
+    {
+      "exerciseId": "RLEARN-01-ex4-estimator-variance-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.04, "tolerance": 0.001 },
+      "fullSolution": "Var{Theta*} = sigma^2/n = 0.8/20 = 0.04."
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "SYM-02-ex1-universal-instantiation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 4, "description": "Correctly substitutes x with Priya throughout the sentence." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Student(Priya) => MustAttend(Priya)."
+    },
+    {
+      "exerciseId": "SYM-02-ex2-unification-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly matches arguments position by position." },
+          { "points": 2, "description": "Correctly derives theta = {x/Robotics, y/Prof} and verifies." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Match first arguments (Prof, y) and second arguments (x, Robotics). theta = {x/Robotics, y/Prof}. Check: Teaches(Prof,Robotics) = Teaches(Prof,Robotics), identical."
+    },
+    {
+      "exerciseId": "SYM-02-ex3-gmp-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies theta={x/Priya} unifying both premise pairs." },
+          { "points": 2, "description": "Correctly applies GMP to conclude MustSubmitHomework(Priya)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "theta = {x/Priya} unifies Student(x) with Student(Priya) and Registered(x,AI) with Registered(Priya,AI). Applying GMP: q*theta = MustSubmitHomework(Priya)."
+    },
+    {
+      "exerciseId": "SYM-02-ex4-chaining-tradeoff-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly characterizes forward chaining as data-driven with an example." },
+          { "points": 2, "description": "Correctly characterizes backward chaining as goal-driven with an example." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Forward chaining starts from known facts and fires whatever rules apply regardless of relevance, like automatic/unconscious processing. Backward chaining starts from a specific query and only explores what's needed to answer it, like deliberate problem-solving. Forward is natural for deriving all consequences of new information; backward is natural for one specific question, avoiding wasted work on irrelevant facts."
+    }
+  ]
+}

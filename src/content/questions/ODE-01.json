@@ -1,0 +1,101 @@
+{
+  "moduleId": "ODE-01",
+  "exercises": [
+    {
+      "id": "ODE-01-ex1-verify-solution",
+      "objective": "Verify a candidate ODE solution by direct substitution, and explain why a whole family of solutions exists.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Verify that $x(t) = 3e^{2t}$ solves the ODE $\\dot x = 2x$, by differentiating and substituting. Then explain why $x(t) = Ce^{2t}$ solves the same ODE for *any* constant $C$, and why this doesn't contradict $x(t)=3e^{2t}$ also being a valid solution.",
+      "hints": [
+        "Differentiate: $\\dot x = \\frac{d}{dt}[3e^{2t}] = 6e^{2t}$. Compare to $2x = 2(3e^{2t}) = 6e^{2t}$. They match, so the ODE holds for every $t$.",
+        "Repeat the same computation with $Ce^{2t}$ in place of $3e^{2t}$: $\\dot x = 2Ce^{2t}$, and $2x=2Ce^{2t}$, identical for any constant $C$ (the constant just factors out of both sides).",
+        "An ODE alone (no initial condition) doesn't pin down one specific function, only a whole family differing by the constant of integration, since differentiating any member of that family gives the same result (a constant's derivative is 0). $3e^{2t}$ is just the specific member of that family with $C=3$; both statements are true simultaneously, they're not in conflict, an initial condition (e.g. $x(0)=3$) would be needed to select $C=3$ specifically out of the whole family."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ODE-01-ex2-direction-field",
+      "objective": "Reason qualitatively about solution behavior using the sign of the derivative, without solving the ODE.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": ["ODE-01-ex1-verify-solution"],
+      "answerType": "short-text",
+      "prompt": "For $\\dot x = -x+1$ (equilibrium at $x=1$, where $\\dot x=0$), without solving the ODE, describe qualitatively how a solution starting at $x(0)=3$ must behave over time, and separately how one starting at $x(0)=-1$ must behave. Use only the sign of $\\dot x=-x+1$ in each region.",
+      "hints": [
+        "For $x>1$ (e.g. $x=3$): $\\dot x = -x+1 < 0$, so $x$ is decreasing. It should decrease, but does it decrease past 1? As $x\\to1^+$, $\\dot x\\to0$, so the decrease slows down and the solution approaches $x=1$ without crossing it.",
+        "For $x<1$ (e.g. $x=-1$): $\\dot x=-x+1>0$, so $x$ is increasing. Similarly, as $x\\to1^-$, $\\dot x\\to0$, so it increases and approaches $x=1$ from below, slowing down as it gets close.",
+        "Both solutions approach the equilibrium $x=1$ monotonically (one from above, one from below) without ever crossing it or overshooting, since the sign of $\\dot x$ always points back toward $x=1$. This qualitative picture (a stable equilibrium, everything nearby flows toward it) is exactly the kind of insight a direction field gives you for free, before doing any algebra."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ODE-01-ex3-separable-derivation",
+      "objective": "Rigorously justify the separable-equation solution method via the chain rule.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["ODE-01-ex1-verify-solution"],
+      "answerType": "derivation",
+      "prompt": "For $\\dot x = f(t)g(x)$, define $F(x) = \\int \\frac{1}{g(x)}\\,dx$ (an antiderivative, so $F'(x)=1/g(x)$). Using the chain rule on $\\frac{d}{dt}[F(x(t))]$, show that $F(x(t)) = \\int f(t)\\,dt + C$, justifying the \"separate and integrate\" recipe rigorously (i.e. without treating $dx$ and $dt$ as literally separable quantities).",
+      "hints": [
+        "Apply the chain rule: $\\dfrac{d}{dt}[F(x(t))] = F'(x(t))\\cdot\\dot x(t)$.",
+        "Substitute $F'(x)=1/g(x)$ and $\\dot x = f(t)g(x)$: $\\dfrac{d}{dt}[F(x(t))] = \\dfrac{1}{g(x(t))}\\cdot f(t)g(x(t)) = f(t)$ (the $g(x(t))$ terms cancel exactly).",
+        "So $\\dfrac{d}{dt}[F(x(t))] = f(t)$ for all $t$. Integrating both sides with respect to $t$: $F(x(t)) = \\int f(t)\\,dt + C$. This is exactly \"$\\int dx/g(x) = \\int f(t)\\,dt$\" (since $F(x)=\\int dx/g(x)$ by definition), now derived from the ordinary chain rule rather than informal differential manipulation."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ODE-01-ex4-separable-numeric",
+      "objective": "Solve a separable ODE by hand and evaluate the solution numerically.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["ODE-01-ex3-separable-derivation"],
+      "answerType": "numeric",
+      "prompt": "Solve $\\dot x = tx$, $x(0)=1$, and evaluate $x(2)$. Enter a decimal to 3 decimal places.",
+      "hints": [
+        "Separate: $\\dfrac{dx}{x} = t\\,dt$. Integrate both sides: $\\ln|x| = \\dfrac{t^2}{2}+C$.",
+        "Exponentiate: $x(t) = Ae^{t^2/2}$. Apply $x(0)=1$: $A e^0 = A = 1$, so $x(t)=e^{t^2/2}$.",
+        "$x(2) = e^{4/2} = e^2 \\approx 7.389$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ODE-01-ex5-integrating-factor-derivation",
+      "objective": "Derive the integrating factor formula for a linear first-order ODE.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["ODE-01-ex1-verify-solution"],
+      "answerType": "derivation",
+      "prompt": "For $\\dot x + p(t)x = q(t)$, we want to multiply both sides by some function $\\mu(t)$ so that the left side, $\\mu(t)\\dot x + \\mu(t)p(t)x$, becomes exactly $\\dfrac{d}{dt}[\\mu(t)x(t)]$ (a single product-rule derivative). Derive the requirement this places on $\\mu(t)$, and solve for $\\mu(t) = e^{\\int p(t)\\,dt}$.",
+      "hints": [
+        "Expand the target via the product rule: $\\dfrac{d}{dt}[\\mu(t)x(t)] = \\mu(t)\\dot x(t) + \\dot\\mu(t)x(t)$.",
+        "Compare this to $\\mu(t)\\dot x(t) + \\mu(t)p(t)x(t)$ (the left side after multiplying by $\\mu$): the $\\mu\\dot x$ terms already match, so we need $\\dot\\mu(t) = \\mu(t)p(t)$ for the remaining terms to match too.",
+        "$\\dot\\mu(t)=\\mu(t)p(t)$ is itself a separable ODE in $\\mu$! Separating: $d\\mu/\\mu = p(t)\\,dt$, integrating: $\\ln|\\mu| = \\int p(t)\\,dt$, so $\\mu(t) = e^{\\int p(t)\\,dt}$ (taking the constant of integration to be zero, since any one valid $\\mu$ suffices, we don't need the most general one)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ODE-01-ex6-ivp-numeric",
+      "objective": "Solve a linear first-order IVP via the integrating factor and evaluate the solution numerically.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["ODE-01-ex5-integrating-factor-derivation"],
+      "answerType": "numeric",
+      "prompt": "Solve $\\dot x + 3x = 6$, $x(0)=0$, and evaluate $x(1)$. Enter a decimal to 3 decimal places.",
+      "hints": [
+        "$p(t)=3$ (constant), so $\\mu(t) = e^{\\int 3\\,dt} = e^{3t}$. Then $\\dfrac{d}{dt}[e^{3t}x] = 6e^{3t}$.",
+        "Integrate both sides: $e^{3t}x = 2e^{3t}+C$, so $x(t) = 2+Ce^{-3t}$. Apply $x(0)=0$: $2+C=0\\Rightarrow C=-2$, giving $x(t)=2-2e^{-3t}$.",
+        "$x(1) = 2-2e^{-3} \\approx 2-2(0.0498) \\approx 1.900$."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

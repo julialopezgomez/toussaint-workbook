@@ -1,0 +1,69 @@
+{
+  "moduleId": "DYN-07",
+  "exercises": [
+    {
+      "id": "DYN-07-ex1-mpc-loop-derivation",
+      "objective": "Derive the receding-horizon MPC loop as a modification of a single open-loop trajectory-optimization solve.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Starting from DYN-04's finite-horizon trajectory-optimization problem, describe precisely (in words or pseudocode) the two changes that turn a single open-loop solve into the MPC algorithm. What gets re-measured, what gets re-solved, and what gets discarded at each control cycle?",
+      "hints": [
+        "Change 1: instead of solving once at $t=0$ from an assumed initial state, at every control cycle you first measure/estimate the actual current state $x$ (not the state the previous plan predicted you'd be in).",
+        "Change 2: you re-solve DYN-04's finite-horizon problem from scratch, now starting from that measured $x$ as $x_0$, over the next $H$ steps.",
+        "You apply only the very first control $u_0^*$ of the freshly solved sequence, then discard the rest of that plan entirely (even though it's a full $H$-step trajectory) and repeat from step 1 at the next control cycle; this is exactly what 'receding horizon' means, the planning window slides forward by one step every cycle."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-07-ex2-feedback-robustness-conceptual",
+      "objective": "Explain why MPC's closed-loop re-solving gives robustness to model error that open-loop trajectory execution lacks.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["DYN-07-ex1-mpc-loop-derivation"],
+      "answerType": "short-text",
+      "prompt": "Using DYN-06's closed-loop framing $\\dot x=f(x,\\pi(x,t))$, explain precisely why MPC is robust to model error (an inaccurate $f$) in a way that executing a single open-loop trajectory is not.",
+      "hints": [
+        "An open-loop plan computes controls $u_0,u_1,\\ldots,u_T$ once, based on the *assumed* dynamics $f$ and the *assumed* initial state; if the real dynamics or disturbances differ even slightly, every subsequent control in the sequence is now wrong for the state the robot actually ends up in, and nothing corrects for it.",
+        "MPC's control law is $\\pi_{\\text{MPC}}(x,t)=u_0^*(x)$: a genuine function of the *current, actually-measured* state, re-evaluated (by re-solving the optimization) at every cycle.",
+        "Whatever the real dynamics did between cycles (model error, disturbance, anything), the next MPC solve starts from wherever the robot *actually* is, not wherever the old plan predicted; each re-solve implicitly re-corrects for whatever went wrong, exactly the mechanism that makes any closed-loop policy $\\pi(x,t)$ (DYN-06) robust in a way an open-loop control sequence can never be."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-07-ex3-warmstart-conceptual",
+      "objective": "Explain why warm-starting from the previous shifted solution helps real-time MPC solves converge faster.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Connecting to OPT-01/OPT-02's Newton-type solvers, explain why initializing each new MPC solve with the previous solution (shifted forward by one step) typically lets the solver converge in far fewer iterations than starting from scratch each time.",
+      "hints": [
+        "OPT-01/OPT-02's Newton-type methods converge fastest when the initial guess is already close to the true optimum (locally quadratic convergence); a poor initial guess can need many more iterations, or fail to converge to the right local optimum at all.",
+        "Consecutive MPC solves are nearly the same optimization problem: the same cost structure, the same constraints, and an $x_0$ that differs only slightly from the previous cycle's $x_0$ (one real time-step's worth of state change).",
+        "The previous solution, shifted forward by one step (dropping the now-executed first step, appending one new step, e.g. by repeating the last control as a placeholder), is therefore already very close to the new problem's optimum, giving the Newton-type solver an excellent starting point and letting it converge in very few iterations, often critical for keeping each re-solve fast enough to run in real time."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-07-ex4-dyn-block-synthesis",
+      "objective": "Trace how each DYN module contributes a distinct piece of a complete robot control stack, from equations of motion to real-time feedback control.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "In one or two sentences each, state what DYN-01 through DYN-07 each contribute to a complete robot control stack, and how they compose (which module's output feeds which module's input).",
+      "hints": [
+        "DYN-01 derives the equations of motion $M(q)\\ddot q+F(q,\\dot q)=u$ and force kinematics; DYN-02 shows PD control's characteristic-equation behavior for the simplest (1D point mass) case; DYN-03 generalizes to inverse/forward dynamics and operational-space control for the full nonlinear system.",
+        "DYN-04 formalizes optimal control and trajectory optimization (the cost-minimization view that unifies IK, operational-space control, and full-trajectory planning); DYN-05 makes a concrete closed-form instance (cubic splines) for generating smooth reference trajectories; DYN-06 provides the tools (controllability, stability, Lyapunov functions) to check that a given system/controller pairing can actually be controlled and is well-behaved.",
+        "DYN-07 (this module) closes the loop: it takes DYN-04's finite-horizon trajectory-optimization machinery and re-solves it every control cycle from the true current state (MPC), producing a genuine closed-loop policy (DYN-06's framing) that's robust to the model error DYN-01's equations of motion can never fully capture; DYN-05's splines can serve as MPC's smooth reference/warm-start, and DYN-02/DYN-03's PD and operational-space controllers are exactly what MPC reduces to in the linear-quadratic special case (DYN-04's LQR-is-PD-control result)."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

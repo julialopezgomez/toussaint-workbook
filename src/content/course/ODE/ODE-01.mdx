@@ -1,0 +1,151 @@
+---
+id: ODE-01
+block: ODE
+title: "First-Order ODEs: What They Are & How to Solve Them by Hand"
+tier: 1
+estimatedHours: 4
+prerequisites: ["MATH-02"]
+objectives:
+  - "Explain what a differential equation is and what it means for a function to 'solve' one."
+  - "Verify a proposed solution to an ODE by direct substitution."
+  - "Solve separable first-order ODEs by hand."
+  - "Derive and apply the integrating-factor method for linear first-order ODEs."
+  - "State the existence/uniqueness intuition (Lipschitz condition) for an initial value problem."
+sources: []
+externalSources:
+  - { citation: "Standard treatment, e.g. Boyce & DiPrima, Elementary Differential Equations, Ch.1-2; or Strogatz, Nonlinear Dynamics and Chaos, Ch.2", note: "This block has no Toussaint-authored source; confirmed as a genuine content gap in this course's source corpus during the Phase 1 audit, since ODEs were flagged as your weakest area but are needed before Block DYN. Content here follows completely standard, textbook-universal ODE theory, not a specific page-cited source." }
+concepts:
+  - "Differential equation, order, solution"
+  - "Initial value problem (IVP)"
+  - "Direction fields"
+  - "Separable equations"
+  - "Linear first-order ODEs, integrating factor"
+  - "Existence and uniqueness (Lipschitz condition)"
+notation:
+  - { symbol: "$\\dot x$ or $x'(t)$", meaning: "derivative of $x$ with respect to $t$ (time)" }
+  - { symbol: "$x(t)$", meaning: "the unknown function being solved for (not a number, a whole function)" }
+  - { symbol: "$\\mu(t)$", meaning: "integrating factor for a linear first-order ODE" }
+cheatsheetLinks: []
+nextModules: ["ODE-02"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Every dynamical system you'll model in this course (robot dynamics, controller behavior, population/resource models, gradient flow itself) is described by a differential equation: a rule for how a quantity changes, not a formula for what it equals. This module builds that idea from scratch, since it's the one confirmed gap in your background this workbook set out to fill, and everything in Block DYN assumes you're already comfortable here.
+
+## Prerequisites & readiness check
+
+You should be comfortable with ordinary derivatives and basic integration (antiderivatives) from single-variable calculus, and gradients from MATH-02.
+
+<ReadinessCheck
+  question="What is $\int \frac{1}{x}\,dx$?"
+  answer="$\ln|x| + C$."
+/>
+
+## What is a differential equation?
+
+An ordinary algebraic equation like $x^2-4=0$ asks: which *number(s)* $x$ satisfy this? A **differential equation** asks a structurally different question: which *function* $x(t)$ satisfies a given relationship between the function and its derivative(s)? For example:
+
+$$\dot x(t) = -k\,x(t)$$
+
+says: "the rate of change of $x$ at any time $t$ is proportional to $x(t)$'s current value, with proportionality constant $-k$." This is a rule about *behavior*, not a formula for $x(t)$ directly, finding that formula is what "solving" the ODE means.
+
+> **Definition (order).** The **order** of an ODE is the highest derivative of the unknown function that appears in it. $\dot x=-kx$ is **first-order** (only $\dot x$ appears, not $\ddot x$ or higher).
+>
+> **Definition (solution).** A function $x(t)$ is a **solution** of an ODE on an interval $I$ if substituting $x(t)$ (and its derivatives) into the equation makes it hold true for every $t\in I$.
+
+Crucially: verifying a proposed solution is just calculus (differentiate and substitute), no ODE-solving technique required. This is always your first move, and your last move too, checking a solution by substitution costs nothing and catches nearly every algebra mistake.
+
+<ExerciseCard id="ODE-01-ex1-verify-solution" />
+
+An ODE alone has *infinitely many* solutions (a whole family, differing by a constant), since differentiating removes information (a constant's derivative is zero, so integrating can't recover it). To pin down one specific solution, you need an **initial condition**:
+
+> **Definition (initial value problem, IVP).** An IVP pairs an ODE with a specific value $x(t_0)=x_0$ at some starting time $t_0$. A solution to the IVP is a solution to the ODE that additionally passes through $(t_0,x_0)$.
+
+## Direction fields: seeing a solution before solving for it
+
+Before solving anything algebraically, you can already sketch what solutions *look like*: at every point $(t,x)$ in the plane, the ODE $\dot x=f(t,x)$ tells you the exact slope a solution curve must have if it passes through that point. Plotting a short line segment of that slope at a grid of points gives a **direction field** (or slope field): solutions are curves that flow tangent to these segments everywhere. This is worth building intuition for, since it's exactly how you should *sanity-check* an analytic solution: does the algebraic answer actually flow the way the direction field says it should (e.g. toward zero if $f(t,x)$ points inward everywhere near $x=0$)?
+
+<ExerciseCard id="ODE-01-ex2-direction-field" />
+
+## Separable equations
+
+The first solvable class: an ODE is **separable** if it can be written $\dfrac{dx}{dt} = f(t)\,g(x)$, i.e. the right-hand side factors into a piece depending only on $t$ and a piece depending only on $x$. The solution method exploits this factoring directly:
+
+$$\frac{dx}{dt} = f(t)g(x) \quad\Longrightarrow\quad \frac{dx}{g(x)} = f(t)\,dt \quad\Longrightarrow\quad \int\frac{dx}{g(x)} = \int f(t)\,dt$$
+
+(treating $dx/dt$ as if it were literally a ratio of infinitesimals is not rigorous as written, but it's a reliable mnemonic for a method that *can* be justified rigorously via the chain rule; that justification is the derivation exercise below.)
+
+<ExerciseCard id="ODE-01-ex3-separable-derivation" />
+
+## Worked example: the logistic equation
+
+$\dot x = x(1-x)$ (a foundational model: population growth with a carrying capacity of 1, or any saturating growth process, e.g. a sigmoid-shaped learning curve). This is separable with $f(t)=1$, $g(x)=x(1-x)$:
+
+$$\int\frac{dx}{x(1-x)} = \int dt$$
+
+Using partial fractions, $\dfrac{1}{x(1-x)} = \dfrac1x+\dfrac{1}{1-x}$, so the left side integrates to $\ln|x|-\ln|1-x| = \ln\left|\dfrac{x}{1-x}\right|$. So $\ln\left|\dfrac{x}{1-x}\right| = t+C$, giving $\dfrac{x}{1-x} = Ae^t$ (absorbing the constant, $A=\pm e^C$), and solving for $x$:
+
+$$x(t) = \frac{1}{1+Be^{-t}}, \qquad B = 1/A$$
+
+*(Verified symbolically with SymPy while authoring this module: substituting this $x(t)$ back into $\dot x = x(1-x)$ gives an identity, confirmed exactly.)* This is the **logistic curve**: starting near 0, it grows, then saturates toward 1, exactly the S-shape you've likely already seen as the sigmoid function (PROB and ML blocks) — not a coincidence, the sigmoid is *literally* the solution to this ODE.
+
+<ExerciseCard id="ODE-01-ex4-separable-numeric" />
+
+## Linear first-order ODEs and the integrating factor
+
+A different (but also fully solvable) class: **linear** first-order ODEs, $\dot x + p(t)x = q(t)$ (linear in $x$ and $\dot x$, though $p,q$ can be any functions of $t$). These generally *aren't* separable (e.g. if $q(t)\ne0$), so a different trick is needed: multiply both sides by a cleverly chosen function $\mu(t)$, the **integrating factor**, that makes the left side collapse into a single product-rule derivative.
+
+<ExerciseCard id="ODE-01-ex5-integrating-factor-derivation" />
+
+The result: $\mu(t) = \exp\left(\int p(t)\,dt\right)$, after which $\dfrac{d}{dt}[\mu(t)x(t)] = \mu(t)q(t)$, so $x(t) = \dfrac{1}{\mu(t)}\left[\int\mu(t)q(t)\,dt + C\right]$.
+
+## Worked example
+
+$\dot x + 2x = e^{-t}$, $x(0)=2$. Here $p(t)=2$ (constant), so $\mu(t)=e^{\int2\,dt}=e^{2t}$. Then $\dfrac{d}{dt}[e^{2t}x] = e^{2t}e^{-t}=e^t$, integrating: $e^{2t}x = e^t+C$, so $x(t) = e^{-t}+Ce^{-2t}$. Applying $x(0)=2$: $1+C=2\Rightarrow C=1$, giving $x(t)=e^{-t}+e^{-2t}$.
+
+*(Verified with SymPy: substituting $x(t)=e^{-t}+e^{-2t}$ into $\dot x+2x$ gives exactly $e^{-t}$, confirmed symbolically.)*
+
+<ExerciseCard id="ODE-01-ex6-ivp-numeric" />
+
+## Existence and uniqueness, briefly
+
+A natural question: does an IVP always have exactly one solution? Not necessarily, some ODEs have solutions that aren't unique, or that only exist for a finite time before "blowing up." The standard sufficient condition:
+
+> **Theorem (Picard-Lindelöf, informal).** If $f(t,x)$ is continuous and **Lipschitz continuous** in $x$ (recall [OPT-05](/course/OPT/OPT-05)'s Lipschitz definition: $|f(t,x)-f(t,\bar x)|\le L|x-\bar x|$ for some constant $L$, uniformly in $t$ near $t_0$) in a neighborhood of $(t_0,x_0)$, then the IVP $\dot x=f(t,x)$, $x(t_0)=x_0$ has a **unique** solution on some interval around $t_0$.
+
+The Lipschitz condition rules out the pathological case where $f$ changes too erratically in $x$ for a solution to be pinned down uniquely (the classic counterexample, $\dot x = \sqrt{|x|}$, $x(0)=0$, has infinitely many solutions, since $\sqrt{|x|}$ is *not* Lipschitz at $x=0$, its slope is infinite there). You won't need to check this condition by hand often in practice, but knowing it exists explains why "just solve the ODE" is sometimes not well-posed at all.
+
+## Summary
+
+- A differential equation relates a function to its derivative(s); a solution is a function (not a number) that makes the equation hold on an interval; always verify a candidate solution by direct substitution.
+- An IVP pairs an ODE with an initial condition, pinning down one specific solution out of the whole family.
+- Separable ODEs, $\dot x=f(t)g(x)$, solve via $\int dx/g(x) = \int f(t)\,dt$; the logistic equation $\dot x=x(1-x)$ is a canonical example whose solution is the sigmoid curve.
+- Linear first-order ODEs, $\dot x+p(t)x=q(t)$, solve via the integrating factor $\mu(t)=e^{\int p(t)dt}$, which turns the left side into a single derivative $\frac{d}{dt}[\mu x]$.
+- The Picard-Lindelöf theorem gives a sufficient (Lipschitz) condition for a unique solution to exist, tying directly back to OPT-05's Lipschitz-continuity definition.
+
+## Retrieval questions
+
+1. What does it mean for a function to "solve" a differential equation, and how do you check a candidate solution?
+2. Derive the separable-equation solution method from the chain rule, without looking back.
+3. Derive the integrating factor $\mu(t)=e^{\int p(t)dt}$ from the requirement that $\mu(t)\dot x+\mu(t)p(t)x$ collapses to $\frac{d}{dt}[\mu(t)x]$, without looking back.
+4. What condition on $f(t,x)$ guarantees a unique solution to an IVP, and what's the classic counterexample when it fails?
+
+## Mastery checklist
+
+- [ ] Can state what a differential equation and its solution are, precisely.
+- [ ] Verified a candidate solution to an ODE by direct substitution.
+- [ ] Solved a separable ODE by hand, including the logistic equation.
+- [ ] Derived and applied the integrating-factor method for a linear first-order ODE.
+- [ ] Can state the Lipschitz condition for existence/uniqueness and recognize when it might fail.
+
+## Source note
+
+This module has no Toussaint-authored source (confirmed as a genuine gap in the source corpus during this workbook's Phase 1 audit: ODEs were flagged as your weakest background area, but no available lecture PDF teaches them from first principles, and Block DYN needs them). All content is newly authored, following completely standard treatment universal to any introductory ODE text (e.g. Boyce & DiPrima, or the early chapters of Strogatz's *Nonlinear Dynamics and Chaos*), not adapted from a specific cited source. All worked examples independently verified with SymPy while authoring this module.
+
+---
+
+**Next**: [ODE-02: Linear Systems of ODEs, Eigenvalues & Stability](/course/ODE/ODE-02)

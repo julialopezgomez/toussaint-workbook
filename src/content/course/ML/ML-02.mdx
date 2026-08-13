@@ -1,0 +1,158 @@
+---
+id: ML-02
+block: ML
+title: "Regression & Classical Supervised ML"
+tier: 1
+estimatedHours: 3.5
+prerequisites: ["OPT-01", "PROB-01"]
+objectives:
+  - "Explain 'linear in parameters, not inputs,' and construct non-linear feature maps (polynomial, piecewise, RBF)."
+  - "State the estimator-variance/overfitting connection, and derive why cross-validation is needed to choose regularization strength."
+  - "Distinguish ridge (L2) and lasso (L1) regularization, and explain why only ridge has a closed form."
+  - "Derive logistic regression from the discriminative-function/softmax framing, including its gradient."
+sources:
+  - { sourceId: "lecture-machinelearning", pages: "p12-31 (§2-3)", role: "primary" }
+concepts:
+  - "Linear regression, non-linear features"
+  - "Estimator variance, overfitting, cross-validation"
+  - "Ridge vs. lasso regularization"
+  - "Discriminative function, softmax link"
+  - "Logistic regression"
+notation:
+  - { symbol: "$\\phi(x)$", meaning: "feature map: $x\\mapsto\\phi(x)\\in\\mathbb{R}^k$, with $f(x)=\\phi(x)^\\top\\beta$ linear in $\\beta$" }
+  - { symbol: "$f(x,y)$", meaning: "discriminative function: high when $y$ is the correct label for $x$, low otherwise" }
+  - { symbol: "$p(y\\mid x)\\propto e^{f(x,y)}$", meaning: "softmax link connecting a discriminative function to class probabilities" }
+cheatsheetLinks: []
+nextModules: ["ML-04"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+This module is where MATH-02B's matrix-calculus machinery and PROB-01/PROB-03's probability tools become actual, classical machine learning: linear regression, regularization, and logistic regression. Nearly everything here reduces to a formula MATH-02B, OPT-01/02, or PROB-01/03 already derived; this module's real job is connecting those pieces into the standard supervised-learning picture, and filling in the two genuinely new ideas: non-linear feature construction, and why regularization strength can't be chosen by training error alone.
+
+## Prerequisites & readiness check
+
+You should have MATH-02B's ridge-regression closed form and PROB-01's Bayes' rule fresh.
+
+<ReadinessCheck
+  question="From MATH-02B, what is ridge regression's closed-form solution, and what does the λI term do?"
+  answer="β* = (XᵀX + λI)⁻¹Xᵀy; the λI term guarantees XᵀX+λI is invertible even when XᵀX itself is singular or ill-conditioned."
+/>
+
+## Linear regression: linear in parameters, not inputs
+
+A linear model $f(x)=\phi(x)^\top\beta$ is "linear" in the *parameters* $\beta$, not necessarily in the raw input $x$: choosing $\phi(x)$ to include non-linear transformations of $x$ makes $f$ itself highly non-linear in $x$, while the optimization problem for $\beta$ stays exactly the same linear-least-squares problem MATH-02B already solved (just with $\phi(x_i)$ in place of $x_i$ in the data matrix $X$). This is a genuinely powerful trick: linear regression on rich enough features is extremely flexible.
+
+**Example feature maps**:
+
+| Type | $\phi(x)$ (1D case) |
+|---|---|
+| Polynomial (degree $d$) | $(1,x,x^2,\ldots,x^d)$ |
+| Piecewise constant | $\phi_j(x)=[\xi_j<x\leq\xi_{j+1}]$ (indicator per interval) |
+| Radial basis function (RBF) | $\phi_j(x)=e^{-\frac12\|x-c_j\|^2}$ (similarity to center $c_j$) |
+
+<ExerciseCard id="ML-02-ex1-rbf-feature-numeric" />
+
+Whatever $\phi$ is chosen, the optimal $\beta$ is still MATH-02B's exact ridge-regression closed form, $\hat\beta=(X^\top X+\lambda I)^{-1}X^\top y$, now with $X$'s rows being $\phi(x_i)^\top$ instead of raw $x_i^\top$ (not re-derived here, see MATH-02B for the full derivation).
+
+## Estimator variance and the need for regularization
+
+Assuming the training data has noise $\text{Var}\{y\}=\sigma^2I_n$, the ridge-regression estimator $\hat\beta$ is itself a random variable (a different training set gives a different $\hat\beta$), with:
+
+$$\text{Var}\{\hat\beta\} = (X^\top X+\lambda I)^{-1}\sigma^2$$
+
+<ExerciseCard id="ML-02-ex2-estimator-variance-numeric" />
+
+**Overfitting**, precisely stated: picking one specific noisy training set is like picking one specific $\hat\beta$ from this distribution; a model with high estimator variance will look very different depending on which particular noisy sample it happened to see, generalizing poorly to new data even if it fits the training data well. Reducing $\text{Var}\{\hat\beta\}$ is exactly what regularization does, at the cost of introducing some bias.
+
+### Ridge vs. lasso
+
+**Ridge** (L2, MATH-02B) adds $\lambda\sum_j\beta_j^2$ to the loss, has the closed form above, and *shrinks* every coefficient smoothly toward zero. **Lasso** (L1) instead adds $\lambda\sum_j|\beta_j|$:
+
+$$L_\text{lasso}(\beta) = \sum_{i=1}^n(y_i-\phi(x_i)^\top\beta)^2 + \lambda\sum_j|\beta_j|$$
+
+Lasso has **no closed-form solution** (the $|\beta_j|$ terms aren't differentiable at zero, so setting a gradient to zero doesn't work; the optimum is instead found by solving a quadratic program, OPT-03's machinery). In exchange, lasso does something ridge structurally cannot: it drives some coefficients to be **exactly zero**, performing automatic feature selection, not just shrinkage.
+
+<ExerciseCard id="ML-02-ex3-ridge-lasso-conceptual" />
+
+### Choosing $\lambda$: cross-validation
+
+Training error alone can't choose $\lambda$: $\lambda=0$ (no regularization) always achieves the lowest *training* error, by construction, but that's exactly the overfitting regime. What's actually needed is an estimate of **generalization error**, error on data the model didn't get to fit:
+
+```
+k-fold-cross-validation(data D, candidate lambda):
+  1: partition D into k equal-sized subsets D_1, ..., D_k
+  2: for i = 1, .., k do
+  3:     compute beta_i on the training data D \ D_i (leaving out D_i)
+  4:     compute the error l_i = L(beta_i, D_i) / |D_i| on the held-out D_i
+  5: end for
+  6: report mean error (1/k) * sum(l_i), and its variance
+```
+*(Marc Toussaint, `Lecture-MachineLearning.pdf`, p.18, §2:17.)* Repeating this across a range of candidate $\lambda$ values and picking the one with the lowest cross-validated error gives an actual estimate of generalization performance, unlike training error, which is monotonically (and misleadingly) improved by decreasing $\lambda$.
+
+<ExerciseCard id="ML-02-ex4-cross-validation-conceptual" />
+
+## Classification: the discriminative-function view
+
+A **discriminative function** $f(x,y)$ scores how well label $y$ fits input $x$ (high for the correct label, low for wrong ones); the predicted class is $\hat y(x)=\operatorname*{argmax}_yf(x,y)$. Training $f(x,y)$ directly as a regression target (e.g. $f(x,y)=1$ for the correct class, $0$ otherwise, fit with squared error) is a **bad idea in practice**: even when the true optimal decision boundary is linear, regression trained this way on class indicators can produce a badly miscalibrated boundary (a known, empirically-documented failure, not just a theoretical worry).
+
+The standard fix is the **softmax link**, turning $f(x,y)$ into genuine class probabilities:
+
+$$p(y\mid x) = \frac{e^{f(x,y)}}{\sum_{y'}e^{f(x,y')}}$$
+
+and training by minimizing **cross-entropy/negative-log-likelihood** (PROB-03's $H(p,q)$, with $p$ the true one-hot label and $q=p(\cdot\mid x)$ the model's prediction) instead of squared error: this is exactly the fix for the class-indicator-regression failure above, since NLL/cross-entropy is the loss that's actually consistent with predicting a probability distribution over labels.
+
+## Logistic regression: the binary case, derived
+
+Choosing $f(x,0)=0$ (a fixed baseline; only the *relative* score between classes matters) and $f(x,1)=\phi(x)^\top\beta$, the softmax link becomes the familiar **sigmoid**:
+
+$$p(1\mid x) = \frac{e^{f(x,1)}}{e^{f(x,0)}+e^{f(x,1)}} = \frac{e^{\phi(x)^\top\beta}}{1+e^{\phi(x)^\top\beta}} = \sigma(\phi(x)^\top\beta), \qquad \sigma(z):=\frac{1}{1+e^{-z}}$$
+
+(ML-03's exact sigmoid, now appearing as the softmax link's binary special case rather than just "the activation function.") The regularized negative-log-likelihood loss is
+
+$$L_\text{logistic}(\beta) = -\sum_{i=1}^n\Big[y_i\log p_i+(1-y_i)\log(1-p_i)\Big]+\lambda\|\beta\|^2, \qquad p_i:=\sigma(\phi(x_i)^\top\beta)$$
+
+<ExerciseCard id="ML-02-ex5-logistic-gradient-derivation" />
+
+$$\nabla_\beta L_\text{logistic} = X^\top(p-y)+2\lambda\beta$$
+
+*(This is the gradient MATH-02B's logistic-regression Hessian derivation builds on directly; MATH-02B picks up from exactly this formula to derive $\nabla^2_\beta L=X^\top\text{diag}(p\circ(1-p))X+2\lambda I$ via one more application of the chain rule, using this same $\sigma'(z)=\sigma(z)(1-\sigma(z))$ identity.)* Since $L_\text{logistic}$ has no closed-form minimizer (unlike ridge regression), it's minimized iteratively via **Newton's method** (OPT-01), using exactly the Hessian MATH-02B derives.
+
+## A brief look ahead: structured output
+
+Everything above assumes a single discrete label $y$. **Conditional Random Fields (CRFs)** generalize the exact same softmax/cross-entropy machinery to *structured* outputs (a whole sequence, image, or graph of labels at once, e.g. tagging every word in a sentence or every pixel in an image), by making $f(x,y)$ decompose into local terms coupling small subsets of labels, keeping the $\operatorname*{argmax}_yf(x,y)$ prediction tractable despite the output space being exponentially large. This is genuinely useful machinery, but out of scope for this module's depth; flagged here mainly so the *shape* of the generalization (same $p(y\mid x)\propto e^{f(x,y)}$ softmax idea, richer $y$) is recognizable if you meet it later.
+
+## Summary
+
+- $f(x)=\phi(x)^\top\beta$ is linear in $\beta$ but can be arbitrarily non-linear in $x$, depending on the feature map $\phi$ (polynomial, piecewise, RBF); the optimal $\beta$ is still MATH-02B's ridge closed form.
+- Estimator variance $\text{Var}\{\hat\beta\}=(X^\top X+\lambda I)^{-1}\sigma^2$ formalizes overfitting; ridge (L2, closed form, shrinkage) and lasso (L1, no closed form, sparsity/feature selection) both reduce it differently.
+- Cross-validation, not training error, is needed to choose $\lambda$: training error is always minimized at $\lambda=0$, exactly the overfitting regime.
+- Classification uses a discriminative function $f(x,y)$ and the softmax link $p(y\mid x)\propto e^{f(x,y)}$, trained via cross-entropy/NLL (never squared error on class indicators, a documented failure mode).
+- Binary logistic regression is the softmax link's two-class special case, giving the sigmoid; its gradient $X^\top(p-y)+2\lambda\beta$ is exactly what MATH-02B's Hessian derivation builds on, and it's solved via OPT-01's Newton's method.
+
+## Retrieval questions
+
+1. Explain "linear in parameters, not inputs," and give two example non-linear feature maps.
+2. Derive/state $\text{Var}\{\hat\beta\}$, and explain how it formalizes overfitting.
+3. Contrast ridge and lasso: which has a closed form, and why does only one perform feature selection?
+4. Why can't training error alone choose the regularization strength $\lambda$?
+5. Derive the binary logistic regression gradient from its negative-log-likelihood loss, without looking back.
+
+## Mastery checklist
+
+- [ ] Can explain "linear in parameters" and construct non-linear feature maps.
+- [ ] Can state the estimator-variance formula and its overfitting connection.
+- [ ] Can contrast ridge and lasso and explain why only lasso performs feature selection.
+- [ ] Can explain why cross-validation is needed to choose regularization strength.
+- [ ] Derived the binary logistic regression gradient from its NLL loss.
+
+## Source note
+
+This module's exposition, the non-linear feature examples, the estimator-variance formula, ridge/lasso regularization, the cross-validation algorithm, the discriminative-function/softmax classification framing, the squared-error-on-indicators failure mode, binary logistic regression's derivation, and the brief CRF mention are adapted from `lecture-machinelearning`, §2-3 (pp. 12-31). The logistic regression gradient derivation fixes a dangling cross-reference in [MATH-02B](/course/MATH/MATH-02B) (which pointed to ML-03 for "the logistic regression gradient," but ML-03 never actually covers logistic regression, only MLP forward/backward passes with square loss; MATH-02B's link has been corrected to point here). All exercises are newly authored; the logistic regression gradient was independently verified symbolically with SymPy while authoring this module.
+
+---
+
+**Next**: [ML-04: Neural Network Architecture Essentials](/course/ML/ML-04)

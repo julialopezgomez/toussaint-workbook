@@ -3,7 +3,7 @@ id: PROB-03
 block: PROB
 title: "Entropy, Cross-Entropy & KL Divergence"
 tier: 2
-estimatedHours: 2
+estimatedHours: 2.5
 prerequisites: ["PROB-01"]
 objectives:
   - "Explain why $-\\log p(x)$ is a sensible measure of surprise."
@@ -44,9 +44,15 @@ You should have Bayes' rule and basic distributions (PROB-01) fresh.
 
 ## Entropy as expected surprise
 
+> **Definition (negative log-likelihood / surprise).** $p(x)$ measures "how likely is event $x$"; $1/p(x)$ measures "how unlikely." $\log_2\frac{1}{p(x)}=-\log_2p(x)$ measures "how unlikely, in **bits**": e.g. if $x$ is "$n$ heads in a row" for a fair coin, $p(x)=0.5^n$ and $-\log_2p(x)=n$, exactly the number of coin tosses, i.e. $x$ "provides as much information as $n$ coin tosses." $-\log p(x)$ is called the **neg-log-likelihood (NLL)** of $x$, or its **surprise**.
+>
+> It's a theorem (Shannon) that $-\log_2p(x{=}s)$ is the **optimal code length** you should assign to symbol $s$ when compressing samples from $p$: short codes for likely symbols, long codes for unlikely ones (a Huffman code is a simple, greedy way to construct such an optimal code). E.g. for $p=[0.5,0.25,0.25,0]$ over $\{A,B,C,D\}$: assign a 1-bit code to $A$, 2-bit codes to $B,C$, and (in the limit) an infinite-bit code to the impossible $D$.
+
+<ExerciseCard id="PROB-03-ex0-coin-nll" />
+
 <ExerciseCard id="PROB-03-ex1-why-expected-surprise" />
 
-The **entropy** $H(p) = \mathbb{E}_{p(x)}\{-\log p(x)\}$ is the *expected* surprise: how much, on average, samples from $p$ surprise you. Using $\log_2$, entropy is measured in **bits**: the average optimal code length for encoding samples from $p$ (a distribution concentrated on few outcomes has low entropy, easy to compress; a spread-out distribution has high entropy, hard to compress).
+The **entropy** $H(p) = \mathbb{E}_{p(x)}\{-\log p(x)\} = -\sum_xp(x)\log p(x)$ is the *expected* surprise: how much, on average, samples from $p$ surprise you, equivalently, the average *optimal* code length for encoding samples from $p$ (a distribution concentrated on few outcomes has low entropy, easy to compress; a spread-out distribution has high entropy, hard to compress). It's a property of $p$ itself, not any particular sample.
 
 ## Cross-entropy: surprise under the wrong model
 
@@ -88,7 +94,7 @@ Let $p=[0.7,0.1,0.1,0.1]$ over 4 outcomes. Using $\log_2$: since $p$ is concentr
 
 ## Source note
 
-This module's definitions, the surprise/entropy motivation, and the Jensen's-inequality non-negativity argument are adapted from Marc Toussaint's `entropy` lecture note (HTML-sourced, identical to the PDF), used with attribution per this repository's README. `lecture-ai` §1.2 (pp. 12-14) covers the same material in a more compressed form. The worked example and numeric exercise are newly authored.
+This module's definitions, the surprise/entropy motivation, and the Jensen's-inequality non-negativity argument are adapted from Marc Toussaint's `entropy` lecture note (HTML-sourced, identical to the PDF), used with attribution per this repository's README. `lecture-ai` §1.2 (pp. 12-14) covers the same material, including the neg-log-likelihood/surprise/optimal-code-length framing and the coin-toss example now added above. The worked example and numeric exercises are newly authored.
 
 ---
 

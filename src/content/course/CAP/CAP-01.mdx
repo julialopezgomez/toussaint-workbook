@@ -1,0 +1,144 @@
+---
+id: CAP-01
+block: CAP
+title: "Research Bridge: Convex-Decomposition Manipulation Planning"
+tier: 1
+estimatedHours: 3
+prerequisites: ["RLEARN-07", "DYN-04", "PLAN-01"]
+objectives:
+  - "Translate your own report's CS/CG/CP notation into this workbook's $\\mathcal{X}$/$\\mathcal{X}_\\text{fea}$ (PLAN-01) notation, confirming they denote the same objects."
+  - "Walk through your planner's three-stage pipeline (convex decomposition, MIQP grasp-release sequencing, GCS trajectory generation) and explain what each stage buys you over a sampling-based baseline."
+  - "Map the MIQP's discrete/continuous split onto RLEARN-07's TAMP skeleton/trajectory split, identifying where the structural analogy holds and where it doesn't."
+sources: []
+externalSources:
+  - { citation: "López Gómez, J. (2026). \"Learning Representations of Reachable Behaviour for Planning in Long-Horizon Robotics Tasks.\" Final Scientific Report, CDT-D2AIR Year 1, University of Edinburgh / Heriot-Watt University, §5.1 (pp.29–35).", note: "Your own PhD Year-1 report. This module is a synthesis/application exercise, not new taught content: it walks through your own implemented pipeline using the curriculum's own notation, as a self-check that the material taught in this workbook actually transfers to your research." }
+concepts:
+  - "Composite configuration space for manipulation planning"
+  - "Grasp/placement spaces, transit/transfer paths"
+  - "Convex decomposition of $C_\\text{free}$, MIQP grasp-release sequencing, Graphs of Convex Sets"
+notation:
+  - { symbol: "$CS = C_\\text{rob}\\times C_\\text{obj}$", meaning: "composite configuration space of robot + manipulated object (your report's notation for PLAN-01's $\\mathcal{X}$)" }
+cheatsheetLinks: []
+nextModules: []
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+This is the last module in the workbook, and it's deliberately not new taught content. Every tool it uses, configuration-space feasibility (PLAN-01), constrained optimization (OPT-03/OPT-04), trajectory optimization (DYN-04), and TAMP's discrete/continuous split (RLEARN-07), has already been built from Toussaint's own lectures. What's new here is only the exercise of pointing all of it at something concrete: **your own implemented planner**, §5.1 of your Year-1 report. If the curriculum's notation and structure genuinely transferred, you should be able to read your own pipeline description and recognize every piece.
+
+## Prerequisites & readiness check
+
+You should have PLAN-01's $\mathcal{X}$/$\mathcal{X}_\text{fea}$ definitions, DYN-04's trajectory-optimization cost functionals, and RLEARN-07's LGP formulation fresh.
+
+<ReadinessCheck
+  question="From RLEARN-07, what are the two constraint types in a Logic-Geometric Program, and when is each enforced?"
+  answer="$\bar\phi$ (within-mode): enforced continuously throughout a mode. $\hat\phi$ (mode-transition): enforced only at the instant of switching modes."
+/>
+
+## Translating notation: your report vs. this workbook
+
+Manipulation planning extends motion planning to grasping and moving objects. Your report formalizes this in a **composite configuration space**: for robot configuration space $C_\text{rob}$ and object configuration space $C_\text{obj}$,
+
+$$CS = C_\text{rob}\times C_\text{obj}, \qquad CS_\text{free}\subseteq CS \text{ its collision-free subset.}$$
+
+This is exactly [PLAN-01](/course/PLAN/PLAN-01)'s $\mathcal{X}$/$\mathcal{X}_\text{fea}$ pair, just specialized: $CS$ plays the role of $\mathcal{X}$ (the full embedding space of poses, here for the *joint* robot+object system), and $CS_\text{free}$ plays the role of $\mathcal{X}_\text{fea}$ (equivalently $C_\text{free}$ in the wider literature, which PLAN-01 already noted is the same object under a different name). The only thing manipulation planning adds is that the "system" being planned for is a composite of two separately-moving parts, one of which (the object) can only move when the robot carries it.
+
+<ExerciseCard id="CAP-01-ex1-notation-translation" />
+
+Because $C_\text{obj}$ can't move on its own, a valid manipulation path isn't just any path in $CS_\text{free}$: it must alternate between two elementary motion types. A **transit path** moves the robot alone while the object stays at a fixed placement; a **transfer path** moves the robot *and* the object together, rigidly, because the robot is holding it. This alternation is state-based: at any point in a solution, the object is either **grasped** ($G$) or **placed** ($P$), and valid solutions alternate between these two states through grasping/ungrasping actions.
+
+Two subspaces of $CS_\text{free}$ make this alternation concrete. The **placement space** $CP$ holds configurations where the object rests at a stable placement (transit paths live here); the **grasp space** $CG$ holds configurations where the robot holds the object with a fixed grasp (transfer paths live here). Their intersection $CG\cap CP$ is the set of configurations where the object is *simultaneously* grasped and placed correctly, exactly the transition points where the planner can switch between transit and transfer. Manipulation planning is therefore the search for feasible sequences of transit/transfer paths connected through configurations in $CG\cap CP$.
+
+## The three-stage pipeline
+
+Classical manipulation planners build this structure with sampling (PRM/RRT over $CG$, $CP$, per [PLAN-02](/course/PLAN/PLAN-02)). Your planner instead makes it a **structured optimization problem** over a convex decomposition of $CS_\text{free}$, in three stages.
+
+**Stage 1 — preprocessing.** $CS_\text{free}$ is approximated as a union of convex polytopes, $CS_\text{free}\approx\bigcup_{j=1}^J P_j$, generated automatically (via clique covers with IRIS-NP, in Drake). Intersecting with $CG$/$CP$ gives the collision-free grasp and placement regions actually usable by the optimizer:
+
+$$CG_\text{free} = \bigcup_{j=1}^J (CG\cap P_j), \qquad CP_\text{free} = \bigcup_{j=1}^J (CP\cap P_j).$$
+
+**Stage 2 — grasp-release sequencing (the MIQP).** For a fixed number of grasps $\ell$, the planner searches for a sequence $\mathbf{x}_0=\mathbf{q}_\text{init},\mathbf{x}_1=\mathbf{g}_1,\mathbf{x}_2=\mathbf{r}_1,\ldots,\mathbf{x}_{2\ell+1}=\mathbf{q}_\text{goal}$ (alternating grasp/release configurations), formulated as a **mixed-integer quadratic program**: continuous variables $\mathbf{x}_i$ (the actual configurations), binary variables encoding which convex region and connected component each $\mathbf{x}_i$ belongs to, objective $\min\sum_i\|\mathbf{x}_{i+1}-\mathbf{x}_i\|_2^2$ (a discretized, quadratic path-length cost, the same cost-functional flavor as [DYN-04](/course/DYN/DYN-04)'s trajectory optimization), subject to joint limits, polytope-containment, manipulation, and connectivity constraints.
+
+Region membership uses a **big-M constraint**: for $P_j=\{\mathbf{x}\mid A_j\mathbf{x}\leq\mathbf{b}_j\}$ and binary $z_{ij}\in\{0,1\}$ indicating whether $\mathbf{x}_i\in P_j$,
+
+$$A_j\mathbf{x}_i \leq \mathbf{b}_j + M(1-z_{ij}).$$
+
+When $z_{ij}=1$, this is exactly the region's defining inequality. When $z_{ij}=0$, $M$ must be large enough to make the constraint vacuous (true for every $\mathbf{x}_i$ in the feasible domain), effectively switching it off. This is a standard trick for encoding "either this constraint holds, or ignore it" inside a single linear inequality solvable by a MIQP solver.
+
+<ExerciseCard id="CAP-01-ex2-bigM-numeric" />
+
+**Stage 3 — trajectory generation.** Each consecutive pair $(\mathbf{x}_i,\mathbf{x}_{i+1})$ from the MIQP's solution is handed to a **Graphs of Convex Sets (GCS)** planner, which computes a collision-free shortest path through the convex decomposition connecting them: $\tau_i=\text{GCS}(\mathbf{x}_i,\mathbf{x}_{i+1})$. The full trajectory is the concatenation $\tau=\bigcup_i\tau_i$.
+
+The separation is deliberate: the MIQP decides the *discrete* structure (where to grasp, where to release, how many grasps), while GCS computes the *continuous* optimal motion within each already-fixed segment.
+
+<ExerciseCard id="CAP-01-ex3-miqp-classification" />
+
+## Structural parallel to RLEARN-07's TAMP formulation
+
+This discrete/continuous split is exactly [RLEARN-07](/course/RLEARN/RLEARN-07)'s TAMP structure, with the abstractions specialized to the manipulation-planning setting rather than general symbolic actions:
+
+| RLEARN-07 (general LGP) | This pipeline (manipulation-specific) |
+|---|---|
+| Discrete skeleton $s_{1:K}$ (symbolic action sequence) | Grasp-release sequence $\mathbf{x}_1,\ldots,\mathbf{x}_{2\ell}$ (which regions/grasps, chosen by the MIQP's binary variables) |
+| Continuous trajectory $\bar x:[0,KT]\to X$ | Continuous trajectory $\tau=\bigcup_i\tau_i$ (computed by GCS) |
+| Within-mode constraint $\bar\phi$ (holds throughout a mode) | Manipulation constraints: object fixed during transit, moves rigidly with gripper during transfer, enforced along each $\tau_i$ |
+| Mode-transition constraint $\hat\phi$ (checked only at switch instants) | Polytope-containment/connectivity constraints at each $\mathbf{x}_i$ (checked only at the sequence's discrete points) |
+| Skeleton feasibility $s_k\in\text{succ}(s_{k-1})$ | Region/connected-component membership via the binary variables $z_{ij}$ |
+
+<ExerciseCard id="CAP-01-ex4-lgp-parallel" />
+
+The parallel isn't exact: RLEARN-07's skeleton search is typically over a small, hand-defined set of symbolic actions (pick, place, push, ...), while this MIQP searches directly over which of potentially many convex regions and grasp configurations to use, a much larger but more geometrically explicit discrete space. Both are instances of the same underlying idea, though: **separate the problem into "which discrete structure" (skeleton / grasp sequence) and "what continuous motion realizes it" (trajectory), and solve them with different tools suited to each.**
+
+## Experimental results: where the method breaks
+
+The planner was evaluated on a bottle-cap-opening task (3-DOF: cap rotation, gripper rotation, finger position; a 4-DOF variant adds a second finger joint). Because the gripper has limited rotational range, the task can't be solved with a single grasp, regripping is required, making this a genuine test of the grasp-sequencing stage, not just trajectory generation.
+
+| DOF | Coverage target (actual) | # regions | Coverage time (s) | Trajectory time (s) |
+|---|---|---|---|---|
+| 3 | 0.70–0.90 (0.94) | 4 | 29.8 | 29.5 |
+| 3 | 0.96 (0.98) | 7 | 54.6 | 34.0 |
+| 3 | 0.99 (0.996) | 11 | 87.7 | 112.6 |
+| 4 | 0.70 (0.77) | 4 | 16.5 | * (no feasible grasp sequence) |
+| 4 | 0.90 (0.95) | 5 | 31.2 | ** (sequence found, trajectory connection failed) |
+| 4 | 0.96 (0.98) | 10 | 78.5 | 29.0 |
+| 4 | 0.99 (0.996) | 14 | 115.9 | 95.9 |
+
+<ExerciseCard id="CAP-01-ex5-coverage-numeric" />
+
+The pattern is a direct, concrete instance of the theme that has run through this whole workbook: **feasibility is only as good as the representation covering it.** At low coverage, the 4-DOF case doesn't just find a *worse* plan, it finds *no* plan (target 0.70) or a plan whose grasp sequence is right but whose trajectory can't actually be connected (target 0.90). Manipulation tasks reason close to contact, so gaps in the convex decomposition near grasp/placement boundaries can silently remove exactly the regions a valid solution needs, even when the true $CS_\text{free}$ contains one. This is the same phenomenon PLAN-02 flagged for sampling-based planners under narrow passages, now showing up as a *decomposition-coverage* problem instead of a *sampling-density* problem, a different mechanism, the same underlying issue: your finite representation of $C_\text{free}$ has to actually contain the solution.
+
+## Where this points next
+
+Your report's five research questions (RQ1–RQ5, §4.2) ask, in different ways, whether structured representations of reachable behaviour, convex regions, learned motion primitives, learned skill embeddings, or learned world models, can be given explicit reachability/feasibility guarantees usable by a planner. This pipeline is one concrete instance of RQ1 (convex decompositions for manipulation planning); RQ2–RQ4 point toward exactly the RLEARN block's territory (constraint-guided RL, learned skills, learned world models, RLEARN-02 through RLEARN-07), now with the explicit goal of giving those learned components the same kind of planner-usable structure this MIQP gets for free from convex geometry.
+
+## Summary
+
+- Your report's $CS/CG/CP$ notation is PLAN-01's $\mathcal{X}/\mathcal{X}_\text{fea}$ notation, specialized to a composite robot+object system; transit/transfer paths and the grasp/placement spaces formalize the alternating structure every manipulation plan must have.
+- The pipeline splits into three stages: convex decomposition of $CS_\text{free}$ (geometry), MIQP grasp-release sequencing (discrete structure, via big-M region-membership constraints and a DYN-04-flavored quadratic path-length objective), and GCS trajectory generation (continuous motion).
+- This discrete/continuous split is a specialized instance of RLEARN-07's general TAMP/LGP structure: skeleton $\leftrightarrow$ grasp-release sequence, $\bar\phi/\hat\phi$ $\leftrightarrow$ manipulation/connectivity constraints.
+- The experiments show coverage of $CS_\text{free}$, not dimensionality alone, is the binding constraint: this is the same "your plan is only as good as your representation of feasible space" theme from PLAN-02, now in a decomposition-based rather than sampling-based form.
+
+## Retrieval questions
+
+1. Translate $CS$, $CS_\text{free}$, $CG$, $CP$ into PLAN-01's notation.
+2. Explain the big-M trick for encoding convex-region membership in a MIQP.
+3. State the three pipeline stages and what each one optimizes over (discrete vs. continuous).
+4. Explain the structural parallel (and its limits) between this MIQP and RLEARN-07's LGP.
+
+## Mastery checklist
+
+- [ ] Can translate between your report's $CS/CG/CP$ notation and PLAN-01's $\mathcal{X}/\mathcal{X}_\text{fea}$ notation.
+- [ ] Can explain the big-M constraint and why it "switches off" a constraint when $z=0$.
+- [ ] Can state all three pipeline stages and what problem type each one solves.
+- [ ] Can map the MIQP/GCS split onto RLEARN-07's skeleton/trajectory split, and explain where the analogy breaks down.
+
+## Source note
+
+This module's content, the composite configuration space, transit/transit-transfer structure, grasp/placement spaces, the three-stage pipeline (convex decomposition, MIQP formulation including the big-M constraint, GCS trajectory generation), and the experimental results table, is adapted directly from your own PhD Year-1 report, §5.1 "Optimisation-Based Manipulation Planner in Convex Decompositions of $C_\text{free}$" (pp.29–35), read from `Final_Scientific_Report_Julia Lopez Gomez.pdf` in `original notes/` for this module specifically (this file is your own report, not part of the Toussaint lecture corpus, so it's cited via `externalSources` rather than the `sources` field used for the lecture PDFs). The cross-references to PLAN-01, DYN-04, and RLEARN-07 and the explicit structural parallel to RLEARN-07's LGP formulation are newly-authored synthesis for this module, connecting your own report's material to this workbook's notation and prior modules; they do not appear in the report itself. All exercises are newly authored; the big-M and pipeline-time numeric exercises were independently verified by direct computation while authoring this module.
+
+---
+
+**This is the last module in the curriculum.** Return to the [curriculum overview](/curriculum) to review the full route, or revisit any module's cheat sheet / retrieval questions for spaced review.

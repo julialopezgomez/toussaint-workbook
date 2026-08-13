@@ -1,0 +1,46 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "ML-05-ex1-kernel-rewrite-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies that K, kappa(x), and y are all that's needed." },
+          { "points": 2, "description": "Correctly explains the implication for infinite-dimensional feature maps." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "K and kappa(x) are built entirely from scalar kernel evaluations k(.,.); y is the training labels. Neither phi(x_i) nor beta_hat appear individually anywhere. This means the formula works for any valid kernel, including ones (like RBF) whose phi is infinite-dimensional and could never be computed explicitly, since phi is never actually needed."
+    },
+    {
+      "exerciseId": "ML-05-ex2-polynomial-kernel-verification",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 9, "tolerance": 0 },
+      "fullSolution": "x^T x' = 0+2 = 2. k = (2+1)^2 = 9. (Independently verified to match phi(x)^T phi(x') via NumPy.)"
+    },
+    {
+      "exerciseId": "ML-05-ex3-bayesian-posterior-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly applies Bayes' rule with independent likelihood factors." },
+          { "points": 2, "description": "Correctly takes -log of the product of exponentials to get the ridge cost." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "P(beta|D) ~ P(D|beta)P(beta) = [prod_i P(y_i|x_i,beta)] P(beta). Substituting the Gaussian forms: P(beta|D) ~ exp{-(1/2sigma^2) sum_i(y_i-x_i^T beta)^2} exp{-(lambda/2sigma^2)||beta||^2}. Taking -log sums the exponents (up to constants irrelevant to the argmin): -log P(beta|D) ~ sum_i(y_i-x_i^T beta)^2 + lambda||beta||^2 = L_ridge(beta)."
+    },
+    {
+      "exerciseId": "ML-05-ex4-unification-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains why ridge regression's posterior is exactly Gaussian (conjugacy)." },
+          { "points": 2, "description": "Correctly explains why logistic regression needs the Laplace approximation and how it enables kernelization." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Ridge regression's posterior is exactly Gaussian (Gaussian prior times Gaussian likelihood is Gaussian), so it kernelizes directly. Logistic regression's sigmoid-link likelihood isn't conjugate to a Gaussian prior, so its posterior isn't exactly Gaussian; the Laplace approximation (2nd-order Taylor expansion around beta*, using MATH-02B's Hessian) approximates it as Gaussian. Once approximated as Gaussian, the same kernelization applies, giving an approximate GP posterior over f(x): GP classification, with calibrated uncertainty via the sigmoid."
+    }
+  ]
+}

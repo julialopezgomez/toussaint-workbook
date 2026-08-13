@@ -1,0 +1,73 @@
+{
+  "moduleId": "RL-05",
+  "exercises": [
+    {
+      "id": "RL-05-ex1-taxonomy-conceptual",
+      "objective": "Distinguish model-based, model-free, and policy-search RL by what each learns from data.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 83, "originalNumber": "2.3:2-3" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "For each of model-based RL, model-free RL, and policy search, state precisely what is learned from the data $\\mathcal{D}=\\{(s,a,r,s')\\}$.",
+      "hints": [
+        "Model-based RL learns $\\hat P(s'\\mid s,a)$ and $\\hat R(s,a)$, an explicit model of the environment, then plans (RL-02's value/Q-iteration) against that learned model.",
+        "Model-free RL learns $V^*(s)$ or $Q^*(s,a)$ directly (RL-03's TD/Q-learning), skipping the model entirely.",
+        "Policy search learns (or directly estimates the gradient of) the policy $\\pi_\\theta$ itself (RL-04), or uses black-box/evolutionary search on $\\theta$, without necessarily learning any value function at all."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-05-ex2-optimistic-init-numeric",
+      "objective": "Compute the optimistic Q-value initialization from R_max and the discount factor.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 85, "originalNumber": "2.3:7" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For $R_\\text{max}=10$ and $\\gamma=0.9$, compute the optimistic initialization $Q(s,a)=R_\\text{max}/(1-\\gamma)$. Enter a decimal.",
+      "hints": [
+        "$1-\\gamma=1-0.9=0.1$.",
+        "$Q(s,a)=10/0.1$.",
+        "$Q(s,a)=100$: the maximum possible discounted return if you received $R_\\text{max}$ every single step forever, an intentionally optimistic (usually far too large in practice, per the source's own note) starting value."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-05-ex3-ucb-connection-conceptual",
+      "objective": "Explain precisely how Q(s,a) + beta*sigma(s,a) matches OPT-06's UCB1 formula structurally.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 85, "originalNumber": "2.3:7" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain the structural correspondence between UCB-style Q-value exploration, $Q(s,a)+\\beta\\sigma(s,a)$, and OPT-06's UCB1 bandit formula, term by term.",
+      "hints": [
+        "OPT-06's UCB1 chooses the arm maximizing $\\mu_a+\\beta\\sqrt{2\\ln n/n_a}$: a point estimate $\\mu_a$ plus a confidence-bound bonus that's large for under-visited arms and shrinks as $n_a$ grows.",
+        "$Q(s,a)$ plays exactly the role of $\\mu_a$ (a current point estimate of value), and $\\sigma(s,a)$ plays exactly the role of the confidence bound (large when $(s,a)$ is poorly-estimated/rarely-visited, shrinking with more visits).",
+        "Both formulas implement the identical 'optimism in the face of uncertainty' principle: add a bonus proportional to how uncertain the current estimate is, so uncertain options get tried, and the bonus naturally fades as uncertainty is resolved by experience; RL-05's version simply applies this bandit-derived idea to sequential-decision Q-values instead of single-shot bandit arms."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-05-ex4-rmax-mechanism-derivation",
+      "objective": "Explain why R-max's strictly-optimistic reward mechanism requires no separately-designed exploration bonus.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 85, "originalNumber": "2.3:8-9" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Explain why planning (via RL-02's value/Q-iteration) against $R_\\text{R-max}$ automatically produces an exploring policy, with no separate exploration term added to the objective.",
+      "hints": [
+        "Every state-action pair visited fewer than $m$ times is assigned reward $R_\\text{max}$ (the theoretical maximum), regardless of what its true reward actually is.",
+        "Value/Q-iteration, run against this optimistic reward function, will therefore compute a very high value for any path that leads toward unvisited/under-visited $(s,a)$ pairs, since reaching them looks (falsely, but usefully) like reaching maximum reward.",
+        "The resulting 'optimal' policy under $R_\\text{R-max}$ is therefore automatically driven to seek out under-explored regions of the state-action space, purely as a side effect of ordinary reward-maximizing planning; once $(s,a)$ becomes known ($c(s,a)\\geq m$), its true estimated reward replaces the optimistic placeholder, and the optimism naturally fades exactly where it's no longer needed."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

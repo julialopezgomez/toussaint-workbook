@@ -1,0 +1,73 @@
+{
+  "moduleId": "RL-07",
+  "exercises": [
+    {
+      "id": "RL-07-ex1-risk-aversion-numeric",
+      "objective": "Compute expected utility under a concave utility function and confirm risk-averse preference.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 91, "originalNumber": "2.4:5" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "With utility $U(y)=\\sqrt{y}$ (concave), compare a certain $\\$50$ to a 50/50 gamble between $\\$0$ and $\\$100$ (same expected monetary value). Compute $\\mathbb{E}\\{U(\\text{gamble})\\}=0.5\\sqrt0+0.5\\sqrt{100}$. Enter a decimal.",
+      "hints": [
+        "$\\sqrt0=0$, $\\sqrt{100}=10$.",
+        "$\\mathbb{E}\\{U(\\text{gamble})\\}=0.5(0)+0.5(10)$.",
+        "$\\mathbb{E}\\{U(\\text{gamble})\\}=5.0$. Compare to $U(\\text{certain }\\$50)=\\sqrt{50}\\approx7.07$: since $7.07>5.0$, this concave-utility agent strictly prefers the certain \\$50 over the equal-expected-value gamble, exactly risk-averse behavior. (Independently verified with Python while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-07-ex2-mdp-as-decision-network-conceptual",
+      "objective": "Explain how an MDP is a special case of a decision network.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 92, "originalNumber": "2.4:6-7" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Map RL-01's MDP diagram ($s_0,a_0,r_1,s_1,a_1,r_2,\\ldots$) onto the three decision-network node types (decision, random, utility), and state what the overall objective is in decision-network terms.",
+      "hints": [
+        "Each action $a_t$ is a decision node, set by the policy $\\pi_t$ (a function of the parent state $s_t$).",
+        "Each state $s_t$ (for $t>0$) is a random variable node, drawn from $P(s_t\\mid s_{t-1},a_{t-1})$; each reward $r_t$ is a utility node, computed from its parents (typically $s_{t-1},a_{t-1}$).",
+        "The overall objective, in decision-network terms, is $\\max_{\\pi_0,\\pi_1,\\ldots}\\mathbb{E}\\{\\sum_ir_i\\}$: exactly RL-01's expected-return maximization, now recognized as a special (sequential, Markov-structured) case of the general decision-network objective $\\max_{\\pi_1,..}\\mathbb{E}\\{\\sum_iu_i\\}$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-07-ex3-erm-connection-conceptual",
+      "objective": "Explain the connection between empirical risk minimization and ML-02's loss-minimization framing.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 93, "originalNumber": "2.4:9" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain why $\\operatorname*{argmin}_\\theta\\frac1n\\sum_il(f_\\theta(x_i),y_i)$ (ML-02's ridge/logistic-regression loss minimization) is exactly an instance of the maximal-expected-utility principle, with $U=-l$, and why the sample average appears instead of a true expectation.",
+      "hints": [
+        "The maximal-expected-utility principle is $\\operatorname*{argmax}_a\\mathbb{E}_{P(y\\mid a)}\\{U(y)\\}$; setting $U(y):=-l(\\hat y,y)$ turns 'maximize expected utility' into 'minimize expected loss,' exactly risk minimization, $\\operatorname*{argmin}_\\theta\\mathbb{E}_{p(x,y)}\\{l(f_\\theta(x),y)\\}$.",
+        "The true expectation $\\mathbb{E}_{p(x,y)}\\{\\cdot\\}$ requires knowing the true data-generating distribution $p(x,y)$, which is never actually known in a real ML problem.",
+        "Approximating this unknown expectation by a Monte Carlo average over the observed training data, $\\mathbb{E}_{p(x,y)}\\{l(f_\\theta(x),y)\\}\\approx\\frac1n\\sum_il(f_\\theta(x_i),y_i)$ (PROB-02's Monte Carlo estimator), gives exactly Empirical Risk Minimization, and exactly ML-02's ridge/logistic-regression loss functions."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-07-ex4-curiosity-failure-conceptual",
+      "objective": "Explain why naive prediction-error curiosity fails and why rewarding predictor improvement fixes it.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 95, "originalNumber": "2.4:14" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain precisely why rewarding an agent for high prediction error leads to the 'permanently watching white noise TV' failure mode, and why rewarding predictor *improvement* instead fixes it.",
+      "hints": [
+        "White noise is, by construction, maximally unpredictable: no matter how much data an agent observes, its prediction error watching white noise never decreases, so a prediction-error-seeking agent finds it permanently, inexhaustibly 'rewarding' to keep watching.",
+        "But watching white noise teaches the agent nothing: there's no structure to learn, so no actual gain in predictive ability, even though the naive reward signal (prediction error) stays high forever.",
+        "Rewarding predictor *improvement* (how much better predictions got recently) instead of raw error correctly gives zero reward for white noise (predictions never improve, no matter how long you watch), while still rewarding genuinely learnable-but-currently-hard stimuli (where more observation does measurably improve predictions), correctly directing curiosity toward what can actually be learned."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

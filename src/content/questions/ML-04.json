@@ -1,0 +1,73 @@
+{
+  "moduleId": "ML-04",
+  "exercises": [
+    {
+      "id": "ML-04-ex1-conv-parameter-count",
+      "objective": "Compute and compare the parameter count of a convolutional layer vs. a fully-connected layer on the same input.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 37, "originalNumber": "1.3:21-22" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For a $32\\times32\\times3$ (RGB) input, compute the number of parameters in a convolutional layer with $C'=16$ output channels and kernel size $k=3$ (using $C'Ck^2$). Enter an integer.",
+      "hints": [
+        "$C'Ck^2$ with $C'=16,\\ C=3,\\ k=3$.",
+        "$16\\times3\\times9$.",
+        "$432$ parameters, compared to a fully-connected layer mapping the same input to 16 outputs, which would need $32\\times32\\times3\\times16=49{,}152$ parameters, about 114 times more, and that ratio only gets worse for larger images, since the FC count scales with image size while the conv count doesn't."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-04-ex2-architecture-matching-conceptual",
+      "objective": "Match CNN, LSTM, and Transformer architectures to the structural assumption each is built around.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 41, "originalNumber": "1.3:32" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "For each scenario, state which architecture family (CNN, LSTM/GRU, or Transformer) is the natural fit, and why: (a) classifying objects in a photograph, (b) predicting the next value in a long, evolving sensor time series, (c) processing a variable-length, unordered set of detected objects where you don't know in advance how they relate to each other.",
+      "hints": [
+        "(a) CNN: photographs have spatial/grid structure, nearby pixels are related, and convolution's weight sharing exploits exactly that (translation invariance).",
+        "(b) LSTM/GRU: a sensor time series has sequential/temporal structure, and gated memory (forget/input/output gates) is built specifically to carry information forward across time steps.",
+        "(c) Transformer: with no known a-priori order or grid structure, a Transformer's permutation-invariant attention lets every element attend to every other element and *learn* whatever relational structure exists from the data itself, rather than assuming it architecturally."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-04-ex3-initialization-conceptual",
+      "objective": "Explain why 1/sqrt(h) weight initialization scaling prevents activation scale from drifting across network depth.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 42, "originalNumber": "1.3:34" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain why initializing each weight in $W_{l,i\\cdot}$ with standard deviation $1/\\sqrt{h_{l-1}}$ (rather than, say, standard deviation 1 regardless of layer width) helps keep activation scale roughly constant from layer to layer.",
+      "hints": [
+        "A pre-activation $z_i=\\sum_{j=1}^{h_{l-1}}W_{ij}x_j$ sums $h_{l-1}$ roughly-independent terms; for independent random terms, the variance of a sum grows linearly with the number of terms summed.",
+        "So if each $W_{ij}$ has variance $v$, and each $x_j$ has variance $\\text{Var}\\{x\\}$, then $\\text{Var}\\{z_i\\}\\approx h_{l-1}\\cdot v\\cdot\\text{Var}\\{x\\}$: without correcting for $h_{l-1}$, wider layers would produce systematically larger pre-activations purely from summing more terms, nothing to do with the actual learned structure.",
+        "Choosing $v=1/h_{l-1}$ (standard deviation $1/\\sqrt{h_{l-1}}$) exactly cancels the $h_{l-1}$ factor, giving $\\text{Var}\\{z_i\\}\\approx\\text{Var}\\{x\\}$ regardless of layer width: activation scale is preserved layer to layer instead of compounding (shrinking or exploding) with depth, exactly the ODE-02/DYN-06-style stability concern this module connects to."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-04-ex4-dropout-ensemble-conceptual",
+      "objective": "Explain dropout's interpretation as approximating an ensemble of exponentially many networks.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 43, "originalNumber": "1.3:36-37" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain why dropout can be understood as training and approximately averaging an ensemble of exponentially many different networks, and why scaling activations by $p$ at prediction time approximates that average.",
+      "hints": [
+        "Each specific pattern of which units happen to drop out on a given training step defines a distinct, smaller sub-network (with some units simply absent); since there are exponentially many possible drop-out patterns, training with dropout is like training an enormous ensemble of different sub-networks, all sharing the same underlying weights.",
+        "At prediction time, you'd ideally want to average the predictions of every one of these exponentially many sub-networks, which is computationally infeasible to do explicitly.",
+        "Scaling each activation by $p$ (the keep-probability) at prediction time approximates this average directly: on average across training, each unit was 'present' a fraction $p$ of the time, so scaling by $p$ approximates what the ensemble-averaged activation would have been, without ever having to enumerate or run the exponentially many sub-networks explicitly."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+---
+id: ML-07
+block: ML
+title: "Advanced Topics: Ensembles, Bayesian NNs & No Free Lunch"
+tier: 3
+estimatedHours: 2.5
+prerequisites: ["ML-04", "ML-05"]
+objectives:
+  - "Derive weighted local regression as a weighted instance of ML-02's ridge regression."
+  - "Explain bagging, boosting, and gradient boosting, including gradient boosting's functional-gradient-descent interpretation."
+  - "Explain dropout's status as an approximate Bayesian method, connecting ML-04 and ML-05."
+  - "State the No Free Lunch theorem's content and its ML-specific implication."
+sources:
+  - { sourceId: "lecture-machinelearning", pages: "p72-84, p92-94 (§7, §8.2-8.3)", role: "primary" }
+concepts:
+  - "Local/lazy learning, kNN"
+  - "Bagging, boosting, gradient boosting"
+  - "Decision trees (CART)"
+  - "Bayesian neural networks, dropout as approximate inference"
+  - "No Free Lunch theorem"
+notation:
+  - { symbol: "$K(x^*,x)$", meaning: "smoothing kernel weighting nearby points in local regression" }
+  - { symbol: "$\\alpha_m$", meaning: "AdaBoost's weight for the $m$-th weak classifier" }
+cheatsheetLinks: []
+nextModules: []
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+This module is a deliberately lighter, survey-level closing tour (Tier 3, matching the source's own framing of much of this content as optional/advanced): a handful of classical ideas that are still genuinely useful baselines and building blocks, but don't need MATH/OPT/PROB-level derivation depth to use well. It also closes two loose ends: dropout's *actual* theoretical justification (ML-04 introduced it as a heuristic), and the No Free Lunch theorem's implication specifically for machine learning (OPT-05 already proved it in the general optimization setting).
+
+## Prerequisites & readiness check
+
+You should have ML-02's weighted-least-squares machinery and ML-04's dropout definition fresh.
+
+<ReadinessCheck
+  question="From ML-02, what is ridge regression's closed form?"
+  answer="β* = (XᵀX + λI)⁻¹Xᵀy."
+/>
+
+## Local (lazy) learning
+
+Instead of fitting one global model, **local learning** fits a fresh, small model near each query point $x^*$ as needed: weighted local least squares minimizes
+
+$$L_\text{local}(\beta,x^*) = \sum_{i=1}^nK(x^*,x_i)(y_i-f(x_i))^2+\lambda\|\beta\|^2$$
+
+<ExerciseCard id="ML-07-ex1-weighted-regression-derivation" />
+
+with optimum $\hat\beta=(X^\top WX+\lambda I)^{-1}X^\top Wy$, $W=\text{diag}(K(x^*,x_{1:n}))$: exactly ML-02's ridge regression, with each data point additionally weighted by a **smoothing kernel** $K(x^*,x)$ (e.g. a kNN indicator, or a smoothly-decaying Epanechnikov kernel) measuring relevance to the query. Efficiently finding the $k$ nearest neighbors for this is itself a solved problem (**kd-trees**, giving $O(\log n)$ retrieval instead of a linear scan), not covered further here.
+
+## Combining learners: bagging and boosting
+
+Given several models $f_1,\ldots,f_M$, combine them as $f(x)=\sum_m\alpha_mf_m(x)$ (the "basis function view": models themselves are features for one more layer of linear combination). Three ways to get the $f_m$:
+
+- **Bagging** (bootstrap aggregation): train each $f_m$ on an independently resampled (with replacement) version of the data, then average, $f(x)=\frac1M\sum_mf_m(x)$. Reduces variance (similar effect to regularization) without touching bias.
+- **Boosting** (AdaBoost): train a *sequence* of weak classifiers, each on a *reweighted* version of the data emphasizing points the previous classifiers got wrong.
+
+```
+AdaBoost(data D, M rounds):
+  1: initialize weights w_i = 1/n for all i
+  2: for m = 1, .., M do
+  3:     fit classifier G_m to the data, weighted by w_i
+  4:     err_m = (weighted misclassification rate of G_m)
+  5:     alpha_m = log[(1 - err_m) / err_m]
+  6:     for each i: w_i <- w_i * exp{alpha_m}  if G_m(x_i) != y_i, else unchanged
+  7: end for
+  Output: G(x) = sign( sum_m alpha_m G_m(x) )
+```
+*(Marc Toussaint, `Lecture-MachineLearning.pdf`, p.78, §7:18-19.)*
+
+<ExerciseCard id="ML-07-ex2-adaboost-weight-numeric" />
+
+## Gradient boosting
+
+A more general view of boosting: minimizing $L(f)=\sum_iL(y_i,f(x_i))$ by **gradient descent in function space**. Each new weak learner $f_m$ is fit to approximate the *negative gradient* of the loss so far (its "residual," how $f$ should change to reduce loss), and $\alpha_m$ is chosen (e.g. by a 1D line search or linear regression) to control the step size:
+
+$$f^* \approx f_0 + \alpha_1\underbrace{\frac{\partial L(f_0)}{\partial f}}_{\approx f_1} + \alpha_2\underbrace{\frac{\partial L(f_0+\alpha_1f_1)}{\partial f}}_{\approx f_2}+\cdots$$
+
+<ExerciseCard id="ML-07-ex3-gradient-boosting-conceptual" />
+
+This is exactly OPT-01/OPT-02's gradient descent, just performed in the (infinite-dimensional) space of *functions* rather than a finite parameter vector: each step asks "which direction would reduce the loss," fits a weak learner to approximate that direction, and takes a step along it. **Decision trees** (CART: recursively split the input space into rectangular regions, predicting a constant per region, chosen to minimize squared error at each split) are the most common choice of weak learner for gradient boosting in practice, since a shallow tree is cheap to fit and expressive enough to be useful.
+
+## Bayesian neural networks and dropout
+
+ML-04 introduced dropout as a heuristic regularizer. There's a deeper justification, connecting directly to ML-05's Bayesian machinery: **Gal & Ghahramani (2016)** show that a dropout-trained network is mathematically equivalent to an approximate **Deep Gaussian Process** (a chain of GPs, one per layer, each with a particular kernel implied by the dropout pattern). Under this view, running $T$ stochastic forward passes with dropout *active* at prediction time (instead of the usual "scale by $p$, drop out nothing" deterministic prediction) and looking at the *spread* of the $T$ predictions gives a genuine, if approximate, Bayesian **uncertainty estimate**, the same kind of "error bars on a prediction" ML-05's Bayesian ridge regression gave analytically, now obtained empirically from a network never explicitly built to be Bayesian.
+
+<ExerciseCard id="ML-07-ex4-dropout-bayesian-conceptual" />
+
+## No Free Lunch, revisited
+
+OPT-05 already proved the No Free Lunch theorem in general: averaged over *all* possible problem instances, every algorithm performs identically (equivalently to random search). The ML-specific version states the same fact about learning: averaged over a uniform prior over *all* possible true functions $f$, no learning algorithm outperforms any other, including random guessing. **The theorem is not deep once you see why**: if literally every previous data point yields *zero* information about future queries (true only under an unstructured, uniform-over-all-functions prior), there is nothing to exploit and nothing beats random guessing, definitionally. The real content of ML isn't beating No Free Lunch (impossible), it's that real-world problems are never drawn from that uniform, structure-free prior: every method in this entire block implicitly assumes *some* structure (smoothness for kernels/GPs, spatial locality for CNNs, low intrinsic dimension for PCA), and picking the right structural assumption for the actual problem at hand, not finding a universally-best algorithm, is the real game.
+
+## Summary
+
+- **Local (lazy) learning** fits a fresh, kernel-weighted local model per query, exactly ML-02's ridge regression with an added similarity weighting.
+- **Bagging** averages models trained on resampled data (reduces variance); **boosting** (AdaBoost) trains a weighted sequence emphasizing previous mistakes.
+- **Gradient boosting** is gradient descent in function space: each weak learner approximates the negative loss-gradient; decision trees are the standard weak learner.
+- **Dropout** is an approximate Bayesian method (equivalent to a Deep Gaussian Process), giving genuine uncertainty estimates from repeated stochastic forward passes, not just a regularization heuristic.
+- **No Free Lunch** (OPT-05, general case) implies the ML-specific version directly: no learner beats another averaged over all possible problems; real progress comes from choosing the right structural assumption for the actual problem, not from a universally-best algorithm.
+
+## Retrieval questions
+
+1. Derive weighted local regression's closed form from ML-02's ridge regression.
+2. State the AdaBoost algorithm and explain what the weight update accomplishes.
+3. Explain gradient boosting's "gradient descent in function space" interpretation.
+4. Why does dropout give genuine (approximate) uncertainty estimates, and what's the connection to Gaussian Processes?
+5. State the No Free Lunch theorem's real content, and what it implies about the search for a universally-best algorithm.
+
+## Mastery checklist
+
+- [ ] Can derive weighted local regression as weighted ridge regression.
+- [ ] Can state bagging, AdaBoost, and gradient boosting, and how they relate.
+- [ ] Can explain gradient boosting as function-space gradient descent.
+- [ ] Can explain dropout's approximate-Bayesian justification.
+- [ ] Can state the No Free Lunch theorem and its practical implication.
+
+## Source note
+
+This module's exposition, weighted local regression, kd-trees, bagging, AdaBoost (including its pseudocode), gradient boosting, decision trees/CART, the Bayesian-NN/dropout-as-Deep-GP discussion (credited to Gal & Ghahramani, 2016), and the ML-specific No Free Lunch framing are adapted from `lecture-machinelearning`, §7 and §8.2-8.3 (pp. 72-84, 92-94). The No Free Lunch theorem itself is not re-derived here, cross-referenced to [OPT-05](/course/OPT/OPT-05), which already proves it in the general optimization setting; this module only supplies the ML-specific reading. All exercises are newly authored; the AdaBoost weight computation was independently verified by direct computation while authoring this module.
+
+---
+
+**Next**: Return to the [curriculum overview](/curriculum) — Block ML is complete.

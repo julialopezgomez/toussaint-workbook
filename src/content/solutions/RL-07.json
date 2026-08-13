@@ -1,0 +1,47 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RL-07-ex1-risk-aversion-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 5.0, "tolerance": 0.01 },
+      "fullSolution": "E{U(gamble)} = 0.5*0 + 0.5*10 = 5.0. Compare to U(certain 50)=sqrt(50)~=7.07: since 7.07>5.0, the concave-utility agent prefers the certain outcome, risk-averse behavior. (Independently verified with Python.)"
+    },
+    {
+      "exerciseId": "RL-07-ex2-mdp-as-decision-network-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly maps actions to decision nodes." },
+          { "points": 1, "description": "Correctly maps states/rewards to random/utility nodes." },
+          { "points": 2, "description": "Correctly states the objective as max E{sum of utility nodes}." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Each action a_t is a decision node set by policy pi_t (function of parent state s_t). Each state s_t is a random variable node, drawn from P(s_t|s_{t-1},a_{t-1}); each reward r_t is a utility node computed from its parents. The objective is max_{pi_0,pi_1,...} E{sum_i r_i}, exactly RL-01's expected-return maximization as a special sequential, Markov-structured case of the general decision-network objective."
+    },
+    {
+      "exerciseId": "RL-07-ex3-erm-connection-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies U=-l as the connection to maximal-expected-utility." },
+          { "points": 2, "description": "Correctly explains the Monte Carlo approximation from unknown p(x,y) to the sample average." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Setting U(y)=-l(y_hat,y) turns maximize-expected-utility into minimize-expected-loss (risk minimization). The true expectation over p(x,y) requires the unknown data-generating distribution; approximating it via a Monte Carlo average over training data (PROB-02) gives Empirical Risk Minimization, exactly ML-02's ridge/logistic-regression loss functions."
+    },
+    {
+      "exerciseId": "RL-07-ex4-curiosity-failure-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains why white noise gives permanently high prediction error." },
+          { "points": 2, "description": "Correctly explains why predictor-improvement reward correctly gives zero reward for white noise." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "White noise is maximally unpredictable by construction, so prediction error watching it never decreases no matter how much data is observed, making it permanently 'rewarding' under a prediction-error objective despite teaching nothing. Rewarding predictor improvement instead gives zero reward for white noise (predictions never improve), while still rewarding genuinely learnable stimuli where more observation does improve predictions, correctly directing curiosity toward what can actually be learned."
+    }
+  ]
+}

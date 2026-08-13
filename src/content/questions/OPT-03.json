@@ -18,6 +18,23 @@
       "reviewCardIds": ["RC-OPT-03-01"]
     },
     {
+      "id": "OPT-03-ex1b-kkt-geometry",
+      "objective": "Verify all four KKT conditions at the optimum of a small inequality-constrained problem.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-optimization", "page": 22, "originalNumber": "§2.1:4, 2D example" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["OPT-03-ex1-why-not-just-zero-gradient"],
+      "answerType": "derivation",
+      "prompt": "Consider $\\min_{x_1,x_2} x_1$ s.t. $g(x)=x_1^2+x_2^2-1\\le0$. Argue that the optimum is $x^*=(-1,0)$, then find the multiplier $\\lambda$ satisfying KKT stationarity, and verify all four KKT conditions hold at $(x^*,\\lambda)$.",
+      "hints": [
+        "The unconstrained minimum of $x_1$ is $-\\infty$, so the constraint must be active at the optimum (otherwise you could keep decreasing $x_1$). On the boundary $x_1^2+x_2^2=1$, $x_1$ is smallest at $x_1=-1,x_2=0$ (the leftmost point of the unit circle).",
+        "Stationarity: $\\nabla f=(1,0)$, $\\nabla g(x^*)=(2x_1,2x_2)|_{x^*}=(-2,0)$. Solve $\\nabla f+\\lambda\\nabla g=0$: $(1,0)+\\lambda(-2,0)=0 \\Rightarrow 1-2\\lambda=0 \\Rightarrow \\lambda=0.5$.",
+        "Check all four: stationarity holds by construction ($\\lambda=0.5$); primal feasibility holds ($g(x^*)=1+0-1=0\\le0$); dual feasibility holds ($\\lambda=0.5\\ge0$); complementarity holds ($\\lambda g(x^*)=0.5\\times0=0$, since the constraint is exactly active). All four check out, confirming $(x^*,\\lambda)$ is a genuine KKT point."
+      ],
+      "reviewCardIds": []
+    },
+    {
       "id": "OPT-03-ex2-lagrangian-derivation",
       "objective": "Derive the KKT stationarity condition for an equality-constrained problem.",
       "provenance": "newly-authored",
@@ -62,6 +79,22 @@
         "If $g(x^*)<0$ strictly (the constraint isn't touching its boundary), complementary slackness forces $\\lambda=0$. Intuitively: a constraint that isn't binding shouldn't have any effect on where the optimum sits, an inactive constraint might as well not exist at that point, so its multiplier should be zero.",
         "If $\\lambda>0$ (the constraint IS actively influencing the solution, pushing $x^*$ against it), complementary slackness forces $g(x^*)=0$: the constraint must be exactly tight, since a multiplier can only be positive if the constraint is genuinely restricting where the optimum can be.",
         "This is exactly analogous to the equality-constraint case (where the multiplier is always 'active' since the constraint always holds exactly): complementary slackness generalizes that idea to inequality constraints, which might or might not be 'engaged' at the optimum."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-03-ex5-duality-gap",
+      "objective": "Compute the dual function for a small problem and verify weak duality.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": ["OPT-03-ex1b-kkt-geometry"],
+      "answerType": "numeric",
+      "prompt": "For the problem from the KKT-geometry exercise ($\\min x_1$ s.t. $x_1^2+x_2^2-1\\le0$, true optimum $p^*=-1$), one can show the dual function is $l(\\lambda) = -\\dfrac{1}{4\\lambda}-\\lambda$ for $\\lambda>0$. Evaluate $l(1)$ and confirm weak duality ($l(\\lambda)\\le p^*$) holds. Enter $l(1)$ as a decimal.",
+      "hints": [
+        "$l(1) = -\\dfrac{1}{4(1)} - 1 = -0.25-1$.",
+        "$l(1) = -1.25$.",
+        "Since $-1.25 \\le -1 = p^*$, weak duality holds at this (non-optimal) $\\lambda$, as it must for every $\\lambda\\ge0$. (If you maximize $l(\\lambda)$ over $\\lambda>0$, you'd find $\\lambda^*=0.5$ gives $l(0.5)=-1$, exactly matching $p^*$: strong duality holds here since the primal is convex and Slater's condition is satisfied, e.g. $x=(0,0)$ is a strictly interior point.)"
       ],
       "reviewCardIds": []
     }

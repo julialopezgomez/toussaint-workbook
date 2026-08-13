@@ -64,6 +64,23 @@
         "Substitute $x=s+t$, $y=s-t$: $\\partial z/\\partial s = (s-t)+(s+t) = 2s$. The $t$'s cancel exactly, as promised."
       ],
       "reviewCardIds": []
+    },
+    {
+      "id": "MATH-01-ex5-skew-challenge",
+      "objective": "Apply the product rule to a 3D cross-product expression via the skew-symmetric matrix representation.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-maths", "page": 19, "originalNumber": "§2.6.1" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": ["MATH-01-ex4-multipath-challenge"],
+      "answerType": "derivation",
+      "prompt": "Recall that the cross product can be written as a matrix-vector product using the skew-symmetric matrix $\\text{skew}(a) = \\begin{pmatrix}0&-a_3&a_2\\\\a_3&0&-a_1\\\\-a_2&a_1&0\\end{pmatrix}$, so that $a\\times b = \\text{skew}(a)\\,b = -\\text{skew}(b)\\,a$ for any $a,b\\in\\mathbb{R}^3$. Let $f(a,b) = \\|a\\times b\\|^2 = (a\\times b)^\\top(a\\times b)$. (a) Show that $f(a,b) = \\|a\\|^2\\|b\\|^2 - (a^\\top b)^2$ using the identity $\\text{skew}(a)^\\top\\text{skew}(a) = \\|a\\|^2 I - aa^\\top$. (b) Using this scalar form, derive $\\nabla_a f$ and $\\nabla_b f$.",
+      "hints": [
+        "For (a): $f = b^\\top\\text{skew}(a)^\\top\\text{skew}(a)\\,b$. Substitute the given identity and simplify $b^\\top(\\|a\\|^2 I - aa^\\top)b$ term by term; recall $b^\\top I b = \\|b\\|^2$ and $b^\\top(aa^\\top)b = (a^\\top b)^2$.",
+        "For (b), differentiate each term of $\\|a\\|^2\\|b\\|^2-(a^\\top b)^2$ w.r.t. $a$ separately: the first is a product rule ($\\|b\\|^2$ constant w.r.t. $a$, and $\\nabla_a\\|a\\|^2=2a$), giving $2\\|b\\|^2a$; the second is a chain rule (outer function $(\\cdot)^2$, inner $a^\\top b$, with $\\nabla_a(a^\\top b)=b$), giving $2(a^\\top b)b$.",
+        "Combine: $\\nabla_a f = 2\\|b\\|^2 a - 2(a^\\top b)b$. By the symmetry of $f$ in $a,b$, $\\nabla_b f = 2\\|a\\|^2 b - 2(a^\\top b)a$."
+      ],
+      "reviewCardIds": []
     }
   ]
 }

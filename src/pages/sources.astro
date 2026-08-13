@@ -1,0 +1,70 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const modules = await getCollection('course');
+
+const bySource = new Map<string, { pages: string; role: string; id: string; block: string }[]>();
+for (const m of modules) {
+  for (const s of m.data.sources) {
+    if (!bySource.has(s.sourceId)) bySource.set(s.sourceId, []);
+    bySource.get(s.sourceId)!.push({ pages: s.pages, role: s.role, id: m.data.id, block: m.data.block });
+  }
+}
+const sortedSources = [...bySource.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+
+const externalCites: { citation: string; note: string; id: string; block: string }[] = [];
+for (const m of modules) {
+  for (const ext of m.data.externalSources ?? []) {
+    externalCites.push({ ...ext, id: m.data.id, block: m.data.block });
+  }
+}
+---
+<BaseLayout title="Source Index">
+  <nav class="no-print breadcrumb"><a href="/">Start</a> / <a href="/curriculum">Curriculum</a> / Sources</nav>
+  <h1>Source index</h1>
+  <p>
+    Every <code>sources[]</code> and <code>externalSources[]</code> entry across all {modules.length} modules,
+    aggregated at build time. <code>sourceId</code>s match <code>data/source-manifest/manifest.json</code>; the
+    extracted text itself is never committed or served (see <code>CLAUDE.md</code>), this page only lists which
+    modules cite which source and page ranges.
+  </p>
+
+  <h2>Toussaint course PDFs / notes</h2>
+  {sortedSources.map(([sourceId, entries]) => (
+    <section class="source-block">
+      <h3><code>{sourceId}</code></h3>
+      <ul>
+        {entries
+          .sort((a, b) => a.id.localeCompare(b.id))
+          .map((e) => (
+            <li>
+              <a href={`/course/${e.block}/${e.id}`}>{e.id}</a> — {e.pages} <em>({e.role})</em>
+            </li>
+          ))}
+      </ul>
+    </section>
+  ))}
+
+  {externalCites.length > 0 && (
+    <>
+      <h2>External sources</h2>
+      <ul>
+        {externalCites.map((e) => (
+          <li>
+            <a href={`/course/${e.block}/${e.id}`}>{e.id}</a>: {e.citation}
+            <div class="note">{e.note}</div>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
+
+  <style>
+    .breadcrumb { font-size: 0.85rem; opacity: 0.7; margin-bottom: 1rem; }
+    .breadcrumb a { color: inherit; }
+    .source-block { margin: 1.25rem 0; }
+    .source-block h3 { margin-bottom: 0.3rem; }
+    .note { font-size: 0.85rem; opacity: 0.7; margin: 0.2rem 0 0.6rem; }
+  </style>
+</BaseLayout>

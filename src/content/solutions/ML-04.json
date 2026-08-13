@@ -1,0 +1,47 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "ML-04-ex1-conv-parameter-count",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 432, "tolerance": 0 },
+      "fullSolution": "C'Ck^2 = 16*3*9 = 432. Compare to a fully-connected layer on the same input to 16 outputs: 32*32*3*16 = 49,152, about 114x more."
+    },
+    {
+      "exerciseId": "ML-04-ex2-architecture-matching-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly matches (a) to CNN with spatial-structure reasoning." },
+          { "points": 1, "description": "Correctly matches (b) to LSTM/GRU with sequential-structure reasoning." },
+          { "points": 1, "description": "Correctly matches (c) to Transformer with permutation-invariance reasoning." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "(a) CNN: photographs have spatial/grid structure; convolution's weight sharing exploits translation invariance. (b) LSTM/GRU: sequential/temporal structure; gated memory carries information across time steps. (c) Transformer: no known a-priori structure; permutation-invariant attention lets elements attend to each other and learn relational structure from data."
+    },
+    {
+      "exerciseId": "ML-04-ex3-initialization-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains that summing h_{l-1} independent terms grows variance linearly with width." },
+          { "points": 2, "description": "Correctly explains that 1/h_{l-1} weight variance cancels this, preserving activation scale across depth." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "A pre-activation sums h_{l-1} roughly-independent terms; variance of a sum of independent terms grows linearly with the number of terms. So without correction, Var{z} ~ h_{l-1}*v*Var{x}, meaning wider layers give systematically larger pre-activations regardless of learned structure. Choosing weight variance v=1/h_{l-1} cancels this factor, giving Var{z}~Var{x} regardless of width: activation scale is preserved across depth instead of compounding exponentially."
+    },
+    {
+      "exerciseId": "ML-04-ex4-dropout-ensemble-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains each dropout pattern as a distinct sub-network, exponentially many total." },
+          { "points": 2, "description": "Correctly explains why scaling by p at prediction time approximates the ensemble average." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Each dropout pattern defines a distinct sub-network sharing the same weights; exponentially many patterns exist, so training with dropout is like training an enormous weight-sharing ensemble. Ideally you'd average all their predictions at test time, infeasible explicitly. Scaling by p (keep-probability) approximates this: each unit was present a fraction p of the time on average during training, so scaling by p approximates the ensemble-averaged activation without enumerating the sub-networks."
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "moduleId": "ODE-03",
+  "exercises": [
+    {
+      "id": "ODE-03-ex1-euler-derivation",
+      "objective": "Derive the forward Euler update rule from a first-order Taylor expansion.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Starting from MATH-00's first-order Taylor expansion $x(t+h) \\approx x(t) + h\\dot x(t)$, and using $\\dot x(t)=f(x(t),t)$ (the ODE itself), derive the forward Euler update rule $x_{k+1} = x_k + h\\,f(x_k,t_k)$.",
+      "hints": [
+        "Apply the Taylor expansion at $t=t_k$: $x(t_k+h) \\approx x(t_k) + h\\dot x(t_k)$.",
+        "Substitute the ODE, $\\dot x(t_k) = f(x(t_k),t_k)$: $x(t_k+h) \\approx x(t_k) + h\\,f(x(t_k),t_k)$.",
+        "Writing $x_k$ for the numerical approximation of $x(t_k)$ (and $x_{k+1}$ for the approximation of $x(t_k+h)$), this is exactly $x_{k+1} = x_k + h\\,f(x_k,t_k)$: Euler simply takes the first-order Taylor approximation and uses it, iterated, as the actual update rule, one step at a time."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ODE-03-ex2-euler-numeric",
+      "objective": "Compute two forward Euler steps by hand.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["ODE-03-ex1-euler-derivation"],
+      "answerType": "numeric",
+      "prompt": "For $\\dot x=-x$, $x_0=1$, using step size $h=0.25$, compute $x_2$ (i.e. two Euler steps, reaching $t=0.5$). Enter a decimal to 4 decimal places.",
+      "hints": [
+        "First step: $x_1 = x_0 + h(-x_0) = 1 + 0.25(-1) = 0.75$.",
+        "Second step: $x_2 = x_1 + h(-x_1) = 0.75 + 0.25(-0.75) = 0.75 - 0.1875$.",
+        "$x_2 = 0.5625$. (Compare to the true $x(0.5)=e^{-0.5}\\approx0.6065$: using a smaller step size and more steps already noticeably improved on the single-step $h=0.5$ result from the worked example, $0.5$, but there's still a real gap, illustrating Euler's only-first-order convergence.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ODE-03-ex3-rk4-derivation-check",
+      "objective": "Compute the first two RK4 stage evaluations by hand.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["ODE-03-ex2-euler-numeric"],
+      "answerType": "numeric",
+      "prompt": "For $\\dot x=-x$, $x_0=1$, $h=0.5$: compute $k_1=f(x_0,t_0)$ and then $k_2=f(x_0+\\tfrac{h}{2}k_1,\\,t_0+\\tfrac h2)$. Report $k_2$. Enter a decimal.",
+      "hints": [
+        "$k_1 = f(x_0,t_0) = -x_0 = -1$ (since $f(x,t)=-x$ for this ODE, and $t$ doesn't actually appear on the right-hand side here).",
+        "$k_2 = f(x_0 + 0.25k_1,\\,t_0+0.25) = f(1+0.25(-1),\\,0.25) = f(0.75,\\,0.25)$.",
+        "Since $f(x,t)=-x$ regardless of $t$: $k_2 = -0.75$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ODE-03-ex4-comparison-numeric",
+      "objective": "Quantify how much more accurate RK4 is than Euler for an identical problem and step size.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 12,
+      "prerequisites": ["ODE-03-ex3-rk4-derivation-check"],
+      "answerType": "numeric",
+      "prompt": "From the worked examples: Euler's single-step estimate of $x(0.5)$ had error $\\approx0.10653$; RK4's had error $\\approx0.00024$. Compute the ratio (Euler's error) / (RK4's error), i.e. how many times larger Euler's error is. Enter a decimal to 1 decimal place.",
+      "hints": [
+        "Divide directly: $0.10653 / 0.00024$.",
+        "This is roughly $443.9$ (small variations depending on how many decimal places you carry through).",
+        "So RK4's single-step error here is over 400 times smaller than Euler's, for only 4x the per-step computational cost, a dramatically favorable trade whenever function evaluations are cheap relative to the value of an accurate simulation."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RLEARN-05-ex1-linear-reward-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly substitutes the linear reward into J(pi)." },
+          { "points": 2, "description": "Correctly pulls w outside the sum/expectation to identify mu(pi)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "J(pi) = E_pi{sum_t gamma^t w^T phi(s_t,a_t)}. w doesn't depend on t or the trajectory, pull it out: J(pi) = w^T E_pi{sum_t gamma^t phi(s_t,a_t)} = w^T mu(pi)."
+    },
+    {
+      "exerciseId": "RLEARN-05-ex2-max-margin-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains step 3 as max-margin discrimination of the expert against seen policies." },
+          { "points": 2, "description": "Correctly explains step 4 as an RL subproblem and why alternation is needed." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Step 3: find w that makes the expert's mu(pi*) look better than every policy tried so far, by the largest margin t (max-margin classification). Step 4: given the current w, solve the ordinary RL problem for the optimal policy under that reward. One round isn't enough because a w from step 3 only discriminates against policies seen so far; the new pi_{i+1} might exploit a loophole. Adding it to the discrimination set next round closes that loophole, iteratively narrowing w."
+    },
+    {
+      "exerciseId": "RLEARN-05-ex3-airl-reward-shaping-connection",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly substitutes the reward/value interpretations." },
+          { "points": 2, "description": "Correctly applies the Bellman equation for Q to arrive at the advantage function." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "f_theta,phi(s,a,s') ~= r(s,a) + gamma*V(s') - V(s). By RL-04's Bellman equation, r(s,a)+gamma*V(s') ~= Q(s,a) (for the actually-transitioned s'). So f_theta,phi(s,a,s') ~= Q(s,a) - V(s) = A(s,a), the advantage function. This is why training this functional form gives g_theta reward semantics and h_phi value semantics: the algebra forces f toward the advantage function."
+    },
+    {
+      "exerciseId": "RLEARN-05-ex4-bradley-terry-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.881, "tolerance": 0.005 },
+      "fullSolution": "e^3 ~= 20.09, e^1 ~= 2.72. P = 20.09/22.80 ~= 0.881. (Independently verified with Python.)"
+    }
+  ]
+}

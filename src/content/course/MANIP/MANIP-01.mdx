@@ -1,0 +1,139 @@
+---
+id: MANIP-01
+block: MANIP
+title: "Grasping Fundamentals: Contacts & Force Closure"
+tier: 2
+estimatedHours: 2.5
+prerequisites: ["DYN-01"]
+objectives:
+  - "Define a contact (signed distance, witness points, contact normal) and the friction cone."
+  - "State the force-closure condition and derive the total-wrench formula it depends on."
+  - "Explain why two frictionless point contacts can never achieve force closure in the plane."
+  - "Distinguish force closure, form closure, caging, and equilibrium."
+sources:
+  - { sourceId: "lecture-robotlearning", pages: "p81-83 (§1.11, \"Grasping Background\")", role: "primary" }
+  - { sourceId: "lecture-robotics", pages: "p157-162 (§10, brief intro)", role: "supplementary" }
+concepts:
+  - "Contact, witness points, signed distance"
+  - "Friction cone"
+  - "Force closure, form closure, caging, equilibrium"
+  - "Wrench (force-torque)"
+notation:
+  - { symbol: "$(f_i,\\tau_i)$", meaning: "the wrench (force, torque) contact $i$ exerts at its contact point" }
+  - { symbol: "$\\mathcal{F}_i$", meaning: "the friction cone: the set of forces contact $i$ can physically exert" }
+  - { symbol: "$\\mu$", meaning: "friction coefficient" }
+cheatsheetLinks: []
+nextModules: ["MANIP-02"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+import SourceFigure from '../../../components/SourceFigure.astro';
+
+## Why this matters
+
+Grasping is, in Matt Mason's phrase, "when an agent moves things other than itself": the object is now a second body in DYN-01's multibody system, one you influence only indirectly, through contact forces. This module is deliberately brief (the source material itself is, too), covering the one piece of classical theory that still underlies essentially every modern learned-grasping system: **force closure**, the condition for a "secure" grip.
+
+## Prerequisites & readiness check
+
+You should have DYN-01's force-kinematics/wrench framing fresh.
+
+<ReadinessCheck
+  question="From DYN-01, what is a wrench, and how does the Newton-Euler equation relate wrenches to accelerations?"
+  answer="A wrench is a (force, torque) pair; Newton-Euler relates a body's total wrench to its linear/angular acceleration: (f_total, τ_total) = (m v̇, I ẇ + w × Iw)."
+/>
+
+## Contacts
+
+Two bodies in contact are described by their configuration $q=(q_1,q_2)$ ($q_i\in SE(3)$), whose shapes define a pairwise **signed distance** $d_{12}(q_1,q_2)$ (negative when penetrating, zero at contact, positive when separated). At contact, the two nearest points $p_1,p_2$ are the **witness points**, and the direction between them defines the **contact normal** $n\in\mathbb{R}^3$.
+
+A body with $C$ simultaneous contact points $p_i$, each exerting a wrench $(f_i,\tau_i)$, experiences a total wrench:
+
+$$f_\text{total}=\sum_{i=1}^Cf_i, \qquad \tau_\text{total}=\sum_{i=1}^C\big[\tau_i+f_i\times(p_i-c)\big]$$
+
+(where $c$ is the body's reference point, e.g. its center of mass), related to the resulting acceleration by DYN-01's Newton-Euler equation, $(f_\text{total},\tau_\text{total})=(m\dot v,\ I\dot w+w\times Iw)$. Since manipulation is exactly "using contact forces to accelerate an object," this pair of equations is, in a real sense, the whole of what manipulation is about.
+
+<ExerciseCard id="MANIP-01-ex1-wrench-computation" />
+
+## The friction cone
+
+A point contact with **no friction** can only push (a normal force, never a tangential one): $\tau_i=0$, $f_i=f_i^\perp$ (purely along $n$). With **Coulomb friction** (coefficient $\mu$), the contact can also resist some tangential sliding: decomposing $f_i=f_i^\perp+f_i^\parallel$ (normal and tangential components, $f_i^\perp=nn^\top f_i$), the contact **sticks** (doesn't slip) only while
+
+$$\|f_i^\parallel\| \leq \mu\|f_i^\perp\|$$
+
+The set of forces satisfying this, $\mathcal{F}_i=\{f_i:\|f_i^\parallel\|\leq\mu\|f_i^\perp\|\}$, is the **friction cone**: a cone around the normal direction with half-angle $\tan^{-1}\mu$.
+
+<SourceFigure
+  src="/figures/lecture-robotics/fig9-friction-cones.png"
+  alt="Left: a single friction cone with half-angle arctan(mu) around the contact normal. Right: several fingers' friction cones combining to span a wider range of achievable forces."
+  caption="A friction cone (left) restricts a single contact's force to a cone of half-angle tan⁻¹μ around the surface normal; multiple fingers' cones (right) combine to potentially span a much larger set of achievable total forces."
+  source="Lecture-Robotics.pdf"
+  page="159"
+/>
+
+<ExerciseCard id="MANIP-01-ex2-friction-cone-limit" />
+
+## Force closure
+
+A grasp $\{(p_i,n_i)\}_{i=1}^C$ achieves **force closure** iff, choosing $f_i\in\mathcal{F}_i$ appropriately for each contact, *any* desired total wrench $(f_\text{total},\tau_\text{total})\in\mathbb{R}^6$ can be generated or exactly counteracted:
+
+$$\text{Force closure} \iff \text{the positive linear span of the friction cones }\mathcal{F}_1,\ldots,\mathcal{F}_C\text{ covers all of }\mathbb{R}^6$$
+
+Intuitively: no matter what external wrench (gravity, a push, a knock) the grasped object experiences, a force-closed grasp can always generate an exactly-opposing wrench through its contacts, so the object can never be pried loose or rotated free, regardless of the disturbance direction.
+
+<ExerciseCard id="MANIP-01-ex3-two-finger-impossibility" />
+
+A classical existence result (**Mishra, Schwartz & Sharir, 1987**): for any bounded shape that isn't a surface of revolution, a force-closure grasp exists, and a simple greedy synthesis (place fingers everywhere, then delete any finger that's redundant, i.e. removable without shrinking the positive span) finds one using at most 6 fingers in the plane, at most 12 in 3D. In practice, force closure is often turned into a *continuous* quality metric instead of a yes/no test: bound each finger's force magnitude, so the friction cones define a bounded convex polytope in the 6D wrench space, and use that polytope's **inner radius** (distance from the origin to its nearest face) as a graded measure of grasp robustness, rather than a binary closure/no-closure answer.
+
+## Form closure, caging, and equilibrium
+
+Force closure is one of four related but distinct concepts:
+
+| Concept | Meaning |
+|---|---|
+| **Force closure** | Contacts can apply *any* wrench to the object (via friction-cone forces) |
+| **Form closure** | The object is at an *isolated point* in configuration space (geometrically trapped, no forces needed to hold it there); equivalent to *frictionless* force closure |
+| **Caging** | The object isn't fixed in place, but *cannot escape* the surrounding contacts (a weaker guarantee than form closure, but often easier to achieve and still practically useful) |
+| **Equilibrium** | The contact forces merely *balance* the object's weight and other external forces (weaker still: sufficient for the object to sit still under the *current* load, but with no guarantee against a different disturbance) |
+
+<ExerciseCard id="MANIP-01-ex4-closure-concepts-conceptual" />
+
+**A grounding thought experiment** (Oliver Brock's "mitten thought experiment"): a blindfolded subject wearing a thick mitten (eliminating fine tactile feedback and dexterous finger control) can still reliably grasp a wide variety of objects, provided someone else positions the object correctly relative to the hand first. This suggests that good *perception and positioning* plus a simple compliant closing motion can substitute for precise force-closure computation, an idea directly echoed in how modern learned-grasping systems work: rather than computing friction cones online, they train a model (e.g. GraspNet, DexNet) to directly predict good grasp poses from an image, using classical force-closure theory (or physics-simulated outcomes) only as the *label generator* for training data, not as something computed at grasp time.
+
+<SourceFigure
+  src="/figures/lecture-robotics/fig10-mitten-thought-experiment.png"
+  alt="A cartoon of a blindfolded person wearing a thick mitten successfully grasping a bottle handed to them by someone else"
+  caption="The mitten thought experiment: reliable grasping without fine tactile feedback, given the object is well-positioned first."
+  source="Lecture-Robotics.pdf"
+  page="161"
+/>
+
+## Summary
+
+- A **contact** is defined by a signed distance, witness points, and a contact normal; multiple contacts sum to a total wrench via DYN-01's Newton-Euler framing.
+- The **friction cone** restricts a contact's force to a cone of half-angle $\tan^{-1}\mu$ around the normal; frictionless contacts ($\mu=0$) degenerate to a single ray (pure push, no resistance to sliding).
+- **Force closure** holds iff the positive span of all contacts' friction cones covers the full 6D wrench space; a graded version uses the resulting wrench-polytope's inner radius as a continuous quality metric.
+- **Form closure**, **caging**, and **equilibrium** are progressively weaker relatives of force closure, useful in different practical settings.
+- Modern learned grasping largely uses classical force-closure theory (or physics simulation) as a *label generator* for training data, not as an online computation.
+
+## Retrieval questions
+
+1. Define a contact (signed distance, witness points, normal) and write the total-wrench summation formula.
+2. Derive the friction cone constraint, and explain what it degenerates to for a frictionless contact.
+3. State the force-closure condition, and explain why two frictionless point contacts can never achieve it in the plane.
+4. Distinguish force closure, form closure, caging, and equilibrium.
+
+## Mastery checklist
+
+- [ ] Can define a contact and write the total-wrench formula.
+- [ ] Can derive the friction cone constraint and its frictionless limit.
+- [ ] Can state the force-closure condition and explain the two-frictionless-contact impossibility result.
+- [ ] Can distinguish force closure, form closure, caging, and equilibrium.
+
+## Source note
+
+The formal contact definition (signed distance, witness points, contact normal), the friction cone, and the force-closure condition are adapted from `lecture-robotlearning`, §1.11 ("Grasping Background," pp. 81-83), which gives a more complete formal treatment than `lecture-robotics`'s own brief introduction to the same material. The Mishra-Schwartz-Sharir existence/synthesis result, the wrench-polytope inner-radius quality metric, the form closure/caging/equilibrium distinctions, the mitten thought experiment (credited in the source to Oliver Brock), and both embedded figures are adapted from `lecture-robotics`, §10 (pp. 157-162). The brief connection to modern learned grasping (GraspNet, DexNet, using classical theory as a label generator) is adapted from `lecture-robotlearning`'s own discussion in the same section, kept intentionally brief since a full treatment of learned grasping is out of this module's scope. All exercises are newly authored; the two-frictionless-contact impossibility argument was independently verified via a convex-cone reasoning check while authoring this module.
+
+---
+
+**Next**: [MANIP-02: Legged Locomotion Basics](/course/MANIP/MANIP-02)

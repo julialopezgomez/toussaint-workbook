@@ -1,0 +1,107 @@
+---
+id: SYM-03
+block: SYM
+title: "STRIPS, PDDL & Relational MDPs"
+tier: 1
+estimatedHours: 2.5
+prerequisites: ["SYM-02", "RL-01"]
+objectives:
+  - "Represent an MDP state as a conjunction of grounded FOL literals, connecting to RL-01's MDP formalism."
+  - "Define STRIPS operators (precondition, effect, frame assumption) and explain forward-search planning with them."
+  - "Explain why deterministic STRIPS rules can't be learned from limited data, and how probabilistic relational rules fix this."
+sources:
+  - { sourceId: "lecture-ai", pages: "p195-199 (§4.7)", role: "primary" }
+concepts:
+  - "Grounded literals, relational MDP state"
+  - "STRIPS operators, PDDL, frame assumption"
+  - "Forward-search planning"
+  - "Noisy relational planning rules"
+notation:
+  - { symbol: "$c(s,a)$", meaning: "(reused from RL-05) a symbolic state $s$ as a conjunction of ground literals" }
+  - { symbol: "$\\Omega_{r,i}$", meaning: "the $i$-th possible outcome of a probabilistic relational rule $r$" }
+cheatsheetLinks: []
+nextModules: ["SYM-04"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+RL-01's MDP state $s$ was left abstract. This module makes it concrete for exactly the kind of domain TAMP cares about (a scene of objects with properties and relations): $s$ becomes a conjunction of grounded FOL facts, and STRIPS/PDDL give a compact, general-purpose language for $P(s'\mid s,a)$ in that representation. The module's real payoff, though, is the honest problem this creates: deterministic STRIPS rules are elegant but essentially unlearnable from data, which is exactly the gap SYM-04's probabilistic relational models exist to close.
+
+## Prerequisites & readiness check
+
+You should have RL-01's MDP formalism and SYM-02's grounded-literal/unification machinery fresh.
+
+<ReadinessCheck
+  question="From RL-01, what three things define an MDP?"
+  answer="The initial state distribution P(s0), transition probabilities P(s'|s,a), and expected reward R(s,a)."
+/>
+
+## State as grounded literals
+
+Representing an MDP's state $s$ as an arbitrary FOL sentence would make $P(s'\mid s,a)$ intractably hard to define in general. The practical simplification: let $s$ be a conjunction of **grounded literals** (facts with no logic variables), e.g.
+
+$$\text{At}(C_1,\text{SFO})\wedge\text{At}(C_2,\text{JFK})\wedge\text{At}(P_1,\text{SFO})\wedge\text{Cargo}(C_1)\wedge\text{Plane}(P_1)\wedge\cdots$$
+
+exactly the kind of state a scene-graph or symbolic-state description of a robotics task would naturally produce (which objects exist, and what's currently true of/between them).
+
+## STRIPS and PDDL
+
+**STRIPS** (STanford Research Institute Problem Solver) rules describe a deterministic action's effect compactly: a **precondition** (which grounded facts must hold for the action to apply) and an **effect** (which facts change). The **frame assumption**: every fact *not* mentioned in the effect stays unchanged, avoiding the need to explicitly restate everything that doesn't change. **PDDL** (Planning Domain Definition Language) is the standardized syntax for STRIPS-style operators, used by the majority of state-of-the-art classical planners.
+
+<ExerciseCard id="SYM-03-ex1-strips-frame-assumption" />
+
+**Forward-search planning**: build a decision tree where each node is a situation (a grounded state); expanding a node requires computing every feasible action, i.e. every substitution making some action's precondition match currently-true facts, exactly SYM-02's unification/matching problem. With a cost function and heuristic, this is directly RL-06's $A^*$/tree-search machinery, now searching over symbolic states instead of raw MDP states.
+
+## The problem: STRIPS rules can't really be learned
+
+STRIPS rules are intuitive, concise, and plan well in known, deterministic domains, but extracting *deterministic* rules from *limited, noisy* data is fundamentally awkward: with as few as $n=20$ objects, a state space of roughly $2^{n^2}\approx10^{120}$ configurations is far too large to observe densely enough to confidently declare "this effect always happens, deterministically."
+
+<ExerciseCard id="SYM-03-ex2-state-space-numeric" />
+
+## The fix: probabilistic relational rules
+
+Pasula, Zettlemoyer & Kaelbling (ICAPS 2004) compress noisy observed data into **probabilistic relational rules** (Noisy Deictic Rules): instead of one deterministic effect, a rule specifies several possible **outcomes**, each with a probability:
+
+$$\text{grab}(X):\quad \text{on}(X,Y),\ \text{ball}(X),\ \text{cube}(Y),\ \text{table}(Z)\ \longrightarrow\ \begin{cases}0.7: & \text{inhand}(X),\ \neg\text{on}(X,Y)\\ 0.2: & \text{on}(X,Z),\ \neg\text{on}(X,Y)\\ 0.1: & \text{noise}\end{cases}$$
+
+<ExerciseCard id="SYM-03-ex3-ndr-probability-numeric" />
+
+If $(s,a)$ has a unique covering rule $r$ with outcomes $\Omega_{r,0},\ldots,\Omega_{r,m_r}$ and probabilities $p_{r,i}$, the induced transition probability is $P(s'\mid s,a)=P(s'\mid s,r)=\sum_ip_{r,i}P(s'\mid\Omega_{r,i},s)$, each $P(s'\mid\Omega_{r,i},s)$ itself deterministic given which outcome occurred. Rule *sets* are learned by maximizing (likelihood $-$ description length), directly OPT-04/ML-02's regularized-objective pattern, trading fit against rule-set complexity.
+
+## Why uncertainty enables learning
+
+<ExerciseCard id="SYM-03-ex4-uncertainty-learning-conceptual" />
+
+The genuinely important insight here, worth carrying forward past this specific rule-learning method: **introducing uncertainty into a representation isn't just about honestly modeling a stochastic world, it's what makes the representation learnable at all**. A purely deterministic rule either fits an observation exactly or is simply wrong, an all-or-nothing, brittle target for learning from limited data; a probabilistic rule can *compress and regularize* (exactly ML-02's regularization idea, now applied to symbolic rule structure instead of a continuous parameter vector $\beta$), absorbing noisy exceptions into a small "noise" outcome probability rather than needing an entirely separate rule for every observed exception, yielding models that generalize far more strongly.
+
+## Summary
+
+- An MDP's symbolic state is a conjunction of **grounded literals**; **STRIPS** operators define precondition/effect pairs under the **frame assumption**, standardized as **PDDL**; forward-search planning expands nodes via SYM-02's unification/matching problem.
+- Deterministic STRIPS rules can't really be learned: state spaces are astronomically large ($\sim10^{120}$ for just 20 objects), and deterministic rules are an all-or-nothing target for noisy, limited data.
+- **Probabilistic relational rules** (NDRs) fix this by specifying a small set of possible outcomes with probabilities, learned by maximizing likelihood minus description length (a regularized objective, exactly ML-02's pattern).
+- **Uncertainty enables learning**: a probabilistic representation can compress/regularize noisy exceptions into a rule set, where a purely deterministic representation cannot, generalizing far more strongly from limited data.
+
+## Retrieval questions
+
+1. How is an MDP's state represented in terms of FOL, and why is this simplification necessary?
+2. State STRIPS's precondition/effect/frame-assumption structure, and explain forward-search planning's connection to unification.
+3. Why can't deterministic STRIPS rules be learned from limited data?
+4. State the probabilistic relational rule transition formula, and explain the "uncertainty enables learning" insight.
+
+## Mastery checklist
+
+- [ ] Can represent a symbolic MDP state and apply the STRIPS frame assumption.
+- [ ] Can explain forward-search planning's connection to the unification/matching problem.
+- [ ] Can explain why deterministic rules are unlearnable from limited data.
+- [ ] Can state the probabilistic relational rule transition formula and the uncertainty-enables-learning insight.
+
+## Source note
+
+This module's exposition, the grounded-literal MDP-state representation, STRIPS/PDDL, the frame assumption, forward-search planning, the state-space-size argument, probabilistic relational rules (Pasula, Zettlemoyer & Kaelbling, ICAPS 2004), and the uncertainty-enables-learning insight are adapted from `lecture-ai`, §4.7 (pp. 195-199). All exercises are newly authored; the state-space-size claim was independently verified numerically while authoring this module.
+
+---
+
+**Next**: [SYM-04: Probabilistic Relational Models & Markov Logic Networks](/course/SYM/SYM-04)

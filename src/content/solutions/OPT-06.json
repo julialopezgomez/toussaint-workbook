@@ -1,0 +1,55 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "OPT-06-ex1-explore-exploit",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly names both effects: reward collection (exploitation) and information collection (exploration)." },
+          { "points": 2, "description": "Gives a correct, concrete scenario showing pure exploitation getting permanently stuck due to early noise." }
+        ],
+        "commonErrors": [
+          "Only naming the effects abstractly without a concrete scenario showing the failure mode."
+        ]
+      },
+      "fullSolution": "Choosing an arm both collects reward now (exploitation) and collects information about that arm for future decisions (exploration). Concrete failure: if arm A happens to give a lucky high reward on its first try while arm B (actually better on average) gives an unlucky low reward on its first try, pure exploitation (always play argmax hat-mu_a) would lock onto A forever, since hat-mu_A stays higher than hat-mu_B from that point on, and B is never tried again to discover its true (better) average. This permanent lock-in based on early noise is exactly the failure mode that motivates tracking a confidence interval (UCB1) rather than just the point estimate."
+    },
+    {
+      "exerciseId": "OPT-06-ex2-ucb-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 1.395, "tolerance": 0.01 },
+      "fullSolution": "ln(20) ~= 2.9957. sqrt(2*2.9957/5) = sqrt(1.1983) ~= 1.0947. Score = 0.3 + 1.0947 ~= 1.395."
+    },
+    {
+      "exerciseId": "OPT-06-ex3-gp-posterior-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains that the GP definition itself guarantees joint Gaussianity of any finite set of function values (plus noise)." },
+          { "points": 2, "description": "Correctly explains why sigma_0^2 adds only to the diagonal (independent noise across data points, doesn't affect cross-covariances)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "(a) By definition, a GP specifies that for ANY finite collection of input points, the corresponding function values are jointly Gaussian. So (f(x), f(x_1),..,f(x_n)) is jointly Gaussian by construction. Adding independent Gaussian observation noise to each f(x_i) to get y_i preserves joint Gaussianity (sums of jointly Gaussian and independent Gaussian variables remain jointly Gaussian).\n(b) y_i = f(x_i) + noise_i, with noise_i independent across i and independent of f. Cov(y_i,y_i) = Cov(f(x_i),f(x_i)) + Var(noise_i) = k(x_i,x_i) + sigma_0^2 (the noise variance only affects the diagonal, since noise_i is independent of noise_j for i!=j and independent of f, so it contributes nothing to the off-diagonal covariances k(x_i,x_j)). This is exactly why (K+sigma_0^2*I) replaces plain K: it's the covariance matrix of the observed (noisy) y's, not the noise-free f's."
+    },
+    {
+      "exerciseId": "OPT-06-ex4-gp-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 1.64, "tolerance": 0.03 },
+      "fullSolution": "(K+sigma_0^2 I)^-1 @ y = [[1.5483,-0.9298],[-0.9298,1.5483]] @ [1,2] = [1.5483-1.8596, -0.9298+3.0966] = [-0.3113, 2.1668]. mu(x*|D) = kappa(x*) . that = 0.8825*(-0.3113) + 0.8825*2.1668 = 0.8825*1.8555 ~= 1.638, rounds to 1.64. (Independently verified with NumPy while authoring this module.)"
+    },
+    {
+      "exerciseId": "OPT-06-ex5-acquisition-comparison",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains MPI's blind spot: ignores magnitude of improvement, only its probability." },
+          { "points": 1, "description": "Correctly explains EI's fix: weights probability by improvement size." },
+          { "points": 1, "description": "Correctly explains beta's role in UCB's explore/exploit balance." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "MPI only cares about the PROBABILITY of exceeding y*, treating a tiny improvement and a huge improvement identically as long as their probabilities of occurring are equal. So MPI can prefer a point offering a high probability of a negligible improvement over a point offering a lower probability of a massive improvement, generally the wrong choice for finding the true global optimum. EI fixes this by weighting the probability of improvement by the SIZE of the improvement (y*-y), so a low-probability-huge-improvement point can beat a high-probability-tiny-improvement point when it should. For UCB, increasing beta up-weights the uncertainty term sigma_D(x) relative to the mean mu_D(x), pushing the policy toward more exploration (favoring uncertain/unexplored regions); decreasing beta favors exploitation (regions already believed good), the same explore/exploit dial as UCB1's beta in the bandit setting."
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "ODE-03-ex1-euler-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly applies the Taylor expansion at t=t_k." },
+          { "points": 1, "description": "Correctly substitutes the ODE xdot=f(x,t) in place of the derivative." },
+          { "points": 2, "description": "Correctly relabels as the iterated update rule x_{k+1} = x_k + h*f(x_k,t_k)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "x(t_k+h) ~= x(t_k) + h*xdot(t_k) (Taylor expansion at t_k). Substituting xdot(t_k)=f(x(t_k),t_k): x(t_k+h) ~= x(t_k) + h*f(x(t_k),t_k). Writing x_k for the numerical approximation of x(t_k) and x_{k+1} for x(t_k+h): x_{k+1} = x_k + h*f(x_k,t_k), the forward Euler update, i.e. Euler is literally 'take one first-order Taylor step, then repeat.'"
+    },
+    {
+      "exerciseId": "ODE-03-ex2-euler-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.5625, "tolerance": 0.001 },
+      "fullSolution": "x1 = x0 + h*(-x0) = 1 + 0.25*(-1) = 0.75. x2 = x1 + h*(-x1) = 0.75 + 0.25*(-0.75) = 0.75 - 0.1875 = 0.5625. (True x(0.5)=e^-0.5~=0.6065; verified with NumPy while authoring this module.)"
+    },
+    {
+      "exerciseId": "ODE-03-ex3-rk4-derivation-check",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": -0.75, "tolerance": 0.001 },
+      "fullSolution": "k1 = f(x0,t0) = -x0 = -1. k2 = f(x0 + 0.25*k1, t0+0.25) = f(1+0.25*(-1), 0.25) = f(0.75, 0.25) = -0.75 (since f(x,t)=-x regardless of t)."
+    },
+    {
+      "exerciseId": "ODE-03-ex4-comparison-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 443.6, "tolerance": 5 },
+      "fullSolution": "0.10653/0.00024 ~= 443.9 (using the precise values from the worked examples, 0.10653065971263342/0.00024017362069994608 = 443.5568..., rounds to about 443.6). Verified with NumPy while authoring this module. RK4's error here is over 400x smaller than Euler's for the same step size, at only 4x the per-step cost."
+    }
+  ]
+}

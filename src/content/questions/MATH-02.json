@@ -2,6 +2,22 @@
   "moduleId": "MATH-02",
   "exercises": [
     {
+      "id": "MATH-02-ex0-directional-derivative",
+      "objective": "Compute a directional derivative using the gradient.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "Let $f(x,y) = x^2+y^2$. At the point $(1,1)$, compute the directional derivative $\\nabla f(x)^\\top d$ along the unit direction $d = (1/\\sqrt2,\\,1/\\sqrt2)$ (i.e. the direction pointing straight away from the origin through $(1,1)$). Enter a decimal to 3 decimal places.",
+      "hints": [
+        "First compute the gradient: $\\nabla f(x,y) = (2x, 2y)$. At $(1,1)$: $\\nabla f = (2,2)$.",
+        "Check $d$ really is a unit vector first: $\\|d\\| = \\sqrt{(1/\\sqrt2)^2+(1/\\sqrt2)^2} = \\sqrt{1/2+1/2}=1$. Good.",
+        "$\\nabla f(x)^\\top d = 2(1/\\sqrt2) + 2(1/\\sqrt2) = 4/\\sqrt2 \\approx 2.828$."
+      ],
+      "reviewCardIds": []
+    },
+    {
       "id": "MATH-02-ex1-why-check-numerically",
       "objective": "Explain the value of numerical gradient checking.",
       "provenance": "newly-authored",
@@ -16,6 +32,23 @@
         "This is exactly why gradient checking is standard practice before trusting a hand-derived (or hand-coded) gradient in an optimizer: an optimizer can silently converge to the wrong answer, or fail to converge at all, if even one gradient component is wrong, and that failure mode can be very hard to diagnose without a check like this."
       ],
       "reviewCardIds": ["RC-MATH-02-01"]
+    },
+    {
+      "id": "MATH-02-ex1b-gradcheck-implementation",
+      "objective": "Apply Algorithm 1's centered finite-difference formula by hand to verify an analytic gradient component.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-maths", "page": 19, "originalNumber": "§2.7.2 (i)" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["MATH-02-ex1-why-check-numerically"],
+      "answerType": "numeric",
+      "prompt": "Let $f(x_1,x_2) = x_1^2 x_2$. The analytic gradient component is $\\partial f/\\partial x_1 = 2x_1x_2$, which equals $4$ at $x=(1,2)$. Verify this using Algorithm 1's centered-difference formula with $\\epsilon=0.001$: compute $f(1.001,2)$ and $f(0.999,2)$ to at least 6 decimal places, then apply $[f(x+\\epsilon e_1)-f(x-\\epsilon e_1)]/(2\\epsilon)$. Enter your estimate to 3 decimal places.",
+      "hints": [
+        "$f(1.001,2) = (1.001)^2 \\times 2$. Compute $(1.001)^2 = 1.002001$ first, then multiply by 2.",
+        "$f(0.999,2) = (0.999)^2 \\times 2$. Compute $(0.999)^2 = 0.998001$ first, then multiply by 2.",
+        "$f(1.001,2)=2.004002$, $f(0.999,2)=1.996002$. Difference $=0.008000$. Divide by $2\\epsilon=0.002$: estimate $=4.000$, matching the analytic value well within Algorithm 1's tolerance of $10^{-4}$."
+      ],
+      "reviewCardIds": []
     },
     {
       "id": "MATH-02-ex2-quadratic-gradient-derivation",

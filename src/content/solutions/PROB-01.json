@@ -1,6 +1,18 @@
 {
   "solutions": [
     {
+      "exerciseId": "PROB-01-ex0-axioms-check",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly splits A union B into three disjoint pieces and applies additivity." },
+          { "points": 2, "description": "Correctly derives p(A\\B) and p(B\\A) in terms of p(A), p(B), p(A∩B), and substitutes back." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "A union B = (A\\B) union (B\\A) union (A intersect B), a disjoint union. By additivity: p(A union B) = p(A\\B) + p(B\\A) + p(A intersect B).\nA = (A\\B) union (A intersect B), disjoint, so p(A) = p(A\\B) + p(A intersect B), giving p(A\\B) = p(A) - p(A intersect B). Similarly p(B\\A) = p(B) - p(A intersect B).\nSubstitute: p(A union B) = [p(A)-p(A intersect B)] + [p(B)-p(A intersect B)] + p(A intersect B) = p(A)+p(B)-p(A intersect B)."
+    },
+    {
       "exerciseId": "PROB-01-ex1-joint-vs-conditional",
       "checkMode": "rubric",
       "rubric": {

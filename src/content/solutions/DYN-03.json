@@ -1,0 +1,41 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "DYN-03-ex1-naive-tracking-instability",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies that the control law has no dependence on the actual current error." },
+          { "points": 2, "description": "Correctly explains that errors compound with nothing pulling the system back, unlike a feedback term." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "The command u=M(q)*qddot_ref+F(q,qdot) uses only the reference's own acceleration, never comparing to the actual current state q_t, qdot_t. So if any error appears (numerical drift, an unmodeled disturbance, approximation error in M or F), the control law has no way to notice or correct it, the next command still just replays the reference acceleration regardless of accumulated drift. Errors from every previous step simply add up over time with nothing restoring the system toward the reference, exactly why a feedback (error-correcting) term like DYN-02's Kp/Kd is essential, not optional, even with perfect knowledge of the dynamics and reference trajectory."
+    },
+    {
+      "exerciseId": "DYN-03-ex2-tracking-error-dynamics",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly shows the nonlinearity cancels, qddot=qddot* exactly." },
+          { "points": 1, "description": "Correctly differentiates e(t)=q_ref-q twice." },
+          { "points": 2, "description": "Correctly substitutes and simplifies to arrive at eddot+Kd*edot+Kp*e=0." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "u=M*qddot*+F, forward dynamics qddot=M^-1(u-F)=M^-1(M*qddot*+F-F)=qddot* exactly (the M,F terms cancel completely).\nSo qddot = qddot_ref + Kp(q_ref-q) + Kd(qdot_ref-qdot).\ne=q_ref-q, edot=qdot_ref-qdot, eddot=qddot_ref-qddot.\nSubstitute: eddot = qddot_ref - [qddot_ref + Kp(q_ref-q) + Kd(qdot_ref-qdot)] = -Kp*e - Kd*edot.\nSo eddot + Kd*edot + Kp*e = 0, exactly DYN-02's PD closed-loop equation with m=1 (since inverse dynamics already absorbed the true M(q))."
+    },
+    {
+      "exerciseId": "DYN-03-ex3-operational-space-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly applies the product rule to phidot=J(q(t))qdot(t)." },
+          { "points": 2, "description": "Correctly identifies both resulting terms as Jdot*qdot and J*qddot." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "phidot(q(t)) = J(q(t))*qdot(t), a product of two time-dependent quantities. Product rule: phiddot = [d/dt J(q(t))]*qdot(t) + J(q(t))*[d/dt qdot(t)] = Jdot*qdot + J*qddot. So phiddot(q) = J*qddot + Jdot*qdot. (Verified against a finite-difference computation on a 2-link arm while authoring this module.)"
+    }
+  ]
+}

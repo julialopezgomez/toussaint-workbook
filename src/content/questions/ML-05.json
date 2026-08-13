@@ -1,0 +1,73 @@
+{
+  "moduleId": "ML-05",
+  "exercises": [
+    {
+      "id": "ML-05-ex1-kernel-rewrite-conceptual",
+      "objective": "Explain why the kernel-trick rewrite of ridge regression never needs beta or the individual features.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 50, "originalNumber": "5:2" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "In $f(x)=\\kappa(x)^\\top(K+\\lambda I)^{-1}y$, explain exactly which quantities are needed to compute a prediction, and confirm that $\\hat\\beta$ and each individual $\\phi(x_i)$ never appear.",
+      "hints": [
+        "$K$ is built entirely from scalar values $k(x_i,x_j)$; $\\kappa(x)$ is built entirely from scalar values $k(x,x_i)$; $y$ is just the training labels.",
+        "Nowhere in $\\kappa(x)^\\top(K+\\lambda I)^{-1}y$ does a feature vector $\\phi(x_i)$ or the parameter vector $\\hat\\beta$ appear on its own, only the scalar kernel evaluations $k(\\cdot,\\cdot)$ that combine pairs of them.",
+        "This means you can evaluate this formula for *any* valid kernel function $k$, including ones (like the RBF kernel) whose corresponding $\\phi$ is infinite-dimensional and could never be computed or stored explicitly, since $\\phi$ itself is never actually needed."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-05-ex2-polynomial-kernel-verification",
+      "objective": "Verify the polynomial kernel identity k(x,x')=phi(x)^T phi(x') for a concrete numeric example.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 52, "originalNumber": "5:6" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For $x=(1,2)$, $x'=(0,1)$, compute the degree-2 polynomial kernel $k(x,x')=(x^\\top x'+1)^2$ directly. Enter an integer.",
+      "hints": [
+        "$x^\\top x'=(1)(0)+(2)(1)=2$.",
+        "$k(x,x')=(2+1)^2=9$.",
+        "$k(x,x')=9$. (Independently verified to also match $\\phi(x)^\\top\\phi(x')$ with $\\phi(x)=(1,\\sqrt2x_1,\\sqrt2x_2,x_1^2,\\sqrt2x_1x_2,x_2^2)$ via NumPy while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-05-ex3-bayesian-posterior-derivation",
+      "objective": "Derive that ridge regression's neg-log-posterior is proportional to its cost function.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 86, "originalNumber": "8:6" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Given $P(\\beta)\\propto e^{-\\frac{\\lambda}{2\\sigma^2}\\|\\beta\\|^2}$ and $P(y_i\\mid x_i,\\beta)\\propto e^{-\\frac{1}{2\\sigma^2}(y_i-x_i^\\top\\beta)^2}$, use Bayes' rule to show $-\\log P(\\beta\\mid D)\\propto\\sum_i(y_i-x_i^\\top\\beta)^2+\\lambda\\|\\beta\\|^2$.",
+      "hints": [
+        "By Bayes' rule (PROB-01), $P(\\beta\\mid D)\\propto P(D\\mid\\beta)P(\\beta) = \\Big[\\prod_iP(y_i\\mid x_i,\\beta)\\Big]P(\\beta)$ (data points independent given $\\beta$).",
+        "Substituting the given Gaussian forms: $P(\\beta\\mid D)\\propto\\exp\\Big\\{-\\frac{1}{2\\sigma^2}\\sum_i(y_i-x_i^\\top\\beta)^2\\Big\\}\\exp\\Big\\{-\\frac{\\lambda}{2\\sigma^2}\\|\\beta\\|^2\\Big\\}$.",
+        "Taking $-\\log$ of a product of exponentials just sums the exponents (up to the overall $1/(2\\sigma^2)$ constant and an additive normalizing constant from $P(D)$, both irrelevant to the $\\operatorname*{argmin}$): $-\\log P(\\beta\\mid D)\\propto\\sum_i(y_i-x_i^\\top\\beta)^2+\\lambda\\|\\beta\\|^2=L_\\text{ridge}(\\beta)$, exactly the ridge cost function."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-05-ex4-unification-conceptual",
+      "objective": "Explain how GP classification arises from Bayesian logistic regression via the Laplace approximation.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 91, "originalNumber": "8:19-20" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["ML-05-ex3-bayesian-posterior-derivation"],
+      "answerType": "short-text",
+      "prompt": "Explain, step by step, why the path from binary logistic regression to GP classification needs the Laplace approximation, in a way that Bayesian ridge regression to GP regression did not.",
+      "hints": [
+        "Bayesian ridge regression's posterior $P(\\beta\\mid D)$ is exactly Gaussian (a Gaussian prior times a Gaussian likelihood is Gaussian, PROB-05), so it could be kernelized directly, no approximation needed.",
+        "Logistic regression's likelihood involves the sigmoid link, which is not conjugate to a Gaussian prior, so $P(\\beta\\mid D)\\propto\\exp\\{-L_\\text{logistic}(\\beta)\\}$ is not exactly Gaussian; PROB-06's Laplace approximation (a 2nd-order Taylor expansion of $L_\\text{logistic}$ around its minimizer $\\beta^*$) is used to approximate it as Gaussian, $\\mathcal{N}(\\beta\\mid\\beta^*,H^{-1})$, using MATH-02B's already-derived Hessian $H$.",
+        "Once that Gaussian approximation exists, the same kernelization used for ridge regression applies directly, giving an approximate Gaussian Process posterior over the discriminative function $f(x)$: GP classification, with class probabilities read off via the sigmoid, now carrying genuine (approximated) uncertainty rather than a bare point estimate."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

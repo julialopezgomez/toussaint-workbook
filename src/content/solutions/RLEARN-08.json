@@ -1,0 +1,46 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RLEARN-08-ex1-deepsets-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 3.742, "tolerance": 0.001 },
+      "fullSolution": "sum = 1^2+2^2+3^2 = 14; f(X) = sqrt(14) ≈ 3.742. Independently verified: math.sqrt(14) = 3.7416573867739413."
+    },
+    {
+      "exerciseId": "RLEARN-08-ex2-gnn-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly maps MLP_phi/sum/MLP_rho onto phi/sum/rho." },
+          { "points": 2, "description": "Correctly identifies the neighborhood N(n) as the aggregated set." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "MLP_phi plays phi's role, the sum plays the sum's role, MLP_rho plays rho's role: term-for-term identical to Deep Sets. The set aggregated over is node n's neighborhood N(n), a variable-size, unordered set of neighbor features h_m, exactly the setting Deep Sets targets. So GNN aggregation is a local, per-node, per-layer instance of Deep Sets; update then folds this summary into the node's own previous feature."
+    },
+    {
+      "exerciseId": "RLEARN-08-ex3-markov-game-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies S becoming joint state space, A becoming joint action space." },
+          { "points": 2, "description": "Correctly identifies R splitting into N per-agent rewards." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "S, P_0, gamma keep their form but S is now the joint state of all N robots. A becomes the joint action space A_1 x ... x A_N, with P depending on the whole joint action. R splits into N reward functions r_1,...,r_N, one per robot, which may coincide (cooperative), sum to zero (competitive), or neither (mixed) -- a distinction absent from the single-agent MDP."
+    },
+    {
+      "exerciseId": "RLEARN-08-ex4-nonstationarity-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly notes the true joint Markov game is stationary." },
+          { "points": 2, "description": "Correctly explains the apparent non-stationarity comes from unobserved changing co-agent policies." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "The true joint transition function over the full joint state/action is fixed and Markovian. But a single robot only sees its own state/action/reward, not other robots' policies; as those other, learning robots' policies change over time, the same observed state can lead to different outcomes at different times purely because of unobserved policy change, not because the world changed. From that narrow viewpoint this looks exactly like a non-Markovian environment, even though the full joint Markov game is perfectly stationary."
+    }
+  ]
+}

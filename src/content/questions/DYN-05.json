@@ -1,0 +1,73 @@
+{
+  "moduleId": "DYN-05",
+  "exercises": [
+    {
+      "id": "DYN-05-ex1-cubic-coefficients-derivation",
+      "objective": "Derive the cubic spline coefficients from four boundary conditions.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "splines", "page": 1, "originalNumber": "Eq. (1)-(4)" },
+      "difficulty": "core",
+      "estimatedMinutes": 18,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "For $x(t)=at^3+bt^2+ct+d$ with $x(0)=x_0,\\dot x(0)=v_0,x(\\tau)=x_1,\\dot x(\\tau)=v_1$: (a) show $d=x_0,c=v_0$ immediately from the $t=0$ conditions. (b) Using the remaining two conditions, set up two linear equations in $a,b$ and solve them.",
+      "hints": [
+        "(a) At $t=0$: $x(0)=d=x_0$ directly. $\\dot x(t)=3at^2+2bt+c$, so $\\dot x(0)=c=v_0$ directly.",
+        "(b) At $t=\\tau$: $x(\\tau)=a\\tau^3+b\\tau^2+c\\tau+d=x_1$ becomes $a\\tau^3+b\\tau^2 = x_1-x_0-v_0\\tau$ (using $c=v_0,d=x_0$). And $\\dot x(\\tau)=3a\\tau^2+2b\\tau+c=v_1$ becomes $3a\\tau^2+2b\\tau=v_1-v_0$.",
+        "Solve this $2\\times2$ linear system for $a,b$ (e.g. eliminate $b$ by combining $2\\times$(first equation) $-\\tau\\times$(second equation)/... or just solve directly): $a=\\dfrac{1}{\\tau^3}\\big[2(x_0-x_1)+\\tau(v_0+v_1)\\big]$, $b=\\dfrac{1}{\\tau^2}\\big[3(x_1-x_0)-\\tau(2v_0+v_1)\\big]$. (Independently verified with SymPy's linear solver while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-05-ex2-cost-numeric",
+      "objective": "Compute the minimum-acceleration cost of a cubic spline piece from its boundary conditions.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "splines", "page": 1, "originalNumber": "Eq. (5)" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["DYN-05-ex1-cubic-coefficients-derivation"],
+      "answerType": "numeric",
+      "prompt": "For $x_0=0,v_0=1,x_1=2,v_1=0,\\tau=2$, compute $\\int_0^\\tau\\ddot x(t)^2\\,dt = \\dfrac{12}{\\tau^3}D^2+\\dfrac1\\tau V^2$ with $D=(x_1-x_0)-\\tfrac\\tau2(v_0+v_1)$, $V=v_1-v_0$. Enter a decimal.",
+      "hints": [
+        "$D = (2-0) - \\tfrac22(1+0) = 2-1 = 1$. $V = 0-1=-1$.",
+        "$\\dfrac{12}{\\tau^3}D^2 = \\dfrac{12}{8}(1)^2 = 1.5$. $\\dfrac1\\tau V^2 = \\dfrac12(1)^2=0.5$.",
+        "Total cost $=1.5+0.5=2.0$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-05-ex3-timing-conceptual",
+      "objective": "Explain why timing-optimal control gives better macroscopic behavior than plain PD control.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "splines", "page": 1, "originalNumber": "\"Single-piece optimal timing control\" section" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain two specific ways in which plain PD control's approach behavior is worse than timing-optimal (spline-based) control, for generating macroscopic (large-scale, not just local-neighborhood) motion toward a target.",
+      "hints": [
+        "PD control converges only exponentially: mathematically, $x(t)-x^*\\to0$ but never reaches exactly zero in finite time, so there's no clean, predictable 'time-to-target' you could report or plan around.",
+        "PD's commanded acceleration is proportional to the current error, $K_p(x^*-x)$, so it's very large far from the target (potentially unrealistically/dangerously large) and very small close to the target (slow final approach), an intuitively backwards profile for many tasks.",
+        "Timing-optimal control instead solves for a specific $\\tau$ (giving a genuine, predictable time-to-target) and produces a smooth acceleration profile shaped by the actual cost tradeoff ($\\alpha\\tau$ vs. $\\int\\ddot x^2dt$) rather than a fixed proportional law, avoiding both problems: this is exactly why 'capped PD' heuristics were historically invented, timing-optimal control solves the underlying issue directly instead of patching the symptom."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-05-ex4-continuity-counting",
+      "objective": "Count free parameters for a Hermite spline under a given continuity class.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "splines", "page": 1, "originalNumber": "\"Hermite Cubic Splines\" section" },
+      "difficulty": "core",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For a $\\mathcal{C}^2$-continuous (continuous-acceleration) Hermite spline with $m=6$ pieces, using the free-parameter count $3+m$, how many free parameters remain? Enter an integer.",
+      "hints": [
+        "The formula for $\\mathcal{C}^2$ continuity is $3+m$.",
+        "Substitute $m=6$: $3+6$.",
+        "$9$ free parameters (e.g. the 5 interior piece durations/velocities plus a couple of boundary choices, depending on exact parameterization) remain to be optimized, regardless of how many degrees of freedom the path has per piece, continuity constraints eat up the rest."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

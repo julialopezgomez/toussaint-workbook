@@ -1,0 +1,54 @@
+{
+  "moduleId": "MATH-03B",
+  "exercises": [
+    {
+      "id": "MATH-03B-ex1-psd-check",
+      "objective": "Apply Sylvester's criterion to determine whether candidate metric tensors are valid.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Two candidate metric tensors are proposed: $G_1=\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}$ and $G_2=\\begin{pmatrix}1&2\\\\2&1\\end{pmatrix}$. Using Sylvester's criterion, determine which (if either) is a valid metric tensor (i.e. positive definite), and explain what goes wrong for the invalid one.",
+      "hints": [
+        "Sylvester's criterion for a 2x2 symmetric matrix $\\begin{pmatrix}a&b\\\\b&d\\end{pmatrix}$: PD iff $a>0$ and $ad-b^2>0$.",
+        "For $G_1$: $a=2>0$, $ad-b^2 = 2(2)-1^2=3>0$. Both conditions hold.",
+        "For $G_2$: $a=1>0$, but $ad-b^2=1(1)-2^2=1-4=-3<0$. So $G_1$ is valid (PD); $G_2$ is not (you can even find a specific $v$ with $v^\\top G_2v<0$, e.g. $v=(1,-1)$: $v^\\top G_2v = 1-2-2+1=-2<0$, confirming it directly)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-03B-ex2-metric-tensor-numeric",
+      "objective": "Compute a scalar product using a non-orthonormal metric tensor.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["MATH-03B-ex1-psd-check"],
+      "answerType": "numeric",
+      "prompt": "Let $G=\\begin{pmatrix}2&1\\\\1&3\\end{pmatrix}$ (first confirm to yourself this is a valid PD metric tensor via Sylvester's criterion), $v=\\begin{pmatrix}1\\\\2\\end{pmatrix}$, $w=\\begin{pmatrix}3\\\\-1\\end{pmatrix}$. Compute $\\langle v,w\\rangle = v^\\top Gw$. Enter a decimal.",
+      "hints": [
+        "First check $G$ is PD: $a=2>0$, $ad-b^2=6-1=5>0$. Valid.",
+        "Compute $Gw$ first: $\\begin{pmatrix}2&1\\\\1&3\\end{pmatrix}\\begin{pmatrix}3\\\\-1\\end{pmatrix} = \\begin{pmatrix}2(3)+1(-1)\\\\1(3)+3(-1)\\end{pmatrix} = \\begin{pmatrix}5\\\\0\\end{pmatrix}$.",
+        "$v^\\top(Gw) = (1)(5)+(2)(0) = 5$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-03B-ex3-projection-derivation",
+      "objective": "Derive the orthogonal projection matrix onto the span of orthonormal vectors, and prove idempotency.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-maths", "page": 30, "originalNumber": "§3.3.1" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": ["MATH-03B-ex2-metric-tensor-numeric"],
+      "answerType": "derivation",
+      "prompt": "Let $\\{e_1,..,e_k\\}$ be orthonormal (w.r.t. the standard dot product), and let $U=[e_1\\;\\cdots\\;e_k]\\in\\mathbb{R}^{n\\times k}$. Starting from the projection formula $P(x)=\\sum_{i=1}^ke_i\\langle e_i,x\\rangle$, (a) show that $P(x) = UU^\\top x$, i.e. that the projection is the linear map with matrix $P=UU^\\top$. (b) Prove that $P$ is idempotent, $P^2=P$ (a defining property of any projection: projecting twice does nothing more than projecting once).",
+      "hints": [
+        "For (a): $\\langle e_i,x\\rangle = e_i^\\top x$ for the standard dot product, a scalar. So $e_i\\langle e_i,x\\rangle = e_i(e_i^\\top x) = (e_ie_i^\\top)x$. Summing over $i$: $P(x)=\\sum_ie_ie_i^\\top x = \\left(\\sum_ie_ie_i^\\top\\right)x$. Recognize $\\sum_ie_ie_i^\\top = UU^\\top$ (this is exactly what the matrix product $UU^\\top$ computes when $U$'s columns are the $e_i$).",
+        "For (b): $P^2 = (UU^\\top)(UU^\\top) = U(U^\\top U)U^\\top$. What is $U^\\top U$, given the $e_i$ are orthonormal?",
+        "$U^\\top U = I_k$ (the $(i,j)$ entry of $U^\\top U$ is $e_i^\\top e_j=\\langle e_i,e_j\\rangle=\\delta_{ij}$, exactly the identity matrix). So $P^2 = U I_kU^\\top = UU^\\top = P$. Idempotency confirmed: geometrically, once you've projected onto the span, projecting again changes nothing, you're already there."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

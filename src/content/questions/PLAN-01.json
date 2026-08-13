@@ -1,0 +1,73 @@
+{
+  "moduleId": "PLAN-01",
+  "exercises": [
+    {
+      "id": "PLAN-01-ex1-dof-counting",
+      "objective": "Compute the true degrees of freedom of a constrained system from its generalized coordinates and holonomic constraints.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "robotkin", "page": 1, "originalNumber": "Fundamental Kinematics Concepts" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "A planar closed kinematic chain (e.g. a four-bar linkage) is described with $n=4$ generalized joint-angle coordinates, but closing the loop imposes $d=2$ independent holonomic constraints (the chain must close up in both $x$ and $y$). What is the true number of degrees of freedom $p$? Enter an integer.",
+      "hints": [
+        "The formula is $p=n-d$: true degrees of freedom equal generalized coordinates minus independent holonomic constraints.",
+        "Substitute $n=4,d=2$.",
+        "$p=4-2=2$: only 2 of the 4 joint angles can be chosen independently; the other 2 are then determined by the loop-closure constraint."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "PLAN-01-ex2-potential-field-gradient",
+      "objective": "Derive that potential-field gradient descent on a quadratic attractive potential reproduces DYN-02's P control law exactly.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 59, "originalNumber": "§4.1:15 (\"Total Potential Function\")" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "For the quadratic attractive potential $U_\\text{att}(q)=\\tfrac12K_p\\|q-q^*\\|^2$, compute $F_\\text{att}(q)=-\\nabla U_\\text{att}(q)$ and compare it to DYN-02's P control law $u=K_p(q^*-q)$.",
+      "hints": [
+        "$\\nabla U_\\text{att}(q)=\\nabla\\big[\\tfrac12K_p\\|q-q^*\\|^2\\big]=K_p(q-q^*)$ (MATH-02's quadratic-form gradient rule, or direct componentwise differentiation).",
+        "$F_\\text{att}(q)=-\\nabla U_\\text{att}(q)=-K_p(q-q^*)=K_p(q^*-q)$.",
+        "This is exactly DYN-02's proportional control law $u=K_p(q^*-q)$: gradient descent on the quadratic attractive potential *is* P control, term for term."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "PLAN-01-ex3-grid-search-scaling",
+      "objective": "Compute the number of grid cells needed for wavefront/Dijkstra search over a configuration space, illustrating the curse of dimensionality.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 68, "originalNumber": "§4.1:26 (\"Dijkstra Algorithm\")" },
+      "difficulty": "core",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For a 6-DOF robot arm discretized at $k=20$ cells per joint, how many grid cells does a full grid discretization of the configuration space require? Enter an integer.",
+      "hints": [
+        "A grid over an $n$-dimensional space with $k$ cells per dimension has $k^n$ total cells.",
+        "Here $n=6$ (degrees of freedom), $k=20$ (cells per joint).",
+        "$20^6=64{,}000{,}000$: 64 million cells, for a fairly coarse discretization of a modest 6-DOF arm. This is the curse of dimensionality in concrete numbers."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "PLAN-01-ex4-space-definitions-conceptual",
+      "objective": "Distinguish configuration space, feasible configuration space, and minimal coordinates using a concrete example.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "robotkin", "page": 1, "originalNumber": "Fundamental Kinematics Concepts" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 10,
+      "prerequisites": ["PLAN-01-ex1-dof-counting"],
+      "answerType": "short-text",
+      "prompt": "For a 2-link planar arm with joint limits (each joint restricted to $[-\\pi/2,\\pi/2]$) operating near an obstacle, describe in your own words what $\\mathcal{X}$, $\\mathcal{X}_\\text{fea}$, and a choice of minimal coordinates would each look like.",
+      "hints": [
+        "$\\mathcal{X}$: the generic embedding space for the two joint angles, e.g. $\\mathcal{X}=\\mathbb{R}^2$ (or $[0,2\\pi)^2$ if wrapped), with no restriction yet applied.",
+        "$\\mathcal{X}_\\text{fea}$: the subset of $\\mathcal{X}$ actually reachable, i.e. $[-\\pi/2,\\pi/2]^2$ intersected with whatever sub-region avoids the obstacle (a 2D region with a hole or notch cut out where the arm would collide).",
+        "Minimal coordinates here: the two joint angles themselves already are minimal (no holonomic constraint links them, this is an open kinematic chain, not a closed loop), so $\\mathcal{X}=\\mathbb{R}^2$ with $n=p=2$ requires no reduction; the joint-limit and collision restrictions only shrink $\\mathcal{X}_\\text{fea}$ within $\\mathcal{X}$, they don't change the coordinate count itself."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

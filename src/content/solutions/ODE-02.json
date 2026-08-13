@@ -1,0 +1,49 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "ODE-02-ex1-eigenvector-ansatz",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly differentiates the left side, getting lambda*e^{lambda t}*v." },
+          { "points": 1, "description": "Correctly computes the right side, getting e^{lambda t}*(Av)." },
+          { "points": 2, "description": "Correctly divides out e^{lambda t} to arrive at Av=lambda*v." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "xdot(t) = d/dt[e^{lambda t} v] = lambda*e^{lambda t}*v (v constant, differentiate the scalar exponential).\nA*x(t) = A(e^{lambda t} v) = e^{lambda t}(Av) (linearity of matrix-vector multiplication, scalar factors out).\nSetting these equal (required for the ansatz to solve xdot=Ax): lambda*e^{lambda t}*v = e^{lambda t}*(Av). Since e^{lambda t} is never zero, divide both sides by it: lambda*v = Av, i.e. Av=lambda*v, the eigenvector/eigenvalue equation."
+    },
+    {
+      "exerciseId": "ODE-02-ex2-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.786, "tolerance": 0.005 },
+      "fullSolution": "x1(1) = 2*e^-1 + e^-3 = 2*0.367879 + 0.049787 = 0.735759+0.049787 = 0.785546, rounds to 0.786. (Verified with NumPy while authoring this module.)"
+    },
+    {
+      "exerciseId": "ODE-02-ex3-complex-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly identifies asymptotic stability from the negative real part." },
+          { "points": 1, "description": "Correctly computes the oscillation period from the imaginary part." },
+          { "points": 1, "description": "Correctly describes the trajectory as a decaying/stable spiral." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Real part -0.5 < 0: asymptotically stable, solutions decay with envelope e^{-0.5t}. Imaginary part 2: oscillation at angular frequency 2, period T=2*pi/2=pi. The trajectory spirals inward toward the origin, completing a full rotation roughly every pi time units while shrinking by a factor e^{-0.5} per unit time: a stable spiral."
+    },
+    {
+      "exerciseId": "ODE-02-ex4-stability-classify",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly reads off the eigenvalues 1 and -2 from the diagonal matrix." },
+          { "points": 1, "description": "Correctly concludes the system is unstable overall (any positive eigenvalue)." },
+          { "points": 1, "description": "Correctly names this a saddle, describing the mixed stable/unstable directions." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Eigenvalues (diagonal entries): lambda1=1, lambda2=-2. Since lambda1>0, the system is unstable overall: generic initial conditions grow without bound along the lambda1=1 eigendirection (the x1-axis). Real eigenvalues of opposite sign: this is a saddle, attracting along the x2-axis (lambda2=-2) but repelling along the x1-axis (lambda1=1)."
+    }
+  ]
+}

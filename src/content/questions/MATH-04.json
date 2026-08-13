@@ -51,19 +51,118 @@
       "reviewCardIds": []
     },
     {
-      "id": "MATH-04-ex4-rank1-challenge",
+      "id": "MATH-04-ex4-pseudoinverse",
+      "objective": "Derive and apply the pseudo-inverse for a full-column-rank matrix.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-maths", "page": 36, "originalNumber": "§3.6.3, eq. 110-111" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["MATH-04-ex3-numeric"],
+      "answerType": "derivation",
+      "prompt": "Starting from $A^\\dagger = VS^{-1}U^\\top$ (the general pseudo-inverse via the SVD $A=USV^\\top$), and assuming $A$ has full column rank ($k=n$, so $V^\\top V=VV^\\top=I_n$), show that $A^\\dagger = (A^\\top A)^{-1}A^\\top$, and that $A^\\dagger A = I_n$.",
+      "hints": [
+        "First express $(A^\\top A)^{-1}$ using the SVD: $A^\\top A = VS^2V^\\top$ (from ex2), and for full column rank $S$ is invertible, so $(A^\\top A)^{-1} = VS^{-2}V^\\top$ (inverse of a similarity-transformed diagonal matrix).",
+        "Now compute $(A^\\top A)^{-1}A^\\top = VS^{-2}V^\\top \\cdot VSU^\\top$. Use $V^\\top V=I_n$ to simplify the middle.",
+        "$VS^{-2}(V^\\top V)SU^\\top = VS^{-2}SU^\\top = VS^{-1}U^\\top = A^\\dagger$, confirming the two formulas agree. For $A^\\dagger A$: $A^\\dagger A = VS^{-1}U^\\top \\cdot USV^\\top = VS^{-1}(U^\\top U)SV^\\top = VS^{-1}SV^\\top = VV^\\top = I_n$ (using full column rank, $VV^\\top=I_n$)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-04-ex5-rank1-challenge",
       "objective": "Explain why every matrix can be built from rank-1 pieces.",
       "provenance": "source-adapted",
       "sourceRef": { "sourceId": "svd", "page": 2, "originalNumber": "closing discussion" },
       "difficulty": "challenge",
       "estimatedMinutes": 10,
-      "prerequisites": ["MATH-04-ex3-numeric"],
+      "prerequisites": ["MATH-04-ex4-pseudoinverse"],
       "answerType": "proof",
       "prompt": "The SVD writes $A = \\sum_{i=1}^k \\sigma_i u_i v_i^\\top$, a sum of $k$ rank-1 matrices $u_i v_i^\\top$ (outer products). Explain why each term $u_i v_i^\\top$ has rank exactly 1, and why this decomposition justifies calling rank-1 matrices the \"minimalistic building blocks\" of any matrix.",
       "hints": [
         "A rank-1 matrix $uv^\\top$ (outer product of two vectors) has every column equal to $u$ scaled by a different number: column $j$ is $v_j u$. All columns are scalar multiples of the single vector $u$, hence rank 1 (a 1-dimensional column space).",
         "The SVD sum $A=\\sum_i \\sigma_i u_i v_i^\\top$ expresses $A$'s action as $k$ independent input-direction-to-output-direction mappings, added together: each term picks up the component of $x$ along $v_i$, scales it, and places it along $u_i$.",
         "Since any matrix of rank $k$ can be written this way (as a sum of exactly $k$ rank-1 pieces via its SVD), and no fewer rank-1 pieces would suffice (rank is additive-minimal in this sense), rank-1 matrices are literally the atomic units any linear map decomposes into: nothing simpler can capture a genuine input-to-output direction mapping."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-04-ex6-pca-variance",
+      "objective": "Prove that the top eigenvector of a covariance matrix is the direction of maximal data variance.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 20,
+      "prerequisites": ["MATH-04-ex5-rank1-challenge"],
+      "answerType": "proof",
+      "prompt": "Let $C=\\sum_i\\lambda_iv_iv_i^\\top$ be the eigendecomposition of a zero-mean dataset's covariance matrix, with $\\lambda_1\\ge\\lambda_2\\ge\\cdots\\ge0$. The variance of the data projected onto a unit direction $d$ is $\\text{Var}(d) = d^\\top Cd$. Prove that $\\text{Var}(d)$ is maximized (over all unit vectors $d$) exactly at $d=v_1$ (the top eigenvector), with maximum value $\\lambda_1$.",
+      "hints": [
+        "Substitute the eigendecomposition: $d^\\top Cd = d^\\top\\left(\\sum_i\\lambda_iv_iv_i^\\top\\right)d = \\sum_i\\lambda_i(v_i^\\top d)^2$. Let $c_i=v_i^\\top d$ (the coordinates of $d$ in the eigenbasis); since $d$ has unit length and $\\{v_i\\}$ is orthonormal, $\\sum_ic_i^2=1$.",
+        "So the problem becomes: maximize $\\sum_i\\lambda_ic_i^2$ subject to $\\sum_ic_i^2=1$, with $\\lambda_1$ the largest eigenvalue. This is a weighted average of the $\\lambda_i$ with weights $c_i^2$ summing to 1.",
+        "A weighted average of numbers is maximized by putting all the weight on the largest number: $\\sum_i\\lambda_ic_i^2 \\le \\lambda_1\\sum_ic_i^2 = \\lambda_1$, with equality iff $c_1=\\pm1$ and all other $c_i=0$, i.e. $d=\\pm v_1$. So the maximum variance direction is exactly the top eigenvector, with variance $\\lambda_1$, confirming PCA's principal component really is the direction of maximal variance."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-04-ex7-psd-eigenvalue-proof",
+      "objective": "Prove the equivalence between positive semi-definiteness and non-negative eigenvalues.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": ["MATH-04-ex6-pca-variance"],
+      "answerType": "proof",
+      "prompt": "Prove both directions of the claim made in [MATH-03B](/course/MATH/MATH-03B): a symmetric matrix $M$ is PSD ($v^\\top Mv\\ge0\\;\\forall v$) if and only if all its eigenvalues are $\\ge0$.",
+      "hints": [
+        "($\\Leftarrow$, eigenvalues non-negative implies PSD): use the eigendecomposition $M=\\sum_i\\lambda_ih_ih_i^\\top$. For any $v$, $v^\\top Mv=\\sum_i\\lambda_i(h_i^\\top v)^2$ (same computation as the PCA-variance exercise). If every $\\lambda_i\\ge0$, every term in this sum is $\\ge0$ (a non-negative number times a square), so the whole sum is $\\ge0$.",
+        "($\\Rightarrow$, PSD implies eigenvalues non-negative): suppose $M$ is PSD, and let $h_j$ be any eigenvector with eigenvalue $\\lambda_j$. Apply the PSD condition specifically to $v=h_j$.",
+        "$v^\\top Mv = h_j^\\top Mh_j = h_j^\\top(\\lambda_jh_j) = \\lambda_j(h_j^\\top h_j) = \\lambda_j\\|h_j\\|^2$. Since PSD requires this to be $\\ge0$, and $\\|h_j\\|^2>0$ (eigenvectors are nonzero by definition), we must have $\\lambda_j\\ge0$. Since $h_j$ was an arbitrary eigenvector, every eigenvalue is $\\ge0$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-04-ex8-eigenvector-facts",
+      "objective": "Prove three basic structural facts about eigenvalues and eigenvectors.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 20,
+      "prerequisites": ["MATH-04-ex7-psd-eigenvalue-proof"],
+      "answerType": "proof",
+      "prompt": "Let $Av=\\lambda v$ ($v\\neq0$). Prove: (a) $A^kv=\\lambda^kv$ for any positive integer $k$. (b) For any scalar $\\alpha$, $(A+\\alpha I)v = (\\lambda+\\alpha)v$, i.e. shifting a matrix by $\\alpha I$ shifts every eigenvalue by $\\alpha$ while leaving eigenvectors unchanged. (c) If $A$ is symmetric and $Av=\\lambda v$, $Aw=\\mu w$ with $\\lambda\\neq\\mu$, then $v^\\top w=0$ (eigenvectors for distinct eigenvalues of a symmetric matrix are orthogonal).",
+      "hints": [
+        "(a): Induction. Base case $k=1$ is given. Assume $A^{k-1}v=\\lambda^{k-1}v$; then $A^kv=A(A^{k-1}v)=A(\\lambda^{k-1}v)=\\lambda^{k-1}(Av)=\\lambda^{k-1}(\\lambda v)=\\lambda^kv$.",
+        "(b): Direct computation: $(A+\\alpha I)v = Av+\\alpha Iv = \\lambda v+\\alpha v = (\\lambda+\\alpha)v$.",
+        "(c): Compute $v^\\top Aw$ two different ways. First, $v^\\top Aw = v^\\top(\\mu w) = \\mu(v^\\top w)$. Second, using $A^\\top=A$: $v^\\top Aw = (A^\\top v)^\\top w = (Av)^\\top w = (\\lambda v)^\\top w = \\lambda(v^\\top w)$. So $\\mu(v^\\top w) = \\lambda(v^\\top w)$, i.e. $(\\mu-\\lambda)(v^\\top w)=0$. Since $\\lambda\\neq\\mu$, we must have $v^\\top w=0$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-04-ex9-power-method-convergence",
+      "objective": "Explain why the power method converges to the largest-magnitude eigenvector.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-maths", "page": 37, "originalNumber": "§3.7.1" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 20,
+      "prerequisites": ["MATH-04-ex8-eigenvector-facts"],
+      "answerType": "proof",
+      "prompt": "Let $A$ be diagonalizable with eigenvectors $h_1,..,h_n$ (a basis) and eigenvalues $|\\lambda_1|>|\\lambda_2|\\ge\\cdots\\ge|\\lambda_n|$ (a unique largest magnitude). Write an initial $x_0=\\sum_ic_ih_i$ (generic, so $c_1\\neq0$). Using part (a) of the previous exercise, show that (up to normalization) $A^kx_0$ becomes dominated by the $h_1$ term as $k\\to\\infty$, explaining why the power method converges to $h_1$.",
+      "hints": [
+        "Apply $A^k$ to $x_0=\\sum_ic_ih_i$ term by term, using $A^kh_i=\\lambda_i^kh_i$ from part (a): $A^kx_0 = \\sum_ic_i\\lambda_i^kh_i = \\lambda_1^k\\left(c_1h_1+\\sum_{i\\ge2}c_i\\left(\\frac{\\lambda_i}{\\lambda_1}\\right)^kh_i\\right)$.",
+        "Since $|\\lambda_1|$ is strictly the largest, $|\\lambda_i/\\lambda_1|<1$ for all $i\\ge2$, so $(\\lambda_i/\\lambda_1)^k\\to0$ as $k\\to\\infty$.",
+        "So $A^kx_0 \\approx \\lambda_1^kc_1h_1$ for large $k$: every term except the $h_1$ term vanishes in relative size. After normalizing (dividing by $\\|A^kx_0\\|$ at each step, as the algorithm does), the direction converges to $h_1$ (up to sign, since $\\lambda_1^k$ can be negative), and $x^\\top Ax\\to\\lambda_1$. This is exactly why the method needs $x_0$ to have a nonzero component along $h_1$ (generic random initialization guarantees this with probability 1) and why it fails to distinguish two eigenvalues of equal magnitude (the ratio $(\\lambda_i/\\lambda_1)^k$ wouldn't vanish for a tied $|\\lambda_i|=|\\lambda_1|$)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-04-ex10-smallest-eigenvalue",
+      "objective": "Explain why the shifted power method variant finds the smallest eigenvalue.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-maths", "page": 38, "originalNumber": "§3.7.2" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["MATH-04-ex9-power-method-convergence"],
+      "answerType": "derivation",
+      "prompt": "Assume $A$ is symmetric with all eigenvalues positive, and let $\\lambda_{\\max}$ be its largest eigenvalue (found by the ordinary power method). Using part (b) of the eigenvector-facts exercise, show that $\\lambda_{\\max}I - A$ has the same eigenvectors as $A$, but with the ordering of eigenvalues reversed, and explain why running the ordinary power method on $\\lambda_{\\max}I-A$ therefore finds $A$'s *smallest* eigenvector.",
+      "hints": [
+        "From part (b) (with $\\alpha=-1$ scaling and a sign flip, or directly): if $Av_i=\\lambda_iv_i$, then $(\\lambda_{\\max}I-A)v_i = \\lambda_{\\max}v_i - \\lambda_iv_i = (\\lambda_{\\max}-\\lambda_i)v_i$. So $\\lambda_{\\max}I-A$ has the *same* eigenvectors $v_i$, with eigenvalues $\\lambda_{\\max}-\\lambda_i$.",
+        "Since all $\\lambda_i\\le\\lambda_{\\max}$, every eigenvalue of $\\lambda_{\\max}I-A$ is $\\ge0$, and the eigenvalue that was *smallest* for $A$ (call it $\\lambda_{\\min}$) becomes *largest* for $\\lambda_{\\max}I-A$, since $\\lambda_{\\max}-\\lambda_{\\min}$ is the biggest possible gap.",
+        "Therefore running the ordinary power method on $\\lambda_{\\max}I-A$ converges to the eigenvector of its largest eigenvalue, which is exactly $A$'s smallest eigenvector, and $A$'s smallest eigenvalue is recovered as $\\lambda_{\\max}$ minus that power method's converged eigenvalue, i.e. $\\lambda_{\\min}=\\lambda_{\\max}-\\|y\\|$ in the algorithm's notation."
       ],
       "reviewCardIds": []
     }

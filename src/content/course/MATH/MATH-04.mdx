@@ -1,51 +1,61 @@
 ---
 id: MATH-04
 block: MATH
-title: "SVD & Eigendecomposition"
+title: "SVD, Eigendecomposition & the Power Method"
 tier: 1
-estimatedHours: 3
-prerequisites: ["MATH-03"]
+estimatedHours: 7
+prerequisites: ["MATH-03B"]
 objectives:
   - "Explain what the SVD $A=USV^\\top$ gives you that the raw matrix doesn't."
-  - "Derive the connection between the SVD and the eigendecomposition of $A^\\top A$."
-  - "Compute the singular values of a small matrix by hand."
-  - "Explain why every matrix decomposes into rank-1 pieces."
+  - "Derive the connection between the SVD and the eigendecomposition of $A^\\top A$ and of symmetric matrices."
+  - "Compute the singular values and pseudo-inverse of a small matrix by hand."
+  - "State the eigendecomposition definition, the characteristic polynomial, and when a matrix fails to be diagonalizable."
+  - "Prove basic eigenvalue facts: PSD-eigenvalue equivalence, eigenvector orthogonality, and shift/power invariances."
+  - "Derive and apply the power method (including the smallest-eigenvalue variant), and connect the SVD of a covariance matrix to PCA."
 sources:
   - { sourceId: "svd", pages: "p1-2 (HTML-sourced)", role: "primary" }
-  - { sourceId: "lecture-maths", pages: "p31-39 (§3.4-3.8)", role: "supplementary" }
+  - { sourceId: "lecture-maths", pages: "p31-38 (§3.4-3.7)", role: "primary" }
 concepts:
   - "Singular Value Decomposition (SVD)"
-  - "Eigendecomposition"
-  - "Rank-1 matrices / outer products"
-  - "Orthonormal basis"
+  - "Rank, determinant, row/column space"
+  - "Pseudo-inverse"
+  - "Covariance matrix and PCA"
+  - "Eigendecomposition, characteristic polynomial, diagonalizability"
+  - "Power method (largest and smallest eigenvalue)"
 notation:
   - { symbol: "$A=USV^\\top$", meaning: "singular value decomposition: $U,V$ orthonormal, $S$ diagonal with singular values $\\sigma_i \\ge 0$" }
   - { symbol: "$\\sigma_i$", meaning: "the $i$-th singular value" }
-  - { symbol: "$u_i, v_i$", meaning: "the $i$-th columns of $U$, $V$: output and input singular directions" }
-  - { symbol: "$uv^\\top$", meaning: "outer product of two vectors: a rank-1 matrix" }
+  - { symbol: "$A^\\dagger$", meaning: "the Moore-Penrose pseudo-inverse of $A$" }
+  - { symbol: "$A=Q\\Lambda Q^{-1}$", meaning: "eigendecomposition: $\\Lambda$ diagonal eigenvalues, columns of $Q$ the eigenvectors" }
+  - { symbol: "$p_A(\\lambda)=\\det(\\lambda I-A)$", meaning: "characteristic polynomial; its roots are $A$'s eigenvalues" }
 cheatsheetLinks: []
 nextModules: ["MATH-05"]
 ---
 
 import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
 import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+import SourceFigure from '../../../components/SourceFigure.astro';
 
 ## Why this matters
 
-The SVD underlies PCA (dimensionality reduction), least-squares solutions, matrix conditioning/numerical stability, and low-rank approximation, all of which reappear throughout this course. It's also one of the cleanest illustrations of MATH-03's theme: a matrix looks arbitrary in the standard basis, but in the *right* basis (the singular directions), its action becomes as simple as possible: independent scalings along orthogonal axes.
+The SVD and eigendecomposition underlie PCA (dimensionality reduction), least-squares/pseudo-inverse solutions, matrix conditioning, low-rank approximation, and (via the power method) practical large-scale eigenvalue computation, all of which reappear throughout this course and your thesis work (covariance estimation, reachability analysis, spectral properties of dynamics linearizations). It's also one of the cleanest illustrations of MATH-03's theme: a matrix looks arbitrary in the standard basis, but in the *right* basis (the singular/eigen- directions), its action becomes as simple as possible: independent scalings along orthogonal axes.
 
 ## Prerequisites & readiness check
 
-You should be comfortable with matrices as linear maps and orthonormal bases from MATH-03.
+You should be comfortable with orthonormal bases, the metric tensor, and positive (semi-)definite matrices from [MATH-03B](/course/MATH/MATH-03B).
 
 <ReadinessCheck
-  question="What does it mean for a set of vectors $\{v_1,\dots,v_k\}$ to be orthonormal?"
-  answer="Each vector has unit length ($v_i^\top v_i = 1$) and every pair is orthogonal ($v_i^\top v_j = 0$ for $i\neq j$)."
+  question="What does it mean for a set of vectors $\{v_1,\dots,v_k\}$ to be orthonormal? And what does $M\succeq0$ mean?"
+  answer="Orthonormal: each has unit length ($v_i^\top v_i = 1$) and every pair is orthogonal ($v_i^\top v_j = 0$ for $i\neq j$). $M\succeq0$ (PSD) means $v^\top Mv\ge0$ for every vector $v$."
 />
 
 ## Matrices as row space / column space
 
 A matrix $A \in \mathbb{R}^{m\times n}$ can be viewed as a collection of rows (each row dotted with $x$ picks up a component of $x$ within the row-spanned input space), or as a collection of columns (applying $A$ to $x$ linearly combines the columns, weighted by $x$'s entries, landing in the column-spanned output space). The problem: raw rows/columns are generally neither orthonormal nor guaranteed independent, so there's no clean, explicit description of exactly how $A$ transports the input space to the output space.
+
+> **Definition 3.14 (rank).** $\text{rank}(f)=\text{rank}(A)$ of a transform $f$ or its matrix $A$ is the unique minimal $k$ such that $A$ can be written as a sum of $k$ rank-1 terms.
+>
+> **Definition 3.16 (row/column space, null space).** The **row space** of $A$ is $\text{span}\{v_i\}_{i=1}^{\text{rank}(A)}$ (the input fundamental space); the **input null space** $\mathcal{V}_\perp$ is its orthogonal complement, $v\in\mathcal{V}_\perp\Rightarrow f(v)=0$. Symmetrically, the **column space** is $\text{span}\{u_i\}_{i=1}^{\text{rank}(A)}$ (output fundamental space), with **output null space** $\mathcal{U}_\perp$ orthogonal to it.
 
 <ExerciseCard id="MATH-04-ex1-why-orthonormal" />
 
@@ -55,11 +65,29 @@ For any $A \in \mathbb{R}^{m\times n}$, there exists a rank $k \le \min(m,n)$, o
 
 $$A = \sum_{i=1}^k \sigma_i u_i v_i^\top = USV^\top, \qquad S=\text{diag}(\sigma_{1:k}),\ U=u_{1:k},\ V=v_{1:k}$$
 
-Each term $\sigma_i u_i v_i^\top$ projects $x$ onto input direction $v_i$, scales by $\sigma_i$, and places the result along output direction $u_i$, entirely independently of the other terms (since the $v_i$ are mutually orthogonal and the $u_i$ are mutually orthogonal).
+<SourceFigure
+  src="/figures/lecture-maths/fig2-svd.png"
+  alt="Diagram illustrating a linear transform as project-scale-unproject: input space V with fundamental vector v1, mapped through f to output space U with fundamental vector u1"
+  caption="A linear transform f = Σ σᵢuᵢvᵢᵀ described as: take input x, project it onto input fundamental vector v1 to yield a scalar, stretch/squeeze it by σ1, and 'unproject' this into output fundamental vector u1; repeat for all i and sum."
+  source="Lecture-Maths.pdf"
+  page="32"
+/>
 
-## Computing an SVD by hand: the eigendecomposition connection
+Each term $\sigma_i u_i v_i^\top$ projects $x$ onto input direction $v_i$, scales by $\sigma_i$, and places the result along output direction $u_i$, entirely independently of the other terms (since the $v_i$ are mutually orthogonal and the $u_i$ are mutually orthogonal). Put in one sentence: **every matrix $A$ can be expressed as a linear combination of only $k$ rank-1 "project-scale-unproject" matrices**, and rank-1 matrices are the most minimalistic kind of matrix there is, always of the form $uv^\top$ for some $u,v$.
 
-You rarely need to invoke specialized SVD algorithms for small matrices: the SVD is directly computable from an eigendecomposition you may already know how to do.
+> **Definition 3.15 (determinant).** $\det(A) = \pm\prod_{i=1}^n\sigma_i$ if $\text{rank}(A)=n=m$, else $0$ (the sign depends on whether the transform includes a reflection).
+
+## Understanding $vv^\top$ as a projection
+
+You already met this in [MATH-03B](/course/MATH/MATH-03B): the projection of $x$ onto a unit vector $v$ is $x_\| = vv^\top x$ (or $\frac{1}{\|v\|^2}v v^\top x$ if $v$ isn't normalized), and the projection matrix $vv^\top$ is symmetric, PSD, and rank 1. The SVD is directly built from this idea: it represents *any* matrix as a sum of "project [onto $v_i$] $\to$ scale [by $\sigma_i$] $\to$ unproject [into $u_i$]" pieces, each one a stretched version of exactly this rank-1 projection structure.
+
+## SVD for symmetric matrices, and the eigendecomposition connection
+
+You rarely need to invoke specialized SVD algorithms for small matrices, and the SVD is directly related to a decomposition you may already know: for a **symmetric** matrix $A$,
+
+$$A = \sum_i\lambda_iv_iv_i^\top = V\Lambda V^\top, \qquad Av_i=\lambda_iv_i$$
+
+i.e. the same $v_i$ are simultaneously the SVD's orthonormal directions *and* $A$'s eigenvectors, with $\lambda_i=\pm\sigma_i$ (positive if the corresponding eigenvalue is positive, since singular values are always non-negative by definition but eigenvalues can be negative). If $A$ is additionally positive semi-definite, every $\lambda_i\ge0$, so $\lambda_i=\sigma_i$ exactly and $U=V$.
 
 <ExerciseCard id="MATH-04-ex2-eigendecomp-connection" />
 
@@ -71,32 +99,89 @@ Let $A = \begin{pmatrix}3&1\\1&3\end{pmatrix}$ (symmetric, chosen so the eigende
 
 <ExerciseCard id="MATH-04-ex3-numeric" />
 
+## The pseudo-inverse
+
+For a symmetric matrix, the **pseudo-inverse** simply reverses the stretching along the same orthogonal projections:
+
+$$A^\dagger = \sum_i\lambda_i^{-1}v_iv_i^\top = V\Lambda^{-1}V^\top, \qquad AA^\dagger=A^\dagger A=VV^\top$$
+
+For a general (non-symmetric, possibly non-square) matrix, using the SVD $A=USV^\top$:
+
+$$A^\dagger = \sum_i\sigma_i^{-1}v_iu_i^\top = VS^{-1}U^\top$$
+
+If $A$ has full column rank ($k=n$), $A^\dagger=(A^\top A)^{-1}A^\top$ is the **left** pseudo-inverse ($A^\dagger A=I_n$), exactly the normal-equations solution from [MATH-02B](/course/MATH/MATH-02B)'s least-squares derivation. If $A$ has full row rank ($k=m$), $A^\dagger=A^\top(AA^\top)^{-1}$ is the **right** pseudo-inverse ($AA^\dagger=I_m$). When $A$ isn't full rank, $A^\dagger y$ is still well-defined and gives the minimizer of $\|Ax-y\|^2$ closest to zero among the (infinitely many) minimizers.
+
+<ExerciseCard id="MATH-04-ex4-pseudoinverse" />
+
 ## Rank-1 matrices as building blocks
 
-<ExerciseCard id="MATH-04-ex4-rank1-challenge" />
+<ExerciseCard id="MATH-04-ex5-rank1-challenge" />
+
+## Covariance, and the SVD/PCA connection
+
+For a zero-mean dataset $D=\{x_i\}_{i=1}^m$, $x_i\in\mathbb{R}^n$, the **covariance matrix** is $C=\frac1n\sum_ix_ix_i^\top=\frac1nX^\top X$ (with data matrix $X$ containing $x_i^\top$ as its $i$-th row). $C$ is symmetric PSD (a sum of PSD rank-1 terms $x_ix_i^\top$, each PSD since $v^\top x_ix_i^\top v=(x_i^\top v)^2\ge0$), so its eigendecomposition $C=\sum_i\lambda_iv_iv_i^\top$ always exists with all $\lambda_i\ge0$. Here $\lambda_i$ is exactly the **data variance along eigenvector $v_i$**, $\sqrt{\lambda_i}$ the standard deviation along $v_i$, and $\sqrt{\lambda_i}v_i$ the principal-axis vectors that make up the ellipsoid typically used to illustrate a covariance. This is exactly **Principal Component Analysis**: the eigenvectors of the covariance matrix, sorted by eigenvalue, are the directions of maximal variance in the data, in order.
+
+<ExerciseCard id="MATH-04-ex6-pca-variance" />
+
+## Eigendecomposition, formally
+
+> **Definition 3.18 (eigendecomposition).** The eigendecomposition (diagonalization) of $A\in\mathbb{R}^{n\times n}$, if it exists, is $A=Q\Lambda Q^{-1}$, where $\Lambda=\text{diag}(\lambda_1,..,\lambda_n)$ and each column $q_i$ of $Q$ is an **eigenvector**.
+
+Unlike the SVD, this is *not* a theorem, it's a definition, and it doesn't always exist. The eigenvalues are exactly the roots of the **characteristic polynomial** $p_A(\lambda)=\det(\lambda I-A)$ (this has a root at $\lambda$ precisely because $A-\lambda I$ then has zero determinant, i.e. rank $<n$, i.e. there's a nonzero $x$ with $(A-\lambda I)x=0$, i.e. $Ax=\lambda x$). A matrix fails to be diagonalizable exactly when some eigenvalue's *algebraic* multiplicity (as a root of $p_A$) exceeds the dimension of its eigenvector span, geometrically, the eigenvectors for that eigenvalue don't span enough dimensions. Only a measure-zero subset of matrices are like this (random matrices are diagonalizable with probability 1); every symmetric matrix is always diagonalizable, with real eigenvalues, which is exactly the SVD-for-symmetric-matrices connection above.
+
+<ExerciseCard id="MATH-04-ex7-psd-eigenvalue-proof" />
+
+<ExerciseCard id="MATH-04-ex8-eigenvector-facts" />
+
+## The power method: finding the largest eigenvalue
+
+For large matrices, you don't want to compute the full characteristic polynomial. The **power method** finds the largest-magnitude eigenvalue/eigenvector iteratively: initialize $x$ randomly, then iterate
+
+$$x \leftarrow Ax, \qquad x \leftarrow \frac{1}{\|x\|}x$$
+
+If this converges, $x$ must be an eigenvector, with eigenvalue $\lambda=x^\top Ax$. If $A$ is diagonalizable and $x$ is initially a (generic) combination of all eigenvectors, $x$ converges to the eigenvector with the largest $|\lambda_i|$ (if the largest-magnitude eigenvalue is negative, $x$ flips sign every iteration rather than truly converging, but still identifies the right eigenvector/eigenvalue up to that alternation).
+
+<ExerciseCard id="MATH-04-ex9-power-method-convergence" />
+
+**A trick for the smallest eigenvalue** (assuming all eigenvalues are positive, e.g. a PSD matrix, a common setting in model fitting): initialize $x,y$ randomly and iterate
+
+$$x\leftarrow Ax,\quad \lambda\leftarrow\|x\|,\quad x\leftarrow x/\lambda,\quad y\leftarrow(\lambda I-A)y,\quad y\leftarrow y/\|y\|$$
+
+Then $y$ converges to the *smallest* eigenvector, and $\lambda-\|y\|$'s corresponding value converges to its eigenvalue. This works because $\lambda I - A$ (with $\lambda$ = the largest eigenvalue found by the outer loop) has the *same* eigenvectors as $A$ but with eigenvalues $\lambda-\lambda_i$, flipping the ordering: $A$'s smallest eigenvalue becomes $\lambda I-A$'s largest, so the ordinary power method (run as the inner loop on $y$) finds it.
+
+<ExerciseCard id="MATH-04-ex10-smallest-eigenvalue" />
+
+**Why care about eigenvalues/eigenvectors at all?** A short, concrete list, several of which you'll meet again directly in your own research: least-squares problems (finding the smallest eigenvalue/-vector, e.g. camera calibration, bundle adjustment, plane fitting), PCA, stationary distributions of Markov processes (directly relevant to MDPs and RL), PageRank, spectral clustering, and spectral learning methods (e.g. for training HMMs).
 
 ## Summary
 
-- $A=USV^\top$ gives explicit orthonormal bases for the input space ($V$) and output space ($U$), with singular values $\sigma_i$ describing exactly how much each input direction is scaled on its way to the corresponding output direction.
-- $A^\top A = VS^2V^\top$: the SVD is directly computable from the eigendecomposition of $A^\top A$ (columns of $V$ = eigenvectors, $\sigma_i=\sqrt{\lambda_i}$).
-- Every matrix of rank $k$ decomposes into exactly $k$ rank-1 pieces ($\sigma_i u_i v_i^\top$), the minimal atomic units of any linear map.
+- $A=USV^\top$ gives explicit orthonormal bases for the input space ($V$) and output space ($U$), with singular values $\sigma_i$ describing exactly how much each input direction is scaled on its way to the corresponding output direction; every matrix decomposes into $k=\text{rank}(A)$ rank-1 "project-scale-unproject" pieces.
+- For symmetric $A$, the SVD and eigendecomposition coincide (up to sign): $Av_i=\lambda_iv_i$, $A=V\Lambda V^\top$.
+- The pseudo-inverse $A^\dagger$ reverses the SVD's stretching; for full column rank it reduces to the normal-equations formula $(A^\top A)^{-1}A^\top$.
+- A dataset's covariance matrix is symmetric PSD; its eigenvectors (sorted by eigenvalue) are PCA's principal directions, with eigenvalues equal to the variance along each.
+- The eigendecomposition (Definition 3.18) is a definition, not a theorem, it doesn't always exist, but always does for symmetric matrices.
+- The power method finds the largest eigenvalue/eigenvector iteratively via repeated multiplication and normalization; a variant using $\lambda I-A$ finds the smallest.
 
 ## Retrieval questions
 
-1. Write the relationship between $A^\top A$ and the SVD components $V$, $S$ from memory.
-2. Why does a rank-1 outer product $uv^\top$ have rank exactly 1?
-3. For a symmetric positive-definite matrix, how do the singular values relate to the eigenvalues?
+1. Write the relationship between a symmetric matrix's SVD and its eigendecomposition from memory.
+2. State the pseudo-inverse formula for a full-column-rank matrix, and connect it to the least-squares normal equations.
+3. Why is a dataset's covariance matrix always PSD, and what do its eigenvectors/eigenvalues mean geometrically?
+4. State Definition 3.18 and explain, in one sentence, when a matrix fails to be diagonalizable.
+5. Write the power method iteration from memory, and explain (don't just state) why it converges to the largest-magnitude eigenvector.
 
 ## Mastery checklist
 
-- [ ] Can explain what the SVD provides that a raw matrix doesn't.
-- [ ] Derived $A^\top A = VS^2V^\top$ from $A=USV^\top$.
-- [ ] Computed a matrix's singular values by hand via the $A^\top A$ eigendecomposition.
-- [ ] Can explain why rank-1 matrices are the atomic units of the SVD decomposition.
+- [ ] Can explain what the SVD provides that a raw matrix doesn't, and state the rank-1 decomposition view.
+- [ ] Derived $A^\top A = VS^2V^\top$ (or the symmetric-matrix shortcut) and computed singular values by hand.
+- [ ] Derived the pseudo-inverse formula and connected it to least squares.
+- [ ] Can explain the covariance-matrix/PCA connection and why covariance matrices are always PSD.
+- [ ] Proved the PSD-eigenvalue equivalence and at least one other basic eigenvector fact (orthogonality, $A^k$, or shift invariance).
+- [ ] Implemented or traced through the power method (both largest- and smallest-eigenvalue variants) by hand on a small example.
 
 ## Source note
 
-The opening motivation (rows/columns view, the SVD theorem, and the rank-1 building-block discussion) is adapted from Marc Toussaint's `svd` lecture note (HTML-sourced, identical to the PDF version), used with attribution per this repository's README. The eigendecomposition-connection derivation, the worked example, and the numeric exercise are newly authored for this workbook. `lecture-maths` §3.4-3.8 (pp. 31-39) covers this same material in more depth (including the general eigendecomposition and power-method computation), noted here as supplementary further reading, not yet incorporated into this module.
+The opening motivation (rows/columns view, the SVD theorem, and the rank-1 building-block discussion) is adapted from Marc Toussaint's `svd` lecture note (HTML-sourced, identical to the PDF version) and `lecture-maths` §3.4-3.6 (pp. 33-36, Definitions 3.14-3.17, the projection/pseudo-inverse/covariance discussion, Figure 2 on p. 32). The eigendecomposition definition, characteristic polynomial discussion, and both power-method variants are adapted from §3.7 (pp. 37-38, Definition 3.18, §3.7.1-3.7.3). The worked example, all numeric verifications, and the proof exercises (PSD-eigenvalue, eigenvector orthogonality, $A^k$, shift invariance, power-method convergence) are newly authored, though several formalize facts the source states without proof.
 
 ---
 

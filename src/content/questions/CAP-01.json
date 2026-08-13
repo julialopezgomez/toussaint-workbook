@@ -1,0 +1,88 @@
+{
+  "moduleId": "CAP-01",
+  "exercises": [
+    {
+      "id": "CAP-01-ex1-notation-translation",
+      "objective": "Translate the report's CS/CS_free notation into PLAN-01's X/X_fea notation.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "julia-report", "page": 29, "originalNumber": "5.1.1" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Your report defines $CS=C_\\text{rob}\\times C_\\text{obj}$ and its collision-free subset $CS_\\text{free}$. Using PLAN-01's notation, what is $CS$ equivalent to, and what is $CS_\\text{free}$ equivalent to? What does $CS$ being a *product* of two spaces reflect about manipulation planning specifically?",
+      "hints": [
+        "PLAN-01 defines a generic configuration space $\\mathcal{X}$ (the embedding space for a system's pose description) and its feasible subset $\\mathcal{X}_\\text{fea}$ (equivalently $C_\\text{free}$).",
+        "$CS$ is exactly $\\mathcal{X}$, specialized to a system that happens to be a composite of two separately-moving parts; $CS_\\text{free}$ is exactly $\\mathcal{X}_\\text{fea}$ for that composite system.",
+        "The product structure $C_\\text{rob}\\times C_\\text{obj}$ reflects that manipulation planning must track the pose of the robot *and* the manipulated object jointly, since the object's motion isn't independent (it can only move when grasped), unlike classical motion planning where only the robot's own configuration space matters."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "CAP-01-ex2-bigM-numeric",
+      "objective": "Compute the minimal big-M value that makes a region-membership constraint vacuous when the binary indicator is off.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "Consider a 1D configuration $x$ with joint limits $x\\in[-5,5]$, and a convex region defined by the single inequality $x\\leq3$ (so $A_j=1$, $b_j=3$). Using the big-M constraint $A_jx\\leq b_j+M(1-z)$, what is the smallest integer $M$ such that, when $z=0$, the constraint is vacuous (true) for every $x$ in the joint-limit range?",
+      "hints": [
+        "When $z=0$, the constraint becomes $x\\leq3+M$. For this to be vacuous, it must hold even at the worst case: the largest possible $x$ in the domain.",
+        "The largest possible $x$ given the joint limits is $x=5$. Substitute: you need $5\\leq3+M$.",
+        "Solving gives $M\\geq2$, so the smallest integer value is $M=2$. (Independently verified: 5 - 3 = 2.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "CAP-01-ex3-miqp-classification",
+      "objective": "Classify which parts of the pipeline are discrete-optimization problems and which are continuous.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "julia-report", "page": 31, "originalNumber": "5.1.2" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["CAP-01-ex2-bigM-numeric"],
+      "answerType": "short-text",
+      "prompt": "For each of the pipeline's three stages (convex decomposition, MIQP grasp-release sequencing, GCS trajectory generation), state whether its core computation is a discrete or continuous optimization problem, and why.",
+      "hints": [
+        "Convex decomposition (Stage 1) is a preprocessing/geometric step, not itself an optimization over the planning variables; it produces the regions $P_j$ that the later stages optimize over.",
+        "The MIQP (Stage 2) is fundamentally a *mixed* problem: continuous variables (the configurations $\\mathbf{x}_i$) plus binary/discrete variables (region and connected-component membership, $z_{ij}$), which is exactly why it needs a mixed-integer solver rather than a plain QP.",
+        "GCS (Stage 3), given already-fixed endpoints from Stage 2, computes a shortest path through the convex decomposition, a continuous trajectory-optimization problem (the same flavor as DYN-04), with no further discrete decisions left to make."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "CAP-01-ex4-lgp-parallel",
+      "objective": "Identify where the MIQP/GCS split matches RLEARN-07's LGP structure and where the analogy breaks down.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": ["RLEARN-07-ex3-lgp-constraints-derivation"],
+      "answerType": "short-text",
+      "prompt": "RLEARN-07's LGP formulation optimizes over a discrete skeleton $s_{1:K}$ and a continuous trajectory $\\bar x$. This module's pipeline optimizes over a discrete grasp-release sequence (via the MIQP's binary variables) and a continuous trajectory (via GCS). Explain the correspondence between the two, and identify one concrete way the discrete search spaces differ.",
+      "hints": [
+        "Both formulations split into 'what discrete structure' and 'what continuous motion realizes it,' with a within-mode constraint enforced continuously and a mode-transition constraint enforced only at discrete switch points.",
+        "The MIQP's binary variables $z_{ij}$ (which convex region a configuration belongs to) play the skeleton's role $s_{1:K}$ (which symbolic action is active); the manipulation constraints (object fixed during transit, rigid during transfer) play $\\bar\\phi$'s role; the polytope-containment/connectivity constraints at each $\\mathbf{x}_i$ play $\\hat\\phi$'s role.",
+        "The key difference: RLEARN-07's skeleton search is over a small, hand-defined set of symbolic actions (pick, place, ...), a modest discrete space; this MIQP searches directly over which of potentially many convex regions and grasp configurations to use, a much larger but more geometrically explicit discrete space, since it's specialized to manipulation rather than general symbolic planning."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "CAP-01-ex5-coverage-numeric",
+      "objective": "Compute total pipeline time from the experimental results table and interpret the coverage-quality bottleneck.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "julia-report", "page": 33, "originalNumber": "Table 5.1" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "From Table 5.1, compute the total pipeline time (coverage time + trajectory time) for the 4-DOF case at 0.96 target coverage. Give your answer in seconds.",
+      "hints": [
+        "Find the 4-DOF, 0.96 target-coverage row: coverage time 78.5s, trajectory time 29.0s.",
+        "Add the two: $78.5+29.0$.",
+        "$=107.5$s. (Independently verified: 78.5 + 29.0 = 107.5.) Contrast this with the 4-DOF, 0.90-target row, which has a coverage time of only 31.2s but *fails* to produce a trajectory at all (the ** marker): lower coverage doesn't just mean a slower plan, it can mean no usable plan, even though it superficially looks cheaper."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

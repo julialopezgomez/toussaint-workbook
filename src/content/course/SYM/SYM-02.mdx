@@ -1,0 +1,111 @@
+---
+id: SYM-02
+block: SYM
+title: "First-Order Logic & Inference"
+tier: 1
+estimatedHours: 3
+prerequisites: ["SYM-01"]
+objectives:
+  - "State FOL's syntax and semantics, including quantifiers and their properties."
+  - "Apply universal instantiation and compute unifying substitutions (the matching problem)."
+  - "Derive Generalized Modus Ponens, and explain forward/backward chaining for FOL."
+sources:
+  - { sourceId: "lecture-ai", pages: "p182-194 (§4.6)", role: "primary" }
+concepts:
+  - "First-order logic syntax and semantics"
+  - "Quantifiers, universal/existential instantiation"
+  - "Unification (the matching problem)"
+  - "Generalized Modus Ponens, forward/backward chaining"
+notation:
+  - { symbol: "$\\forall x:\\alpha,\\ \\exists x:\\alpha$", meaning: "universal/existential quantification" }
+  - { symbol: "$\\theta$", meaning: "a substitution, e.g. $\\{x/\\text{John}\\}$" }
+  - { symbol: "$\\text{unifies}(\\alpha,\\beta)$", meaning: "$\\theta$ unifies $\\alpha,\\beta$ iff $\\alpha\\theta=\\beta\\theta$" }
+cheatsheetLinks: []
+nextModules: ["SYM-03"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+A direct note from the source material worth internalizing: what makes first-order (relational) representations valuable isn't really "logical reasoning" as an inference technique, it's the idea of representing knowledge in terms of **objects, properties, and relations**, which generalizes across object identities in a way propositional logic structurally cannot. This is precisely what makes FOL the right foundation for STRIPS/PDDL (SYM-03) and, ultimately, for relational probabilistic models (SYM-04) that unify this generalization power with genuine uncertainty. The specific inference algorithms below matter mainly because **unification** (computing substitutions) is a building block every one of those later formalisms needs.
+
+## Prerequisites & readiness check
+
+You should have SYM-01's Modus Ponens and Horn-clause forward chaining fresh.
+
+<ReadinessCheck
+  question="From SYM-01, what does Modus Ponens let you conclude, and from what?"
+  answer="Given α1,...,αn all true and the rule α1∧...∧αn⇒β, conclude β."
+/>
+
+## Why propositional logic isn't enough
+
+Propositional logic can't express "pits cause breezes in adjacent squares" except by writing one sentence *per square*: it has no notion of objects or general relations between them. **First-order logic (FOL)** fixes this, assuming the world contains **objects** (people, numbers, ...), **relations** (red, brother-of, bigger-than, ...), and **functions** (father-of, one-more-than, ...).
+
+## Syntax, semantics, and quantifiers
+
+FOL adds to propositional logic's connectives: **constants** (KingJohn, 2), **predicates** (Brother, $>$), **variables** ($x,y$), **functions** (Sqrt, FatherOf), and **quantifiers** ($\forall,\exists$). An atomic sentence is $\text{predicate}(\text{term}_1,\ldots)$ or $\text{term}_1=\text{term}_2$; a term is a constant, variable, or function applied to terms. **Universal quantification** $\forall x:P$ is true iff $P$ holds for every object in the model ("Everyone at Berkeley is smart": $\forall x:\text{At}(x,\text{Berkeley})\Rightarrow\text{Smart}(x)$); **existential** $\exists x:P$ iff $P$ holds for *some* object ("Someone at Stanford is smart": $\exists x:\text{At}(x,\text{Stanford})\wedge\text{Smart}(x)$).
+
+**Quantifiers do not commute across type**: $\exists x:\forall y:\text{Loves}(x,y)$ ("someone loves everyone") is a *much* stronger claim than $\forall y:\exists x:\text{Loves}(x,y)$ ("everyone is loved by someone, possibly different people"), even though same-type quantifiers ($\forall x\forall y\equiv\forall y\forall x$, similarly for $\exists$) do commute freely. A **model** for FOL contains objects and relations among them; an **interpretation** maps constant symbols to objects, predicate symbols to relations, function symbols to functional relations.
+
+## Instantiation: from quantified to ground sentences
+
+<ExerciseCard id="SYM-02-ex1-universal-instantiation" />
+
+**Universal instantiation (UI)**: from $\forall v:\alpha$, add $\text{Subst}(\{v/g\},\alpha)$ for *any* ground term $g$ (can be applied repeatedly, to every relevant constant). **Existential instantiation (EI)**: from $\exists v:\alpha$, add $\text{Subst}(\{v/k\},\alpha)$ for a single *fresh* constant $k$ (a **Skolem constant**, never appearing elsewhere), applied only once. Instantiating every quantified sentence this way **propositionalizes** the KB, reducing FOL inference to SYM-01's propositional machinery, in principle: Herbrand's theorem (1930) guarantees that if $\alpha$ is entailed, it's entailed by some finite propositionalized subset, though the search for that subset can loop forever if $\alpha$ is *not* entailed (entailment in FOL is only **semidecidable**, Turing/Church, 1936). Naive propositionalization also generates enormous numbers of irrelevant ground sentences, making it impractical directly, which motivates a smarter approach: **unification**.
+
+## Unification: the matching problem
+
+Instead of instantiating everything, compute *specific* substitutions that make a rule's premises match known facts. $\theta$ **unifies** $\alpha,\beta$ iff $\alpha\theta=\beta\theta$ (applying $\theta$ to both makes them identical).
+
+<ExerciseCard id="SYM-02-ex2-unification-derivation" />
+
+Unification is exactly what lets a single general rule apply to many different concrete situations without explicitly enumerating them, and it's genuinely expensive in general: matching a rule's *conjunctive* premises against a database of facts is an NP-hard constraint-satisfaction problem (a rule with enough $\text{Diff}(\cdot,\cdot)\Rightarrow\ldots$ premises can literally encode graph coloring).
+
+## Generalized Modus Ponens (GMP)
+
+SYM-01's Modus Ponens generalizes directly, using unification to match premises instead of requiring them to already be identical:
+
+$$\frac{p_1',\ p_2',\ \ldots,\ p_n',\qquad(p_1\wedge p_2\wedge\cdots\wedge p_n\Rightarrow q)}{q\theta}\qquad\text{for a substitution }\theta\text{ such that }\forall i:\theta\text{ unifies}(p_i',p_i)$$
+
+<ExerciseCard id="SYM-02-ex3-gmp-derivation" />
+
+(GMP assumes a KB of **definite clauses**, exactly one positive literal, with all variables implicitly universally quantified.) Applying GMP repeatedly, always firing a rule whose instantiated premises are now known, is **forward chaining** for FOL, sound and complete for first-order definite clauses; running it backward from a query is **backward chaining**. **Datalog** (definite clauses with no function symbols) guarantees forward chaining terminates in polynomially many iterations; with function symbols, termination is not guaranteed if the query isn't actually entailed, the same semidecidability limit as before.
+
+<ExerciseCard id="SYM-02-ex4-chaining-tradeoff-conceptual" />
+
+## Resolution for FOL
+
+Exactly as in SYM-01, but sentences must first be converted to CNF via a longer procedure (eliminate $\Leftrightarrow,\Rightarrow$; move $\neg$ inward via De Morgan; standardize variable names apart; **Skolemize** existential variables, now replaced by a *function* of the enclosing universal variables rather than a plain constant; drop universal quantifiers; distribute $\wedge$ over $\vee$). The resolution rule itself is the same as SYM-01's, now applied with unification (rather than exact literal matching) to find complementary literals: sound and complete for all of FOL.
+
+## Summary
+
+- **FOL** adds objects, relations, functions, and quantifiers ($\forall,\exists$) to propositional logic; quantifiers of the *same* type commute, of *different* types they generally don't.
+- **Universal/existential instantiation** ground quantified sentences into propositional ones; Herbrand's theorem guarantees a finite entailing subset exists, but the search can loop if $\alpha$ isn't entailed (semidecidability).
+- **Unification** computes a substitution $\theta$ making two sentences identical, avoiding naive full propositionalization; it's NP-hard in general (a CSP).
+- **Generalized Modus Ponens** uses unification to apply a general rule to specific facts; repeated application gives forward/backward chaining, sound and complete for definite clauses (guaranteed-terminating for function-free Datalog).
+- **Resolution**, after a longer CNF-conversion procedure (including Skolemization by function, not just constant), remains sound and complete for all of FOL.
+
+## Retrieval questions
+
+1. State FOL's syntax elements and explain why $\exists x\forall y$ and $\forall y\exists x$ differ.
+2. State universal and existential instantiation, and explain the semidecidability limitation.
+3. Define unification, and derive a substitution for a concrete example.
+4. State Generalized Modus Ponens, and explain the difference between forward and backward chaining.
+
+## Mastery checklist
+
+- [ ] Can state FOL's syntax/semantics and quantifier properties.
+- [ ] Can apply universal instantiation and explain the propositionalization/semidecidability tradeoff.
+- [ ] Can compute a unifying substitution for a concrete example.
+- [ ] Can state and apply Generalized Modus Ponens.
+
+## Source note
+
+This module's exposition, FOL syntax/semantics, quantifier properties, universal/existential instantiation, Herbrand's theorem, unification, Generalized Modus Ponens, forward/backward chaining for FOL, and the CNF-conversion/resolution procedure are adapted from `lecture-ai`, §4.6 (pp. 182-194), including the source's own framing (in its motivation essay) of why relational representations matter more than logical reasoning per se. The worked "unification" and "Generalized Modus Ponens" exercises use newly-authored examples structurally analogous to, but distinct from, the source's own King/Greedy/Evil and "West is a criminal" worked examples, to avoid presenting a fully solved version of the source's own running example before you attempt it yourself. All exercises are newly authored.
+
+---
+
+**Next**: [SYM-03: STRIPS, PDDL & Relational MDPs](/course/SYM/SYM-03)

@@ -3,26 +3,29 @@ id: OPT-01
 block: OPT
 title: "Unconstrained Optimization: Line Search & Newton"
 tier: 1
-estimatedHours: 3
+estimatedHours: 5
 prerequisites: ["MATH-02", "MATH-05"]
 objectives:
-  - "Explain the failure modes of gradient descent with a poorly chosen fixed step size."
-  - "Derive Newton's method as the exact minimizer of the second-order Taylor model."
-  - "Compute a Newton step for a quadratic objective by hand."
-  - "Explain what the Armijo backtracking condition guarantees."
+  - "State the desiderata for a downhill optimization algorithm (monotone, convergent, rescaling-invariant)."
+  - "Derive backtracking line search and both Wolfe conditions, and state the exponential-convergence theorem for gradient descent."
+  - "Derive the steepest-descent direction under a general metric via the Cholesky-substitution argument."
+  - "Derive Newton's method from root-finding first, then as the exact minimizer of the 2nd-order Taylor model, and explain its scale/coordinate invariance."
+  - "Explain the non-positive-definite Hessian failure mode and the gradient-fallback / Levenberg-Marquardt damping fix."
 sources:
-  - { sourceId: "lecture-optimization", pages: "p5-20 (Part 1)", role: "primary" }
+  - { sourceId: "lecture-optimization", pages: "p5-14 (§1.1-1.3)", role: "primary" }
   - { sourceId: "lecture-maths", pages: "p47-58 (§4.1)", role: "supplementary" }
 concepts:
+  - "Downhill algorithm desiderata"
   - "Gradient descent"
-  - "Backtracking line search / Armijo condition"
+  - "Backtracking line search / Wolfe conditions"
+  - "Steepest descent under a metric"
   - "Newton's method"
-  - "Quadratic model of an objective"
+  - "Non-positive-definite fallback / damping / trust region"
 notation:
   - { symbol: "$\\alpha$", meaning: "step size" }
-  - { symbol: "$d$", meaning: "descent direction (e.g. $d=-\\nabla f(x)$ or the Newton direction)" }
-  - { symbol: "$\\delta^*$", meaning: "the optimal step under a local quadratic model" }
-  - { symbol: "$c$", meaning: "Armijo condition constant, typically $10^{-4}$" }
+  - { symbol: "$\\delta$", meaning: "descent direction (e.g. $\\delta=-\\nabla f(x)$ or the Newton direction)" }
+  - { symbol: "$\\varrho_{\\text{ls}}, \\varrho_\\alpha^\\pm$", meaning: "backtracking line search parameters: sufficient-decrease factor, step growth/shrink factors" }
+  - { symbol: "$\\lambda$", meaning: "Levenberg-Marquardt damping parameter" }
 cheatsheetLinks: []
 nextModules: ["OPT-02"]
 ---
@@ -43,19 +46,96 @@ You should have gradients/Hessians (MATH-02), Taylor expansion (MATH-00), and th
   answer="$f(x+\delta) \approx f(x) + \nabla f(x)^\top \delta + \tfrac12\delta^\top H(x)\delta$"
 />
 
+## Problem formulation and desiderata
+
+We consider the unconstrained non-linear program $\min_{x\in\mathbb{R}^n}f(x)$ for smooth $f:\mathbb{R}^n\to\mathbb{R}$, where we can query $f(x)$, $\nabla f(x)$ (gradient methods), and sometimes $\nabla^2f(x)$ (2nd-order methods). We want algorithms that are:
+
+- **monotone**: generate a sequence $x_i$ that gradually reduces $f(x_i)\le f(x_{i-1})$;
+- **convergent**: under bounded positive curvature assumptions, we want *exponential* convergence rates, guaranteed;
+- **invariant to rescaling of $f$** (multiplying the objective by a constant shouldn't change the path taken);
+- **invariant to rescaling of $x$** (or to a linear transform of $x$, i.e. a change of coordinates).
+
+That last one is exactly the contra/covariance theme from [MATH-03](/course/MATH/MATH-03)/[MATH-05](/course/MATH/MATH-05): a genuinely good optimizer shouldn't care whether you measure $x$ in meters or millimeters.
+
 ## Gradient descent and the step-size problem
 
-The simplest optimizer, gradient descent, updates $x \leftarrow x - \alpha \nabla f(x)$. It's cheap (only needs the gradient) but its performance depends heavily on choosing $\alpha$ well.
+Plain gradient descent iterates $x\leftarrow x-\alpha\nabla f(x)$: cheap (only needs the gradient), but a fixed $\alpha$ is fragile. Near a flat region the gradient is small, so a fixed $\alpha$ takes tiny, wasteful steps; near a steep region the same $\alpha$ can overshoot wildly and even diverge.
 
 <ExerciseCard id="OPT-01-ex1-why-stepsize-matters" />
 
-## Newton's method: use curvature, not just slope
+## Backtracking line search and the Wolfe conditions
 
-Rather than guessing a step size, use the second-order Taylor model itself to choose the *best* step, assuming (optimistically) that the quadratic model is exact.
+**Line search** in general means solving $\min_{\alpha\ge0}f(x+\alpha\delta)$ for a given step *direction* $\delta$ (separating the two core issues of any downhill method: direction and step size). The most common practical approach is **backtracking**: start with a stepsize guess and shrink it until the step is "good enough."
+
+```
+Backtracking Line Search
+Input:    initial x, functions f(x) and ∇f(x), tolerance θ,
+          parameters (defaults: ϱα⁺=1.2, ϱα⁻=0.5, δmax=∞, ϱls=0.01)
+1: initialize stepsize α = 1
+2: repeat
+3:   δ ← -∇f(x)/‖∇f(x)‖                        // (alternative: δ = -∇f(x))
+4:   while f(x+αδ) > f(x) + ϱls·∇f(x)ᵀ(αδ) do    // line search
+5:     α ← ϱα⁻·α                                 // REJECT & decrease stepsize
+6:   end while
+7:   x ← x + αδ                                  // ACCEPT
+8:   α ← min{ϱα⁺·α, δmax}                        // increase stepsize
+9: until |αδ| < θ                                // perhaps for 10 iterations in sequence
+```
+*(Marc Toussaint, `lecture-optimization.pdf`, p.7)*
+>
+> Typical defaults: $\varrho_\alpha^+=1.2$, $\varrho_\alpha^-=0.5$, $\varrho_{\text{ls}}=0.01$.
+
+The acceptance test is the **1st Wolfe condition** (the "sufficient decrease condition," also called the **Armijo condition**):
+
+$$f(x+\alpha\delta) \le f(x) + \varrho_{\text{ls}}\nabla f(x)^\top(\alpha\delta)$$
+
+requiring a decrease of $f$ at least $\varrho_{\text{ls}}$-times what the linear model predicted. A stronger, second condition is sometimes added, the **2nd Wolfe condition** (the "curvature condition"):
+
+$$|\nabla f(x+\alpha\delta)^\top\delta| \le \varrho_{\text{ls2}}|\nabla f(x)^\top\delta|, \qquad \varrho_{\text{ls2}}\in(\varrho_{\text{ls}}, \tfrac12)$$
+
+requiring the *slope* along $\delta$ to have decreased by a factor $\varrho_{\text{ls2}}$ too, this rules out steps that are technically decreasing but stop far short of a local minimum along the line (needed for conjugate gradient's convergence guarantee, [OPT-02](/course/OPT/OPT-02)).
+
+> **Theorem (exponential convergence).** Let $f:\mathbb{R}^n\to\mathbb{R}$ have Hessian eigenvalues $\lambda$ bounded by $m<\lambda<M$ (with $m>0$) everywhere. Then gradient descent with backtracking line search converges exponentially, with rate $1-2\tfrac{m}{M}\varrho_{\text{ls}}\varrho_\alpha^-$.
+
+This is a genuinely strong guarantee (proof left to the exercises, per the source, and outside this workbook's scope), but note the rate degrades as $M/m$ (the Hessian's **condition number**) grows: badly-conditioned problems (very different curvature in different directions) converge slowly under plain gradient descent, exactly the motivation for using curvature information directly, next.
+
+<ExerciseCard id="OPT-01-ex1b-wolfe-check" />
+
+## What "steepest descent" actually means
+
+The gradient $-\nabla f(x)$ is often called the "steepest descent direction." Is it, really? A more careful definition: **the steepest descent direction is the one where, taking a step of length 1, you get the largest decrease of $f$ in its linear approximation**:
+
+$$\delta^* = \operatorname*{argmin}_\delta \nabla f(x)^\top\delta \quad\text{s.t.}\quad \|\delta\|=1$$
+
+But "length 1" depends on a choice of metric: $\|\delta\|^2=\delta^\top A\delta$ for some SPD matrix $A$ (the Euclidean case is just $A=I$). This is exactly [MATH-05](/course/MATH/MATH-05)'s covariant-gradient setup, and the source derives it slightly differently, worth seeing both routes:
+
+<ExerciseCard id="OPT-01-ex1c-steepest-descent-cholesky" />
+
+**Behavior under linear coordinate transformations** (recapping [MATH-03](/course/MATH/MATH-03)'s contra/covariance table): if $z=Bx$ is a change of coordinates, the gradient transforms as $\nabla_zf(z)=B^{-\top}\nabla_xf(x)$, the metric transforms as $A_z=B^{-\top}A_xB^{-1}$, and the steepest descent direction $A_z^{-1}\nabla_zf(z) = BA_x^{-1}\nabla_xf(x)$ transforms exactly like an ordinary coordinate vector, i.e. it is **covariant**. This is precisely why $-\nabla f(x)$ alone (implicitly $A=I$) is *not* invariant to rescaling $x$, violating the desiderata above, and why Newton's method (next) fixes this.
+
+## Newton's method, from root-finding up
+
+Newton's method is usually introduced for finding roots (zero points) of a function $g$:
+
+$$x \leftarrow x - \frac{g(x)}{g'(x)}$$
+
+(approximate $g$ by its tangent line at $x$, and jump to where that tangent line crosses zero). To find optima of $f(x)$ in 1D, apply this to $g=f'$ (since optima are roots of the derivative):
+
+$$x \leftarrow x - \frac{f'(x)}{f''(x)}$$
+
+And in higher dimensions, $x\in\mathbb{R}^n$:
+
+$$\boxed{x \leftarrow x - \nabla^2f(x)^{-1}\nabla f(x)}$$
 
 <ExerciseCard id="OPT-01-ex2-newton-derivation" />
 
 **Stop and try**: check that Newton's step reduces to something sensible in 1D: for $f:\mathbb{R}\to\mathbb{R}$, $\delta^* = -f'(x)/f''(x)$. Confirm this matches $-H(x)^{-1}\nabla f(x)$ in the $n=1$ case.
+
+**Notes on the Newton step** (several genuinely important, easy-to-miss properties):
+
+- If $f$ is a 2nd-order polynomial (truly quadratic), the Newton step jumps to the optimum in exactly **one step**.
+- Unlike the gradient magnitude $|\nabla f(x)|$, the Newton step's magnitude $|\delta|$ is **meaningful and scale-invariant**: rescaling $f$ (e.g. trading cents for euros) leaves $\delta$ unchanged, since $\nabla^2f$ and $\nabla f$ rescale by the same factor and cancel.
+- Unlike the gradient $\nabla f(x)$, the Newton step $\delta$ is a **true vector**: it's invariant under linear coordinate transformations, its coordinates transform contra-variantly, exactly as they should for a genuine vector (not merely a "coordinate-valued 1-form" the way a raw gradient is). The proof is identical to the steepest-descent-under-a-metric argument above, with the Hessian playing the role of the metric $A$.
 
 ## Worked example
 
@@ -71,32 +151,65 @@ Solving $A\delta^*=-\nabla f(x_0)$ (rather than explicitly inverting $A$) gives 
 
 ## When the quadratic model isn't exact: line search
 
-For a non-quadratic $f$, the quadratic model is only locally accurate, so a full Newton step $\delta^*$ might overshoot. **Backtracking line search** addresses this by trying $\alpha=1$ first, then shrinking $\alpha$ (e.g. by half each time) until the step satisfies the Armijo condition.
+For a non-quadratic $f$, the quadratic model is only locally accurate, so a full Newton step $\delta^*$ might overshoot. Backtracking line search (above) fixes this by trying $\alpha=1$ first, then shrinking:
+
+```
+Basic Newton Method
+Input:    initial x, functions f(x), ∇f(x), ∇²f(x), tolerance θ,
+          parameters (defaults: ϱα⁺=1.2, ϱα⁻=0.5, ϱls=0.01, λ)
+1: initialize stepsize α = 1, fixed damping λ
+2: repeat
+3:   compute δ to solve (∇²f(x) + λI)δ = -∇f(x)
+4:   while f(x+αδ) > f(x) + ϱls·∇f(x)ᵀ(αδ) do    // line search
+5:     α ← ϱα⁻·α                                 // decrease stepsize
+6:   end while
+7:   x ← x + αδ                                  // step is accepted
+8:   α ← min{ϱα⁺·α, 1}                            // increase stepsize
+9: until |αδ|∞ < θ
+```
+*(Marc Toussaint, `lecture-optimization.pdf`, p.12. Line 3 computes the Newton step δ = -∇²f(x)⁻¹∇f(x), e.g. using a Cholesky-based linear solve.)*
 
 <ExerciseCard id="OPT-01-ex4-armijo-challenge" />
 
+## When the Hessian isn't positive definite
+
+Newton's method as derived assumes $\nabla^2f(x)$ is invertible and positive definite, i.e. the quadratic model has a genuine minimum. Two things can go wrong:
+
+- **If the Hessian is negative definite**, the Newton step jumps to a **maximum** instead (it's still the exact stationary point of the local quadratic model, just the wrong kind).
+- **If some eigenvalues are positive and some negative** (a **saddle point**, MATH-02's classification), the "Newton step" isn't well-defined as a sensible descent direction at all.
+
+**Fix**: a robust Newton method checks whether the proposed step actually points downhill ($\nabla f(x)^\top\delta>0$ after a sign flip, or the linear solve fails outright because $\nabla^2f(x)+\lambda I$ isn't positive definite), and if not, falls back to the plain gradient direction $\delta\leftarrow-\nabla f(x)/\|\nabla f(x)\|$ for that step. The damping constant $\lambda$ can also be increased (shifting all the Hessian's eigenvalues up by $\lambda$, [MATH-04](/course/MATH/MATH-04)'s shift-invariance fact) until $\nabla^2f(x)+\lambda I$ becomes positive definite. This combination is called **Levenberg-Marquardt damping**, and is closely related to **trust-region methods**: the damped Newton step is exactly the solution to $\min_\delta\left[\nabla f(x)^\top\delta+\tfrac12\delta^\top\nabla^2f(x)\delta+\tfrac12\lambda\delta^2\right]$, a squared penalty on step size, while a trust-region method solves the same objective subject to an explicit hard constraint $\delta^2\le\beta$; both converge to $-\nabla f(x)$ as the damping/trust-region shrinks to force a tiny step, and to the plain Newton step as it's relaxed.
+
+<ExerciseCard id="OPT-01-ex5-fallback-check" />
+
 ## Summary
 
-- Fixed-step gradient descent is fragile: too large risks divergence, too small wastes iterations.
-- Newton's method, $\delta^* = -H(x)^{-1}\nabla f(x)$, is the exact minimizer of the local second-order Taylor model, derived by differentiating that model and setting it to zero, the same "set the derivative to zero" idea from ordinary calculus, applied to a model rather than $f$ itself.
-- Backtracking line search with the Armijo condition guarantees a meaningful fraction of the predicted decrease is actually achieved, protecting against both overshoot and negligible-progress steps.
+- A good downhill optimizer should be monotone, (exponentially) convergent, and invariant to rescaling of both $f$ and $x$.
+- Backtracking line search accepts a step once the 1st Wolfe/Armijo condition holds; the 2nd Wolfe (curvature) condition is a stronger variant needed by conjugate gradient. Gradient descent with backtracking converges exponentially at a rate governed by the Hessian's condition number $M/m$.
+- The steepest-descent direction under a general metric $A$ is $-A^{-1}\nabla f(x)$, derived via a Cholesky substitution; this transforms covariantly under coordinate changes, unlike the plain gradient.
+- Newton's method, $\delta^*=-\nabla^2f(x)^{-1}\nabla f(x)$, is derived first as root-finding on $\nabla f$, then recognized as steepest descent under the Hessian-as-metric. It's scale-invariant and coordinate-invariant, unlike plain gradient descent, and jumps to the exact optimum in one step for quadratic $f$.
+- A non-positive-definite Hessian breaks Newton's method (jumps to a max or an ill-defined saddle direction); the fix is a gradient-direction fallback and/or Levenberg-Marquardt damping, closely related to trust-region methods.
 
 ## Retrieval questions
 
-1. Derive Newton's step from the second-order Taylor model, without looking back.
-2. Why does a single Newton step land exactly on the minimizer for a quadratic $f$, but only approximately for a general $f$?
-3. What does the Armijo constant $c$ control, and what would $c=1$ mean (even though it's not used in practice)?
+1. State the four desiderata for a downhill optimization algorithm.
+2. Write both Wolfe conditions from memory, and explain what each one individually guards against.
+3. Derive the steepest-descent direction under a metric $A$ using the Cholesky-substitution argument, without looking back.
+4. Derive Newton's step, starting from root-finding, without looking back.
+5. What goes wrong with Newton's method at a saddle point, and what's the standard fix?
 
 ## Mastery checklist
 
-- [ ] Can explain both step-size failure modes for plain gradient descent.
-- [ ] Derived Newton's method from the second-order Taylor model.
+- [ ] Can state the downhill-algorithm desiderata and both Wolfe conditions.
+- [ ] Can state the exponential convergence theorem and explain the role of the condition number $M/m$.
+- [ ] Derived the steepest-descent-under-a-metric formula via the Cholesky substitution.
+- [ ] Derived Newton's method from root-finding, through 1D optima, to the general $n$-dimensional case.
 - [ ] Computed a Newton step by hand for a quadratic objective.
-- [ ] Can explain what the Armijo condition guarantees and why "any decrease" isn't sufficient.
+- [ ] Can explain the non-positive-definite Hessian failure mode and the gradient-fallback/damping fix.
 
 ## Source note
 
-This module's topic and page range are from `lecture-optimization`, Part 1 (pp. 5-20), with `lecture-maths` §4.1 (pp. 47-58) as a shorter parallel treatment of the same material. All exposition, the worked example, and every exercise here are newly authored, paraphrasing the sources' topic coverage and building the Newton derivation explicitly from MATH-00/MATH-02's Taylor-expansion machinery rather than quoting either source directly.
+This module's exposition, algorithm boxes, the exponential convergence theorem, the Wolfe conditions, the steepest-descent-under-a-metric derivation, Newton's method (root-finding through $n$-D), and the non-positive-definite fallback/damping discussion are all adapted from `lecture-optimization`, §1.1-1.3 (pp. 5-14), with `lecture-maths` §4.1 (pp. 47-58) as a parallel treatment. The worked example and exercises are newly authored and independently verified (NumPy for the Newton step; a 200,000-sample random search confirming the Cholesky-derived steepest-descent direction against brute force, cross-checked again for this module).
 
 ---
 

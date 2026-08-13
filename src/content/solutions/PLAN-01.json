@@ -1,0 +1,41 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "PLAN-01-ex1-dof-counting",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 2, "tolerance": 0 },
+      "fullSolution": "p = n - d = 4 - 2 = 2. Only 2 of the 4 joint angles are independently choosable; the other 2 are determined by the loop-closure constraint."
+    },
+    {
+      "exerciseId": "PLAN-01-ex2-potential-field-gradient",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly computes the gradient of the quadratic attractive potential." },
+          { "points": 2, "description": "Correctly identifies the negative gradient as matching DYN-02's P control law exactly." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "grad U_att(q) = grad[ (1/2)Kp||q-q*||^2 ] = Kp(q-q*). F_att(q) = -grad U_att(q) = -Kp(q-q*) = Kp(q*-q). This is exactly DYN-02's P control law u=Kp(q*-q): gradient descent on the quadratic attractive potential is P control."
+    },
+    {
+      "exerciseId": "PLAN-01-ex3-grid-search-scaling",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 64000000, "tolerance": 0 },
+      "fullSolution": "k^n = 20^6 = 64,000,000 cells."
+    },
+    {
+      "exerciseId": "PLAN-01-ex4-space-definitions-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly describes X as the unrestricted embedding space." },
+          { "points": 1, "description": "Correctly describes X_fea as the joint-limit- and collision-restricted subset." },
+          { "points": 1, "description": "Correctly identifies that this open chain's coordinates are already minimal." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "X: the generic embedding space for the two joint angles, e.g. R^2, with no restriction applied yet. X_fea: the subset of X actually reachable, i.e. [-pi/2,pi/2]^2 intersected with whatever region avoids the obstacle (a bounded region with a notch/hole cut out). Minimal coordinates: the two joint angles are already minimal (open chain, no holonomic constraint linking them), so n=p=2; joint limits and collision only shrink X_fea within X, they don't change the coordinate count."
+    }
+  ]
+}

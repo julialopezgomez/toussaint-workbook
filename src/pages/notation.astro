@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const modules = await getCollection('course');
+
+const bySymbol = new Map<string, { meaning: string; id: string; block: string }[]>();
+for (const m of modules) {
+  for (const n of m.data.notation) {
+    if (!bySymbol.has(n.symbol)) bySymbol.set(n.symbol, []);
+    bySymbol.get(n.symbol)!.push({ meaning: n.meaning, id: m.data.id, block: m.data.block });
+  }
+}
+const sortedSymbols = [...bySymbol.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+---
+<BaseLayout title="Notation Index">
+  <nav class="no-print breadcrumb"><a href="/">Start</a> / <a href="/curriculum">Curriculum</a> / Notation</nav>
+  <h1>Notation index</h1>
+  <p>
+    Every <code>notation[]</code> entry across all {modules.length} modules, aggregated at build time. This is the
+    cross-course notation-unification view: if the same symbol appears with a different meaning in two modules
+    (genuine overload, or drift worth fixing), it'll show up here as two entries under the same symbol.
+  </p>
+  <table>
+    <thead><tr><th>Symbol</th><th>Meaning</th><th>Module</th></tr></thead>
+    <tbody>
+      {sortedSymbols.map(([symbol, entries]) =>
+        entries.map((e, i) => (
+          <tr>
+            {i === 0 && <td rowspan={entries.length} set:html={symbol} />}
+            <td>{e.meaning}</td>
+            <td><a href={`/course/${e.block}/${e.id}`}>{e.id}</a></td>
+          </tr>
+        ))
+      )}
+    </tbody>
+  </table>
+  <style>
+    .breadcrumb { font-size: 0.85rem; opacity: 0.7; margin-bottom: 1rem; }
+    .breadcrumb a { color: inherit; }
+    td { vertical-align: top; }
+  </style>
+</BaseLayout>

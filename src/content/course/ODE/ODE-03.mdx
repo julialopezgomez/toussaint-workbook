@@ -1,0 +1,141 @@
+---
+id: ODE-03
+block: ODE
+title: "Numerical Integration: Euler & RK4"
+tier: 1
+estimatedHours: 3.5
+prerequisites: ["ODE-02"]
+objectives:
+  - "Explain why most ODEs need numerical rather than closed-form solutions."
+  - "Derive the forward Euler method from a first-order Taylor expansion, and state its local/global error."
+  - "State the RK4 algorithm and explain why it achieves higher accuracy for a similar cost per step."
+  - "Compute Euler and RK4 steps by hand and compare their accuracy against a known closed-form solution."
+sources: []
+externalSources:
+  - { citation: "Standard treatment, e.g. Boyce & DiPrima, Elementary Differential Equations, §8.1-8.4; or any numerical-methods reference (e.g. Press et al., Numerical Recipes, Ch.17)", note: "Continues ODE-01/02's newly-authored, textbook-standard treatment; no Toussaint-authored source exists for this topic." }
+concepts:
+  - "Forward Euler method"
+  - "Local and global truncation error"
+  - "Runge-Kutta 4th order (RK4)"
+  - "Numerical stability, stiffness (briefly)"
+notation:
+  - { symbol: "$h$", meaning: "step size" }
+  - { symbol: "$x_k \\approx x(t_k)$", meaning: "numerical approximation of the true solution at $t_k=t_0+kh$" }
+  - { symbol: "$k_1,k_2,k_3,k_4$", meaning: "RK4's four per-step slope estimates" }
+cheatsheetLinks: []
+nextModules: ["DYN-01"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Every robot-dynamics simulator, every trajectory optimizer's forward rollout, every physics engine, is, underneath, repeatedly calling a numerical ODE integrator, because almost no dynamics of practical interest has a closed-form solution like the ones ODE-01/02 built by hand. This module builds the two integrators you'll actually use (or recognize inside a library call) for the rest of this course.
+
+## Prerequisites & readiness check
+
+You should have linear systems and the general idea of an IVP (ODE-01/ODE-02) fresh.
+
+<ReadinessCheck
+  question="What is the first-order Taylor approximation $x(t+h) \approx {}?$ in terms of $x(t)$ and $\dot x(t)$?"
+  answer="$x(t+h) \approx x(t) + h\dot x(t)$ (MATH-00's first-order Taylor expansion)."
+/>
+
+## Why numerical integration?
+
+Nonlinear ODEs, ODEs with complicated forcing terms, or large coupled systems (a robot with many joints) generally have **no closed-form solution** expressible in elementary functions, even though a unique solution exists (Picard-Lindelöf, ODE-01). Numerical integration sidesteps this entirely: instead of finding a formula for $x(t)$, march forward in small time steps $h$, using the ODE itself (which only requires evaluating $f$, not solving anything symbolic) to estimate how $x$ changes over each step.
+
+## Forward Euler: the simplest integrator
+
+Given $\dot x=f(x,t)$ and a current point $(t_k,x_k)$, MATH-00's first-order Taylor expansion says $x(t_k+h) \approx x(t_k) + h\dot x(t_k) = x(t_k)+hf(x(t_k),t_k)$. Forward Euler takes this approximation *as* the update rule:
+
+<ExerciseCard id="ODE-03-ex1-euler-derivation" />
+
+```
+Forward Euler Method
+Input:    initial x0 ≈ x(t0), function f(x,t), step size h, number of steps N
+Output:   sequence x0, x1, .., xN approximating x(t0), x(t0+h), .., x(t0+Nh)
+1: t ← t0
+2: for k = 0, .., N-1 do
+3:   x_{k+1} ← x_k + h·f(x_k, t)
+4:   t ← t + h
+5: end for
+```
+*(Newly authored, standard form; see e.g. Boyce & DiPrima §8.1.)*
+
+Each step commits a **local truncation error** of $O(h^2)$ (the size of the first dropped Taylor term, $\tfrac12h^2\ddot x$), since Euler only keeps the linear term. Over $N=O(1/h)$ steps needed to cover a fixed time interval, these errors accumulate to a **global error of $O(h)$**: halving $h$ roughly halves the total error, a modest (first-order) improvement rate.
+
+## Worked example: Euler vs. the true solution
+
+For $\dot x=-x$, $x(0)=1$ (true solution $x(t)=e^{-t}$, from ODE-01's exponential-decay pattern), take one Euler step with $h=0.5$: $x_1 = x_0+h(-x_0) = 1+0.5(-1) = 0.5$. The true value is $x(0.5)=e^{-0.5}\approx0.6065$, an error of about $0.107$, over 17% relative error from a single step.
+
+*(Verified with NumPy while authoring this module.)* This is a large error for a fairly modest step size, and it compounds: after 4 steps to $t=2$ ($h=0.5$ throughout), Euler gives $x\approx0.0625$ against the true $e^{-2}\approx0.1353$, a factor-of-2 error.
+
+<ExerciseCard id="ODE-03-ex2-euler-numeric" />
+
+## Runge-Kutta 4th order (RK4): a much better trade
+
+Euler only samples the slope once, at the *start* of each step. RK4 samples the slope **four times** within each step, at cleverly chosen intermediate points, then combines them in a weighted average designed to match the Taylor expansion of the true solution up to the 4th-order term:
+
+```
+Runge-Kutta 4th Order (RK4)
+Input:    initial x0 ≈ x(t0), function f(x,t), step size h, number of steps N
+Output:   sequence x0, x1, .., xN approximating x(t0), x(t0+h), .., x(t0+Nh)
+1: t ← t0
+2: for k = 0, .., N-1 do
+3:   k1 ← f(x_k, t)
+4:   k2 ← f(x_k + (h/2)·k1, t + h/2)
+5:   k3 ← f(x_k + (h/2)·k2, t + h/2)
+6:   k4 ← f(x_k + h·k3, t + h)
+7:   x_{k+1} ← x_k + (h/6)·(k1 + 2·k2 + 2·k3 + k4)
+8:   t ← t + h
+9: end for
+```
+*(Newly authored, standard form; see e.g. Boyce & DiPrima §8.4 or Press et al., Numerical Recipes Ch.17.)*
+
+Read the four stages as: $k_1$, the slope at the start; $k_2$, the slope at the midpoint, estimated using a half-step guess from $k_1$; $k_3$, the slope at the midpoint again, refined using $k_2$'s guess; $k_4$, the slope at the endpoint, estimated using a full step from $k_3$. The final update weights these $1{:}2{:}2{:}1$, a specific combination chosen (by matching Taylor series terms) so that RK4's **local error is $O(h^5)$** and its **global error is $O(h^4)$**: halving $h$ now shrinks the error by a factor of $16$, dramatically better than Euler's factor of $2$, at the cost of 4 function evaluations per step instead of 1.
+
+<ExerciseCard id="ODE-03-ex3-rk4-derivation-check" />
+
+## Worked example: RK4 vs. Euler, head to head
+
+Same problem, $\dot x=-x$, $x(0)=1$, $h=0.5$: $k_1=f(1,0)=-1$; $k_2=f(1+0.25(-1),0.25)=f(0.75,0.25)=-0.75$; $k_3=f(1+0.25(-0.75),0.25)=f(0.8125,0.25)=-0.8125$; $k_4=f(1+0.5(-0.8125),0.5)=f(0.59375,0.5)=-0.59375$. Combining: $x_1 = 1+\tfrac{0.5}{6}(-1+2(-0.75)+2(-0.8125)+(-0.59375)) \approx 0.60677$.
+
+*(Verified with NumPy while authoring this module.)* Compare to the true $x(0.5)=e^{-0.5}\approx0.60653$: RK4's error is about $0.00024$, roughly **450 times smaller** than Euler's error on the identical problem and step size, for 4x the per-step cost, a trade that's overwhelmingly worth it whenever function evaluations are cheap (which they usually are compared to the cost of a poor simulation).
+
+<ExerciseCard id="ODE-03-ex4-comparison-numeric" />
+
+## A note on stability and stiffness
+
+Both methods above are **explicit** (the update only uses already-known information, no equation-solving per step), which is simple but has a limitation: for some ODEs (called **stiff**, typically ones with widely separated fast and slow timescales, common in robot dynamics with both fast contact dynamics and slow overall motion), explicit methods need an impractically small $h$ just to remain numerically *stable* (not blow up), even though the true solution itself is smooth and slowly varying. **Implicit** methods (using $f$ evaluated at the *new*, not-yet-known point, requiring a per-step equation solve, e.g. via Newton's method from [OPT-01](/course/OPT/OPT-01)) trade extra per-step cost for much better stability on stiff problems. This is exactly why physics/robotics simulators often default to implicit or semi-implicit integrators rather than plain RK4, worth knowing the name of the issue even without deriving the full stability theory here.
+
+## Summary
+
+- Numerical integration marches an ODE forward in small steps using only $f$ evaluations, sidestepping the need for a closed-form solution.
+- Forward Euler, $x_{k+1}=x_k+hf(x_k,t_k)$, is a direct first-order Taylor step: local error $O(h^2)$, global error $O(h)$.
+- RK4 combines four slope estimates per step ($k_1,..,k_4$) with $1{:}2{:}2{:}1$ weights, achieving local error $O(h^5)$, global error $O(h^4)$, at 4x Euler's per-step cost, a trade that's almost always worth it.
+- Stiff ODEs (widely separated timescales) can force explicit methods like Euler/RK4 to unstably small step sizes; implicit methods trade a per-step equation solve for much better stability there.
+
+## Retrieval questions
+
+1. Derive the forward Euler update rule from a first-order Taylor expansion, without looking back.
+2. State the RK4 algorithm's four stages from memory, and explain in one sentence what each stage estimates.
+3. Why does RK4's error shrink by a factor of 16 (not 2) when you halve the step size, while Euler's only shrinks by a factor of 2?
+4. What is a stiff ODE, and why does it matter for choosing an integrator?
+
+## Mastery checklist
+
+- [ ] Can explain why numerical integration is needed for most real ODEs.
+- [ ] Derived forward Euler from a first-order Taylor expansion and can state its error order.
+- [ ] Can state the RK4 algorithm and explain what each of its four stages estimates.
+- [ ] Computed at least one Euler step and one RK4 step by hand, and compared their accuracy against a known solution.
+- [ ] Can explain what a stiff ODE is and why it matters for integrator choice.
+
+## Source note
+
+This module has no Toussaint-authored source (see ODE-01's source note); both algorithms are entirely standard numerical-methods content, presented here in their universal textbook form (e.g. Boyce & DiPrima §8.1/8.4, or any numerical-methods reference). All worked examples and numeric comparisons independently verified with NumPy while authoring this module.
+
+---
+
+**Next**: Block DYN — Robot Dynamics & Control (not yet built)

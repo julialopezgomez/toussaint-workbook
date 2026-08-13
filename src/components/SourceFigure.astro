@@ -1,0 +1,42 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  caption: string;
+  source: string;
+  page: string | number;
+}
+const { src, alt, caption, source, page } = Astro.props;
+---
+<figure class="source-figure">
+  <img src={src} alt={alt} loading="lazy" />
+  <figcaption>
+    {caption} <span class="fig-source">(Marc Toussaint, <code>{source}</code>, p.{page})</span>
+  </figcaption>
+</figure>
+
+<style>
+  .source-figure {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: var(--surface, #f9f9fb);
+    border: 1px solid var(--border, #e0e0e8);
+    border-radius: 0.6rem;
+    text-align: center;
+  }
+  .source-figure img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.3rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    .source-figure img { background: #fff; padding: 0.5rem; border-radius: 0.4rem; }
+  }
+  figcaption {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    opacity: 0.85;
+    text-align: left;
+  }
+  .fig-source { opacity: 0.7; font-size: 0.8rem; }
+</style>

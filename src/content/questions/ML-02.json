@@ -1,0 +1,90 @@
+{
+  "moduleId": "ML-02",
+  "exercises": [
+    {
+      "id": "ML-02-ex1-rbf-feature-numeric",
+      "objective": "Compute a radial basis function feature value.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 15, "originalNumber": "2:9" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For an RBF feature $\\phi_j(x)=e^{-\\frac12\\|x-c_j\\|^2}$ with $x=(1,1)$ and center $c_j=(0,0)$, compute $\\phi_j(x)$. Enter a decimal.",
+      "hints": [
+        "$\\|x-c_j\\|^2=(1-0)^2+(1-0)^2=2$.",
+        "$\\phi_j(x)=e^{-\\frac12(2)}=e^{-1}$.",
+        "$\\phi_j(x)\\approx0.3679$. (Independently verified with NumPy while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-02-ex2-estimator-variance-numeric",
+      "objective": "Compute estimator variance for a simple 1D regression case and connect it to overfitting.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 16, "originalNumber": "2:12" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For standardized 1D data with $X^\\top X=n$ (so $\\text{Var}\\{\\hat\\beta\\}=\\sigma^2/n$), $\\sigma^2=4$, $n=100$: compute $\\text{Var}\\{\\hat\\beta\\}$. Enter a decimal.",
+      "hints": [
+        "$\\text{Var}\\{\\hat\\beta\\}=(X^\\top X)^{-1}\\sigma^2=\\sigma^2/n$ in this standardized 1D case.",
+        "Substitute: $4/100$.",
+        "$\\text{Var}\\{\\hat\\beta\\}=0.04$. More data ($n$ larger) directly reduces estimator variance, exactly the 'more data means less overfitting' intuition, made precise."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-02-ex3-ridge-lasso-conceptual",
+      "objective": "Explain why lasso performs feature selection while ridge does not.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 19, "originalNumber": "2:19-20" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain, in terms of the two penalty functions' shapes (not just 'lasso uses absolute value'), why L1 (lasso) regularization tends to produce exactly-zero coefficients while L2 (ridge) does not.",
+      "hints": [
+        "Ridge's penalty $\\beta_j^2$ is smooth and has zero slope exactly at $\\beta_j=0$: shrinking a small $\\beta_j$ further toward zero costs less and less penalty-gradient the closer it gets, so the optimizer has little pressure to push it all the way to exactly zero.",
+        "Lasso's penalty $|\\beta_j|$ has a constant-magnitude slope everywhere except at $\\beta_j=0$, where it's non-differentiable (a sharp corner): this constant 'pull' toward zero doesn't weaken as $\\beta_j$ shrinks, so it's entirely plausible for the optimum to land exactly at the corner, $\\beta_j=0$, if the data doesn't provide enough gradient from the loss term to overcome that pull.",
+        "This is why lasso performs automatic feature selection (some $\\beta_j$ become exactly zero, dropping that feature entirely) while ridge only ever shrinks coefficients toward zero without eliminating any of them."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-02-ex4-cross-validation-conceptual",
+      "objective": "Explain why training error cannot be used to choose the regularization strength lambda.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 17, "originalNumber": "2:17" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain precisely why picking $\\lambda$ to minimize training error always gives $\\lambda=0$, and why that's the wrong choice.",
+      "hints": [
+        "Training error is $\\sum_i(y_i-\\phi(x_i)^\\top\\beta)^2$ alone; adding any regularization term can only ever pull $\\beta$ away from the unregularized least-squares minimizer, which is exactly the $\\beta$ that minimizes training error by definition.",
+        "So for any $\\lambda>0$, training error is (weakly) worse than at $\\lambda=0$; minimizing training error over choices of $\\lambda$ therefore always selects $\\lambda=0$, no exceptions.",
+        "But $\\lambda=0$ is exactly the no-regularization, maximal-estimator-variance, most-overfitting-prone setting; cross-validation instead estimates error on held-out data the model didn't fit, which genuinely can get worse as $\\lambda\\to0$ (overfitting) and worse again as $\\lambda\\to\\infty$ (underfitting), giving an actual, non-degenerate criterion for choosing $\\lambda$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-02-ex5-logistic-gradient-derivation",
+      "objective": "Derive the binary logistic regression gradient from its negative-log-likelihood loss.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 29, "originalNumber": "3:19" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Starting from $L(\\beta)=-\\sum_i[y_i\\log p_i+(1-y_i)\\log(1-p_i)]+\\lambda\\|\\beta\\|^2$ with $p_i=\\sigma(\\phi(x_i)^\\top\\beta)$, and using $\\sigma'(z)=\\sigma(z)(1-\\sigma(z))$ (ML-03), derive $\\nabla_\\beta L=X^\\top(p-y)+2\\lambda\\beta$.",
+      "hints": [
+        "For one data point, differentiate w.r.t. $\\beta$ using the chain rule through $p_i=\\sigma(z_i)$, $z_i=\\phi(x_i)^\\top\\beta$: $\\frac{\\partial}{\\partial\\beta}\\big[y_i\\log p_i+(1-y_i)\\log(1-p_i)\\big] = \\Big[\\frac{y_i}{p_i}-\\frac{1-y_i}{1-p_i}\\Big]\\,p_i(1-p_i)\\,\\phi(x_i)$.",
+        "Simplify the bracket: $\\Big[\\frac{y_i}{p_i}-\\frac{1-y_i}{1-p_i}\\Big]p_i(1-p_i) = y_i(1-p_i)-(1-y_i)p_i = y_i-p_i$. So the per-point derivative of $-[y_i\\log p_i+(1-y_i)\\log(1-p_i)]$ w.r.t. $\\beta$ is $(p_i-y_i)\\phi(x_i)$.",
+        "Summing over all $i$ and adding the regularization term's derivative $2\\lambda\\beta$: $\\nabla_\\beta L=\\sum_i(p_i-y_i)\\phi(x_i)+2\\lambda\\beta=X^\\top(p-y)+2\\lambda\\beta$ (stacking $\\phi(x_i)^\\top$ as rows of $X$). (Independently verified symbolically with SymPy while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

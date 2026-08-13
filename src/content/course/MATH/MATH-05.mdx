@@ -39,6 +39,14 @@ You should be comfortable with gradients (MATH-02) and basic constrained-optimiz
   answer="$G=G^\top$, and $d^\top G d > 0$ for every nonzero vector $d$."
 />
 
+## The differential as a 1-form, formally
+
+Recall from [MATH-03](/course/MATH/MATH-03) that a derivative is naturally a 1-form (a row-convention object that "eats" a tangent-step vector and outputs a scalar change). The source states this precisely:
+
+> **Definition 3.19 (differential).** Given $f:V\to G$, the differential is $df|_x: V\to G,\; v\mapsto\lim_{h\to0}\dfrac{f(x+hv)-f(x)}{h}$.
+
+$df|_x$ is linear in $v$ (the directional derivative), so $df|_x$ is a **$G$-valued 1-form**. What we usually call "the gradient" or "the Jacobian" is simply the *coordinates* of this 1-form in a chosen basis, exactly MATH-02's row-vector convention, now with its formal justification: a gradient is co-variant (transforms like a 1-form) precisely because it *is* one.
+
 ## Why the plain gradient isn't always "steepest"
 
 <ExerciseCard id="MATH-05-ex1-why-not-plain-gradient" />
@@ -80,7 +88,7 @@ Compare to the plain gradient descent direction, $-\nabla f(x) = \begin{pmatrix}
 
 ## Source note
 
-This module's topic and page range are from `lecture-maths`, §3.9 (pp. 39-42), which frames this via 1-forms and contra-/co-variance more formally than this module does. The Lagrange-multiplier derivation, worked example, and exercises here are newly authored, using a more direct constrained-optimization argument as a more approachable route to the same result, appropriate given this module's placement early in the course.
+This module's topic, page range, and Definition 3.19 are from `lecture-maths`, §3.9 (pp. 39-42), which frames this via 1-forms and contra-/co-variance more formally than the rest of this module does. The Lagrange-multiplier derivation, worked example, and exercises here are newly authored, using a more direct constrained-optimization argument as a more approachable route to the same result, appropriate given this module's placement early in the course.
 
 ---
 

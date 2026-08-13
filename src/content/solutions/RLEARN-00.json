@@ -1,0 +1,50 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RLEARN-00-ex1-taxonomy-classification",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 4, "description": "Correctly identifies the manipulation-model/constraints category with reasoning." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Manipulation model (state/observations -> constraints): the output is a spatial success constraint (grasp pose), not a control, value, or plan, matching RLEARN-06's grasp/affordance model row."
+    },
+    {
+      "exerciseId": "RLEARN-00-ex2-data-generation-classification",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 4, "description": "Correctly identifies simulation/domain-randomization with reasoning." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Simulation/domain transfer, specifically domain randomization: all data comes from a physics engine with randomized parameters, not the real robot or a human, matching RLEARN-04."
+    },
+    {
+      "exerciseId": "RLEARN-00-ex3-shortcut-mapping",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies inverse dynamics as the shortcut target." },
+          { "points": 2, "description": "Correctly explains why Q avoids the extra dynamics-model step V requires." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Learning Q(s,a) directly shortcuts the need for DYN-01's inverse dynamics model (qddot -> u). With only V(s), converting 'which direction increases value' into an actual control needs a differentiable dynamics model; Q already scores actions directly, no separate dynamics-model conversion step needed."
+    },
+    {
+      "exerciseId": "RLEARN-00-ex4-challenges-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains the Jacobian discontinuity at contact onset." },
+          { "points": 2, "description": "Correctly connects this to MANIP-02's hybrid dynamics framing." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Objects are part of the multibody system but not articulated: untouched, their Jacobian w.r.t. robot joints is exactly zero, jumping discontinuously the instant contact occurs. This hard on/off switching is exactly MANIP-02's hybrid dynamical system idea (there, stance/swing phase switching in legged locomotion): smooth continuous dynamics interleaved with discrete, non-smooth events, breaking the purely-continuous DYN-01 through DYN-04 framework."
+    }
+  ]
+}

@@ -47,7 +47,28 @@ const { title } = Astro.props;
       h1, h2, h3 { line-height: 1.25; }
       h2 { margin-top: 2.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
       code { background: var(--surface-2); padding: 0.1em 0.35em; border-radius: 0.3em; font-size: 0.9em; }
-      pre { background: var(--surface-2); padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+      /* Pseudocode/algorithm blocks (fenced ```text blocks): override Shiki's
+         inline-styled "github-dark" theme, which it applies unconditionally
+         regardless of the page's light/dark mode, since we want these to read
+         as plain, high-contrast monospace text matching the page theme, not a
+         syntax-highlighted code sample. Shiki sets background-color/color as
+         inline styles on .astro-code and per-token spans, so plain selectors
+         can't win; !important is required here. */
+      pre.astro-code span {
+        background-color: transparent !important;
+        color: var(--fg) !important;
+      }
+      pre {
+        background: var(--surface-2) !important;
+        color: var(--fg) !important;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        font-size: 0.85rem;
+        line-height: 1.55;
+        border: 1px solid var(--border);
+      }
+      pre code { background: none; padding: 0; border-radius: 0; font-size: inherit; }
       table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
       th, td { border: 1px solid var(--border); padding: 0.4rem 0.6rem; text-align: left; font-size: 0.92rem; }
       a { color: var(--accent); }

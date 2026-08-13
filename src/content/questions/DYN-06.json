@@ -1,0 +1,73 @@
+{
+  "moduleId": "DYN-06",
+  "exercises": [
+    {
+      "id": "DYN-06-ex1-controllability-expansion",
+      "objective": "Derive why the controllability matrix's columns are B, AB, A^2B, ... by repeated differentiation.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 136, "originalNumber": "§8.2:27" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Starting from $\\dot x=Ax+Bu$, differentiate once more to find $\\ddot x$ in terms of $x,u,\\dot u$. Explain, in one or two sentences, why this shows $x_i$ is influenced by $u$ 'directly' via $B$ while $\\ddot x_i$ is influenced only 'indirectly' via $AB$.",
+      "hints": [
+        "Differentiate $\\dot x=Ax+Bu$ with respect to $t$: $\\ddot x=A\\dot x+B\\dot u$. Substitute $\\dot x=Ax+Bu$ back in: $\\ddot x=A(Ax+Bu)+B\\dot u=A^2x+ABu+B\\dot u$.",
+        "So $\\ddot x$ depends on $u$ through the term $ABu$ (plus a $B\\dot u$ term from the derivative of $u$ itself). Compare to $\\dot x=Ax+Bu$, where $u$ enters directly through $B$ with no $A$ factor at all.",
+        "$x_i$'s rate of change is influenced directly by $u$ through row $i$ of $B$. $\\ddot x_i$ is influenced by $u$ only after passing through the dynamics matrix $A$ once (row $i$ of $AB$): $u$ first moves some $\\dot x_j$ via $B$, and $A$ then propagates that into $\\ddot x_i$, hence 'indirectly.' Stacking $B,AB,A^2B,\\ldots$ as columns of $C$ collects every level of directness at once."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-06-ex2-controllability-numeric",
+      "objective": "Compute a controllability matrix and determine controllability via its rank.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 137, "originalNumber": "§8.2:29 (\"Controllability examples\")" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["DYN-06-ex1-controllability-expansion"],
+      "answerType": "numeric",
+      "prompt": "For $A=\\begin{pmatrix}0&0\\\\1&0\\end{pmatrix}$, $B=\\begin{pmatrix}1\\\\0\\end{pmatrix}$, compute $C=[B\\ \\ AB]$ and its rank. Enter the rank (an integer 0, 1, or 2).",
+      "hints": [
+        "$AB=\\begin{pmatrix}0&0\\\\1&0\\end{pmatrix}\\begin{pmatrix}1\\\\0\\end{pmatrix}=\\begin{pmatrix}0\\\\1\\end{pmatrix}$.",
+        "$C=[B\\ \\ AB]=\\begin{pmatrix}1&0\\\\0&1\\end{pmatrix}$.",
+        "This is the $2\\times2$ identity matrix, rank $2$ (full rank, $\\dim(x)=2$): the system is completely controllable."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-06-ex3-eigenvalue-stability-numeric",
+      "objective": "Classify a PD-controlled point mass's stability from the eigenvalues of its closed-loop state matrix.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 140, "originalNumber": "§8.3:37 (\"Linear Stability Analysis: Example\")" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For $m=1,K_p=4,K_d=1$, compute the real part of the closed-loop eigenvalues $\\omega=\\dfrac{-K_d\\pm\\sqrt{K_d^2-4mK_p}}{2m}$ (a negative value confirms asymptotic stability). Enter a decimal.",
+      "hints": [
+        "Discriminant: $K_d^2-4mK_p=1-16=-15<0$, so the roots are complex (oscillatory-damped, matching DYN-02's classification).",
+        "For complex roots, $\\operatorname{Re}(\\omega)=-K_d/(2m)$ regardless of the discriminant's exact (negative) value.",
+        "$\\operatorname{Re}(\\omega)=-1/(2\\times1)=-0.5$. Negative, so the closed loop is asymptotically stable (and oscillatory, since the roots are complex)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-06-ex4-energy-lyapunov-derivation",
+      "objective": "Derive that the total-energy Lyapunov function decreases for the PD-controlled point mass iff K_d>0.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 141, "originalNumber": "§8.3:42 (\"Lyapunov function method – Energy Example\")" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "For the PD-controlled point mass in deviation coordinates $x=(q-q^*,\\dot q)$, with closed-loop dynamics $m\\ddot q=-K_p(q-q^*)-K_d\\dot q$, let $V(x)=\\tfrac12m\\dot q^2+\\tfrac12K_p(q-q^*)^2$ (kinetic plus proportional-term potential energy). Compute $\\dot V(x)$ and show it reduces to $-K_d\\dot q^2$.",
+      "hints": [
+        "$\\dot V = m\\dot q\\ddot q + K_p(q-q^*)\\dot q$ (product rule, using $\\frac{d}{dt}\\tfrac12K_p(q-q^*)^2=K_p(q-q^*)\\dot q$).",
+        "Substitute the closed-loop dynamics $m\\ddot q=-K_p(q-q^*)-K_d\\dot q$, i.e. $m\\dot q\\ddot q = \\dot q\\cdot[-K_p(q-q^*)-K_d\\dot q] = -K_p(q-q^*)\\dot q-K_d\\dot q^2$.",
+        "$\\dot V = [-K_p(q-q^*)\\dot q-K_d\\dot q^2] + K_p(q-q^*)\\dot q = -K_d\\dot q^2$. The $K_p(q-q^*)\\dot q$ terms cancel exactly, leaving $\\dot V=-K_d\\dot q^2\\leq0$ iff $K_d\\geq0$: the same stability condition as the eigenvalue analysis, reached by a completely independent route."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+---
+id: RLEARN-06
+block: RLEARN
+title: "Manipulation & Grasp Learning"
+tier: 1
+estimatedHours: 2.5
+prerequisites: ["MANIP-01", "RLEARN-01"]
+objectives:
+  - "Explain model-based and simulation-based grasp-label generation as two instances of RLEARN-02's privileged-teacher pattern."
+  - "State what GraspNet/DexNet-style architectures actually predict from an RGB-D scene."
+  - "Explain why general-purpose manipulation learning is often described as 'beyond the MDP/RL framework.'"
+sources:
+  - { sourceId: "lecture-robotlearning", pages: "p84-87 (§1.11, continuing past MANIP-01's p81-83)", role: "primary" }
+concepts:
+  - "Model-based vs. simulation-based grasp labels"
+  - "Grasp-prediction architectures"
+  - "Manipulation beyond pick-and-place"
+cheatsheetLinks: []
+nextModules: ["RLEARN-07"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+MANIP-01 built force closure from first principles. This module is deliberately short: it picks up exactly where MANIP-01 left off (that module already covered the source's own brief treatment of GraspNet/DexNet as "label generators"), filling in the genuinely new material, how grasp *data* actually gets generated at scale, what these architectures concretely predict, and why "manipulation" as a learning problem is broader than picking and placing.
+
+## Prerequisites & readiness check
+
+You should have MANIP-01's force-closure condition and RLEARN-02's privileged-teacher pattern fresh.
+
+<ReadinessCheck
+  question="From RLEARN-02, what is the privileged-teacher pattern?"
+  answer="Train a policy/model with privileged information unavailable at deployment, use it to generate training data, then train a deployment-time model on only the actually-available inputs."
+/>
+
+## Grasp labels are privileged-teacher, twice over
+
+**Model-based labels** (GraspNet-1Billion, DexNet 2.0): for every point in a scene, every approach direction, offset, roll, and width, compute MANIP-01's **force-closure metric** directly, requiring exact, ground-truth object poses and shapes. **Force-closure theory is the origin of the "intelligence" here**; the learned network's actual job is only to transfer that theory to work from real, noisy RGB-D input, where exact poses/shapes aren't available.
+
+<ExerciseCard id="RLEARN-06-ex1-privileged-teacher-grasp-labels" />
+
+**Simulation-based labels** (ACRONYM, Eppner, Mousavian & Fox, 2021): throw random objects (from a shape dataset) into a rigid-body physics simulator, generate candidate grasps, close and lift the gripper, and directly *measure* success (in-hand motion during lift) rather than computing a force-closure score at all.
+
+<ExerciseCard id="RLEARN-06-ex2-simulation-labels-numeric" />
+
+Both are the *same* underlying pattern as RLEARN-02's privileged teacher: some source of ground truth unavailable at deployment (exact shapes/poses for force closure; a full physics simulator for ACRONYM) generates labels, and the learned network only has to reproduce that source's judgments from realistic sensor input. **The physics simulator (Newton-Euler + contact models, DYN-01) is, in this precise sense, "the origin of intelligence" for ACRONYM-style data**, exactly as force-closure theory is for GraspNet/DexNet.
+
+## What grasp-prediction architectures actually predict
+
+**GraspNet-1Billion** (Fang et al., 2020): given a point cloud, first classify each point $p$ for viability/success, then predict the remaining grasp parameters (direction $D$, rotation $R$, width $w$), with separate loss functions per part, a genuinely structured, staged prediction rather than one monolithic regression. **AnyGrasp** (GraspNet 2, Fang et al., 2023) extends this to temporally-stable, dynamic predictions (grasping a moving object consistently across frames, not just a single static snapshot). Other notable lines: antipodal-grasp detection directly in point clouds (Ten Pas et al.), Contact-GraspNet (efficient 6-DOF grasps in cluttered scenes), and diffusion-based grasp/motion cost functions (Urain et al., 2023, directly RLEARN-02's diffusion-model machinery applied to grasp generation).
+
+<ExerciseCard id="RLEARN-06-ex3-architecture-conceptual" />
+
+**The real bottleneck, per the source's own stated view**: given good data, architecture design is comparatively solved; **data generation is the actual key**, and existing methods still have real deficits, especially for more complex hands than the standard parallel-jaw gripper.
+
+## Manipulation beyond pick-and-place
+
+Grasping is only one instance of manipulation. **Articulated objects** (doors, drawers, scissors) need a different representation entirely: **FlowBot3D** (Eisner, Zhang & Held, 2024) learns a mapping from every point $p$ on an object's surface to a **flow field** $F_p\in\mathbb{R}^3$ (the instantaneous direction that point would move under successful manipulation), assuming the gripper can attach anywhere on the surface, a fundamentally different target than "predict one good grasp pose."
+
+<ExerciseCard id="RLEARN-06-ex4-beyond-mdp-conceptual" />
+
+**Manipulation learning is often described as beyond the MDP/RL framework** precisely because of this: rather than learning a low-level state $\mapsto$ action policy (RL-01's MDP setting), most of the genuinely successful manipulation-learning work instead predicts *structured intermediate targets*, grasps in an RGB-D scene, manipulability/flow fields for articulated objects, keypoints/waypoints of interaction, which are then executed using ordinary model-based control (DYN-03's operational-space control, or KIN-03's IK) rather than a learned policy at all. This is worth internalizing as a genuine, still-open research question, not settled: general-purpose manipulation (pushing, throwing, rope/cloth manipulation, tool use) remains, in the source's own assessment, "far away from truly understanding" as a unified learning problem.
+
+## Summary
+
+- Both **model-based** (force-closure metric on known shapes) and **simulation-based** (physics simulator ground truth) grasp-label generation are instances of RLEARN-02's privileged-teacher pattern: some ground-truth source generates labels, the network transfers those judgments to realistic sensor input.
+- **GraspNet/DexNet-style architectures** predict grasp success/viability first, then geometric parameters, in structured stages, not one monolithic regression; data generation, not architecture, is the field's real bottleneck.
+- **Manipulation learning beyond pick-and-place** (articulated objects, flow fields, general manipulation) is often "beyond the MDP/RL framework": most successful work predicts structured intermediate targets (grasps, flow fields, keypoints), executed by classical model-based control, rather than learning a low-level policy directly.
+
+## Retrieval questions
+
+1. Explain why both model-based and simulation-based grasp-label generation are instances of the privileged-teacher pattern.
+2. What does a GraspNet-style architecture predict, and in what stages?
+3. What does FlowBot3D learn, and how does it differ from predicting a single grasp pose?
+4. Why is manipulation learning often described as "beyond the MDP/RL framework"?
+
+## Mastery checklist
+
+- [ ] Can explain grasp-label generation as an instance of the privileged-teacher pattern.
+- [ ] Can state what GraspNet/DexNet-style architectures predict.
+- [ ] Can explain FlowBot3D's flow-field target for articulated objects.
+- [ ] Can explain why manipulation learning is often "beyond the MDP/RL framework."
+
+## Source note
+
+This module's exposition, model-based grasp labels (GraspNet-1Billion, DexNet 2.0), simulation-based grasp labels (ACRONYM, Eppner, Mousavian & Fox, 2021), grasp-prediction architectures (GraspNet/AnyGrasp, and briefly Ten Pas et al., Contact-GraspNet, Urain et al.'s diffusion-based approach), and manipulation beyond pick-and-place (FlowBot3D, Eisner, Zhang & Held, 2024) are adapted from `lecture-robotlearning`, §1.11 (pp. 84-87), continuing directly from where [MANIP-01](/course/MANIP/MANIP-01) (which already covers this section's pp. 81-83) leaves off. The explicit framing of both grasp-label-generation approaches as instances of RLEARN-02's privileged-teacher pattern is newly authored connecting commentary. All exercises are newly authored; the simulation-based grasp-success count was independently verified by direct computation while authoring this module.
+
+---
+
+**Next**: [RLEARN-07: Task and Motion Planning & Logic-Geometric Programs](/course/RLEARN/RLEARN-07)

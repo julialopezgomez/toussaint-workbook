@@ -45,6 +45,18 @@
         ]
       },
       "fullSolution": "max(2x1+3x2) = -min(-2x1-3x2), so the objective in standard min form is c = [-2,-3].\nx1>=0 becomes -x1<=0; x2>=0 becomes -x2<=0.\nFull standard form: min c^T x s.t. Ax<=b, with c=[-2,-3], A=[[1,1],[-1,0],[0,-1]], b=[10,0,0] (three stacked rows: the original constraint, and the two rewritten non-negativity constraints)."
+    },
+    {
+      "exerciseId": "OPT-04-ex4-central-path-check",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.5, "tolerance": 0.001 },
+      "fullSolution": "lambda = -mu/g(x*(mu)) = -0.01/(-0.02) = 0.5. Check: lambda*g(x*(mu)) = 0.5*(-0.02) = -0.01 = -mu, confirming the relaxed complementarity condition holds exactly (it becomes the exact KKT complementarity lambda*g=0 only in the limit mu->0)."
+    },
+    {
+      "exerciseId": "OPT-04-ex5-auglag-update",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.9, "tolerance": 0.001 },
+      "fullSolution": "kappa_new = kappa_old + 2*nu*h(x') = 0.5 + 2*2*0.1 = 0.5 + 0.4 = 0.9. This update mechanism lets kappa converge to the correct multiplier as h(x') shrinks toward zero across iterations, without needing nu itself to grow unboundedly, avoiding the ill-conditioning of a pure penalty method."
     }
   ]
 }

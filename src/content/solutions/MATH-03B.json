@@ -1,0 +1,41 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "MATH-03B-ex1-psd-check",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly applies Sylvester's criterion to G1, concluding PD." },
+          { "points": 1, "description": "Correctly applies Sylvester's criterion to G2, concluding NOT PD." },
+          { "points": 1, "description": "Explains or demonstrates concretely what goes wrong for G2 (e.g. exhibits a v with v^T G2 v < 0)." }
+        ],
+        "commonErrors": [
+          "Only checking the diagonal entries are positive without checking the determinant condition (a common shortcut that misses non-PD matrices with positive diagonals, like G2 here)."
+        ]
+      },
+      "fullSolution": "G1: a=2>0, ad-b^2=2*2-1^2=3>0. Both Sylvester conditions hold, so G1 is PD, a valid metric tensor.\nG2: a=1>0, but ad-b^2=1*1-2^2=1-4=-3<0. Fails the second condition, so G2 is NOT PD. Concretely, for v=(1,-1): v^T G2 v = 1*1*1 + 1*2*(-1) + (-1)*2*1 + (-1)*1*(-1) = 1-2-2+1 = -2 < 0, directly violating the positive-definiteness requirement."
+    },
+    {
+      "exerciseId": "MATH-03B-ex2-metric-tensor-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 5, "tolerance": 0.01 },
+      "fullSolution": "G is PD (Sylvester: 2>0, 2*3-1=5>0). Gw = [[2,1],[1,3]] @ [3,-1] = [2*3+1*(-1), 1*3+3*(-1)] = [5,0]. v^T(Gw) = 1*5+2*0 = 5."
+    },
+    {
+      "exerciseId": "MATH-03B-ex3-projection-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly rewrites <e_i,x> = e_i^T x as a scalar and reassembles P(x) = (sum_i e_i e_i^T) x." },
+          { "points": 1, "description": "Correctly identifies sum_i e_i e_i^T = UU^T." },
+          { "points": 1, "description": "Correctly computes U^T U = I_k using orthonormality." },
+          { "points": 1, "description": "Correctly concludes P^2 = U I_k U^T = UU^T = P." }
+        ],
+        "commonErrors": [
+          "Confusing U^T U (a k x k matrix, = I_k) with U U^T (an n x n matrix, = P, generally NOT the identity unless k=n)."
+        ]
+      },
+      "fullSolution": "(a) <e_i,x> = e_i^T x (standard dot product), a scalar, so e_i<e_i,x> = e_i(e_i^T x) = (e_i e_i^T) x (outer product times x). Summing: P(x) = sum_i (e_i e_i^T) x = (sum_i e_i e_i^T) x. Since U=[e_1 .. e_k] has the e_i as columns, sum_i e_i e_i^T is exactly the matrix product U U^T. So P = UU^T.\n(b) P^2 = (UU^T)(UU^T) = U(U^T U)U^T. The (i,j) entry of U^T U is e_i^T e_j = <e_i,e_j> = delta_ij (orthonormality), so U^T U = I_k. Therefore P^2 = U I_k U^T = UU^T = P, confirming idempotency: P is a genuine projection."
+    }
+  ]
+}

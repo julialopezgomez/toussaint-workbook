@@ -1,6 +1,12 @@
 {
   "solutions": [
     {
+      "exerciseId": "PROB-05-ex0-density-eval",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.242, "tolerance": 0.001 },
+      "fullSolution": "Normalizing constant: 1/sqrt(2*pi*1) = 1/sqrt(2*pi) ~= 0.39894. Exponent: -0.5*(1-0)^2/1 = -0.5, e^-0.5 ~= 0.60653. Product: 0.39894*0.60653 ~= 0.24197, rounds to 0.2420."
+    },
+    {
       "exerciseId": "PROB-05-ex1-why-closed-family",
       "checkMode": "rubric",
       "rubric": {
@@ -36,6 +42,12 @@
       "checkMode": "deterministic",
       "deterministic": { "expected": 2.667, "tolerance": 0.01 },
       "fullSolution": "sigma_c^2 = (1/1 + 1/2)^-1 = 1.5^-1 = 0.6667. mu_c = sigma_c^2 * (a/A + b/B) = 0.6667*(2/1+4/2) = 0.6667*4 = 2.667. (Verified with NumPy while authoring this module.) The combined mean sits closer to a=2 (the tighter/more confident input, A=1) than to b=4 (the looser input, B=2), a precision-weighted average."
+    },
+    {
+      "exerciseId": "PROB-05-ex4-conditional-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.5, "tolerance": 0.01 },
+      "fullSolution": "E{y|x=1} = b + C*A^-1*(x-a) = 0 + 0.5*(1/1)*(1-0) = 0.5*1*1 = 0.5. (Independently verified via 2-million-sample Monte Carlo simulation while authoring this module.)"
     }
   ]
 }

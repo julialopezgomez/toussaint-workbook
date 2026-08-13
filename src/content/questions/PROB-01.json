@@ -2,6 +2,23 @@
   "moduleId": "PROB-01",
   "exercises": [
     {
+      "id": "PROB-01-ex0-axioms-check",
+      "objective": "Apply the probability-measure axioms to derive a standard identity.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 11, "originalNumber": "§1.2:2" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Using only the three probability-measure axioms (non-negativity, additivity on disjoint sets, normalization), derive the inclusion-exclusion identity $p(A\\cup B) = p(A)+p(B)-p(A\\cap B)$ for possibly-overlapping $A,B\\subseteq\\Omega$.",
+      "hints": [
+        "$A\\cup B$ can be split into three pairwise-disjoint pieces: $A\\setminus B$, $B\\setminus A$, and $A\\cap B$. By additivity, $p(A\\cup B) = p(A\\setminus B) + p(B\\setminus A) + p(A\\cap B)$.",
+        "Similarly, $A$ itself splits into the disjoint pieces $A\\setminus B$ and $A\\cap B$, so $p(A) = p(A\\setminus B) + p(A\\cap B)$, giving $p(A\\setminus B) = p(A) - p(A\\cap B)$. By the same logic, $p(B\\setminus A) = p(B) - p(A\\cap B)$.",
+        "Substituting both back into the first line: $p(A\\cup B) = [p(A)-p(A\\cap B)] + [p(B)-p(A\\cap B)] + p(A\\cap B) = p(A)+p(B)-p(A\\cap B)$, exactly the claimed identity (the double-subtracted $p(A\\cap B)$ corrects for counting the overlap twice)."
+      ],
+      "reviewCardIds": []
+    },
+    {
       "id": "PROB-01-ex1-joint-vs-conditional",
       "objective": "Distinguish joint, marginal, and conditional probability.",
       "provenance": "newly-authored",

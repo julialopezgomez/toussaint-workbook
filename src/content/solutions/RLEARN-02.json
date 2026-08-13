@@ -1,0 +1,64 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RLEARN-02-ex1-trajectory-distribution-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies low variance as a consistent bottleneck/precision requirement." },
+          { "points": 2, "description": "Correctly identifies high variance as demonstrator freedom, and states the practical use." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Low variance at time t means every demonstration passed through nearly the same x_t there, indicating a genuine task requirement (precise grasp point, keyhole, etc): a consistent bottleneck. High variance indicates freedom (many paths worked equally well). This lets a downstream controller enforce precision only where it actually matters."
+    },
+    {
+      "exerciseId": "RLEARN-02-ex2-distributional-shift-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains training loss is only evaluated at expert-visited states." },
+          { "points": 2, "description": "Correctly explains test-time states are determined by pi_theta itself, creating the mismatch." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Training loss is only ever evaluated at states the expert actually visited (all the dataset contains). At test time, pi_theta itself determines which states get visited; a small early error can reach states the expert never demonstrated, never trained on. So training loss under pi*'s distribution says nothing about loss under pi_theta's own distribution: distributional shift, absent from ordinary i.i.d. supervised learning."
+    },
+    {
+      "exerciseId": "RLEARN-02-ex3-compound-error-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly contrasts linear scaling in epsilon vs quadratic scaling in T." },
+          { "points": 2, "description": "Correctly states the implication for long-horizon behavior cloning." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Doubling epsilon (T fixed) doubles the bound's second term, linear. Doubling T (epsilon fixed) quadruples it, since T appears squared. This means plain BC is structurally worse-suited to long-horizon tasks than short ones even with identical per-step accuracy, since small errors compound quadratically with length, motivating DAgger and other fixes for long horizons."
+    },
+    {
+      "exerciseId": "RLEARN-02-ex4-privileged-teacher-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly states an advantage (DAgger-friendly second stage, simple augmentation)." },
+          { "points": 2, "description": "Correctly states a cost (simulation-focused, hierarchical/domain-knowledge-dependent)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Advantage: the distillation stage can be trained cheaply with DAgger since the teacher can be queried on-demand; data augmentation is simple. Cost: simulation-focused (needs a source of privileged ground truth) and hierarchical (requires domain knowledge to design the split). Trades a harder one-stage problem for two easier stages, at the cost of needing privileged info and added complexity."
+    },
+    {
+      "exerciseId": "RLEARN-02-ex5-generative-model-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly describes GAN and VAE's two-network structures." },
+          { "points": 2, "description": "Correctly describes Diffusion's single-network denoising structure." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "GAN: two networks trained adversarially, generator (produce realistic samples) and discriminator (tell real from generated). VAE: two networks trained cooperatively, encoder (compress to latent) and decoder (reconstruct from latent), with a KL regularizer. Diffusion: one network trained to remove noise, applied repeatedly; forward noising is fixed, the single trained network learns the reverse denoising step, generating samples via iterated application starting from pure noise."
+    }
+  ]
+}

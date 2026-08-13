@@ -3,29 +3,34 @@ id: MATH-02
 block: MATH
 title: "Gradients, Jacobians, Hessians & Taylor Expansion"
 tier: 1
-estimatedHours: 3
+estimatedHours: 4
 prerequisites: ["MATH-01"]
 objectives:
+  - "State the formal definitions of the Jacobian, gradient, directional derivative, and Hessian."
   - "Compute gradients of scalar-valued functions and Jacobians of vector-valued functions from scratch."
+  - "Explain what the Hessian's eigenvalues/eigenvectors reveal about local curvature, convexity, and saddle points."
   - "Compute Hessians and use them in a second-order Taylor expansion."
   - "Derive the gradient of a quadratic form $x^\\top Ax$ from index notation."
-  - "Numerically verify a hand-derived gradient using finite differences."
+  - "Numerically verify a hand-derived gradient/Jacobian using finite differences, including implementing the check in code."
 sources:
-  - { sourceId: "lecture-maths", pages: "p12-19 (§2.3-2.6)", role: "primary" }
+  - { sourceId: "lecture-maths", pages: "p12-15, p18-19 (§2.3, §2.5, §2.7.2)", role: "primary" }
 concepts:
-  - "Gradient"
   - "Jacobian"
+  - "Gradient"
+  - "Directional derivative"
   - "Hessian"
+  - "Curvature, convexity, saddle points"
   - "Taylor expansion"
   - "Quadratic form"
   - "Numerical gradient checking"
 notation:
-  - { symbol: "$\\nabla f(x)$", meaning: "gradient: vector of partial derivatives, for scalar-valued $f:\\mathbb{R}^n\\to\\mathbb{R}$" }
-  - { symbol: "$J(x)$", meaning: "Jacobian: matrix of partial derivatives, for vector-valued $f:\\mathbb{R}^n\\to\\mathbb{R}^m$" }
-  - { symbol: "$H(x)$ or $\\nabla^2 f(x)$", meaning: "Hessian: matrix of second partial derivatives" }
+  - { symbol: "$\\frac{\\partial}{\\partial x}f(x)$", meaning: "Jacobian matrix, $[\\partial x_j f_i]$, of $f:\\mathbb{R}^n\\to\\mathbb{R}^d$" }
+  - { symbol: "$\\nabla f(x)$", meaning: "gradient (a column vector) of scalar-valued $f:\\mathbb{R}^n\\to\\mathbb{R}$; equals the Jacobian transposed" }
+  - { symbol: "$\\nabla f(x)^\\top d$", meaning: "directional derivative of $f$ along unit direction $d$" }
+  - { symbol: "$\\nabla^2 f(x)$ or $H(x)$", meaning: "Hessian: symmetric matrix of second partial derivatives" }
   - { symbol: "$x^\\top Ax$", meaning: "quadratic form: a scalar built from a vector $x$ and matrix $A$" }
 cheatsheetLinks: []
-nextModules: ["MATH-03"]
+nextModules: ["MATH-02B"]
 ---
 
 import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
@@ -33,7 +38,7 @@ import ReadinessCheck from '../../../components/ReadinessCheck.astro';
 
 ## Why this matters
 
-Gradients, Jacobians, and Hessians are the vocabulary every optimization algorithm and every learned model gradient in this course is written in. This module rebuilds the mechanics from concrete component-level definitions, so that later, when you see $\nabla f(x) = (A+A^\top)x$ appear (as it will, constantly, e.g. underlying least-squares and Gauss-Newton in the Optimization block), you know exactly where it comes from rather than just recognizing the shape of the formula.
+Gradients, Jacobians, and Hessians are the vocabulary every optimization algorithm and every learned model gradient in this course is written in. This module rebuilds the mechanics from precise, formal definitions, so that later, when you see $\nabla f(x) = (A+A^\top)x$ appear (as it will, constantly, e.g. underlying least-squares and Gauss-Newton in the Optimization block), you know exactly where it comes from rather than just recognizing the shape of the formula.
 
 ## Prerequisites & readiness check
 
@@ -44,25 +49,79 @@ You should be comfortable with the chain rule from MATH-01.
   answer="$\partial z/\partial x = y$, $\partial z/\partial y = x$; $dx/dt=1$, $dy/dt=2t$. $dz/dt = y(1) + x(2t) = t^2 + t(2t) = 3t^2$. At $t=2$: $12$."
 />
 
-## Gradient, Jacobian, Hessian
+## The Jacobian and the gradient
 
-For a scalar-valued function $f:\mathbb{R}^n\to\mathbb{R}$, the **gradient** $\nabla f(x) \in \mathbb{R}^n$ collects all $n$ partial derivatives into a vector: $[\nabla f(x)]_i = \partial f/\partial x_i$.
+> **Definition 2.3 (Jacobian).** Given $f:\mathbb{R}^n\to\mathbb{R}^d$, the derivative (Jacobian matrix) is
+> $$\frac{\partial}{\partial x}f(x) = \begin{pmatrix}\frac{\partial}{\partial x_1}f_1(x) & \frac{\partial}{\partial x_2}f_1(x) & \cdots & \frac{\partial}{\partial x_n}f_1(x)\\ \frac{\partial}{\partial x_1}f_2(x) & \frac{\partial}{\partial x_2}f_2(x) & \cdots & \frac{\partial}{\partial x_n}f_2(x)\\ \vdots & & & \vdots \\ \frac{\partial}{\partial x_1}f_d(x) & \frac{\partial}{\partial x_2}f_d(x) & \cdots & \frac{\partial}{\partial x_n}f_d(x)\end{pmatrix} \in \mathbb{R}^{d\times n}$$
+> i.e. row $i$, column $j$ holds $\partial f_i/\partial x_j$: one row per output, one column per input.
 
-For a vector-valued function $f:\mathbb{R}^n\to\mathbb{R}^m$, the **Jacobian** $J(x)\in\mathbb{R}^{m\times n}$ generalizes this to a matrix: $J_{ij} = \partial f_i/\partial x_j$. (A gradient is just the special case $m=1$, written as a row or column depending on convention.)
+> **Definition 2.4 (gradient).** When $f:\mathbb{R}^n\to\mathbb{R}$ has a single output, the Jacobian is a row vector, $\frac{\partial}{\partial x}f(x) = \left(\frac{\partial}{\partial x_1}f,\,..,\,\frac{\partial}{\partial x_n}f\right)$. We define the **gradient** as the corresponding column vector: $\nabla f(x) = \left[\frac{\partial}{\partial x}f(x)\right]^\top$.
 
-The **Hessian** $H(x) \in \mathbb{R}^{n\times n}$ collects second derivatives: $H_{ij} = \partial^2 f/\partial x_i \partial x_j$. It's symmetric whenever $f$ is twice continuously differentiable (mixed partials commute).
+This row-vector-vs-column-vector distinction (Jacobian = row convention, gradient = column convention) is a deliberate, consistent choice in this course (matching contravariance, which you'll meet properly once tensors come up), not a typo, keep it straight since mixing the two conventions mid-derivation is a common source of shape errors.
 
-These feed directly into the **second-order Taylor expansion**, the direct multivariable generalization of what you derived from scratch in [MATH-00](/course/MATH/MATH-00): the scalar $f'(x)\delta$ becomes $\nabla f(x)^\top\delta$ (dot the gradient with the step direction), and $\tfrac12 f''(x)\delta^2$ becomes $\tfrac12 \delta^\top H(x)\delta$ (sandwich the step direction between the Hessian). You'll use this constantly throughout the Optimization block:
+The "purpose" of a derivative is to predict a change in function value from a change in input, to first order:
 
-$$f(x+\delta) \approx f(x) + \nabla f(x)^\top \delta + \tfrac12 \delta^\top H(x) \delta$$
+$$f(x+\delta) - f(x) \doteq \frac{\partial f(x)}{\partial x}\,\delta = \nabla f(x)^\top\delta$$
+
+where $\doteq$ means "equal in first-order approximation." This holds regardless of whether the output space is $\mathbb{R}^d$ or $\mathbb{R}$, and regardless of whether $\delta\in\mathbb{R}^n$ or $\delta\in\mathbb{R}$.
+
+Given a unit direction $d$ (i.e. $\|d\|=1$), the **directional derivative** of $f$ along $d$ is $\nabla f(x)^\top d$, and it holds that
+
+$$\nabla f(x)^\top d = \lim_{\epsilon\to0}\frac{f(x+\epsilon d)-f(x)}{\epsilon}$$
+
+i.e. the gradient tells you, in a single vector, the instantaneous rate of change along *any* direction: just dot it with that direction.
+
+<ExerciseCard id="MATH-02-ex0-directional-derivative" />
+
+## The Hessian, and what its eigenvalues mean
+
+> **Definition 2.5 (Hessian).** For a scalar function $f:\mathbb{R}^n\to\mathbb{R}$, the Hessian is the symmetric matrix of second partial derivatives:
+> $$\nabla^2f(x) = \frac{\partial}{\partial x}\nabla f(x) = \begin{pmatrix}\frac{\partial^2}{\partial x_1\partial x_1}f & \cdots & \frac{\partial^2}{\partial x_1\partial x_n}f\\ \vdots & & \vdots \\ \frac{\partial^2}{\partial x_n\partial x_1}f & \cdots & \frac{\partial^2}{\partial x_n\partial x_n}f\end{pmatrix}$$
+
+The Hessian can be thought of as "the Jacobian of $\nabla f$." For a univariate function, the Hessian is just a single number, the second derivative $f''(x)$ (called the function's "curvature" in this context): $f''(x)>0$ means locally curved upward (**convex**), $f''(x)<0$ means locally curved downward (**concave**).
+
+In the multivariate case, since $H$ is symmetric, it can always be decomposed as $H=\sum_i\lambda_ih_ih_i^\top$ with eigenvalues $\lambda_i$ and eigenvectors $h_i$ that are all mutually orthogonal, forming an orthonormal basis (you'll prove this general fact about symmetric matrices in [MATH-05](/course/MATH/MATH-05)). This gives a strong geometric picture of **how $H$ describes local curvature**: $\lambda_i$ is exactly the directional curvature along eigenvector $h_i$. If $\lambda_i>0$, $f$ curves upward along $h_i$; if $\lambda_i<0$, it curves downward along $h_i$.
+
+This becomes especially useful where $\nabla f(x)=0$ (a **stationary point**, zero slope in every direction):
+
+- If **all** $\lambda_i>0$ (H is positive definite), $f$ is locally convex in every direction and $x$ is a **local minimum**.
+- If **all** $\lambda_i<0$ (H is negative definite), $f$ is locally concave in every direction and $x$ is a **local maximum**.
+- If some $\lambda_i>0$ and some $\lambda_i<0$, $f$ curves down in some directions and up in others: $x$ is a **saddle point** (a local min along some directions, local max along others).
+
+This is exactly why second-order optimization methods (Newton's method, in [OPT-02](/course/OPT/OPT-02)) examine the Hessian's eigenvalues, and why "positive semi-definite" as a property of a matrix (formalized properly once we reach scalar products, [MATH-03B](/course/MATH/MATH-03B)) is such a central concept in optimization: it's precisely the algebraic condition for "this stationary point is a genuine (local) minimum, not a saddle."
+
+<ExerciseCard id="MATH-02-ex1-why-check-numerically" />
+
+## Taylor expansion
+
+The multivariable second-order Taylor expansion is the direct generalization of what you derived from scratch in [MATH-00](/course/MATH/MATH-00) for a single variable: $f(x+v) \approx f(x)+f'(x)v+\tfrac12f''(x)v^2+\cdots$ becomes, for $f:\mathbb{R}^n\to\mathbb{R}$,
+
+$$f(x+v) \approx f(x) + \nabla f(x)^\top v + \frac12 v^\top\nabla^2f(x)\,v + \cdots$$
+
+or, written out in index notation to make every shape explicit,
+
+$$f(x+v) \approx f(x) + \sum_j\frac{\partial}{\partial x_j}f(x)\,v_j + \frac12\sum_{j,k}\frac{\partial^2}{\partial x_j\partial x_k}f(x)\,v_jv_k + \cdots$$
+
+The scalar $f'(x)\delta$ becomes $\nabla f(x)^\top\delta$ (dot the gradient with the step direction), and $\tfrac12f''(x)\delta^2$ becomes $\tfrac12\delta^\top H(x)\delta$ (sandwich the step direction between the Hessian). You'll use this constantly throughout the Optimization block.
 
 ## Checking your gradients numerically
 
-Deriving a gradient by hand is error-prone, and a subtly wrong gradient can make an optimizer silently converge to the wrong place. The standard defense: compare your analytical gradient against a **finite-difference** approximation, which estimates the derivative directly from the definition, no calculus required:
+Deriving a gradient by hand is error-prone, and a subtly wrong gradient can make an optimizer silently converge to the wrong place. The standard defense: compare your analytical gradient/Jacobian against a **finite-difference** approximation, which estimates the derivative directly from the definition, no calculus required. This is described in the source as the actual, standard workflow for implementing any ML/AI/optimization method: (1) formalize the objective on paper, (2) derive gradients/Hessian on paper, (3) implement both the objective and the analytic gradient in code, (4) **test the implementation against a finite-difference estimate**, (5) only then plug it into an optimizer.
 
-$$\frac{\partial f}{\partial x_i} \approx \frac{f(x+\epsilon e_i) - f(x-\epsilon e_i)}{2\epsilon}, \qquad \epsilon \approx 10^{-6}$$
+```
+Algorithm 1: Finite Difference Jacobian Check
+Input:    x ∈ ℝⁿ, function f: ℝⁿ→ℝᵈ, function df: ℝⁿ→ℝᵈˣⁿ
+1: initialize Ĵ ∈ ℝᵈˣⁿ, and ε = 10⁻⁶
+2: for i = 1 : n do
+3:   Ĵ.,i = [f(x+ε·eᵢ) - f(x-ε·eᵢ)] / 2ε          // assigns the i-th column of Ĵ
+4: end for
+5: if ‖Ĵ - df(x)‖∞ < 10⁻⁴ return true; else false
+```
+*(Marc Toussaint, `lecture-maths.pdf`, p.18. Here eᵢ is the i-th standard basis vector in ℝⁿ.)*
 
-<ExerciseCard id="MATH-02-ex1-why-check-numerically" />
+Two details worth noticing: this uses the **centered** difference $[f(x+\epsilon e_i)-f(x-\epsilon e_i)]/2\epsilon$ rather than the one-sided $[f(x+\epsilon e_i)-f(x)]/\epsilon$ you may have seen elsewhere, centered differences have error $O(\epsilon^2)$ instead of $O(\epsilon)$, so they're the right default. And the check is column-by-column: perturbing input $i$ alone (via $\epsilon e_i$) estimates exactly column $i$ of the Jacobian, $\partial f/\partial x_i$, matching Definition 2.3 directly.
+
+<ExerciseCard id="MATH-02-ex1b-gradcheck-implementation" />
 
 ## The gradient of a quadratic form
 
@@ -78,7 +137,7 @@ Let $A = \begin{pmatrix}2&1\\0&3\end{pmatrix}$ (not symmetric), $x=\begin{pmatri
 
 $$\nabla f(x) = (A+A^\top)x = \begin{pmatrix}4&1\\1&6\end{pmatrix}\begin{pmatrix}1\\2\end{pmatrix} = \begin{pmatrix}6\\13\end{pmatrix}$$
 
-*(Independently verified with a finite-difference check at $\epsilon=10^{-6}$ while authoring this module: numerical gradient $[6.0, 13.0]$, matching exactly.)* The Hessian here is simply $A+A^\top = \begin{pmatrix}4&1\\1&6\end{pmatrix}$ itself, since $f$ is quadratic (the gradient is linear in $x$, so its derivative, the Hessian, is constant).
+*(Independently verified with a finite-difference check at $\epsilon=10^{-6}$ while authoring this module: numerical gradient $[6.0, 13.0]$, matching exactly.)* The Hessian here is simply $A+A^\top = \begin{pmatrix}4&1\\1&6\end{pmatrix}$ itself, since $f$ is quadratic (the gradient is linear in $x$, so its derivative, the Hessian, is constant). Its eigenvalues are both positive ($\lambda_1\approx3.30,\lambda_2\approx6.70$, you can verify via the characteristic polynomial from [MATH-05](/course/MATH/MATH-05)), confirming $x=0$ is this quadratic form's unique local (and here, global) minimum.
 
 <ExerciseCard id="MATH-02-ex3-numeric" />
 
@@ -86,27 +145,31 @@ $$\nabla f(x) = (A+A^\top)x = \begin{pmatrix}4&1\\1&6\end{pmatrix}\begin{pmatrix
 
 ## Summary
 
-- Gradient (vector), Jacobian (matrix, vector-valued generalization of gradient), and Hessian (matrix of second derivatives) are all built from the same partial-derivative bookkeeping.
+- The Jacobian (Definition 2.3) is a matrix of $\partial f_i/\partial x_j$; the gradient (Definition 2.4) is its transpose for scalar-valued $f$, a deliberate row/column convention split.
+- The directional derivative $\nabla f(x)^\top d$ gives the instantaneous rate of change along any unit direction $d$, and equals $\lim_{\epsilon\to0}[f(x+\epsilon d)-f(x)]/\epsilon$.
+- The Hessian (Definition 2.5) is symmetric, hence orthogonally diagonalizable; its eigenvalues give the curvature along each corresponding eigenvector direction, which is how convex/concave/saddle stationary points are classified.
 - $\nabla(x^\top Ax) = (A+A^\top)x$ in general, simplifying to $2Ax$ only when $A$ is symmetric, derive it from index notation rather than memorizing the symmetric-only shortcut.
-- Always sanity-check a hand-derived gradient against a finite-difference numerical estimate before trusting it.
+- Always sanity-check a hand-derived gradient/Jacobian against a centered finite-difference numerical estimate (Algorithm 1) before trusting it, this is standard practice, not optional paranoia.
 
 ## Retrieval questions
 
-1. What's the shape difference between a gradient and a Jacobian, and when does one reduce to the other?
-2. Write the finite-difference gradient-check formula from memory.
-3. Derive (don't just recall) $\nabla(x^\top Ax)$ for symmetric $A$ from the general (non-symmetric) result.
+1. Write Definition 2.3 (Jacobian) and Definition 2.4 (gradient) from memory, including which is a row and which is a column.
+2. What does a Hessian eigenvalue $\lambda_i$ tell you geometrically, and how do the signs of all $\lambda_i$ together classify a stationary point?
+3. Write the centered finite-difference formula from Algorithm 1 from memory, and explain why centered (not one-sided) differences are preferred.
+4. Derive (don't just recall) $\nabla(x^\top Ax)$ for symmetric $A$ from the general (non-symmetric) result.
 
 ## Mastery checklist
 
-- [ ] Can state the definitions of gradient, Jacobian, and Hessian precisely (not just "the derivative version").
+- [ ] Can state Definitions 2.3-2.5 (Jacobian, gradient, Hessian) precisely, including the row/column convention.
+- [ ] Can explain what the sign pattern of Hessian eigenvalues implies about a stationary point (min/max/saddle).
 - [ ] Derived $\nabla(x^\top Ax) = (A+A^\top)x$ from index notation.
 - [ ] Computed a gradient and Hessian for a concrete quadratic form.
-- [ ] Can explain what a numerical gradient check protects against.
+- [ ] Implemented (or traced through) the centered finite-difference Jacobian check, Algorithm 1.
 
 ## Source note
 
-This module's topic and page range are from `lecture-maths`, §2.3-2.6 (pp. 12-19), which also contains a GP-regression and a logistic-regression worked example (§2.4.2-2.4.3) and the "backprop in a neural net" exercises (§2.7-2.8, covered separately in [ML-03](/course/ML/ML-03)). All exposition, the worked example, and every exercise here are newly authored, paraphrasing the source's general topic coverage rather than quoting it.
+This module's exposition, definitions, and Algorithm 1 are adapted from `lecture-maths`, §2.3 (pp. 12-15, Definitions 2.3-2.5, directional derivative, Hessian curvature/eigenvalue discussion, Taylor expansion) and §2.5/§2.7.2 (pp. 18-19, the finite-difference gradient-check workflow and Algorithm 1). The quadratic-form worked example and most exercises are newly authored; the gradient-check implementation exercise is adapted from the coding exercise in §2.7.2. The matrix-derivative identities and worked examples (GP/logistic regression) from §2.4 are covered separately in [MATH-02B](/course/MATH/MATH-02B).
 
 ---
 
-**Next**: [MATH-03: Vector Spaces, Bases & Linear Maps](/course/MATH/MATH-03)
+**Next**: [MATH-02B: Matrix Calculus — Identities & Applied Examples](/course/MATH/MATH-02B)

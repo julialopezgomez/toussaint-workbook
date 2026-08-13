@@ -1,0 +1,123 @@
+---
+id: DYN-03
+block: DYN
+title: "Inverse Dynamics & the Standard Control Stack"
+tier: 1
+estimatedHours: 4
+prerequisites: ["DYN-01", "DYN-02"]
+objectives:
+  - "State the general robot dynamics $M(q)\\ddot q+F(q,\\dot q)=u$ and its inverse/forward dynamics uses."
+  - "Derive joint-space reference-trajectory tracking, and explain why it makes every joint behave like DYN-02's 1D point mass."
+  - "Derive operational-space control as the dynamic analogue of KIN-03's inverse-kinematics closed form."
+  - "Explain the Newton-Euler recursion's role as an efficient inverse-dynamics algorithm."
+sources:
+  - { sourceId: "lecture-robotics", pages: "p42-49 (§3.2-3.3)", role: "primary" }
+concepts:
+  - "General robot dynamics $M(q)\\ddot q+F(q,\\dot q)=u$"
+  - "Inverse/forward dynamics"
+  - "Reference-trajectory tracking, PD-like acceleration correction"
+  - "Operational space control"
+  - "Newton-Euler recursion"
+notation:
+  - { symbol: "$M(q),F(q,\\dot q)$", meaning: "mass matrix and bias forces, from DYN-01" }
+  - { symbol: "$\\ddot q^{\\text{ref}}_t,\\ddot y^*_t$", meaning: "desired joint-space / task-space acceleration at time $t$" }
+  - { symbol: "$T=JM^{-1}$", meaning: "operational-space analogue of the Jacobian" }
+cheatsheetLinks: []
+nextModules: ["DYN-04"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+import SourceFigure from '../../../components/SourceFigure.astro';
+
+## Why this matters
+
+This module is where DYN-01's equations of motion and DYN-02's point-mass control combine: general robot dynamics reduce to $M(q)\ddot q+F(q,\dot q)=u$, and controlling that turns out to always reduce, one way or another, to giving every relevant coordinate DYN-02's 1D point-mass PD behavior. Operational-space control is also a direct, satisfying payoff of KIN-03's IK derivation: identical algebra, applied to accelerations instead of positions.
+
+## Prerequisites & readiness check
+
+You should have $M(q)\ddot q+F(q,\dot q)=u$ (DYN-01) and PD control of a point mass (DYN-02) fresh.
+
+<ReadinessCheck
+  question="From DYN-02, what characteristic equation does PD control of a 1D point mass give, and what determines its damping regime?"
+  answer="$m\omega^2+K_d\omega+K_p=0$; the discriminant $K_d^2-4mK_p$ determines oscillatory-damped/over-damped/critically-damped."
+/>
+
+## General robot dynamics, and two uses
+
+Recapping DYN-01 in the notation this module needs: $M(q)\ddot q+F(q,\dot q)=u$, with $M(q)\in\mathbb{R}^{n\times n}$ symmetric PD (invertible), $F(q,\dot q)$ collecting Coriolis/centrifugal and gravity terms. Two direct uses, once $M(q)$ and $F(q,\dot q)$ are computable:
+
+$$\textbf{Inverse dynamics: } u = M(q)\ddot q^*+F(q,\dot q) \qquad \textbf{Forward dynamics: } \ddot q^* = M(q)^{-1}(u-F(q,\dot q))$$
+
+Inverse dynamics answers "what torques do I need for this desired acceleration?"; forward dynamics answers "what acceleration results from these torques?" (used to *simulate* the system, e.g. via RK4 from [ODE-03](/course/ODE/ODE-03)).
+
+**Computing $M(q),F(q,\dot q)$ efficiently**: the naive per-body-Jacobian sum from DYN-01 works but isn't the fastest route. The **Newton-Euler recursion** computes inverse dynamics $u=\text{NE}(q,\dot q,\ddot q^*)$ in $O(n)$ by propagating forces down the kinematic tree (forward pass: compute velocities/accelerations per link from the base outward; backward pass: compute joint torques from the leaves inward, via per-body force balance), without ever forming $M(q)$ explicitly. Useful side effect: calling it with different inputs isolates specific terms, $\text{NE}(q,0,0)=G(q)$ (gravity only), $\text{NE}(q,\dot q,0)=C(q,\dot q)\dot q+G(q)$ (Coriolis+gravity), $\text{NE}(q,0,e_i)=M(q)e_i$ (one column of the mass matrix at a time).
+
+## Following a reference trajectory in joint space
+
+<ExerciseCard id="DYN-03-ex1-naive-tracking-instability" />
+
+Given a smooth reference trajectory $q^{\text{ref}}_{0:T}$, the naive approach (read off $\ddot q^{\text{ref}}_t$ directly, e.g. via a finite-difference of the reference, and command $u=M(q)\ddot q^{\text{ref}}_t+F(q,\dot q)$) is unstable: tiny acceleration errors accumulate over time with nothing pulling the system back toward the reference. The fix is exactly DYN-02's PD idea, layered on top:
+
+$$\ddot q_t^* = \ddot q_t^{\text{ref}} + K_p(q_t^{\text{ref}}-q_t) + K_d(\dot q_t^{\text{ref}}-\dot q_t)$$
+
+then apply inverse dynamics, $u=M(q)\ddot q_t^*+F(q,\dot q)$. This is a genuinely elegant result: **every joint now behaves exactly like DYN-02's 1D point mass around the reference trajectory**, with the same $(K_p,K_d)$ damping-regime classification applying directly, since the nonlinear $M(q),F(q,\dot q)$ terms have been *exactly cancelled* by inverse dynamics, leaving pure point-mass-shaped error dynamics behind.
+
+<ExerciseCard id="DYN-03-ex2-tracking-error-dynamics" />
+
+## Operational space control: the dynamic analogue of IK
+
+Recall KIN-03's inverse kinematics: $q^*=\operatorname*{argmin}_q\|\phi(q)-y^*\|_C^2+\|q-q_0\|_W^2$. **Operational space control** asks the exact same question one derivative level up, for accelerations and torques instead of positions:
+
+$$u^* = \operatorname*{argmin}_u\ \|\ddot\phi(q)-\ddot y^*\|_C^2+\|u\|_H^2$$
+
+<ExerciseCard id="DYN-03-ex3-operational-space-derivation" />
+
+Working through the linearization (product rule on $\dot\phi=J\dot q$, giving $\ddot\phi=J\ddot q+\dot J\dot q$, then substituting forward dynamics $\ddot q=M^{-1}(u-F)$) gives, with $T:=JM^{-1}$:
+
+$$u^* = T^\sharp(\ddot y^*-\dot J\dot q+TF), \qquad T^\sharp = (T^\top CT+H)^{-1}T^\top C$$
+
+exactly KIN-03/[MATH-02B](/course/MATH/MATH-02B)'s Gauss-Newton closed form again, now with $T=JM^{-1}$ playing the role of the Jacobian and $(\ddot y^*-\dot J\dot q+TF)$ playing the role of the target residual. The desired task-space acceleration $\ddot y_t^*$ is itself generated the same DYN-02 way: $\ddot y_t^* = \ddot y_t^{\text{ref}}+K_p(y_t^{\text{ref}}-y_t)+K_d(\dot y_t^{\text{ref}}-\dot y_t)$.
+
+<SourceFigure
+  src="/figures/lecture-robotics/fig4-joint-vs-operational-space.png"
+  alt="Two illustrations of a 2-link arm: one with spring-dampers at every joint (joint space control), one with a single spring-damper at the end-effector (operational space control)"
+  caption="Joint-space control (a PD spring-damper at every joint) vs. operational-space control (the arm behaves as if a single spring-damper connected the end-effector directly to its target): the same underlying math, applied one level of indirection apart."
+  source="Lecture-Robotics.pdf"
+  page="48"
+/>
+
+Operational space control literally makes the end-effector *feel* like DYN-02's 1D point mass, directly, even though the actual actuators are joint torques several linkage-levels away, exactly what you want when the task (e.g. "reach this point," "track this end-effector trajectory") is naturally specified in task space rather than joint space.
+
+## Multiple tasks
+
+Both the IK and operational-space formulations generalize immediately to a "big" kinematic map $\Phi(q)$ stacking several feature maps (position, orientation, multiple end-effectors, obstacle-avoidance margins, ...): $q^*=\operatorname*{argmin}_q\|q-q_0\|_W^2+\|\Phi(q)\|^2$ (statics) or $u^*=\operatorname*{argmin}_u\|u\|_H^2+\|\Phi(q)\|^2$ (dynamics), the same regularized-least-squares machinery handling arbitrarily many simultaneous objectives at once, simply by stacking rows of $\Phi$.
+
+## Summary
+
+- $M(q)\ddot q+F(q,\dot q)=u$ gives inverse dynamics ($u$ from desired $\ddot q$) and forward dynamics ($\ddot q$ from applied $u$, used for simulation); the Newton-Euler recursion computes inverse dynamics in $O(n)$ without forming $M(q)$ explicitly.
+- Naively tracking a reference trajectory's raw accelerations is unstable; adding DYN-02's PD correction to the desired acceleration, then cancelling the nonlinearity via inverse dynamics, makes every joint behave exactly like a 1D point mass around the reference.
+- Operational space control is the acceleration/torque-level analogue of KIN-03's IK, with the identical Gauss-Newton-shaped closed form, $T=JM^{-1}$ standing in for the Jacobian.
+- Both the position-level and acceleration-level formulations stack multiple simultaneous task objectives via a single "big" kinematic map $\Phi(q)$.
+
+## Retrieval questions
+
+1. Write inverse dynamics and forward dynamics from memory, and explain what each is used for.
+2. Why is naive reference-trajectory tracking unstable, and what fixes it?
+3. Derive $\ddot\phi(q)=J\ddot q+\dot J\dot q$ from $\dot\phi=J\dot q$, without looking back.
+4. State the operational-space control closed form, and explain the analogy to KIN-03's IK closed form term by term.
+
+## Mastery checklist
+
+- [ ] Can state inverse and forward dynamics and what each is used for.
+- [ ] Can explain why naive trajectory tracking is unstable and how DYN-02's PD correction fixes it.
+- [ ] Derived $\ddot\phi(q)=J\ddot q+\dot J\dot q$.
+- [ ] Can state the operational-space control closed form and its analogy to IK.
+
+## Source note
+
+This module's exposition, the general dynamics form, inverse/forward dynamics, the Newton-Euler recursion, reference-trajectory tracking, and operational space control (including the figure) are adapted from `lecture-robotics`, §3.2-3.3 (pp. 42-49). The $\ddot\phi=J\ddot q+\dot J\dot q$ derivation is presented in its standard product-rule form (independently verified against a finite-difference check while authoring this module) rather than a coefficient variant appearing in one source slide, which didn't reproduce under direct verification. All exercises are newly authored.
+
+---
+
+**Next**: [DYN-04: Optimal Control & Trajectory Optimization](/course/DYN/DYN-04)

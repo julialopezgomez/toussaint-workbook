@@ -1,0 +1,72 @@
+{
+  "moduleId": "DYN-02",
+  "exercises": [
+    {
+      "id": "DYN-02-ex1-p-control-derivation",
+      "objective": "Derive the characteristic roots of proportional-only control.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 38, "originalNumber": "§3.1:8" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "For $m\\ddot q = K_p(q^*-q)$, substitute the ansatz $q(t)=a+be^{\\omega t}$ and derive $\\omega=\\pm i\\sqrt{K_p/m}$ (and $a=q^*$), exactly as you did for linear systems in ODE-02.",
+      "hints": [
+        "Compute $\\ddot q(t) = b\\omega^2e^{\\omega t}$ (differentiate the ansatz twice). Substitute both $q(t)$ and $\\ddot q(t)$ into the ODE: $mb\\omega^2e^{\\omega t} = K_p(q^*-a-be^{\\omega t}) = K_p(q^*-a)-K_pbe^{\\omega t}$.",
+        "Group terms: $(mb\\omega^2+K_pb)e^{\\omega t} = K_p(q^*-a)$. Since $e^{\\omega t}$ varies with $t$ but the right side doesn't, both sides must vanish independently (for this to hold at every $t$): $mb\\omega^2+K_pb=0$ and $q^*-a=0$.",
+        "From $q^*-a=0$: $a=q^*$. From $mb\\omega^2+K_pb=0$ (with $b\\neq0$): $m\\omega^2+K_p=0$, so $\\omega^2=-K_p/m$, giving $\\omega=\\pm i\\sqrt{K_p/m}$. Purely imaginary roots: an undamped oscillation around $q^*$ that never settles, matching ODE-02's 'center' classification exactly."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-02-ex2-pd-characteristic-equation",
+      "objective": "Derive the PD closed-loop characteristic equation.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 39, "originalNumber": "§3.1:10-11" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["DYN-02-ex1-p-control-derivation"],
+      "answerType": "derivation",
+      "prompt": "For $m\\ddot q = K_p(q^*-q)-K_d\\dot q$, using the same ansatz $q(t)=a+be^{\\omega t}$, derive the characteristic equation $m\\omega^2+K_d\\omega+K_p=0$.",
+      "hints": [
+        "$\\dot q(t) = b\\omega e^{\\omega t}$, $\\ddot q(t)=b\\omega^2e^{\\omega t}$. Substitute all three into the ODE: $mb\\omega^2e^{\\omega t} = K_p(q^*-a-be^{\\omega t}) - K_db\\omega e^{\\omega t}$.",
+        "Group the $e^{\\omega t}$ terms on one side: $(mb\\omega^2+K_db\\omega+K_pb)e^{\\omega t} = K_p(q^*-a)$. As before, both sides must vanish independently.",
+        "From the $e^{\\omega t}$ side (with $b\\neq0$): $m\\omega^2+K_d\\omega+K_p=0$, the characteristic equation, with roots $\\omega=\\dfrac{-K_d\\pm\\sqrt{K_d^2-4mK_p}}{2m}$ by the quadratic formula (and $a=q^*$ from the constant term, as before)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-02-ex3-damping-classify",
+      "objective": "Classify a PD controller's damping regime and compute its decay rate/oscillation frequency.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["DYN-02-ex2-pd-characteristic-equation"],
+      "answerType": "numeric",
+      "prompt": "For $m=2$, $K_p=8$, $K_d=4$: classify the damping regime (using $K_d^2$ vs $4mK_p$), then compute the oscillation frequency $\\sqrt{K_p/m-K_d^2/(4m^2)}$. Enter the frequency as a decimal to 3 decimal places.",
+      "hints": [
+        "$K_d^2=16$, $4mK_p=64$. Since $16<64$, this is the **oscillatory-damped** regime (complex characteristic roots).",
+        "$K_p/m = 8/2=4$. $K_d^2/(4m^2) = 16/16=1$.",
+        "Frequency $=\\sqrt{4-1}=\\sqrt3\\approx1.732$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-02-ex4-lambda-xi-numeric",
+      "objective": "Convert PD gains into the time-scale/damping-ratio parameterization.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 41, "originalNumber": "§3.1:14" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["DYN-02-ex3-damping-classify"],
+      "answerType": "numeric",
+      "prompt": "For the same $m=2$, $K_p=8$, $K_d=4$, compute the damping ratio $\\xi=K_d/\\sqrt{4mK_p}$. Enter a decimal.",
+      "hints": [
+        "$4mK_p = 4(2)(8)=64$, so $\\sqrt{4mK_p}=8$.",
+        "$\\xi = K_d/8 = 4/8$.",
+        "$\\xi=0.5$ (confirming oscillatory-damped, since $\\xi<1$, consistent with the previous exercise's classification via the discriminant)."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

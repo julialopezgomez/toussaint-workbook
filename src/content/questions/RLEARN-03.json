@@ -1,0 +1,56 @@
+{
+  "moduleId": "RLEARN-03",
+  "exercises": [
+    {
+      "id": "RLEARN-03-ex1-reward-shaping-derivation",
+      "objective": "Derive that potential-based reward shaping's optimal value function is the original value function shifted by the potential.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 63, "originalNumber": "1.8:22 (reward shaping reference)" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Given $V^*$ solves RL-01's Bellman optimality equation for reward $R$, verify by direct substitution that $V'(s):=V^*(s)-\\Phi(s)$ solves the Bellman optimality equation for the shaped reward $R'(s,a,s')=R(s,a,s')+\\gamma\\Phi(s')-\\Phi(s)$.",
+      "hints": [
+        "Write the shaped Bellman equation: $V'(s)=\\max_a\\mathbb{E}_{s'}\\{R(s,a,s')+\\gamma\\Phi(s')-\\Phi(s)+\\gamma V'(s')\\}$. Since $-\\Phi(s)$ doesn't depend on $a$ or $s'$, factor it out: $V'(s)=-\\Phi(s)+\\max_a\\mathbb{E}_{s'}\\{R(s,a,s')+\\gamma[\\Phi(s')+V'(s')]\\}$.",
+        "Substitute the guess $V'(s')=V^*(s')-\\Phi(s')$ into the bracket: $\\Phi(s')+V'(s')=\\Phi(s')+V^*(s')-\\Phi(s')=V^*(s')$.",
+        "So $V'(s)=-\\Phi(s)+\\max_a\\mathbb{E}_{s'}\\{R(s,a,s')+\\gamma V^*(s')\\}=-\\Phi(s)+V^*(s)$, exactly the guess: $V'(s)=V^*(s)-\\Phi(s)$ is confirmed to be a consistent fixed point. Since $\\Phi(s)$ doesn't depend on $a$, the $\\operatorname*{argmax}_a$ (the optimal policy) is completely unchanged. (Independently verified numerically on a random small MDP while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-03-ex2-onpolicy-conceptual",
+      "objective": "Explain why on-policy data requirements are a genuine bottleneck for training deep RL on physical robots.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 63, "originalNumber": "1.9:16-17 (context)" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain why needing (near-)on-policy data is a much bigger practical problem for a physical robot than for a simulated one.",
+      "hints": [
+        "In simulation, generating a fresh rollout under the current policy costs only compute time, which is cheap and fully parallelizable.",
+        "On a physical robot, generating a fresh rollout requires real wall-clock time, physical wear, potential safety risk, and often human supervision, none of which parallelize or speed up the way simulated compute does.",
+        "So an algorithm needing frequently-refreshed on-policy data (rather than being able to reuse a large stored buffer of older, off-policy data) imposes a real-world sample-collection cost that dominates practical training time on hardware, exactly why so much robot RL happens in simulation first (RLEARN-04)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-03-ex3-exploration-noise-conceptual",
+      "objective": "Explain why temporally-correlated exploration noise gives better state coverage than naive per-step noise.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 31, "originalNumber": "1.5:24 (connects to exploration discussion)" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain why pink noise or an Ornstein-Uhlenbeck process gives better exploration coverage than i.i.d. per-step (Brownian-like) random noise, for the same number of environment steps.",
+      "hints": [
+        "I.i.d. per-step noise has zero correlation between consecutive actions, so its effects on the system tend to average out (a push one way is nearly as likely to be undone by a push the other way the very next step), producing lots of small, self-cancelling jitter rather than genuine excursions to new states.",
+        "Temporally-correlated noise (pink noise, Ornstein-Uhlenbeck) instead tends to push in a similar direction over several consecutive steps before reversing, producing coherent, sustained excursions.",
+        "This directly parallels RLEARN-01's 'good data' principle (system identification needs frequency coverage, not just any input): sustained, structured excursions actually explore new parts of state space per unit of real-robot time, where uncorrelated jitter mostly cancels itself out and covers less ground."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

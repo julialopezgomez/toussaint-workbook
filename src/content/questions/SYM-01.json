@@ -1,0 +1,56 @@
+{
+  "moduleId": "SYM-01",
+  "exercises": [
+    {
+      "id": "SYM-01-ex1-truth-evaluation",
+      "objective": "Evaluate a propositional sentence's truth under a given model.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 168, "originalNumber": "4.5:9" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "For the model $P=\\text{false},\\ Q=\\text{false},\\ R=\\text{true}$, evaluate $\\neg P\\wedge(Q\\vee R)$. Enter 'true' or 'false'.",
+      "hints": [
+        "$\\neg P$: since $P=\\text{false}$, $\\neg P=\\text{true}$.",
+        "$Q\\vee R$: since $R=\\text{true}$ (even though $Q=\\text{false}$), $Q\\vee R=\\text{true}$.",
+        "$\\neg P\\wedge(Q\\vee R)=\\text{true}\\wedge\\text{true}=\\text{true}$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "SYM-01-ex2-entailment-conceptual",
+      "objective": "Distinguish entailment from a specific inference procedure's derivability, and connect this to soundness/completeness.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 168, "originalNumber": "4.5:7" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain the difference between $KB\\models\\alpha$ (entailment) and $KB\\vdash_i\\alpha$ (derivability by procedure $i$), and state precisely what it would mean for $i$ to be sound but not complete.",
+      "hints": [
+        "$KB\\models\\alpha$ is a semantic fact about models: it's true independent of any particular algorithm, purely a statement about which models satisfy $KB$ and $\\alpha$.",
+        "$KB\\vdash_i\\alpha$ is a statement about what a *specific procedure* $i$ can actually produce as output, which may or may not match the full set of entailed sentences.",
+        "Sound but not complete means: everything $i$ derives is genuinely entailed (no false conclusions ever slip through), but there exist some sentences that are genuinely entailed by $KB$ that $i$ nonetheless fails to derive, i.e. $i$ is trustworthy but not exhaustive."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "SYM-01-ex3-modus-ponens-derivation",
+      "objective": "Apply one step of forward chaining using Modus Ponens on a small Horn-form KB.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 172, "originalNumber": "4.5:21" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Given the Horn-form KB $\\{C,\\ (B\\Rightarrow A),\\ (C\\wedge D\\Rightarrow B)\\}$ and the fact $D$ (so the full KB is $\\{C,D,(B\\Rightarrow A),(C\\wedge D\\Rightarrow B)\\}$), use Modus Ponens twice to derive $A$.",
+      "hints": [
+        "First, check which rule's premises are already fully satisfied: $C\\wedge D\\Rightarrow B$ has premises $C$ and $D$, both already known facts.",
+        "Apply Modus Ponens: from $C,D$ and $C\\wedge D\\Rightarrow B$, derive $B$.",
+        "Now $B\\Rightarrow A$'s premise $B$ is known (just derived). Apply Modus Ponens again: from $B$ and $B\\Rightarrow A$, derive $A$. This two-step process, always firing whatever rule's premises are currently satisfied until the query is reached, is exactly forward chaining."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

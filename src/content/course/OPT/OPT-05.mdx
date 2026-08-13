@@ -3,24 +3,26 @@ id: OPT-05
 block: OPT
 title: "Stochastic & Blackbox Optimization"
 tier: 1
-estimatedHours: 2.5
+estimatedHours: 4.5
 prerequisites: ["OPT-02"]
 objectives:
-  - "Explain the speed/accuracy tradeoff stochastic gradient descent makes relative to full-batch gradient descent."
+  - "Explain the speed/accuracy tradeoff SGD makes relative to full-batch gradient descent, and state the SGD/episodic-SGD algorithms."
+  - "State the Lipschitz-continuity assumption and derive the SGD convergence bound from it."
   - "Compute an SGD step using a mini-batch gradient estimate."
-  - "Understand momentum/Adam as refinements that reduce gradient-estimate noise or adapt per-parameter step sizes."
-  - "Explain the No Free Lunch theorem's actual practical implication (not \"nothing matters\")."
+  - "State the RMSprop/Adagrad/momentum/Adam update rules and explain what each one adapts."
+  - "State the No Free Lunch theorem formally and explain its actual practical implication."
 sources:
-  - { sourceId: "lecture-optimization", pages: "p56-89 (Part 3, §3.1-3.2)", role: "primary" }
+  - { sourceId: "lecture-optimization", pages: "p56-64 (§3.1-3.2)", role: "primary" }
 concepts:
   - "Stochastic Gradient Descent (SGD)"
-  - "Mini-batch gradient estimate"
-  - "Momentum / Adam"
+  - "Lipschitz continuity"
+  - "SGD convergence bound"
+  - "RMSprop / Adagrad / momentum / Adam"
   - "No Free Lunch (NFL) theorem"
-  - "Evolutionary / blackbox optimization"
 notation:
-  - { symbol: "$\\widehat{\\nabla f}(x)$", meaning: "a noisy, unbiased estimate of the true gradient, e.g. from a mini-batch" }
-  - { symbol: "$N$", meaning: "dataset size" }
+  - { symbol: "$\\nabla f_i(w)$", meaning: "gradient of a single cost component (e.g. one data point or mini-batch)" }
+  - { symbol: "$L$", meaning: "Lipschitz constant of $\\nabla f$" }
+  - { symbol: "$\\sigma^2$", meaning: "variance of the per-component gradient estimate, $\\text{Var}\\{\\nabla f_i(w)\\}$" }
 cheatsheetLinks: []
 nextModules: ["OPT-06"]
 ---
@@ -43,7 +45,34 @@ You should have Gauss-Newton (OPT-02) fresh, as context for "why would you ever 
 
 ## The full-batch vs. mini-batch tradeoff
 
+For an **additive cost function**, $\min_wf(w)=\frac1n\sum_{i=1}^nf_i(w)$ (e.g. a per-data-point loss plus regularizer, $f(w)=\frac1n\sum_i\ell(f(x_i;w),y_i)+\frac\lambda2\|w\|^2$), computing $\nabla f$ exactly requires touching every one of the (possibly huge) $n$ data points, every single step.
+
 <ExerciseCard id="OPT-05-ex1-why-sgd" />
+
+**Stochastic gradient descent** instead computes only $\nabla f_i(w)$ for one (or a mini-batch of) randomly-sampled component(s):
+
+```
+Stochastic Gradient Descent
+Input:    initial w0 ∈ ℝⁿ, gradient functions ∇fᵢ(w), stepsize schedule αk
+1: for k = 0, 1, 2, ... do
+2:   sample i uniformly (iid) from {1,..,n}
+3:   wk+1 ← wk - αk·∇fᵢ(wk)
+4: end for
+```
+```
+Stochastic Gradient Descent (episodic)
+Input:    initial w0 ∈ ℝⁿ, gradient functions ∇fᵢ(w), stepsize schedule αk
+1: initialize k = 0
+2: for episode j = 0, 1, ... do
+3:   for i = 1, .., n (or i = RandomPermutation({1,..,n})) do
+4:     wk+1 ← wk - αk·∇fᵢ(wk)
+5:     k ← k + 1
+6:   end for
+7: end for
+```
+*(Marc Toussaint, `lecture-optimization.pdf`, p.57. $\nabla f_i(w)$ has expectation $\mathbb{E}\{\nabla f_i(w)\}=\nabla f(w)$.)*
+
+Crucially, $\nabla f_i(w)$ is an **unbiased** estimator: $\mathbb{E}\{\nabla f_i(w)\}=\nabla f(w)$, so on average across many steps, SGD behaves like gradient descent, just noisier per step, in exchange for being $n$ times cheaper per step.
 
 ## Worked example
 
@@ -55,42 +84,99 @@ Using a mini-batch $\{a_1,a_4\}=\{1,2\}$ instead: $\widehat{\nabla f}(0) = \tfra
 
 <ExerciseCard id="OPT-05-ex2-numeric" />
 
-## Momentum and Adam, briefly
+## Convergence of SGD
 
-Two widely-used refinements reduce the practical impact of gradient noise:
+SGD is a method to find a point where $\nabla f(w)\approx0$; convergence analysis studies how $\|\nabla f(w_k)\|$ decreases with $k$, in expectation. The standard assumption:
 
-- **Momentum** accumulates a running average of recent gradients (rather than using only the current step's noisy estimate), smoothing out the noise and helping push through shallow regions consistently pointing the same general direction.
-- **Adam** additionally adapts a per-parameter step size based on a running estimate of each parameter's gradient variance, taking smaller steps for noisy/high-variance parameters and larger steps for consistently-informative ones.
+> **Definition (Lipschitz continuity of $\nabla f$).** $\exists L\in\mathbb{R}$ s.t. $\forall w,\bar w: \|\nabla f(w)-\nabla f(\bar w)\|\le L\|w-\bar w\|$ ("the change of gradient $\nabla f(w)$ is limited").
 
-Both are covered here conceptually; you'll use them directly (via PyTorch's built-in optimizers) rather than re-deriving them from scratch, when you get to training networks in later modules.
+> **Theorem.** Assuming $\nabla f$ is $L$-continuous and $\text{Var}\{\nabla f_i(w)\}=\sigma^2$, then
+> $$\min_k\{\mathbb{E}\{\|\nabla f(w_k)\|^2\}\} \le \frac{f(w_0)-f^*}{\sum_{k=0}^{t-1}\alpha_k} + \frac{\sum_{k=0}^{t-1}\alpha_k^2}{\sum_{k=0}^{t-1}\alpha_k}\cdot\frac{L\sigma^2}{2}$$
+
+The derivation is a genuinely instructive chain of first-order Taylor bounds, worth walking through once (not for its own sake, but because the same "Lipschitz-bound-then-telescope" pattern recurs across ML/optimization theory):
+
+<ExerciseCard id="OPT-05-ex2b-convergence-derivation" />
+
+**Implications**: with a constant step size $\alpha$ and no gradient noise ($\sigma=0$, i.e. plain gradient descent), this recovers $O(1/t)$ convergence. With genuine stochasticity, a **constant** $\alpha$ is a bad choice, the bound's second term becomes a non-vanishing constant $\alpha L\sigma^2/2$: SGD's gradient-norm bound never shrinks to zero, it plateaus at a noise floor. A **diminishing** step size $\alpha_k=\alpha_0/(1+\gamma k)$ is the standard fix, giving $\sum_k\alpha_k=O(\log t)$ and error $O(1/\log t)$, slower than plain GD's $O(1/t)$, but SGD's steps are $n\times$ cheaper, and for large $n$ this trade is decisively worth it (the source's tabulated comparison: full-batch needs $O(\log\frac1\rho)$ iterations at cost $n$ each to reach precision $\rho$, while SGD needs more iterations but at cost $1$ each, and for large $n$, SGD reaches a target *excess error* $\varepsilon$ in less total time).
+
+## Improving on basic SGD: variance reduction, adaptive scaling, momentum
+
+Three practical directions improve on plain SGD, worth knowing by name since you'll meet all of them as PyTorch optimizer options:
+
+**Adaptive per-coordinate scaling** (estimate the diagonal of the Hessian, or "scale" the gradient coordinate-wise, since a full stochastic BFGS is complex):
+
+$$\text{RMSprop: } v_k\leftarrow(1-\eta)v_{k-1}+\eta[\nabla f_i(w_k)]^2, \quad w_{k+1}\leftarrow w_k-\frac{\alpha_k}{\sqrt{v_k+\mu}}\nabla f_i(w_k) \quad\text{(elementwise)}$$
+
+$$\text{Adagrad: } v_k\leftarrow v_{k-1}+[\nabla f_i(w_k)]^2, \quad w_{k+1}\leftarrow w_k-\frac{\alpha}{\sqrt{v_k+\mu}}\nabla f_i(w_k) \quad\text{(elementwise)}$$
+
+Dividing by $\sqrt{\langle g^2\rangle}$ (a running average of squared gradients) makes the update **scale-invariant** (rescaling $f_i\to af_i$ scales both $\nabla f_i$ and $\sqrt{\langle g^2\rangle}$ equally, cancelling), accounts for different conditioning along different coordinates, and, since $\sqrt{\langle g^2\rangle}$ is roughly proportional to curvature for a quadratic $f_i$, mimics a cheap diagonal-Hessian preconditioner.
+
+**Momentum** (cf. conjugate gradient, [OPT-02](/course/OPT/OPT-02)): $w_{k+1}\leftarrow w_k-\alpha_k\nabla f_i(w_k)+\beta_k(w_k-w_{k-1})$, a low-pass filter on the step direction that smooths gradient noise. **Nesterov's** variant evaluates the gradient at a *look-ahead* point $\tilde w_k=w_k+\beta_k(w_k-w_{k-1})$ instead of $w_k$ itself, giving $O(1/k^2)$ convergence for convex problems (vs. plain gradient descent's $O(1/k)$).
+
+**Adam** combines momentum-style averaging of the gradient ($m_t$) *and* RMSprop-style averaging of the squared gradient ($v_t$), with bias correction (since both start at zero, biased low early on):
+
+```
+Adam
+Require:  α: Stepsize (default 0.001)
+Require:  β1, β2 ∈ [0,1): exponential decay rates for the moment estimates
+          (defaults β1=0.9, β2=0.999, ε=10⁻⁸)
+Require:  f(θ): stochastic objective function
+Require:  θ0: initial parameter vector
+1: m0 ← 0                          (initialize 1st moment vector)
+2: v0 ← 0                          (initialize 2nd moment vector)
+3: t ← 0                           (initialize timestep)
+4: while θt not converged do
+5:   t ← t + 1
+6:   gt ← ∇θft(θt-1)                          (get gradient at timestep t)
+7:   mt ← β1·mt-1 + (1-β1)·gt                  (update biased 1st moment estimate)
+8:   vt ← β2·vt-1 + (1-β2)·gt²                 (update biased 2nd raw moment estimate; elementwise)
+9:   m̂t ← mt / (1-β1ᵗ)                         (bias-corrected 1st moment estimate)
+10:  v̂t ← vt / (1-β2ᵗ)                         (bias-corrected 2nd raw moment estimate)
+11:  θt ← θt-1 - α·m̂t/(√v̂t + ε)                (update parameters; elementwise)
+12: end while
+13: return θt
+```
+*(Marc Toussaint, `lecture-optimization.pdf`, p.62, reproducing Algorithm 1 of Kingma & Ba, "Adam: A Method for Stochastic Optimization," arXiv:1412.6980. gₜ² indicates the elementwise square gₜ⊙gₜ.)*
+
+<ExerciseCard id="OPT-05-ex2c-adam-bias-correction" />
 
 ## The No Free Lunch theorem
 
 <ExerciseCard id="OPT-05-ex3-nfl-conceptual" />
 
+Formally: assume a finite space $X$, a distribution $P(f)$ over functions $f:X\to Y$, and a non-revisiting algorithm $\mathcal{A}$ generating queries and observing outcomes.
+
+> **Theorem (No Free Lunch).** $\exists h:Y\to\mathbb{R}$ s.t. $\forall K, \{x_1,..,x_K\}\subset X: P(f_{x_1},..,f_{x_K})=\prod_{k=1}^Kh(f_{x_k})$ $\iff$ $\forall\mathcal{A},\forall T: P(y_{1:T};\mathcal{A}) = \prod_{i=1}^Th(y_i)$ (independent of $\mathcal{A}$).
+
+In words: **$P(f)$ factorizes (no structure/correlation across different inputs' function values) $\iff$ all algorithms generate the same random observations**, i.e. no algorithm can do better than any other *on average over such a fully unstructured prior*. This is a precise, narrow statement about averaging over **all possible functions with no assumed structure whatsoever** (including wildly discontinuous, adversarial ones with zero real-world analogue), not a claim that every algorithm performs equally on the *structured* problems (smooth, Lipschitz, sparse-Hessian, convex, etc.) you'll actually encounter, where assuming structure (as every method in this block does) is exactly what buys you an advantage.
+
 ## Summary
 
-- SGD trades exact per-step gradients for many more, cheaper, noisy-but-unbiased steps, a good trade whenever the dataset is large.
-- Momentum smooths gradient noise via a running average; Adam additionally adapts per-parameter step sizes.
-- The No Free Lunch theorem is about averaging over ALL possible objective functions (including ones with no real-world analogue), not a statement that optimization method choice doesn't matter on the structured problems you'll actually encounter.
+- SGD trades exact per-step gradients for many more, cheaper, noisy-but-unbiased steps; the convergence bound (derived from Lipschitz continuity via a telescoping sum) shows constant step sizes plateau at a noise floor, while diminishing step sizes $\alpha_k=\alpha_0/(1+\gamma k)$ still converge, just more slowly than full-batch GD.
+- RMSprop/Adagrad adaptively rescale each coordinate by a running estimate of its squared gradient, approximating a diagonal-Hessian preconditioner; momentum/Nesterov smooth gradient noise via a running average of the step direction itself.
+- Adam combines both ideas (momentum on the gradient, RMSprop-style scaling) with bias correction for the early iterations.
+- The No Free Lunch theorem is about averaging over ALL possible objective functions with a fully factorized (structureless) prior, not a statement that optimizer choice doesn't matter on the structured problems you'll actually encounter.
 
 ## Retrieval questions
 
 1. What specifically does a mini-batch gradient estimate get right (in expectation) and wrong (on any single step)?
-2. What's the practical difference between what momentum and Adam each adapt?
-3. State the No Free Lunch theorem's actual scope (what it averages over), and why that scope doesn't include most real optimization problems.
+2. State the Lipschitz-continuity assumption used in the SGD convergence proof, and sketch (without full derivation) how it's used.
+3. Why does a constant step size cause SGD's convergence bound to plateau, and what's the standard fix?
+4. What's the practical difference between what RMSprop/Adagrad and momentum/Nesterov each adapt, and how does Adam combine them?
+5. State the No Free Lunch theorem's actual scope (what it averages over, and what "factorizes" means here), and why that scope doesn't include most real optimization problems.
 
 ## Mastery checklist
 
-- [ ] Can explain the SGD speed/accuracy tradeoff precisely.
+- [ ] Can state the SGD and episodic-SGD algorithms precisely.
+- [ ] Can state the Lipschitz-continuity assumption and sketch the convergence-bound derivation.
 - [ ] Computed an SGD step using a mini-batch gradient estimate.
-- [ ] Can distinguish what momentum and Adam each do.
-- [ ] Can explain why NFL doesn't imply "optimizer choice doesn't matter in practice."
+- [ ] Can state the RMSprop/Adagrad/momentum/Adam update rules and what each adapts.
+- [ ] Can state the No Free Lunch theorem formally and explain why NFL doesn't imply "optimizer choice doesn't matter in practice."
 
 ## Source note
 
-This module's topic and page range are from `lecture-optimization`, §3.1-3.2 (pp. 56-89), which also covers evolutionary/blackbox methods in more depth than this module does (not yet incorporated). All exposition, the worked example, and every exercise here are newly authored, paraphrasing the source's topic coverage.
+This module's exposition, the SGD/episodic-SGD algorithms, the Lipschitz-continuity assumption and convergence theorem (including its derivation), the RMSprop/Adagrad/momentum/Nesterov/Adam update rules, and the formal No Free Lunch theorem are all adapted from `lecture-optimization`, §3.1-3.2 (pp. 56-64). The worked example and exercises are newly authored and independently verified (NumPy for the mini-batch gradient example).
 
 ---
 
-**Next**: OPT-06 (Bayesian Optimization & Bandits): deferred, needs Probability foundations (Block PROB) not yet built.
+**Next**: [OPT-06: Bayesian Optimization & Bandits](/course/OPT/OPT-06)

@@ -1,0 +1,119 @@
+---
+id: DYN-05
+block: DYN
+title: "Splines & Motion Primitives"
+tier: 1
+estimatedHours: 3.5
+prerequisites: ["DYN-04"]
+objectives:
+  - "Derive the cubic spline coefficients from boundary conditions, and show the spline is the exact solution to a minimum-acceleration optimal control problem."
+  - "Explain why timing-optimal control (choosing $\\tau$) is preferable to plain PD control for macroscopic approach behavior."
+  - "State the continuity/degrees-of-freedom relationship for Hermite splines."
+  - "Explain B-splines as a control-point parameterization, and the degree/continuity relationship."
+sources:
+  - { sourceId: "splines", pages: "full note (HTML-sourced)", role: "primary" }
+concepts:
+  - "Cubic spline piece, boundary conditions"
+  - "Minimum-acceleration optimal control"
+  - "Timing-optimal control"
+  - "Hermite splines, continuity classes"
+  - "B-splines, control points, blending functions"
+notation:
+  - { symbol: "$\\tau$", meaning: "duration of a spline piece (time-to-target)" }
+  - { symbol: "$D,V$", meaning: "sum-of-squares features of the minimum-acceleration cost" }
+  - { symbol: "$B_{i,p}(t)$", meaning: "degree-$p$ B-spline blending function for control point $i$" }
+cheatsheetLinks: []
+nextModules: ["DYN-06"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Splines are DYN-04's trajectory optimization made concrete and closed-form for the simplest useful case (piecewise-cubic paths), and they're what an actual reference trajectory generator produces before DYN-03's tracking control ever runs. The single-cubic-piece result here is also a genuinely elegant closure: it's the *exact* solution to a minimum-acceleration optimal control problem, connecting straight back to DYN-04's machinery.
+
+## Prerequisites & readiness check
+
+You should have optimal control's cost-function structure (DYN-04) fresh.
+
+<ReadinessCheck
+  question="From DYN-04, what does trajectory optimization's cost function generally look like?"
+  answer="A sum of control costs (penalizing velocity/acceleration/jerk via $k$-order finite differences) plus task costs."
+/>
+
+## A single cubic spline piece
+
+A cubic polynomial $x(t)=at^3+bt^2+ct+d$ has 4 coefficients, matching exactly 4 boundary conditions: $x(0)=x_0,\dot x(0)=v_0,x(\tau)=x_1,\dot x(\tau)=v_1$ (a spline piece of duration $\tau$).
+
+<ExerciseCard id="DYN-05-ex1-cubic-coefficients-derivation" />
+
+$$d=x_0,\quad c=v_0, \quad a = \frac{1}{\tau^3}\big[2(x_0-x_1)+\tau(v_0+v_1)\big], \quad b = \frac{1}{\tau^2}\big[3(x_1-x_0)-\tau(2v_0+v_1)\big]$$
+
+**This cubic is the exact solution to a minimum-acceleration optimal control problem**: $\min_x\int_0^\tau\ddot x(t)^2\,dt$ subject to the same four boundary conditions, a direct instance of [DYN-04](/course/DYN/DYN-04)'s optimal control formulation with $c(x,u)=\ddot x^2$. The minimal cost has a clean closed form:
+
+$$\int_0^\tau\ddot x(t)^2\,dt = \frac{12}{\tau^3}D^2+\frac1\tau V^2, \qquad D:=(x_1-x_0)-\frac\tau2(v_0+v_1),\ \ V:=v_1-v_0$$
+
+*(Verified symbolically with SymPy while authoring this module: substituting the coefficients above and integrating $\ddot x(t)^2$ reproduces this formula exactly.)* Written as $\tilde D^\top\tilde D+\tilde V^\top\tilde V$ with $\tilde D=\sqrt{12}\,\tau^{-3/2}D$, $\tilde V=\tau^{-1/2}V$, this is a genuine sum-of-squares, exactly the Gauss-Newton-friendly form from OPT-04/DYN-04.
+
+<ExerciseCard id="DYN-05-ex2-cost-numeric" />
+
+## Timing-optimal control: choosing $\tau$ itself
+
+A plain PD controller ($\ddot x_{\text{des}}=K_p(x_{\text{ref}}-x)+K_d(\dot x_{\text{ref}}-\dot x)$) only converges *exponentially*: it never reaches the target in a finite, predictable time, and its accelerations are disproportionately large far from the target and small near it. An alternative: treat $\tau$ itself as a decision variable, minimizing $\alpha\tau+\int_0^\tau\ddot x(t)^2\,dt$ (trading off "get there sooner" against "don't accelerate too hard") using the closed-form cost above. This gives a **definite expected time-to-target** and naturally moderate accelerations, reactively re-solved for $\tau$ each control cycle (using the *current* state as the new starting boundary condition).
+
+<ExerciseCard id="DYN-05-ex3-timing-conceptual" />
+
+*(A note on precision: the source states a specific closed-form solution for the optimal $\tau$ in the co-linear case. Working through the actual stationarity condition $\partial_\tau[\alpha\tau+\text{cost}(\tau)]=0$ independently while authoring this module, the resulting equation is a genuine quartic in $\tau$ without a simple square-root closed form in general; rather than present an unverified formula, this module states the optimization problem precisely and lets you set up the stationarity condition yourself, exactly the kind of "check by direct verification" habit this whole workbook has tried to build.)*
+
+## Hermite splines: continuity and degrees of freedom
+
+A **Hermite spline** is specified by knots $t_0,..,t_m$ and waypoints $x_i$, velocities $v_i$ at each knot ($m$ cubic pieces total). A genuinely useful piece of bookkeeping: how many free parameters remain once you require a given continuity class?
+
+<ExerciseCard id="DYN-05-ex4-continuity-counting" />
+
+| Continuity | Meaning | Free parameters ($m$ pieces, 1D) |
+|---|---|---|
+| $\mathcal{C}^0$ | positions continuous | $1+3m$ |
+| $\mathcal{C}^1$ | velocities continuous | $2+2m$ |
+| $\mathcal{C}^2$ | accelerations continuous | $3+m$ |
+| $\mathcal{C}^3$ | jerk continuous | $4$ (independent of $m$!) |
+
+$\mathcal{C}^3$ having only 4 parameters regardless of the number of pieces is exactly why continuous-jerk paths are only achievable with a *single* piece (a degree-3 polynomial, 4 coefficients, has no room left for extra pieces once jerk-continuity is demanded); $\mathcal{C}^2$ (continuous accelerations, the typical choice) is the natural middle ground, offering $3+m$ free parameters (the piece durations $\tau_{1:m}$ and interior velocities) to optimize.
+
+## B-splines: control points instead of explicit waypoints
+
+A **B-spline** instead expresses the path as a linear combination of $K{+}1$ **control points** $z_0,..,z_K$: $x(t)=\sum_{i=0}^KB_{i,p}(t)z_i$, where the blending functions $B_{i,p}(t)$ (themselves called B-splines) sum to 1 at every $t$, so $x(t)$ always lies in the convex hull of the control points. Unlike Hermite splines, the path generally does **not** pass exactly through the control points, but a one-time matrix inversion (the $B_{i,p}$ evaluated at the desired waypoint times form a band-diagonal matrix, invertible in $O(m)$) lets you *choose* control points that make it pass through given waypoints when needed.
+
+The key structural fact: **a degree-$p$ B-spline is always exactly $(p{-}1)$-order differentiable** (its derivative is a linear combination of degree-$(p{-}1)$ B-splines, recursively), matching the $\mathcal{C}^{p-1}$ continuity class directly, e.g. a cubic ($p=3$) B-spline has continuous accelerations, matching $\mathcal{C}^2$ Hermite splines exactly, they're just alternative parameterizations of the same continuity class, convertible back and forth via the same matrix-inversion idea. The gradient of a B-spline path with respect to its control points is trivial (linear), which is exactly why trajectory optimizers (e.g. KOMO-style) often re-parameterize a fine-grained discretized trajectory through a much lower-dimensional set of B-spline control points, solving a smaller NLP with (via the chain rule) gradients that pull back trivially to the original fine-grained representation.
+
+## Summary
+
+- A cubic spline piece's 4 coefficients come directly from 4 boundary conditions; the piece is the exact minimizer of $\int\ddot x^2dt$ subject to those conditions, a direct instance of DYN-04's optimal control, with a closed-form sum-of-squares cost.
+- Timing-optimal control treats the piece duration $\tau$ itself as a decision variable, giving a definite time-to-target and moderate accelerations, unlike plain PD's asymptotic-only convergence.
+- Hermite splines: the continuity class ($\mathcal{C}^0,..,\mathcal{C}^3$) directly determines how many free parameters remain; $\mathcal{C}^3$ (continuous jerk) only admits a single piece.
+- B-splines parameterize a path via control points and blending functions; degree $p$ gives exactly $\mathcal{C}^{p-1}$ continuity, and control-point gradients are trivial, useful for re-parameterizing large trajectory-optimization problems.
+
+## Retrieval questions
+
+1. Derive the cubic spline coefficients from the four boundary conditions, without looking back.
+2. Why is the cubic spline piece the exact solution to a minimum-acceleration optimal control problem?
+3. Why does plain PD control give a poor "macroscopic" approach behavior compared to timing-optimal control?
+4. State the continuity/free-parameter relationship for Hermite splines, and explain why $\mathcal{C}^3$ forces a single piece.
+5. What continuity class does a degree-$p$ B-spline have, and why does that make cubic B-splines and $\mathcal{C}^2$ Hermite splines equivalent?
+
+## Mastery checklist
+
+- [ ] Derived the cubic spline coefficients from boundary conditions.
+- [ ] Can explain why the cubic spline is the exact minimum-acceleration optimal control solution.
+- [ ] Can explain why timing-optimal control is preferable to plain PD for macroscopic motion.
+- [ ] Can state the Hermite spline continuity/DOF-counting table and explain the $\mathcal{C}^3$/single-piece connection.
+- [ ] Can explain B-splines' control-point parameterization and the degree/continuity relationship.
+
+## Source note
+
+This module's exposition, the cubic spline coefficients, the minimum-acceleration optimal control connection, the sum-of-squares cost formula, the timing-optimal control concept, the Hermite spline continuity/DOF counting, and the B-spline overview are adapted from Marc Toussaint's `splines` HTML note, used with attribution per this repository's README. The cubic coefficient for $a$ is presented in its independently-verified form (via SymPy, solving the boundary-value problem directly), which differs by a sign from the source's own stated formula; a specific closed-form solution for timing-optimal $\tau$ stated in the source did not reproduce under direct numerical verification and is deliberately not asserted here (see the note above). All exercises are newly authored.
+
+---
+
+**Next**: [DYN-06: Controllability & Stability](/course/DYN/DYN-06)

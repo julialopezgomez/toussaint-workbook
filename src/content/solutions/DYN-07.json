@@ -1,0 +1,53 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "DYN-07-ex1-mpc-loop-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies that the actual current state is re-measured at every cycle, replacing the assumed/predicted state." },
+          { "points": 1, "description": "Correctly identifies that the finite-horizon problem is re-solved from scratch from that measured state." },
+          { "points": 1, "description": "Correctly identifies that only the first control is applied and the rest of the plan is discarded." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "At every control cycle: (1) measure/estimate the actual current state x (not the state the previous plan predicted). (2) Re-solve DYN-04's finite-horizon trajectory optimization from scratch, starting from x_0=x, over the next H steps. (3) Apply only the first control u_0* of the freshly solved sequence, and discard the rest of the H-step plan entirely, repeating from step 1 at the next cycle. This sliding, always-discard-and-replan behavior is exactly what 'receding horizon' means."
+    },
+    {
+      "exerciseId": "DYN-07-ex2-feedback-robustness-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains why open-loop execution accumulates error uncorrected." },
+          { "points": 2, "description": "Correctly explains that MPC's re-solve from the true current state is a genuine closed-loop policy pi(x,t) that implicitly corrects for whatever happened." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "An open-loop plan computes u_0,...,u_T once from the assumed dynamics and assumed initial state; if the real dynamics or a disturbance differ even slightly, every later control in the sequence is wrong for the state the robot actually reaches, and nothing corrects for it. MPC's applied control is pi_MPC(x,t)=u_0*(x), a genuine function of the current, actually-measured state, re-evaluated by re-solving at every cycle. Whatever the real dynamics did between cycles, the next solve starts from wherever the robot actually is, not wherever the old plan predicted, so each re-solve implicitly re-corrects for whatever went wrong: exactly the mechanism that makes any closed-loop policy (DYN-06) robust in a way an open-loop sequence cannot be."
+    },
+    {
+      "exerciseId": "DYN-07-ex3-warmstart-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly connects Newton-type convergence speed to initial-guess quality." },
+          { "points": 2, "description": "Correctly explains why the previous shifted solution is a good initial guess for the next MPC solve." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Newton-type solvers (OPT-01/OPT-02) converge fastest (locally quadratically) when the initial guess is already close to the true optimum; a poor initial guess needs many more iterations. Consecutive MPC solves are nearly the same problem: same cost structure and constraints, with x_0 differing only by one time-step's worth of state change. The previous solution, shifted forward by one step (dropping the executed first step, appending one new step), is therefore already very close to the new optimum, giving the solver an excellent starting point and letting it converge in very few iterations, often what makes real-time re-solving computationally feasible at all."
+    },
+    {
+      "exerciseId": "DYN-07-ex4-dyn-block-synthesis",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly summarizes DYN-01 through DYN-04's contributions." },
+          { "points": 2, "description": "Correctly summarizes DYN-05 through DYN-07's contributions and how they compose with the earlier modules." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "DYN-01: derives the equations of motion M(q)qddot+F(q,qdot)=u and force kinematics. DYN-02: PD control's characteristic-equation behavior for the 1D point mass, the simplest reference case. DYN-03: generalizes to inverse/forward dynamics and operational-space control for the full nonlinear system. DYN-04: formalizes optimal control/trajectory optimization, unifying IK, operational-space control, and full-trajectory planning under one cost structure, and gives LQR as the linear-quadratic closed form. DYN-05: a concrete closed-form instance (cubic splines) for generating smooth reference trajectories. DYN-06: tools (controllability, stability, Lyapunov functions) to check a system/controller pairing can actually be controlled and is well-behaved. DYN-07: closes the loop by re-solving DYN-04's finite-horizon problem every control cycle from the true current state (MPC), producing a genuine closed-loop policy (DYN-06) robust to the model error DYN-01's equations of motion can never fully capture; DYN-05's splines can serve as MPC's reference/warm-start, and DYN-02/DYN-03's controllers are exactly what MPC reduces to in the linear-quadratic special case."
+    }
+  ]
+}

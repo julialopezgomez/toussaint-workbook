@@ -1,0 +1,131 @@
+---
+id: ML-05
+block: ML
+title: "Kernelization & Bayesian Learning"
+tier: 1
+estimatedHours: 4
+prerequisites: ["ML-02", "PROB-05"]
+objectives:
+  - "Derive the kernel trick from ridge regression, and state the requirement a valid kernel function must satisfy."
+  - "State the representer theorem's content and why it justifies the kernel trick generally."
+  - "Derive ridge regression as Bayesian MAP/posterior inference, and connect its posterior mean to MATH-02B's closed form."
+  - "Explain, precisely, why 'Gaussian Process' and 'Bayesian kernel ridge regression' name the same object."
+sources:
+  - { sourceId: "lecture-machinelearning", pages: "p50-53, p85-92 (§5, §8.1)", role: "primary" }
+concepts:
+  - "Kernel trick, kernel matrix"
+  - "Reproducing Kernel Hilbert Space (RKHS), representer theorem"
+  - "Bayesian linear regression"
+  - "Gaussian Processes as Bayesian kernel ridge regression"
+  - "Laplace approximation, GP classification"
+notation:
+  - { symbol: "$k(x,x')$", meaning: "kernel function: $\\phi(x)^\\top\\phi(x')$ for some (possibly infinite-dimensional) feature map $\\phi$" }
+  - { symbol: "$K$", meaning: "kernel (Gram) matrix, $K_{ij}=k(x_i,x_j)$" }
+  - { symbol: "$P(\\beta\\mid D)$", meaning: "posterior distribution over parameters given data" }
+cheatsheetLinks: []
+nextModules: ["ML-06"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+This module ties together four things you've already built separately: MATH-02B's ridge-regression closed form, PROB-01's Bayes' rule, PROB-05's Gaussian identities, and OPT-06's Gaussian Process machinery. The genuinely new content is the **kernel trick** (a computational rewrite of ridge regression) and the **Bayesian derivation** of ridge regression itself, which turns out to make "Gaussian Process" and "Bayesian kernel ridge regression" the *same statement*, not two related ideas, exactly the deep insight OPT-06 used without deriving.
+
+## Prerequisites & readiness check
+
+You should have MATH-02B's ridge regression closed form and PROB-05's Gaussian conditioning identity fresh.
+
+<ReadinessCheck
+  question="From MATH-02B, what is ridge regression's closed-form solution?"
+  answer="β* = (XᵀX + λI)⁻¹Xᵀy."
+/>
+
+## The kernel trick
+
+Using the Woodbury identity, MATH-02B's ridge-regression estimate can be rewritten:
+
+$$\hat\beta_\text{ridge} = (X^\top X+\lambda I_k)^{-1}X^\top y = X^\top(XX^\top+\lambda I_n)^{-1}y$$
+
+so the prediction $f(x)=\phi(x)^\top\hat\beta_\text{ridge}$ becomes
+
+$$f(x) = \underbrace{\phi(x)^\top X^\top}_{\kappa(x)^\top}\big(\underbrace{XX^\top}_{K}+\lambda I\big)^{-1}y, \qquad K_{ij}:=k(x_i,x_j):=\phi(x_i)^\top\phi(x_j),\quad \kappa_i(x):=k(x,x_i)$$
+
+<ExerciseCard id="ML-05-ex1-kernel-rewrite-conceptual" />
+
+**The trick**: at no point in this rewritten formula do you need the parameters $\hat\beta$, or even the features $\phi(x_i)$ *individually*, only the scalar $k(x,x')=\phi(x)^\top\phi(x')$ for pairs of inputs. This means you can skip inventing $\phi$ entirely and directly invent $k(x,x')$: a **similarity measure** between inputs, often a far more intuitive design choice than a feature map (e.g. "these two inputs should be considered similar if they're close in Euclidean distance" is a one-line kernel, $k(x,x')=e^{-\gamma\|x-x'\|^2}$, but a much less obvious feature map).
+
+**Example kernels**: polynomial, $k(x,x')=(x^\top x'+c)^d$; squared exponential (RBF), $k(x,x')=e^{-\gamma\|x-x'\|^2}$ (an infinite-dimensional $\phi$: no finite feature vector reproduces it exactly).
+
+<ExerciseCard id="ML-05-ex2-polynomial-kernel-verification" />
+
+Not every function $k(x,x')$ is a valid kernel: it must be **positive definite** ($\forall z\neq0:\ z^\top Kz>0$ for the resulting Gram matrix $K$ on any finite point set), exactly the condition guaranteeing some feature map $\phi$ (possibly infinite-dimensional) exists with $k(x,x')=\phi(x)^\top\phi(x')$ in the first place.
+
+### Every feature map implies a kernel. Does every kernel imply a feature map?
+
+Yes, via the **Reproducing Kernel Hilbert Space (RKHS)**: define a vector space $\mathcal{H}_k$ spanned by (infinitely many) basis elements $\phi_x:=k(\cdot,x)$, with inner product $\langle\phi_x,\phi_y\rangle:=k(x,y)$. Every $x$'s associated "feature" $\phi_x=k(\cdot,x)$ is now a *function*, and $\langle\phi_x,f\rangle=f(x)$ for any $f=\sum_i\alpha_i\phi_{x_i}\in\mathcal{H}_k$ (the "reproducing" property that names the space). The **representer theorem** then states: for *any* loss $L$ and monotone regularizer $\Omega$,
+
+$$f^*=\operatorname*{argmin}_{f\in\mathcal{H}_k}L(f(x_1),\ldots,f(x_n))+\Omega(\|f\|^2_{\mathcal{H}_k}) \qquad\Longrightarrow\qquad f^*=\sum_{i=1}^n\alpha_ik(\cdot,x_i)$$
+
+i.e. even though $\mathcal{H}_k$ is infinite-dimensional, the *actual* optimum always lies in the finite-dimensional span of the $n$ training kernels $\{k(\cdot,x_i)\}$, exactly why the kernel trick's finite-dimensional rewrite above is always achievable, for essentially any kernelized loss, not just ridge regression specifically.
+
+## Ridge regression as Bayesian inference
+
+<ExerciseCard id="ML-05-ex3-bayesian-posterior-derivation" />
+
+Assume a Gaussian prior $\beta\sim\mathcal{N}(0,\sigma^2/\lambda)$ and Gaussian likelihood $y=x^\top\beta+\epsilon,\ \epsilon\sim\mathcal{N}(0,\sigma^2)$. By Bayes' rule (PROB-01), $P(\beta\mid D)\propto P(D\mid\beta)P(\beta)$, and since a product of Gaussian-exponential terms is itself Gaussian (PROB-05):
+
+$$-\log P(\beta\mid D) \propto \sum_i(y_i-x_i^\top\beta)^2+\lambda\|\beta\|^2 = L_\text{ridge}(\beta)$$
+
+**The neg-log-posterior is (up to a constant) exactly the ridge-regression cost function.** Completing the square gives $P(\beta\mid D)=\mathcal{N}(\beta\mid\hat\beta,\Sigma)$ with
+
+$$\Sigma = \sigma^2(X^\top X+\lambda I)^{-1}, \qquad \hat\beta = \frac{1}{\sigma^2}\Sigma X^\top y = (X^\top X+\lambda I)^{-1}X^\top y$$
+
+**the posterior mean $\hat\beta$ is exactly MATH-02B's ridge-regression estimate.** This is a genuinely general pattern, worth internalizing beyond this one example: optimization costs correspond to negative-log-probabilities, and vice versa; a regularized loss's minimizer is a Bayesian posterior's mode/mean, in disguise. The Bayesian view additionally gives $\Sigma$, a **variance** on the estimate, something the classical view of ridge regression never provided on its own (though it's the exact same object as ML-02's estimator-variance formula).
+
+## Gaussian Processes *are* Bayesian kernel ridge regression
+
+Applying the kernel trick to the Bayesian posterior above (predicting $f(x)=\phi(x)^\top\beta$ rather than $\beta$ itself, so the infinite-dimensional case is no obstacle) gives a posterior *directly over function values*:
+
+$$\mathbb{E}\{f(x)\mid D\} = \kappa(x)^\top(K+\lambda I)^{-1}y, \qquad \text{Cov}\{f(x),f(x')\mid D\} = k(x,x')-\kappa(x)^\top(K+\lambda I)^{-1}\kappa(x')$$
+
+These are **exactly OPT-06's Gaussian Process posterior mean/variance formulas** (not re-derived there, just stated and used for Bayesian optimization). The identification is now precise: a **Gaussian Process** is nothing more or less than **Bayesian kernel ridge regression**, viewed from the "function space" side rather than the "parameter space" side, $P(f\mid D)$ instead of $P(\beta\mid D)$. OPT-06's GP definition (jointly Gaussian function values, mean function, covariance function $k$) is the RKHS/kernel-trick machinery above, restated directly in terms of $f$.
+
+## Bayesian logistic regression and GP classification
+
+The same "neg-log-posterior = regularized loss" pattern applies to classification: for binary logistic regression, $P(\beta\mid D)\propto\exp\{-L_\text{logistic}(\beta)\}$ (ML-02's loss). Unlike ridge regression, this posterior isn't exactly Gaussian (the sigmoid link makes it non-conjugate), so it's approximated via PROB-06's **Laplace approximation**: a 2nd-order Taylor expansion of $L_\text{logistic}$ around its minimizer $\beta^*$ gives $P(\beta\mid D)\approx\mathcal{N}(\beta\mid\beta^*,H^{-1})$, using exactly the Hessian $H=X^\top\text{diag}(p\circ(1-p))X+2\lambda I$ MATH-02B already derived. Kernelizing this approximate-Gaussian posterior the same way as above gives **GP classification**: a Gaussian Process posterior over the discriminative function $f(x)$ itself, with class probabilities read off via the sigmoid, giving calibrated *uncertainty* on classification predictions, not just a point estimate.
+
+<ExerciseCard id="ML-05-ex4-unification-conceptual" />
+
+## Summary
+
+- The **kernel trick** rewrites ridge regression so predictions depend only on $k(x,x')=\phi(x)^\top\phi(x')$, never on $\beta$ or $\phi(x_i)$ individually; any positive-definite $k$ works, letting you design a similarity measure directly instead of a feature map.
+- The **RKHS/representer theorem** guarantees this always works: the optimum of any kernelized, regularized loss lies in the finite span of the training kernels, even though the underlying function space is infinite-dimensional.
+- Ridge regression is exactly **Bayesian MAP/posterior inference** under a Gaussian prior/likelihood: the neg-log-posterior is the ridge loss, and the posterior mean is MATH-02B's closed form, now with an explicit posterior **variance** too.
+- **Gaussian Processes are Bayesian kernel ridge regression**, viewed in function space; OPT-06's GP posterior formulas are exactly this module's kernelized Bayesian-regression result.
+- **GP classification** kernelizes the Laplace-approximated posterior of Bayesian logistic regression, using MATH-02B's already-derived Hessian, giving calibrated uncertainty on classification.
+
+## Retrieval questions
+
+1. Derive the kernel-trick rewrite of ridge regression, and state what a valid kernel must satisfy.
+2. State the representer theorem, and explain why it justifies the kernel trick in general (beyond just ridge regression).
+3. Derive that ridge regression's neg-log-posterior equals its cost function, and identify the posterior mean/variance.
+4. In one precise sentence, why are Gaussian Processes and Bayesian kernel ridge regression the same thing?
+5. How does GP classification arise from Bayesian logistic regression?
+
+## Mastery checklist
+
+- [ ] Can derive the kernel-trick rewrite of ridge regression.
+- [ ] Can state the representer theorem's content.
+- [ ] Derived ridge regression as Bayesian inference and identified the posterior mean/variance.
+- [ ] Can explain precisely why GPs are Bayesian kernel ridge regression.
+- [ ] Can explain how GP classification arises via the Laplace approximation.
+
+## Source note
+
+This module's exposition, the kernel trick derivation, the RKHS/representer theorem, the example kernels, the Bayesian ridge regression derivation, the Gaussian-Process-as-Bayesian-kernel-ridge-regression identification, and Bayesian logistic regression/GP classification are adapted from `lecture-machinelearning`, §5 and §8.1 (pp. 50-53, 85-92). The GP posterior formulas themselves are not re-derived here, cross-referenced to [OPT-06](/course/OPT/OPT-06), which already states and uses them for Bayesian optimization; this module supplies the derivation OPT-06 assumed. All exercises are newly authored; the polynomial-kernel feature-map identity and the Bayesian-posterior-equals-ridge-estimate claim were both independently verified (symbolically with SymPy, and numerically with NumPy, respectively) while authoring this module.
+
+---
+
+**Next**: [ML-06: Unsupervised Learning: PCA, Embeddings & Clustering](/course/ML/ML-06)

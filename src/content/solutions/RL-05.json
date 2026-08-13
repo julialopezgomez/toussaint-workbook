@@ -1,0 +1,47 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RL-05-ex1-taxonomy-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correct model-based description." },
+          { "points": 1, "description": "Correct model-free description." },
+          { "points": 2, "description": "Correct policy-search description." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Model-based: learns P_hat(s'|s,a) and R_hat(s,a), then plans against the learned model. Model-free: learns V*(s) or Q*(s,a) directly, skipping the model. Policy search: learns/estimates the gradient of pi_theta directly, or uses black-box/evolutionary search on theta, without necessarily learning any value function."
+    },
+    {
+      "exerciseId": "RL-05-ex2-optimistic-init-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 100, "tolerance": 0.01 },
+      "fullSolution": "Q(s,a) = 10/(1-0.9) = 10/0.1 = 100."
+    },
+    {
+      "exerciseId": "RL-05-ex3-ucb-connection-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly maps Q(s,a) to mu_a and sigma(s,a) to the confidence bound." },
+          { "points": 2, "description": "Correctly identifies the shared optimism-in-the-face-of-uncertainty principle." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "UCB1 chooses argmax mu_a + beta*sqrt(2 ln n / n_a). Q(s,a) plays the role of mu_a (point estimate), sigma(s,a) plays the role of the confidence bound (large for under-visited pairs, shrinking with visits). Both implement 'optimism in the face of uncertainty': add a bonus proportional to uncertainty so uncertain options get tried, fading naturally as uncertainty resolves; RL-05 just applies the same bandit-derived idea to sequential Q-values."
+    },
+    {
+      "exerciseId": "RL-05-ex4-rmax-mechanism-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains that under-visited pairs get R_max regardless of true reward." },
+          { "points": 2, "description": "Correctly explains that planning against this optimistic reward automatically seeks out those pairs." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "State-action pairs visited fewer than m times get R_max reward regardless of true reward. Value/Q-iteration against this optimistic reward computes high value for paths toward under-visited pairs, since reaching them looks like reaching max reward. The resulting policy is automatically driven to explore under-visited regions as a side effect of ordinary reward maximization; once (s,a) becomes known, true estimated reward replaces the optimistic placeholder and optimism fades where no longer needed."
+    }
+  ]
+}

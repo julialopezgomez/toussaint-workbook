@@ -3,24 +3,29 @@ id: OPT-04
 block: OPT
 title: "Convex Problems, LP/QP, SQP & Log Barriers"
 tier: 1
-estimatedHours: 3
+estimatedHours: 5.5
 prerequisites: ["OPT-03"]
 objectives:
-  - "Prove that a local minimum of a convex function is automatically global."
-  - "Derive the log-barrier method's gradient and explain why it never reaches the constraint boundary."
-  - "Recognize and rewrite a problem in standard linear-program (LP) form."
-  - "Understand quadratic programs (QP) and sequential quadratic programming (SQP) at a conceptual level."
+  - "State the formal definitions of convex/quasiconvex/unimodal, and prove that a local minimum of a convex function is automatically global."
+  - "Derive the log-barrier method's gradient and algorithm, the central path, and its exact equivalence to a relaxed KKT system."
+  - "Derive the augmented Lagrangian's update rule and explain why it avoids the log-barrier/penalty methods' ill-conditioning."
+  - "Recognize and rewrite a problem in standard LP form (incl. slack variables), and set up a QP (e.g. the SVM dual)."
+  - "Understand SQP's per-iteration QP subproblem and the Simplex algorithm at a conceptual level."
 sources:
-  - { sourceId: "lecture-optimization", pages: "p23-29, p35-48 (§2.2, §2.5)", role: "primary" }
+  - { sourceId: "lecture-optimization", pages: "p23-30, p35-44 (§2.2-2.3, §2.5)", role: "primary" }
 concepts:
-  - "Convexity"
+  - "Convexity, quasiconvexity, unimodality"
+  - "Log-barrier method / central path"
+  - "Squared penalty method"
+  - "Augmented Lagrangian"
   - "Linear program (LP) / Quadratic program (QP)"
-  - "Log-barrier method"
   - "Sequential Quadratic Programming (SQP)"
+  - "Simplex algorithm"
 notation:
-  - { symbol: "$f(tx_1+(1-t)x_2)\\le tf(x_1)+(1-t)f(x_2)$", meaning: "definition of convexity" }
-  - { symbol: "$\\min c^\\top x$ s.t. $Ax\\le b$", meaning: "standard-form linear program" }
-  - { symbol: "$t$", meaning: "log-barrier weight parameter (larger $t$ = weaker barrier)" }
+  - { symbol: "$f(ax_1+(1-a)x_2)\\le af(x_1)+(1-a)f(x_2)$", meaning: "definition of convexity" }
+  - { symbol: "$B(x,\\mu)$", meaning: "log-barrier objective, $f(x)-\\mu\\sum_i\\log(-g_i(x))$" }
+  - { symbol: "$A(x,\\lambda,\\kappa,\\mu,\\nu)$", meaning: "augmented Lagrangian" }
+  - { symbol: "$\\min c^\\top x$ s.t. $Gx\\le h, Ax=b$", meaning: "standard-form linear program" }
 cheatsheetLinks: []
 nextModules: ["OPT-05"]
 ---
@@ -30,7 +35,7 @@ import ReadinessCheck from '../../../components/ReadinessCheck.astro';
 
 ## Why this matters
 
-Convexity is the property that separates "optimization problems you can actually solve reliably" from "optimization problems where you're at the mercy of your starting point." Recognizing when a subproblem is convex (or can be made convex, e.g. via a QP approximation) is a constant judgment call in trajectory optimization and motion planning, exactly the kind of problem your own manipulation-planning research deals with.
+Convexity is the property that separates "optimization problems you can actually solve reliably" from "optimization problems where you're at the mercy of your starting point." Recognizing when a subproblem is convex (or can be made convex, e.g. via a QP approximation) is a constant judgment call in trajectory optimization and motion planning, exactly the kind of problem your own manipulation-planning research deals with. This module also covers the three practical workhorses for actually solving a constrained problem: log barrier, augmented Lagrangian, and SQP.
 
 ## Prerequisites & readiness check
 
@@ -41,7 +46,13 @@ You should have the Lagrangian and KKT conditions (OPT-03) fresh.
   answer="It must be zero: $\lambda\, g(x^*)=0$ with $g(x^*)<0$ forces $\lambda=0$."
 />
 
-## Convexity: why it matters so much
+## Convexity, quasiconvexity, unimodality
+
+> A set $X$ is **convex** iff $\forall x,y\in X, a\in[0,1]: ax+(1-a)y\in X$. A function is **convex** iff $\forall x,y\in\mathbb{R}^n,a\in[0,1]: f(ax+(1-a)y)\le af(x)+(1-a)f(y)$. A function is **quasiconvex** iff $f(ax+(1-a)y)\le\max\{f(x),f(y)\}$ (equivalently: every sublevel set $\{x:f(x)\le\alpha\}$ is convex). A function is **unimodal** iff it has exactly one local minimum, which is therefore the global one.
+>
+> These form a strict hierarchy: $\text{convex}\subset\text{quasiconvex}\subset\text{unimodal}\subset\text{general}$.
+
+Properties worth having on hand: the sum of two convex functions is convex; $f\in\mathcal{C}^2$ is convex $\iff$ $\nabla^2f(x)$ is PSD everywhere (the Hessian-eigenvalue connection from [MATH-02](/course/MATH/MATH-02)); a convex $f$'s sublevel sets are convex; and the dual function $l(\lambda)=\min_xL(x,\lambda)$ is *always* concave (a pointwise minimization of functions linear in $\lambda$), which is exactly why [OPT-03](/course/OPT/OPT-03)'s dual problem is always convex regardless of the primal.
 
 <ExerciseCard id="OPT-04-ex1-why-convexity-matters" />
 
@@ -49,47 +60,113 @@ This is the single biggest reason convex problems (including LPs and QPs, below)
 
 ## Linear and quadratic programs
 
-A **linear program (LP)** has a linear objective and linear inequality constraints: $\min_x c^\top x$ s.t. $Ax\le b$. A **quadratic program (QP)** allows a quadratic (convex, if the quadratic term's matrix is positive semi-definite) objective with the same linear constraints. Both are convex whenever correctly set up, so local solutions are global.
+A **linear program (LP)**: $\min_x c^\top x$ s.t. $Gx\le h, Ax=b$ (standard form: $\min_xc^\top x$ s.t. $x\ge0,Ax=b$). A **quadratic program (QP)**: $\min_x\tfrac12x^\top Qx+c^\top x$ s.t. $Gx\le h,Ax=b$, with $Q$ positive definite. Both are convex whenever correctly set up, so local solutions are global.
+
+Converting a general LP to standard form uses **slack variables**: introduce $\xi\ge0$ so $Gx\le h$ becomes the equality $Gx+\xi=h$, and split $x=x^+-x^-$ with $x^+,x^-\ge0$ (since standard form needs $x\ge0$, but the original $x$ may be any sign). A slack variable is exactly "a variable added to an inequality to turn it into an equality plus a non-negativity constraint."
 
 <ExerciseCard id="OPT-04-ex3-lp-recognition" />
 
+**Example QP: Support Vector Machines.** The (primal) SVM problem $\min_{\beta,\xi}\|\beta\|^2+C\sum_i\xi_i$ s.t. $y_i(x_i^\top\beta)\ge1-\xi_i,\xi_i\ge0$ is a QP; its Lagrangian dual, $\max_\alpha-\tfrac14\sum_{i,i'}\alpha_i\alpha_{i'}y_iy_{i'}x_i^\top x_{i'}+\sum_i\alpha_i$ s.t. $0\le\alpha_i\le C$, is *also* convex (as [OPT-03](/course/OPT/OPT-03) guarantees generally), and only ever needs $x_i^\top x_{i'}$ (inner products), the basis for kernelization. Data points with $\alpha_i>0$ are exactly the **support vectors** (by complementary slackness: $\alpha_i>0$ forces the corresponding margin constraint to be tight).
+
+The **Simplex algorithm** (Dantzig, 1947) solves LPs by walking along the edges of the constraint **polytope**: since an LP's optimum always sits at a vertex, at each vertex it moves to the adjacent edge that decreases $c^\top x$ the most, until no edge improves further. It's often efficient in practice but exponential in the worst case; **interior point methods** (log barrier, below) instead approach the optimum through the polytope's interior, with polynomial worst-case guarantees.
+
 ## The log-barrier method
 
-One practical way to solve a constrained convex problem: replace each inequality constraint with a penalty term that blows up near the boundary, turning the constrained problem into a sequence of unconstrained ones.
+One practical way to solve a constrained problem: replace each inequality constraint with a penalty term that blows up near the boundary, turning the constrained problem into a sequence of unconstrained ones:
+
+$$\min_xB(x,\mu), \qquad B(x,\mu) = f(x) - \mu\sum_i\log(-g_i(x))$$
+
+As $\mu\to0$, the barrier $-\mu\log(-g)$ converges to $\infty\cdot[g>0]$ (an exact indicator-style barrier), but starting with tiny $\mu$ makes $B$ non-smooth from the start, so $\mu$ is **gradually decreased**. (You'll sometimes see this written with $t=1/\mu$ instead, weight *growing* rather than shrinking, an equivalent, interchangeable convention, e.g. in the exercise below.)
 
 <ExerciseCard id="OPT-04-ex2-log-barrier-derivation" />
 
-**Worked example**: for $g(x)=x-5$ (constraint $x\le5$) with barrier weight $t=1$, the barrier gradient contribution $-\dfrac{1}{t\,g(x)}$ evaluates to $1$ at $x=4$ but $10$ at $x=4.9$, a tenfold increase for moving just $0.9$ closer to the boundary. *(Verified symbolically with SymPy while authoring this module.)* This is exactly the "increasingly strong repulsion" behavior from the derivation above, made concrete.
+```
+Log Barrier Method
+Input:    initial x, functions f(x), g(x), tolerance θ,
+          parameters (defaults: ϱμ⁻=0.5, μ0=1)
+1: initialize μ = μ0
+2: repeat
+3:   centering: solve unconstrained problem x ← argmin_x B(x,μ)
+4:   decrease μ ← ϱμ⁻·μ
+5: until |Δx| < θ                                // repeatedly
+```
+*(Marc Toussaint, `lecture-optimization.pdf`, p.25. Centering is typically solved via Newton, warm-started from the previous x.)*
 
-In practice, the log-barrier method solves a *sequence* of unconstrained problems with $t$ gradually increased (weakening the barrier), each solution used to warm-start the next, converging toward the true constrained solution as $t\to\infty$.
+Varying $\mu$ traces out the **central path**, points $x^*(\mu)$ gradually approaching the true optimum from the *interior* as $\mu\to0$ (this is exactly why it's an **interior point method**: every iterate strictly satisfies $g_i(x)<0$). Remarkably, **centering is equivalent to solving a relaxed KKT system**: at $x^*(\mu)$, $\nabla f(x)-\sum_i\frac{\mu}{g_i(x)}\nabla g_i(x)=0$, which matches KKT stationarity exactly if you define $\lambda_i=-\mu/g_i(x)$ (automatically $\ge0$ in the interior) — but complementarity becomes $\lambda_ig_i(x)=-\mu$ instead of exactly $0$, a **relaxed complementarity** condition. So $\mu$ has a dual meaning: it's both the barrier strength *and* an upper bound on the KKT sub-optimality at each centering step, $f(x^*(\mu))-p^*\le m\mu$ (with $m$ the number of inequality constraints).
 
-## SQP, briefly
+<ExerciseCard id="OPT-04-ex4-central-path-check" />
 
-**Sequential Quadratic Programming (SQP)** handles general (not necessarily convex) constrained problems by repeatedly forming a local QP approximation (linearize the constraints, use a quadratic model of the Lagrangian, exactly the Newton/Gauss-Newton idea from OPT-01/OPT-02 applied to the constrained KKT system) and solving that QP exactly, then repeating at the new point. It's covered here at a conceptual level; a full derivation is a natural extension once you need it for a specific problem.
+## Squared penalty and the augmented Lagrangian
+
+A simpler (but cruder) alternative: a **squared penalty**, zero when feasible, growing quadratically when violated: $S(x,\mu,\nu)=f(x)+\mu\sum_i[g_i(x)>0]g_i(x)^2+\nu\sum_jh_j(x)^2$. Simple and gives good Newton conditioning, but always leaves *some* constraint violation (exact feasibility only as $\mu,\nu\to\infty$, which itself causes ill-conditioning).
+
+```
+Squared Penalty Method
+Input:    initial x, functions f(x), g(x), h(x), tolerances θ, ε,
+          parameters (defaults: ϱμ⁺=ϱν⁺=10, μ0=ν0=1)
+1: initialize μ = μ0, ν = ν0
+2: repeat
+3:   solve unconstrained problem x ← argmin_x S(x,μ,ν)
+4:   μ ← ϱμ⁺·μ,  ν ← ϱν⁺·ν
+5: until |Δx| ≤ θ  and  ∀i,j: gᵢ(x) ≤ ε, |hⱼ(x)| ≤ ε   // repeatedly
+```
+*(Marc Toussaint, `lecture-optimization.pdf`, p.27. μ and ν are increased gradually; quadratic penalties give good conditioning for Newton methods, but always leave some violation.)*
+
+The **augmented Lagrangian** fixes this without sending the penalty weight to infinity, by additionally tracking multiplier estimates $\kappa_j$ (self-contained derivation, equality constraints first): minimize $A(x,\kappa,\nu)=f(x)+\sum_j\kappa_jh_j(x)+\nu\sum_jh_j(x)^2$, then **update** $\kappa_j$ using the gradient at the new minimizer:
+
+$$\kappa_j^{\text{new}} = \kappa_j^{\text{old}} + 2\nu h_j(x')$$
+
+<ExerciseCard id="OPT-04-ex5-auglag-update" />
+
+```
+Augmented Lagrangian
+Input:    initial x, functions f(x), g(x), h(x), tolerances θ, ε,
+          parameters (defaults: ϱμ⁺=ϱν⁺=1.2, μ0=ν0=1)
+1: initialize μ=μ0, ν=ν0, λᵢ=0, κⱼ=0
+2: repeat
+3:   solve unconstrained problem x ← argmin_x A(x,λ,κ,μ,ν)
+4:   ∀i: λᵢ ← max(λᵢ + 2μ·gᵢ(x'), 0),  ∀j: κⱼ ← κⱼ + 2ν·hⱼ(x')
+5:   optionally: μ ← ϱμ⁺·μ, ν ← ϱν⁺·ν
+6: until |Δx| < θ  and  gᵢ(x) < ε  and  |hⱼ(x)| < ε        // repeatedly
+```
+*(Marc Toussaint, `lecture-optimization.pdf`, p.30. Unlike log-barrier/squared-penalty, this does not require μ,ν→∞ for exact constraint satisfaction.)*
+
+Why this is elegant: it does **not** require the penalty limit $\nu\to\infty$ to achieve exact constraint satisfaction, avoiding the ill-conditioning that plagues both the log barrier (as $\mu\to0$) and squared penalty (as $\nu\to\infty$) methods. If $f,h$ were linear, the very next iteration's $\kappa_j$ would be *exactly* right, hitting the constraint exactly, by construction. For inequalities, the same idea applies with $\lambda_i\leftarrow\max(\lambda_i+2\mu g_i(x'),0)$ (clipped at zero, since $\lambda_i\ge0$ is required), toggling between "active, penalize" and "inactive, ignore" as needed each iteration.
+
+## SQP: Newton's method for the constrained case
+
+**Sequential Quadratic Programming (SQP)** generalizes Newton's method to the constrained case directly, without an unconstrained-inner-loop reformulation: in each iteration, Taylor-expand the cost to 2nd order and the constraints to 1st order around the current $x$, then solve the resulting QP exactly for the step $\delta$:
+
+$$\min_\delta f(x)+\nabla f(x)^\top\delta+\tfrac12\delta^\top\nabla^2f(x)\delta \quad\text{s.t.}\quad g(x)+\nabla g(x)^\top\delta\le0,\ h(x)+\nabla h(x)^\top\delta=0$$
+
+If $f$ were exactly quadratic and $g,h$ exactly linear, $\delta^*$ would jump directly to the true optimum in one step (same as plain Newton on an unconstrained quadratic). Each SQP iteration requires a full constrained QP solve (which may itself need an inner log-barrier or augmented-Lagrangian loop, or a dedicated QP solver), but the **outer** loop never re-queries the original nonlinear $f,g,h$ more than once per iteration, an attractive query-efficiency trade whenever evaluating $f,g,h$ is the expensive part.
 
 ## Summary
 
-- A local minimum of a convex function is automatically global, this is what makes convex problems tractable.
-- LPs and QPs are convex when correctly formulated (linear or convex-quadratic objective, linear constraints).
-- The log-barrier method converts a constrained problem into a sequence of unconstrained ones, using a penalty that blows up near the constraint boundary, preventing infeasibility by construction.
-- SQP extends the Newton/Gauss-Newton idea to general constrained problems via repeated local QP approximations.
+- Convex $\subset$ quasiconvex $\subset$ unimodal $\subset$ general; a local minimum of a convex function is automatically global, this is what makes convex problems tractable, and $\nabla^2f\succeq0$ everywhere is the $\mathcal{C}^2$ criterion.
+- LPs/QPs are convex when correctly formulated; standard form uses slack variables; the SVM dual is a canonical QP example; Simplex walks the polytope's edges, log barrier approaches from the interior.
+- The log-barrier method centers a sequence of unconstrained problems along the central path as $\mu\to0$; centering is exactly a relaxed-complementarity KKT system, with $\mu$ an upper bound on sub-optimality.
+- The augmented Lagrangian avoids the ill-conditioning of penalty/barrier methods as their weight $\to\infty$, by explicitly updating multiplier estimates $\kappa_j\leftarrow\kappa_j+2\nu h_j(x')$ instead.
+- SQP generalizes Newton's method directly to the constrained case: Taylor-expand cost (2nd order) and constraints (1st order), solve the resulting QP exactly, repeat.
 
 ## Retrieval questions
 
-1. Prove (don't just state) that a local minimum of a convex function is global.
-2. Derive the log-barrier gradient formula, without looking back.
-3. What's the standard-form trick for converting a maximization problem, or a $\ge$ constraint, into the $\min c^\top x$ s.t. $Ax\le b$ template?
+1. State the convex/quasiconvex/unimodal hierarchy and the $\mathcal{C}^2$ convexity criterion.
+2. Derive the log-barrier gradient formula, and state the modified/relaxed KKT complementarity condition it corresponds to.
+3. Write the augmented Lagrangian's multiplier update rule from memory, and explain why it avoids sending a penalty weight to infinity.
+4. What does SQP Taylor-expand to 2nd order, and what to 1st order, and why the asymmetry?
 
 ## Mastery checklist
 
-- [ ] Proved that convexity implies local minima are global.
-- [ ] Derived the log-barrier gradient and can explain its blow-up behavior.
-- [ ] Rewrote a maximization problem with mixed constraint types into standard LP form.
-- [ ] Can explain, conceptually, what SQP does at each iteration.
+- [ ] Can state the convex/quasiconvex/unimodal definitions and proved local-implies-global for convex $f$.
+- [ ] Derived the log-barrier gradient and can explain the central path / relaxed-KKT connection.
+- [ ] Derived the augmented Lagrangian's multiplier update.
+- [ ] Rewrote a problem into standard LP form using slack variables, and can set up the SVM QP.
+- [ ] Can explain, at the derivation level, what SQP solves at each iteration.
 
 ## Source note
 
-This module's topic and page range are from `lecture-optimization`, §2.2 and §2.5 (pp. 23-29, 35-48). All exposition, the worked example, and every exercise here are newly authored, paraphrasing the source's topic coverage.
+This module's exposition, the log-barrier method and central path, the squared penalty and augmented Lagrangian derivations, convex/quasiconvex/unimodal definitions, LP/QP standard forms and slack variables, the SVM QP example, the Simplex algorithm, and the SQP formulation are all adapted from `lecture-optimization`, §2.2-2.3 (pp. 23-30) and §2.5 (pp. 35-44). The worked example and exercises are newly authored.
 
 ---
 

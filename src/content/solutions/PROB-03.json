@@ -1,6 +1,12 @@
 {
   "solutions": [
     {
+      "exerciseId": "PROB-03-ex0-coin-nll",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 5, "tolerance": 0.01 },
+      "fullSolution": "p(x) = 0.5^5 = 1/32 = 0.03125. -log2(0.03125) = -log2(2^-5) = 5 bits."
+    },
+    {
       "exerciseId": "PROB-03-ex1-why-expected-surprise",
       "checkMode": "rubric",
       "rubric": {

@@ -1,0 +1,90 @@
+{
+  "moduleId": "RLEARN-02",
+  "exercises": [
+    {
+      "id": "RLEARN-02-ex1-trajectory-distribution-conceptual",
+      "objective": "Explain what the variance of a learned GMM trajectory distribution reveals about the demonstrations.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 38, "originalNumber": "1.6:10" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "After fitting a GMM density $p(t,x_t)$ to several demonstrations of the same task, some time steps show low variance in $p(x\\mid t)$ across demonstrations, others show high variance. Explain what this pattern likely indicates about the task, and why it's useful information.",
+      "hints": [
+        "Low variance at a given $t$ means every demonstration passed through nearly the same $x_t$ at that point in the motion, regardless of how differently they otherwise moved.",
+        "This is exactly what you'd expect at a genuine task requirement, e.g. a precise grasp point, a keyhole the demonstrator must thread, a point that must be hit exactly for the task to succeed at all: a 'consistent bottleneck.'",
+        "High-variance regions, by contrast, indicate parts of the motion where the demonstrator had freedom (many different paths worked equally well); knowing which is which lets a downstream controller enforce precision only where it actually matters, rather than uniformly everywhere."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-02-ex2-distributional-shift-derivation",
+      "objective": "Explain why behavior cloning's training objective is not the same as its actual test-time objective.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 41, "originalNumber": "1.6:18" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Behavior cloning minimizes $\\mathbb{E}_{\\pi^*}\\{\\ell(u,\\pi_\\theta(x))\\}$ (expectation under the expert's own visited states). Explain precisely why this differs from what actually matters at test time, $\\mathbb{E}_{\\pi_\\theta}\\{\\ell(\\pi^*(x),\\pi_\\theta(x))\\}$ (expectation under $\\pi_\\theta$'s own visited states).",
+      "hints": [
+        "At training time, the loss is only ever evaluated at states $x$ that the *expert* actually visited, since that's all the dataset $D$ contains.",
+        "At test/deployment time, however, it's $\\pi_\\theta$ itself, not the expert, that determines which states get visited, since $\\pi_\\theta$ is now in control; if $\\pi_\\theta$ makes even a small early error, it can reach states the expert never demonstrated, states $\\pi_\\theta$ was never actually trained on.",
+        "So a small training loss under $\\pi^*$'s state distribution says nothing about the loss under $\\pi_\\theta$'s *own* (self-generated) state distribution: the objective that's actually minimized (training) and the objective that actually matters (deployment) are evaluated under two genuinely different distributions, exactly the distributional shift problem, fundamentally absent from ordinary i.i.d. supervised learning."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-02-ex3-compound-error-conceptual",
+      "objective": "Explain the practical implication of the compound error bound's quadratic dependence on horizon.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 42, "originalNumber": "1.6:20" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["RLEARN-02-ex2-distributional-shift-derivation"],
+      "answerType": "short-text",
+      "prompt": "Given $J(\\pi_\\theta)\\leq J(\\pi^*)+T^2\\varepsilon$, explain why doubling the task horizon $T$ (for the same fixed per-step training error $\\varepsilon$) is much worse news than doubling $\\varepsilon$ itself, and what this implies about behavior cloning on long-horizon tasks.",
+      "hints": [
+        "Doubling $\\varepsilon$ (holding $T$ fixed) doubles the bound's second term, a linear effect.",
+        "Doubling $T$ (holding $\\varepsilon$ fixed) *quadruples* the bound's second term, since $T$ appears squared: the same small per-step error becomes a much larger problem purely because there are more steps for it to compound over.",
+        "This implies plain behavior cloning is structurally worse-suited to long-horizon tasks than short ones, even with identical per-step accuracy: it's not that long tasks are 'harder to fit,' it's that whatever small fitting error exists gets amplified quadratically by task length, exactly the motivation for DAgger and the other distributional-shift fixes when horizons are long."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-02-ex4-privileged-teacher-conceptual",
+      "objective": "Explain the practical tradeoff of the privileged-teacher training pattern.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 46, "originalNumber": "1.6:34" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "State one genuine advantage and one genuine cost of the privileged-teacher pattern (train $\\pi_{\\theta_1}:z\\mapsto u$ with privileged info $z$, then distill to $\\pi_{\\theta_2}:x\\mapsto u$) compared to training $\\pi_\\theta:x\\mapsto u$ directly in one stage.",
+      "hints": [
+        "Advantage: the second (distillation) stage can be trained with DAgger cheaply, since the privileged teacher $\\pi_{\\theta_1}$ can be queried on-demand at any state the student reaches, exactly what DAgger needs, and data augmentation becomes simple.",
+        "Cost: the approach is inherently simulation-focused (you need access to privileged ground-truth information $z$ somewhere, usually only available in simulation) and hierarchical (requires domain knowledge to design what counts as 'privileged' and how the two stages should be split).",
+        "In short: it trades a harder one-stage learning-from-limited-observations problem for two easier stages, at the cost of needing a source of privileged information and added system complexity."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-02-ex5-generative-model-conceptual",
+      "objective": "Distinguish GAN, VAE, and Diffusion Model architectures by what each trains.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 47, "originalNumber": "1.7:2" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "For each of GAN, VAE, and Diffusion, state how many networks are trained and what each network's job is.",
+      "hints": [
+        "GAN trains two networks adversarially: a generator $g_\\omega$ that tries to produce realistic samples, and a discriminator $d_\\phi$ that tries to tell real data from generated samples; GAIL applies this with the generator being the policy itself.",
+        "VAE also trains two networks, but cooperatively rather than adversarially: an encoder $q_\\phi(z\\mid x)$ compressing data into a latent code, and a decoder $p_\\theta(x\\mid z)$ reconstructing data from that code, regularized by a KL term keeping the latent distribution well-behaved.",
+        "Diffusion trains a single network that learns to *remove* noise, applied repeatedly: the forward process adds Gaussian noise step by step (fixed, not learned), and the one trained network learns the reverse (denoising) step, generating samples by iterating that single network many times starting from pure noise."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

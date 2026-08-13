@@ -1,0 +1,46 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RL-03-ex1-td-error-sign-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains the positive-TD-error/increase-V case." },
+          { "points": 2, "description": "Correctly explains the negative-TD-error/decrease-V case." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "V(s) is the old estimate; r+gamma*V(s') is a fresh one-sample re-estimate from what just happened. If r+gamma*V(s') > V(s) (better than expected), TD error is positive, so V(s) increases toward it. If r+gamma*V(s') < V(s) (worse than expected), TD error is negative and V(s) decreases. The update always nudges the old estimate toward what was actually observed."
+    },
+    {
+      "exerciseId": "RL-03-ex2-qlearning-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly replaces the exact expectation with a single sampled transition." },
+          { "points": 2, "description": "Correctly forms the alpha-weighted update using the TD error." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Replace the exact expectation sum_s' P(s'|s,a)*max_a' Q*(s',a') with the single observed s': r + gamma*max_a' Q(s',a'). Since this one-sample estimate is noisy, take a small step alpha toward it rather than overwriting: Q_new(s,a) = Q_old(s,a) + alpha*[r + gamma*max_a' Q_old(s',a') - Q_old(s,a)]."
+    },
+    {
+      "exerciseId": "RL-03-ex3-td-vs-qlearning-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly distinguishes TD-learning's V^pi target from Q-learning's Q* target." },
+          { "points": 2, "description": "Correctly explains why the max_a' target makes Q-learning off-policy/exploration-tolerant." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "TD-learning's target r+gamma*V(s') uses the actual next action taken under pi: it estimates V^pi, the value of the specific data-generating policy. Q-learning's target uses max_a' Q(s',a'), the best possible next action regardless of what was actually taken: it estimates Q*, optimal-behavior value, no matter which policy generated the data. This is why Q-learning tolerates (needs) an exploratory epsilon-greedy behavior policy: the target doesn't depend on the behavior policy's own suboptimality, an off-policy property."
+    },
+    {
+      "exerciseId": "RL-03-ex4-nstep-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 6.0, "tolerance": 0.01 },
+      "fullSolution": "R_t^(2) = 2 + 0.5*3 + 0.25*10 = 2+1.5+2.5 = 6.0."
+    }
+  ]
+}

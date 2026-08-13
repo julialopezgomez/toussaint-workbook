@@ -1,0 +1,109 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "MATH-02B-ex1-solve-i",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly isolates XA = I - A^T." },
+          { "points": 1, "description": "Multiplies by A^-1 on the correct (right) side to get X = (I-A^T)A^-1." }
+        ],
+        "commonErrors": [
+          "Multiplying by A^-1 on the left instead of the right, which does not isolate X since X is left-multiplied by A."
+        ]
+      },
+      "fullSolution": "XA + A^T = I  =>  XA = I - A^T. Multiply both sides on the right by A^-1: XA A^-1 = (I-A^T)A^-1, i.e. X = (I-A^T)A^-1."
+    },
+    {
+      "exerciseId": "MATH-02B-ex2-solve-ii",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly expands [2A(X+B)]^T = 2X^T A^T + 2B^T A^T." },
+          { "points": 1, "description": "Correctly collects X^T terms: X^T(C-2A^T) = 2B^T A^T." },
+          { "points": 1, "description": "Correctly transposes the final equation, reversing multiplication order, to get X = 2(C^T-2A)^-1 A B." }
+        ],
+        "commonErrors": [
+          "Forgetting that transposing a product reverses the order of factors.",
+          "Sign or order errors when moving the 2X^TA^T term across the equation."
+        ]
+      },
+      "fullSolution": "X^T C = [2A(X+B)]^T = 2(X+B)^T A^T = 2X^T A^T + 2B^T A^T.\nX^T C - 2X^T A^T = 2B^T A^T  =>  X^T(C-2A^T) = 2B^T A^T.\nX^T = 2B^T A^T (C-2A^T)^-1.\nTranspose both sides (reversing order): X = [(C-2A^T)^-1]^T A B * 2 = 2[(C-2A^T)^T]^-1 A B = 2(C^T-2A)^-1 A B.\n(Numerically verified with random 3x3 matrices while authoring this module: max abs residual ~7e-15.)"
+    },
+    {
+      "exerciseId": "MATH-02B-ex3-normal-equations",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly transposes the equation to A^T(Ax-y)=0." },
+          { "points": 1, "description": "Arrives at x = (A^T A)^-1 A^T y." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "(Ax-y)^T A = 0_n^T. Transpose: A^T(Ax-y) = 0_n. Distribute: A^T A x - A^T y = 0, so A^T A x = A^T y, and since A^T A is invertible, x = (A^T A)^-1 A^T y."
+    },
+    {
+      "exerciseId": "MATH-02B-ex4-regularized-normal-equations",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly transposes to A^T(Ax-y) + Bx = 0, using B^T=B." },
+          { "points": 1, "description": "Arrives at x = (A^T A + B)^-1 A^T y." },
+          { "points": 1, "description": "Notes the connection to the ridge-regression worked example (B = lambda I as a special case)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "(Ax-y)^T A + x^T B = 0_n^T. Transpose (B symmetric so B^T=B): A^T(Ax-y) + Bx = 0. Distribute: A^T A x - A^T y + Bx = 0, so (A^T A + B)x = A^T y, x = (A^T A + B)^-1 A^T y. With B = lambda*I this is exactly the ridge regression closed form."
+    },
+    {
+      "exerciseId": "MATH-02B-ex5-identity-application",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly substitutes C=A, d=b into the given identity to get 2(Ax-b)^T A." },
+          { "points": 1, "description": "Correctly transposes to the gradient (column) form 2A^T(Ax-b)." },
+          { "points": 1, "description": "Connects the zero-gradient condition back to the normal equations from ex3." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Substituting C=A, d=b: d/dx[(Ax-b)^T(Ax-b)] = (Ax-b)^T A + (Ax-b)^T A = 2(Ax-b)^T A (row form). Transposing: grad g(x) = 2A^T(Ax-b). Setting to zero: A^T(Ax-b)=0 => A^T A x = A^T b, matching ex3's normal equations exactly (with y=b)."
+    },
+    {
+      "exerciseId": "MATH-02B-ex6-matrix-element-derivative",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly writes a^T X b in index notation as a double sum." },
+          { "points": 1, "description": "Correctly differentiates w.r.t. a single element X_ij, isolating the single surviving term a_i b_j." },
+          { "points": 1, "description": "Correctly reassembles the result as the outer product ab^T." }
+        ],
+        "commonErrors": [
+          "Trying to differentiate the whole matrix X at once without dropping to element-wise notation, and getting the shape/order confused."
+        ]
+      },
+      "fullSolution": "a^T X b = sum_{k,l} a_k X_kl b_l. Differentiating w.r.t. a single entry X_ij: every term in the double sum has zero derivative except the one term with k=i, l=j, which contributes a_i b_j. So d/dX_ij [a^T X b] = a_i b_j. Assembling the (i,j) entries a_i b_j into a matrix gives exactly the outer product ab^T, so d/dX [a^T X b] = ab^T."
+    },
+    {
+      "exerciseId": "MATH-02B-ex7-logreg-check",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.16, "tolerance": 0.001 },
+      "fullSolution": "p_i(1-p_i) = 0.2 * 0.8 = 0.16, which is <= 1/4 = 0.25 as required (the function p(1-p) is maximized at p=0.5, where it equals 0.25)."
+    },
+    {
+      "exerciseId": "MATH-02B-ex8-gauss-newton-ik",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly substitutes the linearization and delta=q-q0, expressing the objective as ||r+J*delta||_C^2 + ||delta||_W^2 with r=phi(q0)-y*." },
+          { "points": 2, "description": "Correctly differentiates w.r.t. delta and sets to zero, arriving at (J^T C J + W) delta = -J^T C r." },
+          { "points": 1, "description": "Correctly solves for delta* and substitutes back for q* = q0 + delta*." },
+          { "points": 1, "description": "Recognizes the structural match to the ridge-regression closed form (A -> J, y -> y*-phi(q0), lambda*I -> W)." }
+        ],
+        "commonErrors": [
+          "Forgetting to relinearize J at the new point for subsequent iterations (this single step is only exact if phi is actually linear; otherwise it's one Gauss-Newton iteration, not the exact minimizer)."
+        ]
+      },
+      "fullSolution": "Substituting the linearization, with r = phi(q0)-y*: objective = (r+J*delta)^T C (r+J*delta) + delta^T W delta.\nDifferentiate w.r.t. delta: 2 J^T C (r+J*delta) + 2 W delta = 0.\n=> J^T C r + (J^T C J + W) delta = 0\n=> (J^T C J + W) delta = -J^T C r\n=> delta* = -(J^T C J + W)^-1 J^T C r = (J^T C J + W)^-1 J^T C (y*-phi(q0)).\nSo q* = q0 + (J^T C J + W)^-1 J^T C (y*-phi(q0)).\nThis has exactly the ridge-regression shape (A^T A + lambda I)^-1 A^T y with A->J, lambda*I->W, y->(y*-phi(q0)). Iterating this (relinearizing J at each new q*) is the Gauss-Newton method. (Numerically verified for a random linear-phi test case while authoring this module: gradient at q* is zero to floating-point precision.)"
+    }
+  ]
+}

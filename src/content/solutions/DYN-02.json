@@ -1,0 +1,42 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "DYN-02-ex1-p-control-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly differentiates the ansatz twice and substitutes into the ODE." },
+          { "points": 1, "description": "Correctly separates the equation into the e^{wt}-coefficient condition and the constant condition." },
+          { "points": 2, "description": "Correctly solves both, arriving at a=q* and omega=+-i*sqrt(Kp/m)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "qddot(t) = b*omega^2*e^{omega t}. Substituting: m*b*omega^2*e^{omega t} = Kp(q*-a-b*e^{omega t}) = Kp(q*-a) - Kp*b*e^{omega t}.\nGroup: (m*b*omega^2 + Kp*b)*e^{omega t} = Kp(q*-a). Since e^{omega t} varies with t but the RHS doesn't, both sides vanish independently: m*b*omega^2+Kp*b=0 and q*-a=0.\nFrom the second: a=q*. From the first (b!=0): m*omega^2+Kp=0, omega^2=-Kp/m, omega=+-i*sqrt(Kp/m). Purely imaginary: undamped oscillation, ODE-02's 'center' case."
+    },
+    {
+      "exerciseId": "DYN-02-ex2-pd-characteristic-equation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly computes qdot and qddot from the ansatz and substitutes." },
+          { "points": 1, "description": "Correctly groups the e^{wt} terms and the constant terms." },
+          { "points": 2, "description": "Correctly arrives at the characteristic equation m*omega^2+Kd*omega+Kp=0." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "qdot=b*omega*e^{omega t}, qddot=b*omega^2*e^{omega t}. Substituting into m*qddot = Kp(q*-q)-Kd*qdot: m*b*omega^2*e^{omega t} = Kp(q*-a-b*e^{omega t}) - Kd*b*omega*e^{omega t}.\nGroup e^{omega t} terms: (m*b*omega^2 + Kd*b*omega + Kp*b)*e^{omega t} = Kp(q*-a). Both sides vanish independently.\nFrom the e^{omega t} side (b!=0): m*omega^2+Kd*omega+Kp=0, the characteristic equation, roots omega=(-Kd +- sqrt(Kd^2-4mKp))/(2m) by the quadratic formula."
+    },
+    {
+      "exerciseId": "DYN-02-ex3-damping-classify",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 1.732, "tolerance": 0.005 },
+      "fullSolution": "Kd^2=16, 4mKp=64. 16<64, oscillatory-damped. Kp/m=4, Kd^2/(4m^2)=16/16=1. Frequency = sqrt(4-1)=sqrt(3)~=1.732. (Verified with NumPy while authoring this module.)"
+    },
+    {
+      "exerciseId": "DYN-02-ex4-lambda-xi-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.5, "tolerance": 0.01 },
+      "fullSolution": "4mKp = 4*2*8=64, sqrt=8. xi = Kd/8 = 4/8 = 0.5. (xi<1 confirms oscillatory-damped, consistent with the discriminant classification.)"
+    }
+  ]
+}

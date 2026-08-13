@@ -1,0 +1,92 @@
+---
+id: RLEARN-03
+block: RLEARN
+title: "RL in Robotics: Reward Engineering & Deep RL Tricks"
+tier: 1
+estimatedHours: 2
+prerequisites: ["RL-04"]
+objectives:
+  - "Derive potential-based reward shaping's policy-invariance property."
+  - "Explain the robotics-specific data-collection challenge in on-policy deep RL, and the structured-exploration-noise fix."
+  - "Recognize genuine RL applications in robotics at a level sufficient to read the underlying papers."
+sources:
+  - { sourceId: "lecture-robotlearning", pages: "p57-65 (§1.8, robotics-specific content only)", role: "primary" }
+concepts:
+  - "Potential-based reward shaping"
+  - "On-policy data collection, structured exploration noise"
+notation:
+  - { symbol: "$\\Phi(s)$", meaning: "a potential function over states, used to shape a reward without changing the optimal policy" }
+  - { symbol: "$R'(s,a,s')=R(s,a,s')+\\gamma\\Phi(s')-\\Phi(s)$", meaning: "potential-based reward shaping" }
+cheatsheetLinks: []
+nextModules: ["RLEARN-04"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+RL-01 through RL-07 already built the complete RL foundation, MDPs, Bellman/value-iteration, TD/Q-learning, the policy gradient theorem, and deep-RL stabilization tricks, all directly reusable for robots with no changes. This module is deliberately short: it covers only what's genuinely *robotics-specific* on top of that foundation, designing rewards well, and the practical data-collection challenge of training on-policy deep RL on (or for) a physical system.
+
+## Prerequisites & readiness check
+
+You should have RL-04's Bellman residual and policy gradient fresh; this module adds nothing to that machinery, only two robotics-specific concerns on top of it.
+
+<ReadinessCheck
+  question="From RL-04, what makes a deep-RL method 'on-policy,' and why does that matter for data collection?"
+  answer="On-policy methods (unlike Q-learning's off-policy update) need data collected specifically under the current policy π; you can't reuse old data collected under a different, earlier policy the same way."
+/>
+
+## Reward engineering: shaping without breaking optimality
+
+A poorly-designed reward (e.g. sparse, only given at task completion) can make RL painfully slow: the agent gets no signal at all until it stumbles onto success by chance. The natural fix, **reward shaping** (adding extra terms to guide learning), has an obvious danger: an arbitrary added reward can change *what the optimal policy actually is*, silently teaching the wrong behavior.
+
+**Potential-based reward shaping** (Ng, Harada & Russell, 1999) avoids this: define a potential function $\Phi(s)$ over states, and shape the reward as
+
+$$R'(s,a,s') := R(s,a,s') + \gamma\Phi(s') - \Phi(s)$$
+
+<ExerciseCard id="RLEARN-03-ex1-reward-shaping-derivation" />
+
+**This provably preserves the optimal policy**: solving RL-02's Bellman equation with $R'$ gives $Q'(s,a)=Q(s,a)-\Phi(s)$, exactly the original $Q$ shifted by a *state-only* function. Since $\Phi(s)$ doesn't depend on $a$, $\operatorname*{argmax}_aQ'(s,a)=\operatorname*{argmax}_aQ(s,a)$: identical optimal policy, but (with a well-chosen $\Phi$, e.g. an estimate of distance-to-goal) a dramatically denser, more immediately informative reward signal along the way.
+
+## Data collection: the on-policy bottleneck
+
+<ExerciseCard id="RLEARN-03-ex2-onpolicy-conceptual" />
+
+Many state-of-the-art deep-RL methods (SAC, DDPG, TD3, PPO) require data collected specifically under (something close to) the *current* policy $\pi_\theta$, so that RL-04's Bellman-residual and policy-gradient expectations can be approximated directly by the collected data (formally: SAC is still called "off-policy" because it takes value-function expectations w.r.t. actions freshly sampled from $\pi_\theta$, not literally the old data-collecting policy, but it still needs *reasonably current* rollouts, not arbitrarily stale ones). This is a genuine practical bottleneck on real hardware: unlike classical (discrete, tabular) RL's exploration toolbox (RL-05's optimistic initialization, R-max), a policy generating training rollouts on a physical robot is, by default, an *uninformed*, non-exploring, roughly i.i.d.-per-step noise process (Brownian-motion-like), not a deliberately structured explorer.
+
+**The fix**: replace plain (Brownian-like, uncorrelated) action noise with **structured, temporally-correlated exploration noise**, e.g. pink noise or an Ornstein-Uhlenbeck process (correlated across nearby time steps, producing coherent excursions rather than jittery, self-canceling ones), or **parameter-space noise** (perturb the policy's own parameters $\theta$ once per episode, rather than perturbing each action independently), both giving qualitatively better state-space coverage per unit of real-robot time than naive per-step random noise, directly RLEARN-01's "good data" principle (frequency/state coverage) applied to online RL exploration specifically.
+
+<ExerciseCard id="RLEARN-03-ex3-exploration-noise-conceptual" />
+
+## Genuine RL applications in robotics
+
+Two concrete, real-world-caliber results worth knowing by name (both trained primarily or entirely in simulation, RLEARN-04's territory): **Gran Turismo Sophy** (Wurman et al., *Nature*, 2022) out-raced champion human drivers in a commercial racing game using deep RL; **champion-level drone racing** (Kaufmann et al., *Nature*, 2023) used deep RL to beat human champion drone racers. Both are genuine demonstrations that the RL-01 through RL-07 + RLEARN-04 toolchain, applied carefully with the reward and data-collection considerations above, reaches genuinely superhuman performance in physically-grounded (if simulation-heavy) domains, not just abstract games.
+
+## Summary
+
+- **Potential-based reward shaping**, $R'=R+\gamma\Phi(s')-\Phi(s)$, provably preserves the optimal policy (it shifts $Q$ by a state-only function, leaving $\operatorname*{argmax}_a$ unchanged), letting denser rewards be engineered safely.
+- Many deep-RL methods need **(near-)on-policy data**, a genuine bottleneck for physical robots; **structured exploration noise** (pink noise, Ornstein-Uhlenbeck, parameter-space noise) gives better state coverage per rollout than naive per-step noise, RLEARN-01's "good data" principle applied to online exploration.
+- **Gran Turismo Sophy** and **champion-level drone racing** are genuine, superhuman-caliber RL-in-robotics results, both trained primarily in simulation.
+
+## Retrieval questions
+
+1. Derive why potential-based reward shaping preserves the optimal policy.
+2. Why do many deep-RL methods need (near-)on-policy data, and why is that a genuine challenge for physical robots?
+3. Name two structured-exploration-noise strategies and explain why they beat naive per-step noise.
+4. Name two genuine, superhuman-caliber RL-in-robotics results.
+
+## Mastery checklist
+
+- [ ] Derived potential-based reward shaping's policy-invariance property.
+- [ ] Can explain the on-policy data-collection bottleneck for physical robots.
+- [ ] Can explain structured exploration noise and why it beats naive noise.
+- [ ] Can name genuine RL-in-robotics application results.
+
+## Source note
+
+This module's exposition, potential-based reward shaping (Ng, Harada & Russell, 1999), the on-policy data-collection discussion, structured exploration noise (pink noise, parameter-space noise), and the application papers (Gran Turismo Sophy, champion-level drone racing) are adapted from `lecture-robotlearning`, §1.8 (pp. 57-65), restricted deliberately to the genuinely robotics-specific content in that section; the MDP/Bellman/policy-gradient/deep-RL-tricks content covered in the same section is a direct recap of material already built in full in Block RL and is not repeated here. The reward-shaping policy-invariance property was independently verified numerically on a small MDP while authoring this module.
+
+---
+
+**Next**: [RLEARN-04: Offline RL & Sim2Real](/course/RLEARN/RLEARN-04)

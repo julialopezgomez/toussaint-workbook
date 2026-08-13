@@ -1,0 +1,73 @@
+{
+  "moduleId": "MANIP-01",
+  "exercises": [
+    {
+      "id": "MANIP-01-ex1-wrench-computation",
+      "objective": "Compute the total wrench (force and torque) from two finger contacts on a 2D object.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 82, "originalNumber": "1.11:6" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "Two fingers grasp a 2D object with reference point $c=(0,0)$: finger 1 at $p_1=(1,0)$ exerts $f_1=(0,-1)$; finger 2 at $p_2=(-1,0)$ exerts $f_2=(0,-1)$. Using the 2D cross product $p\\times f=p_xf_y-p_yf_x$, compute $\\tau_\\text{total}=\\sum_i(p_i-c)\\times f_i$. Enter a decimal.",
+      "hints": [
+        "$\\tau_1=(p_1-c)\\times f_1=(1)(- 1)-(0)(0)=-1$.",
+        "$\\tau_2=(p_2-c)\\times f_2=(-1)(-1)-(0)(0)=1$.",
+        "$\\tau_\\text{total}=\\tau_1+\\tau_2=-1+1=0$: the two symmetric downward forces cancel each other's torque exactly (they'd need to, to hold the object without spinning it). (Independently verified with NumPy while authoring this module; $f_\\text{total}=(0,-2)$ for reference.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MANIP-01-ex2-friction-cone-limit",
+      "objective": "Derive the frictionless limit of the friction cone constraint.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 83, "originalNumber": "1.11:8" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Starting from the friction cone constraint $\\|f_i^\\parallel\\|\\leq\\mu\\|f_i^\\perp\\|$, show what happens to the set of allowed forces $\\mathcal{F}_i$ as $\\mu\\to0$.",
+      "hints": [
+        "As $\\mu\\to0$, the right-hand side $\\mu\\|f_i^\\perp\\|\\to0$ for any finite $f_i^\\perp$.",
+        "The constraint becomes $\\|f_i^\\parallel\\|\\leq0$, which forces $f_i^\\parallel=0$ exactly: no tangential force component is allowed at all.",
+        "So $\\mathcal{F}_i$ degenerates to $\\{f_i:f_i=f_i^\\perp\\}$, i.e. a single ray along the contact normal (only pure pushing, no resistance whatsoever to tangential sliding): exactly the frictionless point-contact model stated earlier in the module."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MANIP-01-ex3-two-finger-impossibility",
+      "objective": "Explain why two frictionless point contacts can never achieve force closure in the plane.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 159, "originalNumber": "§10:5-6" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 12,
+      "prerequisites": ["MANIP-01-ex2-friction-cone-limit"],
+      "answerType": "short-text",
+      "prompt": "Using the fact that a frictionless friction cone degenerates to a single ray, explain why two frictionless point contacts can never achieve force closure for a 2D object (i.e. why their friction cones' positive span can never cover the full space of achievable 2D forces).",
+      "hints": [
+        "The positive linear span of a single ray is just that ray itself (all non-negative multiples of one direction), a 1-dimensional set.",
+        "The positive linear span of two rays is, at best, the convex cone spanned by them: this can cover at most a half-plane (180° or less) of the full 2D force space, never the whole plane, no matter how the two rays are oriented.",
+        "Since force closure requires the positive span to cover *every* possible direction (the full space of achievable total wrenches), and two rays can cover at most a half-plane, two frictionless point contacts can never achieve force closure in 2D: at least a third contact (or friction) is required, matching the Mishra-Schwartz-Sharir synthesis result's need for multiple fingers."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MANIP-01-ex4-closure-concepts-conceptual",
+      "objective": "Distinguish force closure, form closure, caging, and equilibrium with a concrete example for each.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 160, "originalNumber": "§10:7" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Give a brief concrete example of a grasp (or containment) situation for each: force closure, form closure, caging, and equilibrium, and explain what distinguishes each from the others.",
+      "hints": [
+        "Force closure: a multi-fingered hand with friction, gripping a ball firmly enough to resist a push from any direction, actively using friction-cone forces.",
+        "Form closure: an egg resting in a snugly-fitted egg-carton pocket, geometrically trapped with zero force needed (frictionless force closure). Caging: a ball loosely surrounded by several fingers with gaps between them, it can rattle around inside but can't get out, a weaker guarantee than form closure.",
+        "Equilibrium: a book resting on an inclined but sufficiently-rough shelf, where friction happens to balance gravity for *this specific* load, but a small added push could easily disturb it, unlike a true force-closed or form-closed grasp."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

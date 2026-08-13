@@ -1,0 +1,126 @@
+---
+id: DYN-02
+block: DYN
+title: "PID & Point-Mass Control"
+tier: 1
+estimatedHours: 3.5
+prerequisites: ["ODE-02"]
+objectives:
+  - "Derive the closed-loop ODE for P, PD, and PID control of a 1D point mass."
+  - "Classify the closed-loop response (oscillatory-damped, over-damped, critically-damped) directly from ODE-02's characteristic-equation machinery."
+  - "Convert between gain parameters $(K_p,K_d)$ and the time-scale/damping-ratio parameterization $(\\lambda,\\xi)$."
+  - "Explain why the integral term requires augmenting the state to keep the closed loop linear."
+sources:
+  - { sourceId: "lecture-robotics", pages: "p37-41 (§3.1)", role: "primary" }
+concepts:
+  - "1D point-mass dynamics"
+  - "Proportional/derivative/integral feedback"
+  - "Closed-loop characteristic equation, damping regimes"
+  - "Time-scale/damping-ratio parameterization"
+notation:
+  - { symbol: "$K_p,K_d,K_i$", meaning: "proportional, derivative, integral gains" }
+  - { symbol: "$\\omega$", meaning: "characteristic root of the closed-loop ODE" }
+  - { symbol: "$\\lambda,\\xi$", meaning: "time-scale (wavelength) and damping ratio, an alternative gain parameterization" }
+cheatsheetLinks: []
+nextModules: ["DYN-03"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+import SourceFigure from '../../../components/SourceFigure.astro';
+
+## Why this matters
+
+This module is ODE-02's linear-systems machinery, applied directly: PID control turns a control-design question ("how should the motor push?") into an ODE-classification question ("is the resulting characteristic equation's roots real or complex, positive or negative real part?"), which you already know how to answer. The 1D point mass is deliberately the simplest possible case, general robot dynamics (DYN-01's $M(q)\ddot q+F(q,\dot q)=u$) reduce to exactly this picture once linearized, which is why point-mass control is a genuine reference case, not a toy.
+
+## Prerequisites & readiness check
+
+You should have linear ODEs, characteristic equations, and the stability classification (ODE-02) fresh.
+
+<ReadinessCheck
+  question="For a 2nd-order linear ODE with characteristic roots $\omega=a\pm bi$ ($b\neq0$), what does the solution look like?"
+  answer="An oscillation at frequency $b$ with an $e^{at}$ growth/decay envelope (ODE-02)."
+/>
+
+## The 1D point mass
+
+The simplest possible dynamical system with inertia: no gravity, no friction, just a mass $m$ with state $x(t)=(q(t),\dot q(t))$ and dynamics $\ddot q(t)=u(t)/m$ (control $u$ is the applied force).
+
+## Proportional feedback: "always pull toward the goal"
+
+The simplest control law, $u=K_p(q^*-q)$ (pull toward goal $q^*$ with a force proportional to the error), turns the dynamics into a closed-loop ODE:
+
+$$m\ddot q = K_p(q^*-q)$$
+
+<ExerciseCard id="DYN-02-ex1-p-control-derivation" />
+
+Solving via the ansatz $q(t)=a+be^{\omega t}$ (exactly ODE-02's eigenvalue ansatz, now for a 2nd-order scalar ODE) gives $\omega=\pm i\sqrt{K_p/m}$: **pure imaginary roots**, an undamped oscillation around $q^*$ at frequency $\sqrt{K_p/m}$ that never settles, exactly ODE-02's "center" classification. Proportional feedback alone never converges, it perpetually overshoots.
+
+## Derivative feedback: "damp the system"
+
+Add a term proportional to velocity error, $u=K_p(q^*-q)+K_d(\dot q^*-\dot q)$ (with $\dot q^*=0$ for simplicity, a fixed target):
+
+$$m\ddot q = K_p(q^*-q)-K_d\dot q$$
+
+<ExerciseCard id="DYN-02-ex2-pd-characteristic-equation" />
+
+The same ansatz gives characteristic roots $\omega=\dfrac{-K_d\pm\sqrt{K_d^2-4mK_p}}{2m}$: **the exact quadratic-formula/discriminant structure from ODE-02's stability classification**, now with a name for each regime:
+
+<SourceFigure
+  src="/figures/lecture-robotics/fig3-damping-regimes.png"
+  alt="Three plots showing position over time for oscillatory-damped, over-damped, and critically-damped PD control responses"
+  caption="The three PD-control damping regimes, determined entirely by the sign of the characteristic equation's discriminant K_d² − 4mK_p: oscillatory-damped (complex roots), over-damped (real roots), critically-damped (repeated real root, fastest non-oscillatory convergence)."
+  source="Lecture-Robotics.pdf"
+  page="40"
+/>
+
+$$K_d^2<4mK_p \Rightarrow \text{oscillatory-damped (complex roots)}, \quad K_d^2>4mK_p\Rightarrow\text{over-damped (real roots)}, \quad K_d^2=4mK_p\Rightarrow\text{critically damped}$$
+
+<ExerciseCard id="DYN-02-ex3-damping-classify" />
+
+## An equivalent, more intuitive parameterization
+
+Gains $(K_p,K_d)$ don't map intuitively onto "how fast" and "how oscillatory" a response looks. The standard fix: reparameterize by **time-scale** (wavelength) $\lambda=1/\sqrt{K_p/m}$ and **damping ratio** $\xi=K_d/\sqrt{4mK_p}$ (so $K_p=m/\lambda^2$, $K_d=2m\xi/\lambda$), giving
+
+$$q(t) = q^*+be^{-\xi t/\lambda}e^{i\sqrt{1-\xi^2}\,t/\lambda}$$
+
+with $\xi>1$ over-damped, $\xi=1$ critically damped, $\xi<1$ oscillatory-damped, exactly matching the discriminant classification above, now expressed as a single dimensionless number $\xi$ that means the same thing regardless of $m$ or the target time-scale $\lambda$.
+
+<ExerciseCard id="DYN-02-ex4-lambda-xi-numeric" />
+
+## Integral feedback and PID
+
+**Idea 3**: "pull if the position error has accumulated over time" (corrects for a constant disturbance a pure PD controller can't fully cancel, e.g. friction or a constant external load):
+
+$$u = K_p(q^*-q)+K_d(\dot q^*-\dot q)+K_i\int_{s=0}^t(q^*(s)-q(s))\,ds$$
+
+This isn't a linear ODE in $x=(q,\dot q)$ alone (the integral term depends on the whole history, not just the current state), but extending the state to $x=(q,\dot q,e)$ with $e(t)=\int_0^t(q^*-q)\,ds$ restores linearity: $\dot q=\dot q$, $\ddot q = u/m$, $\dot e = q^*-q$, an ODE system in the augmented state, exactly ODE-02's machinery again (now 3-dimensional), just with a third state variable tracking accumulated error.
+
+## Summary
+
+- The 1D point mass, $\ddot q=u/m$, is the reference dynamical system every general robot's linearized dynamics reduces to.
+- P control alone gives a pure oscillation (ODE-02's "center"), never converging; PD control's characteristic equation $m\omega^2+K_d\omega+K_p=0$ classifies the response into oscillatory-damped/over-damped/critically-damped by the discriminant $K_d^2-4mK_p$, exactly ODE-02's stability machinery.
+- The $(\lambda,\xi)$ reparameterization (time-scale, damping ratio) is a more intuitive, dimensionless way to specify the same gains.
+- The integral term of PID isn't linear in $(q,\dot q)$ alone; augmenting the state with the accumulated error $e$ restores linearity, letting the same ODE toolbox apply.
+
+## Retrieval questions
+
+1. Derive the characteristic roots of P-only control, and explain why the response never settles.
+2. Write the PD closed-loop characteristic equation and the discriminant condition for each of the three damping regimes.
+3. Convert between $(K_p,K_d)$ and $(\lambda,\xi)$, in both directions, from memory.
+4. Why does the integral term break linearity in $(q,\dot q)$ alone, and how is linearity restored?
+
+## Mastery checklist
+
+- [ ] Derived the P-only closed-loop ODE's characteristic roots and can explain the resulting perpetual oscillation.
+- [ ] Derived the PD closed-loop characteristic equation and can classify the three damping regimes from the discriminant.
+- [ ] Can convert between $(K_p,K_d)$ and $(\lambda,\xi)$.
+- [ ] Can explain why PID's integral term requires state augmentation to stay linear.
+
+## Source note
+
+This module's exposition, all three control laws (P/PD/PID), the closed-loop ODE derivations, the damping-regime classification (including the figure), and the $(\lambda,\xi)$ reparameterization are adapted from `lecture-robotics`, §3.1 (pp. 37-41). All exercises are newly authored and independently verified with NumPy, explicitly connecting each derivation back to ODE-02's characteristic-equation machinery rather than treating it as new content.
+
+---
+
+**Next**: [DYN-03: Inverse Dynamics & the Standard Control Stack](/course/DYN/DYN-03)

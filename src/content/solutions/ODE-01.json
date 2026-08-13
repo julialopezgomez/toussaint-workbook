@@ -1,0 +1,67 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "ODE-01-ex1-verify-solution",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly differentiates 3e^{2t} and confirms it matches 2x." },
+          { "points": 1, "description": "Correctly explains why Ce^{2t} works for any C, and why this is consistent with 3e^{2t} being a valid solution (it's just C=3)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "d/dt[3e^{2t}] = 6e^{2t}. 2x = 2(3e^{2t}) = 6e^{2t}. Match, so the ODE holds.\nFor x=Ce^{2t}: d/dt[Ce^{2t}]=2Ce^{2t}, and 2x=2Ce^{2t}, match for any C (the constant cancels out of the comparison). The ODE alone doesn't determine C uniquely, since differentiating loses that information; 3e^{2t} is simply the C=3 member of this family, not in conflict with the general family being valid too. An initial condition would pin down the specific C."
+    },
+    {
+      "exerciseId": "ODE-01-ex2-direction-field",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly analyzes the x=3 case: decreasing, approaching x=1 without crossing." },
+          { "points": 1, "description": "Correctly analyzes the x=-1 case: increasing, approaching x=1 without crossing." },
+          { "points": 1, "description": "Connects both to the general 'stable equilibrium' picture." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "For x=3>1: xdot=-x+1=-2<0, decreasing, and as x approaches 1 from above, xdot approaches 0, so the decrease slows and x asymptotically approaches 1 without crossing it.\nFor x=-1<1: xdot=-x+1=2>0, increasing, and as x approaches 1 from below, xdot approaches 0 similarly, approaching 1 from below without overshooting.\nBoth trajectories flow toward the equilibrium x=1 monotonically from either side: x=1 is a stable equilibrium, everything nearby is pulled toward it, visible directly from the sign of xdot without solving anything."
+    },
+    {
+      "exerciseId": "ODE-01-ex3-separable-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly applies the chain rule to d/dt[F(x(t))]." },
+          { "points": 2, "description": "Correctly substitutes F'(x)=1/g(x) and xdot=f(t)g(x), showing the g(x) terms cancel to leave f(t)." },
+          { "points": 1, "description": "Correctly integrates both sides to arrive at F(x(t))=integral f(t) dt + C." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "d/dt[F(x(t))] = F'(x(t)) * xdot(t) (chain rule).\nSubstitute F'(x)=1/g(x) and xdot=f(t)g(x): d/dt[F(x(t))] = (1/g(x(t))) * f(t)*g(x(t)) = f(t) (the g(x(t)) factors cancel exactly).\nSo d/dt[F(x(t))] = f(t) holds for all t. Integrating both sides w.r.t. t: F(x(t)) = integral f(t) dt + C, exactly the 'separate and integrate' rule (since F(x) = integral dx/g(x) by definition), now justified rigorously via the ordinary chain rule rather than treating dx/dt as a fraction."
+    },
+    {
+      "exerciseId": "ODE-01-ex4-separable-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 7.389, "tolerance": 0.01 },
+      "fullSolution": "dx/x = t dt. Integrate: ln|x| = t^2/2 + C. x(t) = A*e^{t^2/2}. x(0)=1 gives A=1. x(t)=e^{t^2/2}. x(2)=e^{4/2}=e^2 ~= 7.389. (Verified with SymPy while authoring this module.)"
+    },
+    {
+      "exerciseId": "ODE-01-ex5-integrating-factor-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly expands d/dt[mu*x] via the product rule." },
+          { "points": 2, "description": "Correctly compares terms and derives the requirement mu_dot = mu*p." },
+          { "points": 1, "description": "Correctly solves this (separable) equation for mu, getting mu(t)=e^{integral p dt}." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "d/dt[mu(t)x(t)] = mu(t)*xdot(t) + mu_dot(t)*x(t) (product rule).\nCompare to mu(t)*xdot(t) + mu(t)*p(t)*x(t) (the left side after multiplying the ODE by mu): the mu*xdot terms already match, so we need mu_dot(t) = mu(t)*p(t) for the x(t) terms to match too.\nThis is itself separable: dmu/mu = p(t) dt, integrate: ln|mu| = integral p(t) dt, so mu(t) = e^{integral p(t) dt} (taking the integration constant to be 0, since any valid mu works)."
+    },
+    {
+      "exerciseId": "ODE-01-ex6-ivp-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 1.9, "tolerance": 0.01 },
+      "fullSolution": "p(t)=3, mu(t)=e^{3t}. d/dt[e^{3t}x] = 6e^{3t}. Integrate: e^{3t}x = 2e^{3t}+C, x(t)=2+C*e^{-3t}. x(0)=0: 2+C=0, C=-2. x(t)=2-2e^{-3t}. x(1)=2-2e^{-3} ~= 2-0.0996 ~= 1.900. (Verified with SymPy while authoring this module.)"
+    }
+  ]
+}

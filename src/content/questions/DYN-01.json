@@ -1,0 +1,54 @@
+{
+  "moduleId": "DYN-01",
+  "exercises": [
+    {
+      "id": "DYN-01-ex1-force-kinematics-derivation",
+      "objective": "Derive the Jacobian-transpose force-kinematics identity from conservation of power.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "robotkin", "page": 1, "originalNumber": "\"Force Kinematics\" section" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "A wrench (force+torque) $(f_i,\\tau_i)$ acts on body $i$, related to joint velocities by $(v_i,w_i)=J_i\\dot q$. The power delivered at the joints is $u^\\top\\dot q$ (joint torques times joint velocities); the power received at the body is $(f_i,\\tau_i)^\\top(v_i,w_i)$. Using conservation of power (these must be equal, for *any* $\\dot q$), derive $u=J_i^\\top(f_i,\\tau_i)$.",
+      "hints": [
+        "Substitute $(v_i,w_i)=J_i\\dot q$ into the body-power expression: $(f_i,\\tau_i)^\\top(v_i,w_i) = (f_i,\\tau_i)^\\top J_i\\dot q$.",
+        "Conservation of power requires $u^\\top\\dot q = (f_i,\\tau_i)^\\top J_i\\dot q$ for this specific $\\dot q$, but power conservation must hold for *any* joint velocity $\\dot q$ the system could have (not just one specific value), so the two sides' coefficients of $\\dot q$ must match exactly: $u^\\top = (f_i,\\tau_i)^\\top J_i$.",
+        "Transposing both sides: $u = J_i^\\top(f_i,\\tau_i)$. This is exactly the Jacobian transpose, the dual operation to $J_i$ itself: where $J_i$ mapped joint velocities forward to body velocity, $J_i^\\top$ maps body force/torque backward to joint torques, without ever needing to explicitly differentiate anything, purely from energy conservation."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-01-ex2-pendulum-verify",
+      "objective": "Apply the simple pendulum's equation of motion numerically.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For the simple pendulum $mL^2\\ddot\\theta+mgL\\sin\\theta=u$ with $m=1$kg, $L=1$m, $g=9.8$m/s$^2$, and no applied torque ($u=0$), compute $\\ddot\\theta$ at $\\theta=\\pi/6$ (30°). Enter a decimal to 2 decimal places.",
+      "hints": [
+        "With $u=0$: $mL^2\\ddot\\theta = -mgL\\sin\\theta$, so $\\ddot\\theta = -(g/L)\\sin\\theta$ (the $m$ cancels, and $L$ simplifies since $mL^2/(mL)=L$... more directly, divide both sides by $mL^2$).",
+        "$\\ddot\\theta = -(9.8/1)\\sin(\\pi/6) = -9.8\\times0.5$.",
+        "$\\ddot\\theta = -4.90$ rad/s$^2$ (the pendulum accelerates back toward $\\theta=0$, consistent with $\\theta=\\pi/6$ being displaced from the stable equilibrium)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-01-ex3-linearization-numeric",
+      "objective": "Compute the small-oscillation period of a linearized pendulum.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["DYN-01-ex2-pendulum-verify"],
+      "answerType": "numeric",
+      "prompt": "Using the linearized pendulum equation $\\ddot\\theta\\approx-(g/L)\\theta$ (ODE-02's harmonic-oscillator form, eigenvalues $\\pm i\\sqrt{g/L}$), compute the oscillation period $T=2\\pi/\\sqrt{g/L}$ for $L=0.25$m, $g=9.8$m/s$^2$. Enter a decimal (seconds) to 3 decimal places.",
+      "hints": [
+        "$g/L = 9.8/0.25 = 39.2$.",
+        "$\\sqrt{39.2} \\approx 6.261$.",
+        "$T = 2\\pi/6.261 \\approx 1.004$ seconds."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

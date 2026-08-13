@@ -1,0 +1,42 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "PLAN-04-ex1-local-minimum-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies that gradient-based optimization only follows local downhill directions." },
+          { "points": 2, "description": "Correctly connects this to PLAN-01's local-minimum problem in trajectory space." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Gradient-based optimization (Gauss-Newton) only follows the local downhill direction of the cost, like PLAN-01's potential-field gradient descent. Starting on a straight line through/near an obstacle, the collision-cost gradient can locally nudge the trajectory without ever committing to a full detour around the obstacle. There's no mechanism for discovering that a large, qualitatively different detour would give much lower cost: PLAN-01's local-minimum problem, one level up, in trajectory space."
+    },
+    {
+      "exerciseId": "PLAN-04-ex2-pipeline-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies PRM/RRT's contribution as solving global topology." },
+          { "points": 2, "description": "Correctly identifies trajectory optimization's contribution as local smoothing/refinement, and that neither stage needs to do the other's job." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "PRM/RRT contribute a solution to the global, topological sub-problem (which side of each obstacle, i.e. which homotopy class), via random global exploration, which local gradient methods cannot do. Trajectory optimization contributes local refinement: turning a jagged, possibly dynamically-infeasible sampled path into something smooth, control-cost-minimizing, and dynamics-respecting. Neither stage does the other's job: PRM/RRT output can stay jagged, and trajectory optimization never needs to reason about global topology."
+    },
+    {
+      "exerciseId": "PLAN-04-ex3-full-pipeline-synthesis",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly describes PLAN-01's role (formalizing the search space)." },
+          { "points": 1, "description": "Correctly describes PLAN-02/03's role (global feasible path via control-based sampling)." },
+          { "points": 1, "description": "Correctly describes PLAN-04's role (initializing trajectory optimization)." },
+          { "points": 1, "description": "Correctly describes DYN-03's role (real-time tracking control)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "PLAN-01: formalizes the searched space (X_fea/Q_free) and explains why naive grid search/potential fields won't scale or escape local minima. PLAN-02/03: control-based-sampling RRT finds some feasible, constraint-respecting path through Q_free (global topology). PLAN-04: hands that path to DYN-04's trajectory optimization as an initial guess, producing a smooth, locally-optimal, dynamically-consistent reference trajectory. DYN-03: operational-space/joint-space PD-like tracking control executes that reference trajectory in real time, correcting for disturbance/model error."
+    }
+  ]
+}

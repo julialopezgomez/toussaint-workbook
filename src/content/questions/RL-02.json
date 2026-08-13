@@ -1,0 +1,73 @@
+{
+  "moduleId": "RL-02",
+  "exercises": [
+    {
+      "id": "RL-02-ex1-value-iteration-numeric",
+      "objective": "Run two iterations of value iteration by hand on a tiny two-state MDP.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 71, "originalNumber": "2.2:10" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "Two states $s_1,s_2$, one action each (deterministic): from $s_1$, reward $1$, transition to $s_2$; from $s_2$, reward $0$, transition to $s_1$. With $\\gamma=0.5$ and $V_0(s_1)=V_0(s_2)=0$, compute $V_2(s_2)$ (value iteration's estimate after 2 iterations). Enter a decimal.",
+      "hints": [
+        "$V_1(s_1)=1+0.5V_0(s_2)=1+0=1$. $V_1(s_2)=0+0.5V_0(s_1)=0+0=0$.",
+        "$V_2(s_2)=0+0.5V_1(s_1)=0+0.5(1)=0.5$.",
+        "$V_2(s_2)=0.5$. (Independently verified with Python while authoring this module; $V_2(s_1)=1+0.5V_1(s_2)=1+0=1$ for reference.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-02-ex2-vq-relation-derivation",
+      "objective": "Derive V*(s) = max_a Q*(s,a) from the definitions of V* and Q*.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 72, "originalNumber": "2.2:11" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Using $V^*(s)=\\max_\\pi V^\\pi(s)$ and $Q^*(s,a)$'s definition (expected return starting from $s$, taking action $a$ first, then acting optimally), argue why $V^*(s)=\\max_aQ^*(s,a)$.",
+      "hints": [
+        "The optimal value at $s$ is the best achievable expected return, maximized over every possible first action (and every subsequent decision).",
+        "$Q^*(s,a)$ is, by definition, exactly the best achievable expected return *given that the first action is fixed to $a$* (with optimal behavior thereafter).",
+        "So maximizing $Q^*(s,a)$ over $a$ recovers exactly the same quantity as maximizing over the first action directly within $V^*(s)$'s own definition: $V^*(s)=\\max_aQ^*(s,a)$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-02-ex3-convergence-proof-derivation",
+      "objective": "Derive the lower-bound half of Q-iteration's convergence proof, mirroring the upper-bound half shown in the lesson.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 72, "originalNumber": "2.2:12" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": ["RL-02-ex2-vq-relation-derivation"],
+      "answerType": "derivation",
+      "prompt": "The lesson showed $Q_{k+1}(s,a)\\leq Q^*(s,a)+\\gamma\\Delta_k$. Derive the mirror-image lower bound, $Q_{k+1}(s,a)\\geq Q^*(s,a)-\\gamma\\Delta_k$, using $Q_k(s',a')\\geq Q^*(s',a')-\\Delta_k$.",
+      "hints": [
+        "Start from the Q-iteration update and substitute the lower bound on $Q_k$: $Q_{k+1}(s,a)=R(s,a)+\\gamma\\sum_{s'}P(s'\\mid s,a)\\max_{a'}Q_k(s',a')\\geq R(s,a)+\\gamma\\sum_{s'}P(s'\\mid s,a)\\max_{a'}\\big[Q^*(s',a')-\\Delta_k\\big]$.",
+        "Since $\\sum_{s'}P(s'\\mid s,a)=1$, the constant $-\\Delta_k$ factors straight out of the max and the sum: $=\\Big[R(s,a)+\\gamma\\sum_{s'}P(s'\\mid s,a)\\max_{a'}Q^*(s',a')\\Big]-\\gamma\\Delta_k$.",
+        "The bracketed term is exactly $Q^*(s,a)$'s own Bellman equation, so $Q_{k+1}(s,a)\\geq Q^*(s,a)-\\gamma\\Delta_k$, exactly mirroring the upper bound: together they give $\\Delta_{k+1}\\leq\\gamma\\Delta_k$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-02-ex4-convergence-rate-numeric",
+      "objective": "Compute the number of iterations needed for a given convergence tolerance using the geometric contraction rate.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 72, "originalNumber": "2.2:12" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["RL-02-ex3-convergence-proof-derivation"],
+      "answerType": "numeric",
+      "prompt": "Given $\\Delta_0=100$ and $\\gamma=0.9$, using $\\Delta_k\\leq\\gamma^k\\Delta_0$, find the smallest integer $k$ such that $\\Delta_k<1$. Enter an integer.",
+      "hints": [
+        "$\\Delta_k=\\gamma^k\\Delta_0<1 \\iff \\gamma^k<1/\\Delta_0=0.01$.",
+        "Taking logs: $k>\\log(0.01)/\\log(0.9)\\approx43.7$.",
+        "$k=44$: after 44 iterations, the worst-case error is guaranteed below 1, illustrating that convergence, while geometric (fast in the exponent), still needs meaningfully many iterations for $\\gamma$ close to 1. (Independently verified by direct iteration in Python while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

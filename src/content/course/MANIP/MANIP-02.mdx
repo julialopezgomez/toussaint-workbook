@@ -1,0 +1,121 @@
+---
+id: MANIP-02
+block: MANIP
+title: "Legged Locomotion Basics"
+tier: 2
+estimatedHours: 3
+prerequisites: ["DYN-01", "PLAN-03"]
+objectives:
+  - "State the statically-stable-walking condition (CoG within the support polygon) and apply it to a concrete foot configuration."
+  - "State the Zero Moment Point definition and explain why ZMP-stability lets a legged robot be controlled like a conventional fully-actuated arm."
+  - "Explain why passive dynamic walking's swing-phase equations are a direct, unactuated instance of DYN-01's general dynamics form."
+  - "Explain why legged locomotion is a hybrid dynamical system, connecting phase-switching to PLAN-03's differential-constraint framing."
+sources:
+  - { sourceId: "lecture-robotics", pages: "p163-177 (§11, brief intro)", role: "primary" }
+concepts:
+  - "Statically stable walking, support polygon"
+  - "Zero Moment Point (ZMP)"
+  - "Passive dynamic walking, Compass Gait"
+  - "Hybrid dynamics, impact models"
+notation:
+  - { symbol: "$p_\\text{ZMP}$", meaning: "Zero Moment Point: the ground point where net inertial+gravity moment has no horizontal component" }
+  - { symbol: "$q=(\\theta_s,\\theta_{ns})$", meaning: "Compass Gait configuration: stance-leg and non-stance-leg angles" }
+cheatsheetLinks: []
+nextModules: []
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+import SourceFigure from '../../../components/SourceFigure.astro';
+
+## Why this matters
+
+Legs make DYN-01's general dynamics $M(q)\ddot q+F(q,\dot q)=u$ genuinely harder in a specific way: contacts switch on and off (a foot lifts, another lands), and during the swing phase, the moving leg is entirely **unactuated** by ground contact. This module covers the two classical answers to "how do you even stand up, let alone walk," and where each one's real limitation is.
+
+## Prerequisites & readiness check
+
+You should have DYN-01's general dynamics form and PLAN-03's differential-constraint framing fresh.
+
+<ReadinessCheck
+  question="From DYN-01, what is the general form of a robot's equations of motion?"
+  answer="M(q)q̈ + F(q,q̇) = u, where F(q,q̇) = C(q,q̇)q̇ + G(q) bundles the Coriolis/centripetal and gravitational terms."
+/>
+
+## Statically stable walking
+
+**Walking** is defined as: at every instant, at least one foot is on the ground (contrast **running**, where there are instants with no ground contact at all). Walking has two phases: **double-support** (two feet down, typically *statically* stable) and **single-support** (one foot down, typically statically *unstable*).
+
+A pose is **statically stable** iff the robot could simply hold that pose, indefinitely, without falling, which happens exactly when:
+
+$$\text{statically stable} \iff \text{CoG (center of gravity) projected onto the ground lies within the support polygon}$$
+
+where the **support polygon** is the convex hull of all current foot-ground contact points. (A useful intuition, straight from the source: try walking as slowly as possible while still taking normal-length steps, you'll find yourself needing to shift your weight noticeably over the stance foot before lifting the other, exactly maintaining this condition throughout.)
+
+<ExerciseCard id="MANIP-02-ex1-support-polygon-numeric" />
+
+## Zero Moment Point (ZMP)
+
+Static stability is a strong, conservative condition; **dynamic** stability (the robot can be walking, not just standing) needs a genuinely dynamic criterion. Vukobratović's **Zero Moment Point** is the classical answer, defined as the ground point $p_\text{ZMP}$ for which the net moment of inertial and gravitational forces has no horizontal component:
+
+$$\sum_i r_i\times f_i + I_i\dot w_i+w_i\times I_iw_i \overset{!}{=}(0,0,*)^\top, \qquad r_i:=p_i-p_\text{ZMP}$$
+
+(with $f_i$ the force, $I_i$ the inertia tensor, and $w_i$ the angular velocity of body $i$; $(0,0,*)$ meaning the first two, horizontal, components vanish, and the third, vertical, component is unconstrained.) **If the ZMP remains within the support polygon, the robot is dynamically stable**: intuitively, this is exactly the condition under which the ground can supply whatever reaction force/moment is needed without the foot needing to rotate about its edge (which would mean tipping over).
+
+<SourceFigure
+  src="/figures/lecture-robotics/fig11-compass-gait-model.png"
+  alt="A mechanical diagram of the compass gait biped model, showing stance and swing leg angles theta_s and theta_ns, point masses on each leg, a hip mass, and the ground slope angle phi"
+  caption="The Compass Gait model's mechanical structure: configuration q=(θs,θns), point masses on each leg plus a hip mass, walking down a slope of angle φ."
+  source="Lecture-Robotics.pdf"
+  page="173"
+/>
+
+**Why ZMP matters practically**: ZMP-stability is a "rescue" that lets conventional control apply directly. If the ZMP stays inside the support polygon, the foot can be treated as *virtually glued* to the ground, meaning the whole robot behaves like a **conventional, fully-actuated arm** anchored at the stance foot: exactly DYN-03's operational-space control machinery applies unmodified, since every joint acceleration $\ddot q$ becomes freely commandable again.
+
+<ExerciseCard id="MANIP-02-ex2-zmp-fully-actuated-conceptual" />
+
+**Limitations, stated honestly**: humans don't actually walk with ZMP-stability throughout a stride (we deliberately roll onto the toe or heel, putting the ZMP right at the edge of the support polygon, not safely inside it); and the ZMP framework can't even describe robots with point feet (e.g. walking on stilts), since there's no foot area for a "support polygon" to be defined over in the first place.
+
+## Passive dynamic walking
+
+An entirely different philosophy: instead of fighting underactuation with ZMP-based control, **embrace it**. The **Compass Gait** is the simplest passive walker: a planar biped, configuration $q=(\theta_s,\theta_{ns})$ (stance and non-stance leg angles), that can walk down a gentle slope with **zero actuation at all**, purely from gravity and its own dynamics.
+
+<ExerciseCard id="MANIP-02-ex3-passive-dynamics-connection" />
+
+During the swing phase, the equations of motion are exactly DYN-01's general form, specialized to the unactuated case:
+
+$$M(q)\ddot q+C(q,\dot q)\dot q+G(q)=0$$
+
+(no analytic solution exists in general, but the numeric phase-space trajectory is well studied). Walking then requires switching between two consecutive swing phases at **impact** (when the swing leg touches down), modeled with a standard set of simplifying assumptions: no rebound or slipping at touchdown; the stance leg lifts off without any force interaction; the impact is instantaneous, representable by an impulsive force; velocities can jump discontinuously at impact, but the configuration itself cannot; and actuators (having finite force) cannot contribute anything during an instantaneous impact.
+
+<ExerciseCard id="MANIP-02-ex4-hybrid-dynamics-conceptual" />
+
+This switching between smooth continuous dynamics (the swing phase ODE above) and discrete, instantaneous events (impact) is what makes legged locomotion a genuinely **hybrid dynamical system**, distinct from the purely-continuous dynamics DYN-01 through DYN-06 assumed throughout. Passive dynamic walking is minimally actuated and remarkably efficient, but fragile to disturbances and terrain variation; more recent work (compliant/elastic legs, reinforcement learning directly on the walking policy, e.g. "Learning to Walk in 20 Minutes" using policy-gradient methods) tries to recover some of that efficiency while adding back enough robustness for real, imperfect terrain.
+
+## Summary
+
+- **Statically stable** walking requires the CoG's ground projection to stay within the support polygon (convex hull of foot contacts); walking has double-support (typically stable) and single-support (typically unstable) phases.
+- The **Zero Moment Point** generalizes this to dynamic stability: if the ZMP stays within the support polygon, the stance foot can be treated as glued to the ground, letting a legged robot be controlled exactly like DYN-03's fully-actuated arm; humans don't actually maintain this throughout a stride, and it can't describe point-feet robots at all.
+- **Passive dynamic walking** (the Compass Gait) embraces underactuation instead: the swing phase is exactly DYN-01's general dynamics form with $u=0$, switching between phases at instantaneous, impulsive impacts.
+- This phase-switching makes legged locomotion a **hybrid dynamical system**, combining smooth continuous dynamics with discrete impact events, an important limitation of the purely-continuous DYN framework used so far.
+
+## Retrieval questions
+
+1. State the statically-stable-walking condition and the walking/running distinction.
+2. State the ZMP definition, and explain why ZMP-stability lets a legged robot be treated as a fully-actuated arm.
+3. Why is the Compass Gait's swing-phase equation exactly DYN-01's general dynamics form with $u=0$?
+4. Explain why legged locomotion is a hybrid dynamical system, and list the standard impact-model assumptions.
+
+## Mastery checklist
+
+- [ ] Can state and apply the statically-stable-walking condition.
+- [ ] Can state the ZMP definition and its connection to DYN-03's fully-actuated control.
+- [ ] Can explain the Compass Gait's passive swing-phase dynamics and its connection to DYN-01.
+- [ ] Can explain why legged locomotion is a hybrid dynamical system.
+
+## Source note
+
+This module's exposition, the statically-stable-walking condition, the Zero Moment Point definition and its "glued foot"/fully-actuated argument (credited in the source to Vukobratović & Borovac, 2004), the ZMP limitations, the Compass Gait passive-dynamic-walking model and its embedded figure, the impact-model assumptions, and the brief mention of policy-gradient-based walking (credited to Tedrake, Zhang & Seung, 2004, "Learning to Walk in 20 Minutes") are adapted from `lecture-robotics`, §11 (pp. 163-177). All exercises are newly authored; the support-polygon exercise's barycentric-coordinate computation was independently verified with NumPy while authoring this module.
+
+---
+
+**Next**: Return to the [curriculum overview](/curriculum) — the MANIP block is complete.

@@ -1,0 +1,46 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "ML-06-ex1-pca-projection-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly differentiates w.r.t. z_i and sets to zero." },
+          { "points": 2, "description": "Correctly simplifies using V_p^T V_p=I to get z_i=V_p^T(x_i-mu)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "d/dz_i ||x_i-V_p z_i-mu||^2 = -2V_p^T(x_i-V_p z_i-mu). Setting to zero: V_p^T(x_i-mu) = V_p^T V_p z_i. Using V_p^T V_p=I: z_i_hat = V_p^T(x_i-mu). Differentiating w.r.t. mu similarly and summing over i gives mu_hat = mean(x_i)."
+    },
+    {
+      "exerciseId": "ML-06-ex2-kernel-pca-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies that PCA only needs inner products between data points." },
+          { "points": 2, "description": "Correctly explains the non-linear-structure gain from kernelizing." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "PCA's computation (eigenvectors of X^T X = sum_i x_i x_i^T) only needs inner products between centered data points, never raw coordinates individually. Replacing inner products with kernel evaluations k(x_i,x_j) gives kernel PCA, eigendecomposing the kernel matrix K instead. This lets kernel PCA implicitly operate in a non-linear feature space, uncovering structure (e.g. cluster separation) no linear projection could."
+    },
+    {
+      "exerciseId": "ML-06-ex3-kmeans-iteration-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 1.5, "tolerance": 0.01 },
+      "fullSolution": "(1,1) and (1,2) assign to mu1=(0,0); (8,8) and (9,9) assign to mu2=(10,10). New mu1 = mean((1,1),(1,2)) = (1, 1.5). y-coordinate = 1.5. (Independently verified with NumPy.)"
+    },
+    {
+      "exerciseId": "ML-06-ex4-em-kmeans-connection",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains the Gaussian density becoming sharply peaked as Sigma_k->0." },
+          { "points": 2, "description": "Correctly connects this to q collapsing to a 0/1 hard assignment matching k-means." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "As Sigma_k->0 (equal, isotropic, shrinking), the Gaussian density becomes extremely sharply peaked around mu_k. For a given x_i, the nearest mu_k has overwhelmingly larger density than any other once covariance is small enough. So q(c_i=k)->1 for the nearest center and ->0 for all others, exactly k-means's hard assignment; the M-step mean update also matches k-means's re-centering in this limit."
+    }
+  ]
+}

@@ -48,6 +48,56 @@
         "Solve $\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}\\delta = \\begin{pmatrix}3\\\\4\\end{pmatrix}$ (note the sign flip from $-J^\\top r$): $\\delta \\approx \\begin{pmatrix}0.667\\\\1.667\\end{pmatrix}$. Since the residual is linear here, Gauss-Newton is exact (not approximate), so $x_1$ is the true least-squares solution: second component $\\approx 1.667$."
       ],
       "reviewCardIds": []
+    },
+    {
+      "id": "OPT-02-ex4-path-opt-structure",
+      "objective": "Identify the sum-of-squares structure and Jacobian sparsity in a small robotics path-optimization problem.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-optimization", "page": 16, "originalNumber": "§1.4:6, robotics example" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["OPT-02-ex3-numeric"],
+      "answerType": "derivation",
+      "prompt": "Consider a scalar (1D), 2-timestep path $x=(x_1,x_2)$, with boundary $x_0=0$, $x_{-1}=0$ given, minimizing $\\sum_{t=1}^2(x_t+x_{t-2}-2x_{t-1})^2 + (x_2-5)^2$ (a smoothness cost plus an endpoint target of 5). Write out the feature vector $\\phi(x)=(\\phi_1,\\phi_2,\\phi_3)$ explicitly in terms of $x_1,x_2$, then write its Jacobian $J=\\partial\\phi/\\partial x \\in\\mathbb{R}^{3\\times2}$, and comment on which entries are zero and why.",
+      "hints": [
+        "$\\phi_1 = x_1+x_{-1}-2x_0 = x_1$ (since $x_{-1}=x_0=0$). $\\phi_2 = x_2+x_0-2x_1 = x_2-2x_1$. $\\phi_3 = x_2-5$ (the endpoint target term).",
+        "Differentiate each $\\phi_i$ w.r.t. $x_1,x_2$: $\\partial\\phi_1/\\partial x_1=1,\\partial\\phi_1/\\partial x_2=0$; $\\partial\\phi_2/\\partial x_1=-2,\\partial\\phi_2/\\partial x_2=1$; $\\partial\\phi_3/\\partial x_1=0,\\partial\\phi_3/\\partial x_2=1$.",
+        "$J=\\begin{pmatrix}1&0\\\\-2&1\\\\0&1\\end{pmatrix}$. Every zero entry reflects that a given smoothness term only depends on nearby timesteps (here $\\phi_1$ doesn't involve $x_2$ at all, and $\\phi_3$ doesn't involve $x_1$): in a longer path this banded/local dependency structure is exactly what keeps $J$ (and hence $J^\\top J$) sparse, making Gauss-Newton tractable even for very long trajectories."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-02-ex5-secant-check",
+      "objective": "Verify a candidate Hessian approximation against the secant equation, and explain why it doesn't pin down a unique matrix.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-optimization", "page": 17, "originalNumber": "§1.4:8" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["OPT-02-ex1-why-approximate-hessian"],
+      "answerType": "short-text",
+      "prompt": "Two gradient evaluations give $\\delta=(1,0)$, $y=(2,1)$. Does $\\hat H=\\begin{pmatrix}2&1\\\\1&3\\end{pmatrix}$ satisfy the secant equation $\\hat H\\delta=y$? Then explain why a single $(\\delta,y)$ pair, in $n=2$ dimensions, does not uniquely determine $\\hat H$ (how many free parameters does a symmetric $2\\times2$ matrix have, versus how many scalar equations does $\\hat H\\delta=y$ provide?), motivating why BFGS needs a specific update *rule*, not just any matrix satisfying the secant equation.",
+      "hints": [
+        "Compute $\\hat H\\delta = \\begin{pmatrix}2&1\\\\1&3\\end{pmatrix}\\begin{pmatrix}1\\\\0\\end{pmatrix} = \\begin{pmatrix}2\\\\1\\end{pmatrix}$, which does equal $y=(2,1)$. So yes, it satisfies the secant equation.",
+        "A symmetric $2\\times2$ matrix has 3 free parameters (2 diagonal, 1 off-diagonal). The secant equation $\\hat H\\delta=y$ is a vector equation in $\\mathbb{R}^2$, i.e. only 2 scalar equations.",
+        "3 unknowns, 2 equations: the secant equation alone leaves a 1-parameter family of valid symmetric matrices, it's underdetermined. This is exactly why BFGS specifies a particular *update rule* (the rank-2 correction from the previous estimate), rather than just solving the secant equation directly, it picks out one specific, well-behaved member of that family, incorporating the previous estimate's information rather than discarding it."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-02-ex6-cg-quadratic",
+      "objective": "Numerically verify conjugacy of two successive conjugate-gradient search directions on a quadratic.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": ["OPT-02-ex5-secant-check"],
+      "answerType": "numeric",
+      "prompt": "For $f(x)=x^\\top Ax$ with $A=\\text{diag}(1,4)$, one run of the conjugate gradient algorithm from $x_0=(1,1)$ produces the first two search directions $\\delta_0=(-2,-8)$ and $\\delta_1\\approx(-1.545,\\,0.097)$. Compute $\\delta_0^\\top A\\delta_1$ (the conjugacy check) and confirm it is approximately zero. Enter your result to 2 decimal places.",
+      "hints": [
+        "$A\\delta_1 = \\text{diag}(1,4)\\begin{pmatrix}-1.545\\\\0.097\\end{pmatrix} = \\begin{pmatrix}-1.545\\\\0.388\\end{pmatrix}$ (multiply each entry by its diagonal weight).",
+        "$\\delta_0^\\top(A\\delta_1) = (-2)(-1.545) + (-8)(0.388)$.",
+        "$= 3.09 - 3.104 \\approx -0.01 \\approx 0$ (the small residual is just rounding in the given $\\delta_1$; algebraically this is exactly zero). This confirms the Polak-Ribière construction really did produce a direction $H$-conjugate to the previous one, exactly as the CG algorithm guarantees for a quadratic objective."
+      ],
+      "reviewCardIds": []
     }
   ]
 }

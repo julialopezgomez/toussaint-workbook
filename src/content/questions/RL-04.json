@@ -1,0 +1,73 @@
+{
+  "moduleId": "RL-04",
+  "exercises": [
+    {
+      "id": "RL-04-ex1-bellman-residual-conceptual",
+      "objective": "Explain how the Bellman residual generalizes Q-learning's single-sample TD update.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 77, "originalNumber": "2.2:25-26" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain why RL-03's Q-learning TD update, $\\alpha[r+\\gamma\\max_{a'}Q(s',a')-Q(s,a)]$, is 'a gradient step on the loss $\\tfrac12[r+\\gamma Q(s',\\pi(s'))-Q(s,a)]^2$,' and why storing a whole replay buffer instead of one transition changes this from a table update into a genuine ML training problem.",
+      "hints": [
+        "Differentiating $\\tfrac12[r+\\gamma Q(s',\\pi(s'))-Q(s,a)]^2$ w.r.t. a tabular $Q(s,a)$ entry (treating everything else as fixed) gives exactly $-[r+\\gamma Q(s',\\pi(s'))-Q(s,a)]$; a gradient-descent step of size $\\alpha$ on this loss is exactly Q-learning's update.",
+        "For a single tabular entry, 'the loss' and 'the TD error' are the same computation viewed two ways. But once $Q$ is a neural network $Q_\\theta(s,a)$ instead of a table, you can't update one entry in isolation, you need a genuine loss function summed over data to compute a gradient w.r.t. all of $\\theta$ at once.",
+        "The Bellman residual $B_\\mathcal{D}^\\pi=\\sum_{(s,a,r,s')\\in\\mathcal{D}}[r+\\gamma\\bar Q(s',\\pi(s'))-Q(s,a)]^2$ is exactly this: sum the per-transition squared TD error over the whole replay buffer, making it an ordinary supervised regression loss (ML-02/ML-04) that SGD (OPT-05) can train $\\theta$ against directly."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-04-ex2-log-derivative-trick",
+      "objective": "Derive the log-derivative trick identity used in the policy gradient theorem.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 78, "originalNumber": "2.2:27" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Starting from the ordinary chain rule applied to $\\log P_\\theta(\\xi)$, derive $\\dfrac{\\partial P_\\theta(\\xi)}{\\partial\\theta} = P_\\theta(\\xi)\\dfrac{\\partial\\log P_\\theta(\\xi)}{\\partial\\theta}$.",
+      "hints": [
+        "By the chain rule (ML-01), $\\dfrac{\\partial\\log P_\\theta(\\xi)}{\\partial\\theta} = \\dfrac{1}{P_\\theta(\\xi)}\\dfrac{\\partial P_\\theta(\\xi)}{\\partial\\theta}$ (the derivative of $\\log$ is $1/(\\cdot)$, times the inner derivative).",
+        "Multiply both sides by $P_\\theta(\\xi)$.",
+        "$P_\\theta(\\xi)\\dfrac{\\partial\\log P_\\theta(\\xi)}{\\partial\\theta} = \\dfrac{\\partial P_\\theta(\\xi)}{\\partial\\theta}$: exactly the identity used to rewrite $\\partial J/\\partial\\theta$ as an expectation under $P_\\theta$. (Independently verified symbolically with SymPy for a concrete example distribution while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-04-ex3-trajectory-factorization-derivation",
+      "objective": "Derive that the trajectory log-probability's theta-gradient reduces to a sum of policy log-probability gradients.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 78, "originalNumber": "2.2:27" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": ["RL-04-ex2-log-derivative-trick"],
+      "answerType": "derivation",
+      "prompt": "Given $P_\\theta(\\xi)=P(s_0)\\prod_t\\pi_\\theta(a_t\\mid s_t)P(s_{t+1}\\mid s_t,a_t)$, derive $\\dfrac{\\partial\\log P_\\theta(\\xi)}{\\partial\\theta}=\\sum_t\\dfrac{\\partial\\log\\pi_\\theta(a_t\\mid s_t)}{\\partial\\theta}$, and explain why the environment's dynamics $P(s'\\mid s,a)$ don't appear.",
+      "hints": [
+        "Taking $\\log$ of a product turns it into a sum: $\\log P_\\theta(\\xi)=\\log P(s_0)+\\sum_t\\log\\pi_\\theta(a_t\\mid s_t)+\\sum_t\\log P(s_{t+1}\\mid s_t,a_t)$.",
+        "Differentiate term by term w.r.t. $\\theta$: $P(s_0)$ and $P(s_{t+1}\\mid s_t,a_t)$ are properties of the environment, not the policy, so they don't depend on $\\theta$ at all, and their derivatives are exactly zero.",
+        "Only the $\\sum_t\\log\\pi_\\theta(a_t\\mid s_t)$ terms depend on $\\theta$, giving $\\dfrac{\\partial\\log P_\\theta(\\xi)}{\\partial\\theta}=\\sum_t\\dfrac{\\partial\\log\\pi_\\theta(a_t\\mid s_t)}{\\partial\\theta}$: the environment's dynamics never appear in the gradient because they were never a function of $\\theta$ in the first place, only the policy $\\pi_\\theta$ is."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-04-ex4-target-network-conceptual",
+      "objective": "Explain why a delayed target network stabilizes Bellman residual training.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 77, "originalNumber": "2.2:26" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain what specifically goes wrong if you train $Q_\\theta$ against a target that also uses the current, live $Q_\\theta$ (i.e. $\\bar Q\\equiv Q_\\theta$), and how a delayed/low-pass-filtered $\\bar Q$ fixes it.",
+      "hints": [
+        "If the target $r+\\gamma\\bar Q(s',\\pi(s'))$ uses the same live $Q_\\theta$ being trained, every gradient step that changes $\\theta$ also immediately changes the target the next step is trying to match: the thing you're chasing moves every time you take a step toward it.",
+        "This 'moving target' feedback loop can oscillate or diverge, since the loss landscape itself is shifting as $\\theta$ updates, unlike ordinary supervised regression where the targets $y_i$ are fixed constants.",
+        "Freezing $\\bar Q$ to a delayed/low-pass-filtered copy of $\\theta$ (updated only occasionally, or slowly averaged) breaks this feedback loop: for many consecutive gradient steps, the target is effectively constant, turning training back into an ordinary, well-behaved regression problem, at the cost of the target lagging slightly behind the true current $Q_\\theta$."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

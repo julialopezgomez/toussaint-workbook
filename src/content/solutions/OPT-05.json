@@ -22,6 +22,32 @@
       "fullSolution": "Mini-batch gradient estimate using {3,4}: (1/2)[(0-3)+(0-4)] = (1/2)(-7) = -3.5. x1 = x0 - alpha * (-3.5) = 0 - 0.2*(-3.5) = 0.7. (For comparison, the true full-batch gradient using all 5 points is -3, so the mini-batch estimate of -3.5 is noisy but in the right ballpark, illustrating the tradeoff from the previous exercise.)"
     },
     {
+      "exerciseId": "OPT-05-ex2b-convergence-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly substitutes w_{k+1}-w_k = -alpha_k*grad f_i(w_k) into the quadratic upper bound." },
+          { "points": 2, "description": "Correctly takes expectations and uses unbiasedness E{grad f_i(w_k)}=grad f(w_k) to simplify the cross term to ||grad f(w_k)||^2." }
+        ],
+        "commonErrors": [
+          "Forgetting that grad f(w_k) itself is a fixed (non-random) quantity given w_k, so it can be pulled out of the expectation over the random index i."
+        ]
+      },
+      "fullSolution": "Substituting w=w_{k+1}, w-bar=w_k, w-w-bar = -alpha_k*grad f_i(w_k) into f(w) <= f(w-bar) + grad f(w-bar)^T(w-w-bar) + (L/2)||w-w-bar||^2:\nf(w_{k+1}) <= f(w_k) + grad f(w_k)^T(-alpha_k grad f_i(w_k)) + (L/2)||alpha_k grad f_i(w_k)||^2\n= f(w_k) - alpha_k * grad f(w_k)^T grad f_i(w_k) + (1/2)alpha_k^2 L ||grad f_i(w_k)||^2.\nTaking expectations (over the random sample i, given w_k fixed): E{grad f(w_k)^T grad f_i(w_k)} = grad f(w_k)^T E{grad f_i(w_k)} = grad f(w_k)^T grad f(w_k) = ||grad f(w_k)||^2 (using unbiasedness of the mini-batch gradient estimator, and that grad f(w_k) is a constant given w_k).\nSo E{f(w_{k+1})} <= f(w_k) - alpha_k ||grad f(w_k)||^2 + (1/2)alpha_k^2 L E{||grad f_i(w_k)||^2}, exactly as claimed."
+    },
+    {
+      "exerciseId": "OPT-05-ex2c-adam-bias-correction",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly computes m_1 = (1-beta_1)*g_1 using m_0=0." },
+          { "points": 2, "description": "Correctly computes m_hat_1 and shows the (1-beta_1) factors cancel exactly, giving m_hat_1=g_1." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "m_1 = beta_1*m_0 + (1-beta_1)*g_1 = beta_1*0 + (1-beta_1)*g_1 = (1-beta_1)*g_1.\nm_hat_1 = m_1/(1-beta_1^1) = (1-beta_1)*g_1 / (1-beta_1) = g_1 (the (1-beta_1) factors cancel exactly, for any beta_1 != 1).\nWithout bias correction, m_1=(1-beta_1)*g_1 would badly underestimate g_1 for beta_1 close to 1 (e.g. beta_1=0.9 gives m_1=0.1*g_1, a 10x underestimate); the correction removes this bias completely at t=1, and progressively less aggressively as t grows (since beta_1^t -> 0)."
+    },
+    {
       "exerciseId": "OPT-05-ex3-nfl-conceptual",
       "checkMode": "rubric",
       "rubric": {

@@ -1,18 +1,27 @@
 ---
 import { getCollection, render } from 'astro:content';
 import ModuleLayout from '../../../layouts/ModuleLayout.astro';
+import { BLOCK_ORDER } from '../../../lib/curriculum/blocks';
 
 export async function getStaticPaths() {
   const modules = await getCollection('course');
-  return modules.map((m) => ({
+  const sorted = [...modules].sort((a, b) => {
+    const bi = BLOCK_ORDER.indexOf(a.data.block) - BLOCK_ORDER.indexOf(b.data.block);
+    return bi !== 0 ? bi : a.data.id.localeCompare(b.data.id);
+  });
+  return sorted.map((m, i) => ({
     params: { block: m.data.block, id: m.data.id },
-    props: { entry: m },
+    props: {
+      entry: m,
+      prev: i > 0 ? sorted[i - 1] : null,
+      next: i < sorted.length - 1 ? sorted[i + 1] : null,
+    },
   }));
 }
 
-const { entry } = Astro.props;
+const { entry, prev, next } = Astro.props;
 const { Content } = await render(entry);
 ---
-<ModuleLayout {...entry.data}>
+<ModuleLayout {...entry.data} prev={prev?.data} next={next?.data}>
   <Content />
 </ModuleLayout>

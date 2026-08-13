@@ -1,0 +1,48 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "MANIP-01-ex1-wrench-computation",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0, "tolerance": 0.001 },
+      "fullSolution": "tau1 = (1)(-1)-(0)(0) = -1. tau2 = (-1)(-1)-(0)(0) = 1. tau_total = -1+1 = 0. f_total = (0,-2). (Independently verified with NumPy.)"
+    },
+    {
+      "exerciseId": "MANIP-01-ex2-friction-cone-limit",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly takes the mu->0 limit of the constraint." },
+          { "points": 2, "description": "Correctly identifies the resulting set as a single ray along the normal." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "As mu->0, mu*||f_perp||->0, so the constraint becomes ||f_parallel||<=0, forcing f_parallel=0 exactly. F_i degenerates to {f_i : f_i=f_i_perp}, a single ray along the contact normal: pure pushing, no tangential resistance, the frictionless point-contact model."
+    },
+    {
+      "exerciseId": "MANIP-01-ex3-two-finger-impossibility",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies that a single ray's positive span is 1-dimensional." },
+          { "points": 2, "description": "Correctly identifies that two rays' positive span covers at most a half-plane, never the full plane." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "A single ray's positive span is 1-dimensional (just that ray). Two rays' positive span is at best the convex cone between them, covering at most a half-plane (<=180 degrees), never the full 2D force space regardless of orientation. Since force closure needs the span to cover every direction, two frictionless point contacts can never achieve it in 2D; at least a third contact or friction is required, matching Mishra-Schwartz-Sharir's need for multiple fingers."
+    },
+    {
+      "exerciseId": "MANIP-01-ex4-closure-concepts-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correct force closure example." },
+          { "points": 1, "description": "Correct form closure example." },
+          { "points": 1, "description": "Correct caging example." },
+          { "points": 1, "description": "Correct equilibrium example." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Force closure: a multi-fingered hand with friction gripping a ball firmly enough to resist a push from any direction. Form closure: an egg resting in a snug egg-carton pocket, geometrically trapped, zero force needed. Caging: a ball loosely surrounded by fingers with gaps, can rattle but can't escape. Equilibrium: a book resting on a rough incline where friction happens to balance gravity for this specific load, but could be disturbed by a small added push."
+    }
+  ]
+}

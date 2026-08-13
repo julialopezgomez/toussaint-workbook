@@ -38,7 +38,22 @@
       "fullSolution": "A^T A = [[2,1],[0,2]] @ [[2,0],[1,2]] = [[5,2],[2,4]]. Eigenvalues of a symmetric [[p,q],[q,r]] matrix: (p+r)/2 +- sqrt(((p-r)/2)^2 + q^2). Here p=5, r=4, q=2: (9)/2 +- sqrt(0.25+4) = 4.5 +- sqrt(4.25) = 4.5 +- 2.0616. Eigenvalues: 6.5616 and 2.4384. Larger singular value = sqrt(6.5616) = 2.562 (verified independently with NumPy while authoring this module, matching to full precision)."
     },
     {
-      "exerciseId": "MATH-04-ex4-rank1-challenge",
+      "exerciseId": "MATH-04-ex4-pseudoinverse",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly derives (A^T A)^-1 = V S^-2 V^T from the SVD." },
+          { "points": 2, "description": "Correctly simplifies (A^T A)^-1 A^T using V^T V = I to arrive at V S^-1 U^T." },
+          { "points": 1, "description": "Correctly computes A^dagger A = I_n using U^T U = I." }
+        ],
+        "commonErrors": [
+          "Confusing V^T V (= I_n for full column rank) with V V^T (only = I_n if V is square, i.e. also full row rank)."
+        ]
+      },
+      "fullSolution": "(A^T A)^-1 = (V S^2 V^T)^-1 = V S^-2 V^T (inverse of a similarity transform, valid since S is invertible for full column rank).\n(A^T A)^-1 A^T = V S^-2 V^T (V S U^T) = V S^-2 (V^T V) S U^T = V S^-2 S U^T (using V^T V=I_n) = V S^-1 U^T = A^dagger. Matches.\nA^dagger A = (V S^-1 U^T)(U S V^T) = V S^-1 (U^T U) S V^T = V S^-1 S V^T (using U^T U=I) = V V^T = I_n (using full column rank, V is n x n orthonormal so VV^T=I_n). (Numerically verified for a random 5x3 full-column-rank matrix while authoring this module: matched np.linalg.pinv to floating-point precision.)"
+    },
+    {
+      "exerciseId": "MATH-04-ex5-rank1-challenge",
       "checkMode": "rubric",
       "rubric": {
         "criteria": [
@@ -51,6 +66,80 @@
         ]
       },
       "fullSolution": "For a rank-1 matrix uv^T, column j is (uv^T)_{:,j} = v_j * u, i.e. every column is some scalar multiple of the single vector u. So the column space is spanned by u alone: 1-dimensional, i.e. rank 1.\n\nThe SVD sum A = sum_i sigma_i u_i v_i^T expresses A's entire action as k independent rank-1 pieces added together, each one an isolated input-direction-to-output-direction mapping. Since a rank-k matrix requires at least k rank-1 pieces to express as a sum (rank is subadditive: rank of a sum is at most the sum of ranks, so you can't do it with fewer than k rank-1 terms), and the SVD achieves exactly k, rank-1 matrices are literally the minimal, atomic units that any linear map decomposes into: nothing simpler than 'pick up one input direction, scale, place along one output direction' can capture a genuine directional mapping at all."
+    },
+    {
+      "exerciseId": "MATH-04-ex6-pca-variance",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly substitutes the eigendecomposition to get d^T C d = sum_i lambda_i c_i^2 with c_i=v_i^T d." },
+          { "points": 1, "description": "Correctly notes sum_i c_i^2 = 1 from d being a unit vector and {v_i} orthonormal." },
+          { "points": 2, "description": "Correctly argues the weighted average is maximized by putting all weight on lambda_1, with equality exactly at d=+-v_1." }
+        ],
+        "commonErrors": [
+          "Forgetting to justify why sum c_i^2=1 (this follows from d unit length + orthonormality of the v_i, it's not automatic from any decomposition)."
+        ]
+      },
+      "fullSolution": "d^T C d = d^T (sum_i lambda_i v_i v_i^T) d = sum_i lambda_i (v_i^T d)^2 = sum_i lambda_i c_i^2 where c_i = v_i^T d.\nSince {v_i} is an orthonormal basis and d has unit norm, sum_i c_i^2 = ||d||^2 = 1 (Parseval/orthonormal-coordinate identity).\nSo d^T C d = sum_i lambda_i c_i^2 is a weighted average of the eigenvalues lambda_i with non-negative weights c_i^2 summing to 1. Since lambda_1 is the largest, sum_i lambda_i c_i^2 <= lambda_1 sum_i c_i^2 = lambda_1, with equality iff all the weight sits on lambda_1, i.e. c_1=+-1 and c_i=0 for i>1, i.e. d=+-v_1. So the variance-maximizing direction is exactly the top eigenvector, with maximal variance lambda_1."
+    },
+    {
+      "exerciseId": "MATH-04-ex7-psd-eigenvalue-proof",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly proves the <= direction (all eigenvalues non-negative implies PSD) via the eigendecomposition sum." },
+          { "points": 2, "description": "Correctly proves the => direction (PSD implies eigenvalues non-negative) by applying the PSD condition to an eigenvector itself." }
+        ],
+        "commonErrors": [
+          "Only proving one direction and treating the proof as complete (this is an iff, both directions are required).",
+          "In the forward direction, forgetting that ||h_j||^2 > 0 is what lets you divide/conclude lambda_j >= 0 (eigenvectors are nonzero by definition)."
+        ]
+      },
+      "fullSolution": "(<=) Suppose all eigenvalues lambda_i >= 0. Using M = sum_i lambda_i h_i h_i^T: for any v, v^T M v = sum_i lambda_i (h_i^T v)^2. Each term is a non-negative number (lambda_i>=0) times a square (>=0), so the sum is >=0. Hence M is PSD.\n(=>) Suppose M is PSD. Let h_j be any eigenvector, Mh_j = lambda_j h_j. Apply the PSD condition at v=h_j: h_j^T M h_j >= 0. But h_j^T M h_j = h_j^T (lambda_j h_j) = lambda_j ||h_j||^2. Since h_j != 0 (eigenvectors are nonzero by definition), ||h_j||^2 > 0, so lambda_j = (h_j^T M h_j)/||h_j||^2 >= 0. Since h_j was an arbitrary eigenvector, every eigenvalue is non-negative."
+    },
+    {
+      "exerciseId": "MATH-04-ex8-eigenvector-facts",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly proves (a) by induction." },
+          { "points": 1, "description": "Correctly proves (b) by direct substitution." },
+          { "points": 2, "description": "Correctly proves (c) by computing v^T A w two ways and using symmetry of A." }
+        ],
+        "commonErrors": [
+          "In (c), forgetting to use A^T=A explicitly, without which the two computations of v^T A w wouldn't actually have to agree."
+        ]
+      },
+      "fullSolution": "(a) Induction on k. Base case k=1: A^1 v = A v = lambda v, given. Inductive step: assume A^(k-1) v = lambda^(k-1) v. Then A^k v = A(A^(k-1) v) = A(lambda^(k-1) v) = lambda^(k-1) (A v) = lambda^(k-1) (lambda v) = lambda^k v.\n(b) (A + alpha*I) v = Av + alpha*I*v = lambda*v + alpha*v = (lambda+alpha)*v.\n(c) Compute v^T A w two ways. Way 1: v^T A w = v^T (mu*w) = mu (v^T w) (using Aw=mu*w). Way 2: v^T A w = (A^T v)^T w = (Av)^T w (using A^T=A, symmetry) = (lambda*v)^T w = lambda (v^T w). So mu(v^T w) = lambda(v^T w), i.e. (mu-lambda)(v^T w) = 0. Since lambda != mu, v^T w = 0."
+    },
+    {
+      "exerciseId": "MATH-04-ex9-power-method-convergence",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly expands A^k x0 in the eigenbasis, factoring out lambda_1^k." },
+          { "points": 1, "description": "Correctly argues (lambda_i/lambda_1)^k -> 0 for i>=2 since |lambda_1| is strictly largest." },
+          { "points": 1, "description": "Correctly concludes the normalized direction converges to h_1, and explains the role of a nonzero c_1." }
+        ],
+        "commonErrors": [
+          "Not explaining why c_1 != 0 matters (if c_1=0 exactly, the method converges to the second-largest eigenvector instead; this is why random initialization is used, to guarantee c_1 != 0 with probability 1)."
+        ]
+      },
+      "fullSolution": "A^k x0 = A^k (sum_i c_i h_i) = sum_i c_i (A^k h_i) = sum_i c_i lambda_i^k h_i (using A^k h_i = lambda_i^k h_i from the previous exercise's part (a)).\nFactor out lambda_1^k: A^k x0 = lambda_1^k [ c_1 h_1 + sum_{i>=2} c_i (lambda_i/lambda_1)^k h_i ].\nSince |lambda_1| is strictly the largest magnitude, |lambda_i/lambda_1| < 1 for all i>=2, so (lambda_i/lambda_1)^k -> 0 as k->infinity. Therefore A^k x0 / lambda_1^k -> c_1 h_1, i.e. A^k x0 becomes dominated by the h_1 component, and after normalizing to unit length at each step, the direction converges to h_1 (up to sign flips from lambda_1^k's sign if lambda_1<0). This requires c_1 != 0 (i.e. x0 genuinely has a component along h_1), which a random initialization guarantees with probability 1."
+    },
+    {
+      "exerciseId": "MATH-04-ex10-smallest-eigenvalue",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly shows (lambda_max*I - A) v_i = (lambda_max - lambda_i) v_i, same eigenvectors, shifted+flipped eigenvalues." },
+          { "points": 2, "description": "Correctly argues this makes A's smallest eigenvalue become the largest for the shifted matrix, so the ordinary power method (applied to it) finds A's smallest eigenvector." }
+        ],
+        "commonErrors": [
+          "Forgetting that this reasoning requires lambda_max to actually be A's true largest eigenvalue (found by the outer/first power method loop), not an arbitrary shift."
+        ]
+      },
+      "fullSolution": "Using (A+alpha*I)v=(lambda+alpha)v with alpha=-1 scaling appropriately (or directly): (lambda_max*I - A) v_i = lambda_max*v_i - A*v_i = lambda_max*v_i - lambda_i*v_i = (lambda_max-lambda_i)*v_i. So lambda_max*I-A has the same eigenvectors v_i as A, with eigenvalues lambda_max-lambda_i.\nSince lambda_max is A's largest eigenvalue, lambda_max-lambda_i >= 0 for every i, and this quantity is maximized exactly when lambda_i is A's smallest eigenvalue (largest gap lambda_max-lambda_min). So the eigenvector that was smallest for A becomes the one with the LARGEST eigenvalue for (lambda_max*I-A). Running the ordinary power method on (lambda_max*I-A) therefore converges to exactly that eigenvector, i.e. A's smallest eigenvector, and A's smallest eigenvalue is recovered as lambda_max minus the converged eigenvalue of the shifted matrix. (Numerically verified for a random 4x4 PD matrix with known eigenvalues while authoring this module: recovered smallest eigenvalue matched the true value to floating-point precision.)"
     }
   ]
 }

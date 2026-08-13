@@ -1,30 +1,36 @@
 ---
 id: MATH-03
 block: MATH
-title: "Vector Spaces, Bases & Linear Maps"
+title: "Vector Spaces, Dual Spaces & Coordinate Transformations"
 tier: 1
-estimatedHours: 3
+estimatedHours: 5
 prerequisites: ["MATH-01"]
 objectives:
-  - "State what a vector space and a basis are, and why coordinates are basis-dependent while vectors themselves aren't."
-  - "Derive the change-of-basis coordinate transformation."
-  - "Compute a vector's coordinates in a new basis."
-  - "Understand matrices as coordinate representations of linear maps."
+  - "State the formal vector space axioms (Definition 3.1), and explain why a vector is not fundamentally a tuple of numbers."
+  - "State the formal definitions of span, linear independence, dimension, basis, and coordinates."
+  - "Explain what a vector space and choice of basis buys you for describing systems in ML, RL, and robotics."
+  - "Recognize the taxonomy of linear functions (1-forms, 2-forms, dual vectors) and see why a gradient is naturally a 1-form."
+  - "Derive and apply the change-of-basis coordinate transformation."
+  - "Understand matrices as coordinate representations of linear maps in a chosen pair of bases."
 sources:
-  - { sourceId: "lecture-maths", pages: "p21-30 (§3.1-3.2)", role: "primary" }
+  - { sourceId: "lecture-maths", pages: "p21-31 (§3.1-3.3)", role: "primary" }
 concepts:
-  - "Vector space"
+  - "Vector space (formal definition)"
+  - "Span, linear independence, dimension"
   - "Basis and coordinates"
+  - "Linear functions, 1-forms, dual vectors"
+  - "Tensors and the matrix convention"
   - "Change of basis"
-  - "Linear map"
   - "Matrix as coordinate representation"
 notation:
+  - { symbol: "$V$", meaning: "a vector space (an abstract set with $+$ and scalar multiplication satisfying the axioms)" }
   - { symbol: "$v$", meaning: "a vector, a geometric object independent of any particular basis" }
-  - { symbol: "$b_1,\\dots,b_n$", meaning: "a basis: a linearly independent, spanning set of vectors" }
-  - { symbol: "$[v]_B$", meaning: "the coordinates of $v$ in basis $B$: the coefficients $c_i$ such that $v=\\sum_i c_i b_i$" }
-  - { symbol: "$B$", meaning: "basis matrix, with the basis vectors as its columns" }
+  - { symbol: "$(e_1,\\dots,e_n)$", meaning: "a basis: a linearly independent, spanning tuple of vectors" }
+  - { symbol: "$[v]_B$ or $x^A$", meaning: "the coordinates of $v$ in basis $B$ (or $A$): the coefficients $c_i$ such that $v=\\sum_i c_i e_i$" }
+  - { symbol: "$V^*$", meaning: "the dual space of $V$: the space of all linear functionals (1-forms) $f:V\\to\\mathbb{R}$" }
+  - { symbol: "$\\hat e_i$", meaning: "the dual basis vector: the 1-form that picks out the $i$-th coordinate, $\\hat e_i(v)=v_i$" }
 cheatsheetLinks: []
-nextModules: ["MATH-04"]
+nextModules: ["MATH-03B"]
 ---
 
 import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
@@ -32,7 +38,7 @@ import ReadinessCheck from '../../../components/ReadinessCheck.astro';
 
 ## Why this matters
 
-Nearly everything downstream in this course (rotation matrices, the SVD, PCA, even neural network weight matrices) is really a statement about linear maps between vector spaces, expressed in a chosen basis. Being sloppy about the vector/coordinate distinction is a common, quiet source of bugs when multiple coordinate frames are involved, exactly the situation you're in constantly in robotics (base frame, end-effector frame, world frame). This module makes that distinction precise.
+Nearly everything downstream in this course (rotation matrices, the SVD, PCA, even neural network weight matrices) is really a statement about linear maps between vector spaces, expressed in a chosen basis. Being sloppy about the vector/coordinate distinction is a common, quiet source of bugs when multiple coordinate frames are involved, exactly the situation you're in constantly in robotics (base frame, end-effector frame, world frame). This module makes that distinction precise, and along the way explains *why* the row-vector-vs-column-vector convention from [MATH-02](/course/MATH/MATH-02) wasn't arbitrary: it's the coordinate expression of a deeper vector/dual-vector (contravariant/covariant) distinction.
 
 ## Prerequisites & readiness check
 
@@ -43,17 +49,98 @@ You should be comfortable with basic matrix-vector multiplication and matrix inv
   answer="$\det(M) = 1(4)-2(3) = -2 \neq 0$, so yes, $M$ is invertible."
 />
 
-## Vector spaces and bases, briefly
+## Why care about vector spaces at all?
 
-A **vector space** is a set of objects (vectors) closed under addition and scalar multiplication, satisfying the usual algebraic axioms (associativity, distributivity, etc.). A **basis** $\{b_1,\dots,b_n\}$ is a linearly independent set that spans the space: every vector $v$ can be written uniquely as $v = \sum_i c_i b_i$. The $c_i$ are $v$'s **coordinates** in that basis.
+Toussaint motivates this whole chapter with a direct appeal to what you're actually trying to do: describe systems, or aspects of systems, as elements of a space. Some spaces you'll meet across this course, all of them recognizable from your own work:
 
-Crucially: $v$ itself doesn't depend on which basis you chose, but $[v]_B = (c_1,\dots,c_n)$ absolutely does.
+- The input space $X$ and output space $Y$ in ML, and the space of functions/classifiers $f:X\to Y$.
+- The space of world states $S$ and actions $A$ in Reinforcement Learning, and the space of policies $\pi:S\to A$.
+- The space of feedback controllers $\pi: x\mapsto u$ in robot control.
+- The **configuration space** $Q$ of a robot, and the space of paths $x:[0,1]\to Q$, exactly the objects trajectory optimization searches over.
+- The space of image segmentations in computer vision.
+
+Some of these spaces aren't vector spaces at all (a robot's configuration space might have "holes," or switch dimensionality in places, i.e. it's a manifold with nontrivial topology, not a flat $\mathbb{R}^n$). But to actually *compute* in these spaces, you either introduce local parameterizations that make them (locally) a vector space, or you work in their **local tangent space** (a local linearization), which always is one. Perhaps the most important computation you'll want to do in these spaces is taking derivatives, to set them to zero, or to do gradient descent, or Newton steps, for optimization, and taking a derivative requires the input space to (locally) be a vector space. This is precisely why vector spaces and linear algebra underlie essentially all of optimization, ML, and robotics computation, not because "everything happens to be a vector," but because *derivatives* need somewhere linear to live.
+
+## What is a vector, really?
+
+A **vector** is nothing but an element of a vector space. In general it is *not* a column, array, or tuple of numbers (tuples of numbers are just one special case of a vector space, $\mathbb{R}^n$). This sounds abstract, but the payoff is concrete: a polynomial, a probability distribution, a matrix, or a function can all be "a vector" in the relevant sense, whenever the ordinary rules of addition and scaling make sense for them, letting you use the entire linear-algebra toolkit (derivatives, projections, bases) on objects that aren't literally arrays of numbers.
+
+> **Definition 3.1 (vector space).** A vector space $V$ is a set on which two operations, addition and (scalar) multiplication, are defined:
+> - **Addition** $+:V\times V\to V$ is an abelian group: closed under $+$; associative, $a+(b+c)=(a+b)+c$; commutative, $a+b=b+a$; has a unique identity $0\in V$ with $0+v=v$; every $v$ has a unique inverse $-v$ with $v+(-v)=0$.
+> - **Multiplication** $\cdot:\mathbb{R}\times V\to V$ satisfies, for $\alpha,\beta\in\mathbb{R}$: associativity $\alpha(\beta v)=(\alpha\beta)v$; identity $1v=v$; distribution $\alpha(v+w)=\alpha v+\alpha w$.
+
+Roughly: a vector space is "closed under linear operations," you can add and scale its elements and always stay inside the space.
+
+<ExerciseCard id="MATH-03-ex0-polynomial-vector-space" />
+
+## Span, linear independence, dimension, basis, coordinates
+
+Five definitions worth having precisely (the source is deliberately terse here, "train yourself in reading maths"):
+
+> **Definition 3.4 (span).** $\text{span}(\{v_i\}_{i=1}^k) = \{\sum_i\alpha_iv_i : \alpha_i\in\mathbb{R}\}$: the set of all linear combinations.
+>
+> **Definition 3.5 (linear independence).** $\{v_i\}_{i=1}^n$ is linearly independent iff $\sum_i\alpha_iv_i=0 \Rightarrow \forall_i\,\alpha_i=0$ (the only way to combine them to zero is trivially).
+>
+> **Definition 3.6 (dimension).** $\dim(V) = \max_n\{n\in\mathbb{N} : \exists\{v_i\}_{i=1}^n\text{ lin. indep.}, v_i\in V\}$.
+>
+> **Definition 3.7 (basis).** $B=(e_i)_{i=1}^n$ is a basis of $V$ iff $\text{span}(B)=V$ and $B$ is linearly independent.
+>
+> **Definition 3.8 (coordinates).** The tuple $(v_1,..,v_n)\in\mathbb{R}^n$ is called the coordinates of $v\in V$ in basis $(e_i)_{i=1}^n$ iff $v=\sum_iv_ie_i$.
+
+Note the subtlety in Definition 3.8: $\mathbb{R}^n$ is itself a vector space, so coordinates are also vectors, but in general $V$ itself might not be $\mathbb{R}^n$, so coordinates are vectors, but they are generally not the same kind of object as $v$ itself.
+
+Given a basis $(e_i)_{i=1}^n$, every vector $v$ can be described as a linear combination $v=\sum_iv_ie_i$ of "basic elements," the basis vectors. This idea, that "linear things" can be described as linear combinations of basic elements, carries over to *functions* too, as the next section makes precise.
 
 <ExerciseCard id="MATH-03-ex1-why-coordinate-free" />
 
-## Change of basis
+## A taxonomy of linear functions
 
-Given $v$'s coordinates in the standard basis (i.e. just $v$ itself, written as a list of numbers the usual way), how do you find its coordinates in a *different* basis $B$?
+> **Definition 3.2 (linear).** $f:V\to X$ is linear $\iff$ $f(\alpha v+\beta w)=\alpha f(v)+\beta f(w)$, where $X$ is any other vector space (e.g. $X=\mathbb{R}$, or $X=V\times V$).
+>
+> **Definition 3.3 (multi-linear).** $f:V\times V\times\cdots\times V\to X$ is multi-linear $\iff$ $f$ is linear in each input separately.
+
+Many names are used for special linear functions, worth knowing since you'll see all of them again:
+
+- $f:V\to\mathbb{R}$: **linear functional**, **1-form**, or **dual vector** ("functional" is used especially when $V$ is itself a space of functions).
+- $f:V\to V$: linear function / linear transform / vector-valued 1-form.
+- $f:V\times V\to\mathbb{R}$: **bilinear functional**, or **2-form**.
+- $f:V\times V\times V\to\mathbb{R}$: 3-form.
+- $f:V\times V\to V$: vector-valued 2-form.
+
+This taxonomy connects directly back to derivatives. Given a cost function $f:X\to\mathbb{R}$ over some (possibly non-vector-space) system space $X$, the differential $df|_x: V\to\mathbb{R}$ (with $V$ the local tangent space) is a **1-form**: it tells you how $f$ changes when "making a tangent step" $v\in V$. This is *exactly* why the gradient/Jacobian is naturally a row vector (1-form) in [MATH-02](/course/MATH/MATH-02)'s convention, $\nabla f(x)^\top$ literally "eats" a step direction and outputs a scalar change, the defining behavior of a 1-form. The second derivative (Hessian) is correspondingly a **2-form**: $d^2f|_x:V\times V\to\mathbb{R}$, telling you how $df|_x(v)$ changes when making a further tangent step $w$. And the inner product $\langle\cdot,\cdot\rangle:V\times V\to\mathbb{R}$ is also a 2-form (you'll formalize this in [MATH-03B](/course/MATH/MATH-03B)). A neural network $f:\mathbb{R}^i\to\mathbb{R}^o$ has a derivative $df|_x:\mathbb{R}^i\to\mathbb{R}^o$ that is a **vector-valued 1-form**, exactly the Jacobian matrix.
+
+## The dual space
+
+> **Definition 3.9 (dual space).** Given $V$, its dual space is $V^* = \{f:V\to\mathbb{R}\}$, the space of all 1-forms. Every $v^*\in V^*$ is called a 1-form or dual vector.
+
+$V^*$ is itself a vector space (you can add two linear functionals, $f=f_1+f_2$, and scale them, and the result is still linear). Given a basis $(e_i)_{i=1}^n$ of $V$, define the corresponding **dual basis** $(\hat e_i)_{i=1}^n$ of $V^*$ by
+
+$$\forall_{i,j}: \hat e_i(e_j) = \delta_{ij} \qquad \text{(equivalently, } \forall v\in V: \hat e_i(v)=v_i \text{)}$$
+
+i.e. $\hat e_i$ is the 1-form that simply maps a vector to its $i$-th coordinate. It turns out $(\hat e_i)_{i=1}^n$ is itself a basis of $V^*$, so $\dim(V^*)=\dim(V)$: the space of 1-forms has the same dimension as $V$ itself. Geometrically, a linear function over $V$ can be visualized as a "plane" over $V$, uniquely determined by its iso-lines; every 1-form $f$ is uniquely $f(v)=c^\top v$ for some $c\in V$, so $V$ and $V^*$ are, in this sense, twins (though which $c\in V$ corresponds to a given 1-form does depend on a choice of scalar product, as you'll see in MATH-03B).
+
+## Tensors and the matrix convention, briefly
+
+Once you have both basis vectors $(e_i)$ of $V$ and dual-basis 1-forms $(\hat e_i)$ of $V^*$, *any* linear object (of any of the taxonomy's flavors above) can be written as coordinates against combinations of these basic elements, using the **outer product** (or **tensor product**) $\otimes$: e.g. a bivector-valued 3-form is $f=\sum_{ijklm}f_{ijklm}\,e_i\otimes e_j\otimes\hat e_k\otimes\hat e_l\otimes\hat e_m$. We won't need the general $k$-form tensor machinery in this course, but the special case that matters enormously is: every linear map $f:V\to U$ can be written $f=\sum_{ij}f_{ij}\,e_i\otimes\hat e_j$, where $(\hat e_j)$ is a basis of $V^*$ and $(e_i)$ a basis of $U$. This gives $n^2$ coordinates $f_{ij}$, and the whole world has agreed on how to write them on a sheet of paper: as a **matrix**,
+
+$$f = \begin{pmatrix}f_{11}&f_{12}&\cdots&f_{1n}\\f_{21}&f_{22}&\cdots&f_{2n}\\\vdots&&&\vdots\\f_{n1}&f_{n2}&\cdots&f_{nn}\end{pmatrix}, \qquad u=f(v) \;\Rightarrow\; u_i=\sum_jf_{ij}v_j$$
+
+This is the **matrix convention**: the first (contra-variant) index spans **columns**, the second (co-variant) index spans **rows**. A vector's (contra-variant) coordinates are written as a column; a 1-form's (co-variant) coordinates are written as a row, exactly the convention Definitions 2.3/2.4 already committed to in MATH-02. Summarized:
+
+| | columns | rows |
+|---|---|---|
+| | vector | 1-form / co-vector / derivative |
+| space | output space | input space |
+| variance | co-variant | contra-variant |
+| coordinates | contra-variant coordinates | co-variant coordinates |
+
+A row vector "eats a vector and outputs a scalar," i.e. $v^\top:V\to\mathbb{R}$ should be thought of as a 1-form; rows generally relate to 1-forms (dual vectors), columns to vectors. This is exactly consistent with treating a gradient as a column and a Jacobian/derivative as a row, from MATH-02.
+
+<ExerciseCard id="MATH-03-ex1b-dual-basis" />
+
+## Coordinate transformations
+
+Given two bases $\mathcal{A}=(a_1,..,a_n)$ and $\mathcal{B}=(b_1,..,b_n)$ of the same space, how do a vector's coordinates in one relate to its coordinates in the other?
 
 <ExerciseCard id="MATH-03-ex2-change-of-basis-derivation" />
 
@@ -69,31 +156,41 @@ $$[v]_B = B^{-1}v = \begin{pmatrix}0.5&0.5\\0.5&-0.5\end{pmatrix}\begin{pmatrix}
 
 <ExerciseCard id="MATH-03-ex3-numeric" />
 
-## Matrices as linear maps
+## Matrices as linear maps, and why bases matter for robotics
 
-A matrix $A$ isn't fundamentally "a grid of numbers", it's the coordinate representation of a **linear map** (a function $T$ satisfying $T(u+v)=T(u)+T(v)$ and $T(\alpha v) = \alpha T(v)$) in a particular pair of bases (one for the input space, one for the output space). This is exactly why the *same* linear map can look like a very different matrix depending on your basis choice, and it's the conceptual foundation for why the SVD (next module) is interesting: it finds the basis pair in which a linear map's matrix representation is as simple as possible (diagonal).
+A matrix $A$ isn't fundamentally "a grid of numbers," it's the coordinate representation of a linear map in a particular pair of bases (one for the input space, one for the output space), exactly as derived above. This is exactly why the *same* linear map (e.g. "rotate this vector by 90°") can look like a very different matrix depending on your basis choice (e.g. world frame vs. a rotated body frame), and it's the conceptual foundation for why the SVD (next module) is interesting: it finds the basis pair in which a linear map's matrix representation is as simple as possible (diagonal).
+
+If a linear transform $f$ has matrix $F=[f]^{\mathcal{A}\mathcal{A}}$ in old basis $\mathcal{A}$ (using $\mathcal{A}$ for both input and output), and $B$ is the coordinate transformation matrix carrying old-basis coordinates $[x]^\mathcal{A}$ to new-basis coordinates via $[x]^\mathcal{A}=B[x]^\mathcal{B}$, then $f$'s matrix in the new basis is the **similarity transform** $[f]^{\mathcal{B}\mathcal{B}}=B^{-1}FB$. This exact operation, re-expressing a linear map in a new basis via $B^{-1}FB$, is precisely what happens whenever you change reference frames in a robotics computation, and it's also the operation that eigendecomposition (MATH-05) finds the "nicest possible" version of.
 
 ## Summary
 
-- A vector is basis-independent; its coordinates are not.
-- Change of basis: $[v]_B = B^{-1}v$, where $B$'s columns are the new basis vectors.
-- A matrix represents a linear map relative to chosen input/output bases, the same map can have very different matrix forms in different bases.
+- A vector space (Definition 3.1) is an abstract set closed under addition and scaling, a vector is an *element* of such a space, not fundamentally a tuple of numbers.
+- Span, linear independence, dimension, basis, and coordinates (Definitions 3.4-3.8) formalize "building every vector out of basic elements."
+- Linear functions come in a taxonomy by how many vectors they "eat" and output: 1-forms (functionals, dual vectors), 2-forms, vector-valued versions, etc. A gradient/Jacobian is naturally a 1-form (row convention); this is why MATH-02's row/column convention wasn't arbitrary.
+- The dual space $V^*$ (Definition 3.9) has the same dimension as $V$; the dual basis $\hat e_i$ picks out the $i$-th coordinate.
+- The matrix convention: columns = contra-variant (vector) coordinates, rows = co-variant (1-form) coordinates.
+- Change of basis: $[v]_B = B^{-1}v$, where $B$'s columns are the new basis vectors (in the old/standard basis); a linear map's matrix transforms by the similarity transform $B^{-1}FB$.
 
 ## Retrieval questions
 
-1. Write the change-of-basis formula from memory, and explain why $B$ must be invertible for it to make sense.
-2. Why is it useful to think of a matrix as "a linear map in a particular basis" rather than just "a grid of numbers"?
+1. State Definition 3.1 (vector space) from memory: what are the two operations, and what does each have to satisfy?
+2. Why is a gradient naturally a "1-form" / row-convention object, and a vector naturally a "column" object? Connect this to the matrix convention table.
+3. Write the change-of-basis formula from memory, and explain why $B$ must be invertible for it to make sense.
+4. Why is it useful to think of a matrix as "a linear map in a particular pair of bases" rather than just "a grid of numbers"? What operation re-expresses a linear map in a new basis?
 
 ## Mastery checklist
 
+- [ ] Can state Definition 3.1 (vector space axioms) and give an example of a vector space that isn't a tuple of numbers.
+- [ ] Can state Definitions 3.4-3.8 (span, linear independence, dimension, basis, coordinates) precisely.
+- [ ] Can explain the taxonomy of linear functions (1-form, 2-form, vector-valued forms) and connect it to gradients/Hessians.
 - [ ] Can explain why a vector's coordinates depend on the chosen basis but the vector itself doesn't.
-- [ ] Derived $[v]_B = B^{-1}v$ from the definition of basis coordinates.
-- [ ] Computed a vector's coordinates in a new basis by hand.
+- [ ] Derived $[v]_B = B^{-1}v$ from the definition of basis coordinates, and computed a vector's coordinates in a new basis by hand.
+- [ ] Can state the similarity-transform rule $B^{-1}FB$ for re-expressing a linear map in a new basis.
 
 ## Source note
 
-This module's topic and page range are from `lecture-maths`, §3.1-3.2 (pp. 21-30), which also covers dual vector spaces and tensors in more depth than this module does (deferred, not covered by this workbook yet). All exposition, the worked example, and every exercise here are newly authored, paraphrasing the source's topic coverage.
+This module's exposition and definitions are adapted from `lecture-maths`, §3.1-3.3 (pp. 21-31): §3.1 (vector space motivation and Definition 3.1), §3.2 (Definitions 3.2-3.9, the linear-function taxonomy, dual space, tensors/matrix convention, coordinate transformations). The scalar product, orthonormal bases, and metric tensor content from the tail of §3.3 is covered separately in [MATH-03B](/course/MATH/MATH-03B). All exercises, the worked example, and connecting commentary are newly authored except where a specific source exercise is cited in its provenance tag.
 
 ---
 
-**Next**: [MATH-04: SVD & Eigendecomposition](/course/MATH/MATH-04)
+**Next**: [MATH-03B: Scalar Products, Metric Tensors & Orthonormal Bases](/course/MATH/MATH-03B)

@@ -1,0 +1,116 @@
+---
+id: RL-01
+block: RL
+title: "MDPs, Value Functions & Bellman Equations"
+tier: 1
+estimatedHours: 3
+prerequisites: ["PROB-01", "DYN-04"]
+objectives:
+  - "State the formal Markov Decision Process (MDP) definition and the Markov property."
+  - "Define the expected return, value function, and Q-function for a policy."
+  - "Derive the recursive property of the value function, and state the Bellman optimality equation."
+  - "Explain precisely how this generalizes DYN-04's deterministic Bellman equation to the stochastic, reward-maximizing case."
+sources:
+  - { sourceId: "lecture-ai", pages: "p52-55, p67-71 (§2.1, §2.2)", role: "primary" }
+concepts:
+  - "Markov Decision Process (MDP)"
+  - "Markov property"
+  - "Expected return, value function, Q-function"
+  - "Bellman optimality equation"
+notation:
+  - { symbol: "$P(s'\\mid s,a)$", meaning: "transition probability: world's next state given current state and action" }
+  - { symbol: "$R(s,a)$", meaning: "expected reward for taking action $a$ in state $s$" }
+  - { symbol: "$\\gamma\\in[0,1)$", meaning: "discount factor" }
+  - { symbol: "$V^\\pi(s),\\,Q^\\pi(s,a)$", meaning: "value function / Q-function of policy $\\pi$" }
+cheatsheetLinks: []
+nextModules: ["RL-02"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+DYN-04 already derived the Bellman equation once, for deterministic dynamics and a cost to minimize. This module derives the *same* recursive idea for the genuinely more general setting the rest of this block lives in: stochastic transitions, rewards to maximize, and (until RL-02) no assumption that you even know the underlying model. Nearly everything in RL, value iteration, TD-learning, Q-learning, policy gradients, MCTS, is a different way of exploiting this one equation.
+
+## Prerequisites & readiness check
+
+You should have PROB-01's conditional probability and DYN-04's deterministic Bellman equation fresh.
+
+<ReadinessCheck
+  question="From DYN-04, what is the (deterministic) Bellman equation, and what principle does it come from?"
+  answer="V_t(x) = min_u[c(x,u) + V_{t+1}(f(x,u))], from Bellman's principle: whatever the first decision, the remaining decisions must themselves be optimal for the resulting state."
+/>
+
+## Markov Decision Processes
+
+A **Markov Decision Process (MDP)** is defined by an initial state distribution $P(s_0)$, transition probabilities $P(s'\mid s,a)$, and an expected reward $R(s,a)=\mathbb{E}\{r\mid s,a\}$ (assumed **stationary**: independent of absolute time $t$). The **Markov property**: $s_t$ is a valid state description iff the future ($s_{t'>t}$) is conditionally independent of the past ($s_{t'<t}$) given $s_t$, i.e. $s_t$ captures *everything* about the world relevant to predicting what happens next; there are no additional hidden variables the process depends on beyond $s_t$.
+
+<ExerciseCard id="RL-01-ex1-markov-property-conceptual" />
+
+The goal is a **policy** ($a=\pi(s)$ deterministic, or $\pi(a\mid s)=P(a\mid s;\pi)$ stochastic) maximizing the **expected return**:
+
+$$J^\pi = \mathbb{E}\Big\{\sum_t\gamma^tr_t\ \Big|\ \pi\Big\} = \mathbb{E}\{r_0+\gamma r_1+\gamma^2r_2+\cdots\mid\pi\}, \qquad \gamma\in[0,1)$$
+
+with $s_0\sim P(s_0)$. This is DYN-04's optimal-control objective, translated: $c(x,u)\to-r$ (minimizing cost becomes maximizing reward, just a sign flip), $x_{t+1}=f(x_t,u_t)\to s_{t+1}\sim P(s'\mid s_t,a_t)$ (deterministic dynamics become a distribution over next states), and a new ingredient, the **discount factor** $\gamma$ (weighting near-term reward more than distant reward; DYN-04's finite-horizon sum needs no such factor, but an infinite-horizon MDP sum would otherwise not converge for a policy earning reward forever).
+
+## Value functions and Q-functions
+
+The **value function** of policy $\pi$ is the expected return starting from state $s$:
+
+$$V^\pi(s) = \mathbb{E}\Big\{\sum_t\gamma^tr_t\ \Big|\ s_0=s;\pi\Big\}$$
+
+exactly DYN-04's $V_t(x)$ (optimal cost-to-go), now for a *fixed* policy $\pi$ (not necessarily optimal) and *expected* (not deterministic) return. The **Q-function** additionally fixes the first action:
+
+$$Q^\pi(s,a) = \mathbb{E}\Big\{\sum_t\gamma^tr_t\ \Big|\ s_0=s,a_0=a;\pi\Big\}$$
+
+The **optimal value function** is $V^*(s)=\max_\pi V^\pi(s)$; a policy $\pi^*$ is **optimal** iff $V^{\pi^*}(s)=V^*(s)$ for *every* state $s$ simultaneously (a genuinely strong requirement: in MDPs, at least one deterministic optimal policy always exists satisfying it).
+
+## The recursive property of the value function
+
+<ExerciseCard id="RL-01-ex2-recursive-value-derivation" />
+
+Splitting off the first reward and conditioning on the resulting state:
+
+$$V^\pi(s) = R(s,\pi(s)) + \gamma\sum_{s'}P(s'\mid s,\pi(s))\,V^\pi(s')$$
+
+exactly DYN-04's Bellman-equation derivation (split the sum, apply Bellman's principle to the remainder), now with an **expectation over stochastic next states** replacing DYN-04's single deterministic successor.
+
+## The Bellman optimality equation
+
+> **Theorem (Bellman optimality).** The optimal value function satisfies
+> $$V^*(s) = \max_a\Big[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\,V^*(s')\Big]$$
+> and $\pi^*(s)=\operatorname*{argmax}_a[\,\cdots\,]$ is an optimal policy.
+
+*(Sketch of proof: if $\pi^*$ selected any action other than the maximizer, the policy $\pi'$ agreeing with $\pi^*$ everywhere except $\pi'(s):=\operatorname*{argmax}_a[\cdots]$ would achieve strictly higher value at $s$, contradicting $\pi^*$'s optimality.)* This is exactly DYN-04's Bellman equation, $\min\to\max$ (cost to reward) and a deterministic successor replaced by an expectation, the *same* dynamic-programming intuition: if you already know how to act optimally from every possible next state $s'$ (i.e. you know $V^*(s')$), deciding optimally *now* is a single one-step lookahead.
+
+<ExerciseCard id="RL-01-ex3-bellman-optimality-numeric" />
+
+## Summary
+
+- An **MDP** is $(P(s_0),P(s'\mid s,a),R(s,a))$, stationary; the **Markov property** says $s_t$ captures everything relevant to the future, with no hidden extra dependence on the past.
+- The objective is the **expected discounted return** $J^\pi=\mathbb{E}\{\sum_t\gamma^tr_t\mid\pi\}$; $V^\pi(s)$ and $Q^\pi(s,a)$ are its state- and state-action-conditioned versions.
+- $V^\pi$ satisfies a **recursive (Bellman) equation**, derived exactly like DYN-04's, generalized to stochastic transitions.
+- The **Bellman optimality equation** for $V^*$ generalizes DYN-04's deterministic Bellman equation: $\min\to\max$ (cost to reward), deterministic successor to expectation over $P(s'\mid s,a)$.
+
+## Retrieval questions
+
+1. State the formal MDP definition and the Markov property.
+2. Define $J^\pi$, $V^\pi(s)$, and $Q^\pi(s,a)$.
+3. Derive $V^\pi$'s recursive property from its definition, without looking back.
+4. State the Bellman optimality equation, and explain precisely how it generalizes DYN-04's deterministic version.
+
+## Mastery checklist
+
+- [ ] Can state the formal MDP definition and Markov property.
+- [ ] Can define expected return, value function, and Q-function.
+- [ ] Derived the recursive property of $V^\pi$.
+- [ ] Can state the Bellman optimality equation and its DYN-04 generalization.
+
+## Source note
+
+This module's exposition, the formal MDP/Markov-property definitions, the expected return/value function/Q-function definitions, the recursive-value derivation, and the Bellman optimality equation (with its proof sketch) are adapted from `lecture-ai`, §2.1 and §2.2 (pp. 52-55, 67-71). The explicit generalization from DYN-04's deterministic Bellman equation is newly authored connecting commentary. All exercises are newly authored; the Bellman optimality equation's fixed-point property was independently verified numerically on a small MDP while authoring this module.
+
+---
+
+**Next**: [RL-02: Value Iteration, Q-Iteration & Convergence](/course/RL/RL-02)

@@ -1,0 +1,44 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "KIN-01-ex1-so3-check",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly verifies R^T R = I for R (orthonormal columns)." },
+          { "points": 1, "description": "Correctly computes det(R)=1." },
+          { "points": 2, "description": "Correctly computes det(R')=-1 and identifies it as a reflection, explaining why orthonormality alone doesn't guarantee a rotation." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "R's columns (0,1,0),(-1,0,0),(0,0,1) are mutually orthogonal and unit length, so R^T R = I. det(R) = 1 (cofactor expansion along row 3, which has a single 1 in the bottom-right, gives det=1*det([[0,-1],[1,0]])=1*(0-(-1))=1).\nR' has the same orthonormal columns (sign flip in one entry doesn't change orthogonality/unit length), so R'^T R'=I still. But det(R') = -1 (the sign flip in the (3,3) entry flips the determinant's sign). R' is an orthonormal matrix but represents a reflection, not a rotation: SO(3) requires BOTH orthonormality AND det=+1, since orthonormality alone (the orthogonal group O(3)) includes both rotations and reflections."
+    },
+    {
+      "exerciseId": "KIN-01-ex2-rodrigues-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.866, "tolerance": 0.005 },
+      "fullSolution": "what x v = (0,0,1)x(1,0,0) = (0,1,0). what.v = 0, so the third term vanishes. Result = cos(pi/3)*(1,0,0) + sin(pi/3)*(0,1,0) = 0.5*(1,0,0)+0.866*(0,1,0) = (0.5, 0.866, 0). Second component: 0.866. (Verified with NumPy while authoring this module.)"
+    },
+    {
+      "exerciseId": "KIN-01-ex3-rdot-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly differentiates x(t)=R(t)x_body to get xdot=Rdot*x_body." },
+          { "points": 1, "description": "Correctly substitutes the geometric definition wxx(t)=skew(w)R(t)x_body." },
+          { "points": 2, "description": "Correctly argues that equality for an arbitrary x_body implies equality of the matrices themselves, Rdot=skew(w)R." }
+        ],
+        "commonErrors": [
+          "Only verifying the identity for one specific x_body rather than arguing it must hold for the matrices themselves since x_body is arbitrary."
+        ]
+      },
+      "fullSolution": "x(t) = R(t)*x_body, x_body constant, so xdot(t) = Rdot(t)*x_body.\nGeometric definition: xdot(t) = w x x(t) = skew(w)*x(t) = skew(w)*R(t)*x_body.\nSetting both expressions for xdot(t) equal: Rdot(t)*x_body = skew(w)*R(t)*x_body. Since x_body is an ARBITRARY fixed vector in R^3 (any body point), this equality of the two sides applied to every possible x_body forces the two matrices multiplying x_body to be equal themselves: Rdot(t) = skew(w)*R(t)."
+    },
+    {
+      "exerciseId": "KIN-01-ex4-homogeneous-composition",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 2, "tolerance": 0.01 },
+      "fullSolution": "xA = R_AB @ xB + t_AB = [[0,-1,0],[1,0,0],[0,0,1]]@[1,0,0] + [0,1,0] = [0,1,0]+[0,1,0] = [0,2,0].\nxW = R_WA @ xA + t_WA = I@[0,2,0] + [2,0,0] = [2,2,0]. Second component: 2. (Verified with NumPy while authoring this module.)"
+    }
+  ]
+}

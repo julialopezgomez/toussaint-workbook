@@ -1,6 +1,12 @@
 {
   "solutions": [
     {
+      "exerciseId": "MATH-02-ex0-directional-derivative",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 2.828, "tolerance": 0.01 },
+      "fullSolution": "grad f(x,y) = (2x,2y). At (1,1): grad f = (2,2). Directional derivative = grad f . d = 2*(1/sqrt(2)) + 2*(1/sqrt(2)) = 4/sqrt(2) = 2*sqrt(2) ~= 2.828."
+    },
+    {
       "exerciseId": "MATH-02-ex1-why-check-numerically",
       "checkMode": "rubric",
       "rubric": {
@@ -14,6 +20,12 @@
         ]
       },
       "fullSolution": "A finite-difference check estimates partial f/partial x_i as [f(x+eps*e_i) - f(x-eps*e_i)] / (2 eps) for small eps, using only evaluations of f itself, never touching your analytical gradient formula. If this numerical estimate matches your analytical gradient closely (for a well-chosen eps, not too big or too small due to floating-point error), your derivation is very likely correct. If only one entry disagrees while the rest match, that's strong evidence of a localized bug affecting just that variable or term (e.g. a dropped factor, sign error, or wrong index) rather than a fundamental error in your whole approach, since a fundamental error would typically show up in most or all entries."
+    },
+    {
+      "exerciseId": "MATH-02-ex1b-gradcheck-implementation",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 4.0, "tolerance": 0.01 },
+      "fullSolution": "f(1.001,2) = (1.001)^2 * 2 = 1.002001 * 2 = 2.004002. f(0.999,2) = (0.999)^2 * 2 = 0.998001 * 2 = 1.996002. Difference = 2.004002 - 1.996002 = 0.008000. Divide by 2*eps = 0.002: 0.008000/0.002 = 4.000, matching the analytic value 2*x1*x2 = 2*1*2 = 4 to well within Algorithm 1's tolerance of 1e-4."
     },
     {
       "exerciseId": "MATH-02-ex2-quadratic-gradient-derivation",

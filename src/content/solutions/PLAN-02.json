@@ -1,0 +1,46 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "PLAN-02-ex1-prm-trace",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies the O(n^2) vs O(nk) computational cost tradeoff." },
+          { "points": 2, "description": "Correctly explains why nearby pairs are more valuable to check than distant pairs." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "All-pairs connection would need O(n^2) collision-check calls (one of the most expensive parts of PRM construction); restricting to k nearest neighbors reduces this to O(nk). Nearby configurations are far more likely to have a collision-free straight-line connection than distant ones, so most all-pairs value would be wasted on doomed-to-fail distant pairs. Tradeoff: some possible edges can be missed, but a well-connected roadmap only needs enough local edges for graph search to find a path, not every possible direct edge."
+    },
+    {
+      "exerciseId": "PLAN-02-ex2-completeness-bound-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": -18.02, "tolerance": 0.1 },
+      "fullSolution": "Exponent: -sigma*rho^d*n = -1*0.1^2*5 = -0.05, e^-0.05 ~= 0.9512. Prefactor: 2*gamma/rho = 2/0.1 = 20. Bound = 1 - 20*0.9512 ~= 1 - 19.02 ~= -18.02, a vacuous (negative) lower bound. (Independently verified with direct Python computation; rho=1.0 with the same other parameters gives ~0.987 instead.)"
+    },
+    {
+      "exerciseId": "PLAN-02-ex3-rrt-exploration-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains that sparse regions are nearest-neighbor to more random samples on average." },
+          { "points": 2, "description": "Correctly connects this to the self-correcting bias toward unexplored space." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Sparsely-covered regions are, on average, closer (nearest-neighbor sense) to a larger share of uniformly random target samples than densely-covered regions. So sparse regions get selected as 'nearest neighbor' more often, pulling growth preferentially toward unexplored space, a self-correcting bias. This is why the tree ends up roughly evenly spread without ever computing or targeting uniform coverage explicitly."
+    },
+    {
+      "exerciseId": "PLAN-02-ex4-prm-vs-rrt-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly chooses PRM." },
+          { "points": 2, "description": "Correctly justifies via amortized precomputation over many queries in a fixed environment." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "PRM: precomputation cost (building the roadmap once) is paid once and amortized over every subsequent query; RRT would redo its tree-growing work from scratch for every new (start, goal) pair. Since the layout is fixed and there will be hundreds of queries, PRM's amortized-cost model fits better: pay once, then answer every query with a cheap graph search."
+    }
+  ]
+}

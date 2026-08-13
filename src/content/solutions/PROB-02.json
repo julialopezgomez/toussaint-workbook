@@ -35,6 +35,12 @@
       "checkMode": "deterministic",
       "deterministic": { "expected": 2.5, "tolerance": 0.01 },
       "fullSolution": "w(2) = p(2)/q(2) = 0.5/0.2 = 2.5. (Verified: the full importance-sampling identity was also checked numerically while authoring this module on a similar 3-state example, confirming E_q[x*p(x)/q(x)] matches the true E_p[x] exactly for a discrete distribution.)"
+    },
+    {
+      "exerciseId": "PROB-02-ex4-particle-weighted-expectation",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 12.2, "tolerance": 0.01 },
+      "fullSolution": "f(x_i) = x_i^2: 1, 9, 25. Weighted sum: 0.2*1 + 0.5*9 + 0.3*25 = 0.2 + 4.5 + 7.5 = 12.2."
     }
   ]
 }

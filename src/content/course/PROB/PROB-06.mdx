@@ -3,7 +3,7 @@ id: PROB-06
 block: PROB
 title: "Laplace Approximation, Variational Inference & Fisher Information"
 tier: 2
-estimatedHours: 1.5
+estimatedHours: 2.5
 prerequisites: ["PROB-05", "MATH-00"]
 objectives:
   - "Explain why approximating a complicated distribution with a Gaussian at its mode is useful."
@@ -45,9 +45,15 @@ You should have the Gaussian product derivation (PROB-05) and Taylor expansion (
 
 ## The Laplace approximation
 
+The source motivates this with a scenario directly from robotics: suppose you want $q(x)=p(x\mid D)\propto p(D\mid x)p(x)$, where $x$ is a stochastically-controlled robot path and $p(x)$ a nice Gaussian prior over controls, but $p(D\mid x)$ (e.g. a collision-avoidance likelihood) is computed by a black-box collision-detection package: it gives you values and gradients, but is nowhere near an analytic, closed-form density. $q(x)$ simply cannot be expressed analytically, so it needs to be *approximated*.
+
+> **Definition 5.10 (Laplace approximation).** Given a smooth distribution $q(x)$, define its Laplace approximation as $\tilde q(x)=\exp\{-\tilde E(x)\}$, where $\tilde E(x) = E(x^*)+\tfrac12(x-x^*)^\top\nabla^2E(x^*)(x-x^*)$ is the 2nd-order Taylor expansion of the energy $E(x)=-\log q(x)$ (PROB-04's energy view) at the mode $x^*=\operatorname*{argmin}_xE(x)=\operatorname*{argmax}_xq(x)$.
+
+The linear term vanishes because you Taylor-expand specifically *at the mode*, where $\nabla E(x^*)=0$; since the energy's quadratic approximation is a parabola, its exponential $\tilde q(x)$ is automatically Gaussian. Computing $x^*$ is itself an ordinary optimization problem, often solved via Newton's method ([OPT-01](/course/OPT/OPT-01)), which conveniently computes the Hessian of $E$ at every step anyway, so at the optimum you already have exactly the precision matrix the Laplace approximation needs, for free.
+
 <ExerciseCard id="PROB-06-ex2-laplace-derivation" />
 
-The result, $p(x) \approx N(x\mid x^*, \sigma^2)$ with $\sigma^2 = \left(-\dfrac{d^2\log p}{dx^2}\Big|_{x^*}\right)^{-1}$, is the **Laplace approximation**: literally MATH-00's second-order Taylor expansion, applied to $\log p$ rather than $p$, then exponentiated and matched to a Gaussian's exponent form. The multivariable version replaces the second derivative with (negative) the Hessian of $\log p$ at the mode: $\Sigma = \left(-H_{\log p}(x^*)\right)^{-1}$.
+The result, $p(x) \approx N(x\mid x^*, \sigma^2)$ with $\sigma^2 = \left(-\dfrac{d^2\log p}{dx^2}\Big|_{x^*}\right)^{-1}$, is exactly Definition 5.10 in 1D: literally MATH-00's second-order Taylor expansion, applied to $\log p$ rather than $p$, then exponentiated and matched to a Gaussian's exponent form. The multivariable version replaces the second derivative with (negative) the Hessian of $\log p$ at the mode: $\Sigma = \left(-H_{\log p}(x^*)\right)^{-1}$.
 
 ## Worked example
 
@@ -55,11 +61,15 @@ For $\log \tilde p(x) = -\tfrac14x^4+\tfrac12x^2$ (an unnormalized, actually bim
 
 <ExerciseCard id="PROB-06-ex3-numeric" />
 
-## Variational inference and Fisher information, briefly
+## Variational inference and Fisher information
 
-**Variational inference** generalizes the same underlying idea (approximate a hard-to-work-with distribution with an easy one) beyond just a local Taylor expansion at a mode: it poses the approximation as an explicit optimization problem, choosing the easy distribution (e.g. from a Gaussian family) that minimizes $D(q\|p)$ (the KL divergence from PROB-03) over the whole distribution, not just locally.
+**Variational inference** generalizes the same underlying idea (approximate a hard-to-work-with distribution with an easy one) beyond just a local Taylor expansion at a mode:
 
-**Fisher information** measures how sharply peaked a distribution's log-likelihood is around its mode, formally, it's (the negative expectation of) the same second-derivative-of-log-probability quantity that appears in the Laplace approximation's variance formula, connecting "how much information a sample carries about a parameter" directly to "how tightly the Laplace-approximated posterior would be concentrated."
+> **Definition 5.11 (variational inference).** Given a distribution $p(x)$ and a parameterized family $q(x\mid\beta)$, the variational approximation of $p(x)$ is $\operatorname*{argmin}_qD(q\|p)$.
+
+I.e., instead of matching a Taylor expansion locally at the mode, variational inference poses the approximation as an explicit optimization problem: choose the member of the family $q(x\mid\beta)$ (e.g. a Gaussian family, varying over $\beta=(\mu,\Sigma)$) that minimizes the KL divergence $D(q\|p)$ (PROB-03) to the true, hard-to-work-with $p$, over the *whole* distribution, not just locally around one point.
+
+**Fisher information** measures how sharply peaked a distribution's log-likelihood is around its mode, formally, it's (the negative expectation of) the same second-derivative-of-log-probability quantity that appears in the Laplace approximation's variance formula, connecting "how much information a sample carries about a parameter" directly to "how tightly the Laplace-approximated posterior would be concentrated." (Full disclosure: the source's own treatment of the **Fisher information metric**, §5.6, is explicitly left as a "TODO" in Toussaint's notes, framed only as "the natural metric for comparing two probability distributions $p(x;\beta_1)$ and $p(x;\beta_2)$," directly generalizing OPT-01/MATH-05's steepest-descent-under-a-metric idea to the space of probability distributions themselves, i.e. the "natural gradient." This module covers it only at that same conceptual level the source leaves it at, rather than inventing a fuller derivation the source itself doesn't provide.)
 
 ## Summary
 
@@ -82,7 +92,7 @@ For $\log \tilde p(x) = -\tfrac14x^4+\tfrac12x^2$ (an unnormalized, actually bim
 
 ## Source note
 
-This module's topic and page range are from `lecture-maths`, §5.4-5.6 (pp. 92-96). All exposition, the worked example, and every exercise here are newly authored, built explicitly from MATH-00's Taylor-expansion machinery rather than quoting the source, and deliberately connecting back to PROB-04's energy/log-probability framing and PROB-03's KL divergence.
+This module's formal definitions (Definition 5.10 Laplace approximation, including the robot-path/collision-detection motivating example, and Definition 5.11 variational inference) are adapted from `lecture-maths`, §5.4-5.6 (pp. 92-96); the Fisher information discussion honestly reflects that the source itself leaves §5.6 as an unfinished "TODO," covered here at the same conceptual level. The worked example and every exercise are newly authored, built explicitly from MATH-00's Taylor-expansion machinery, and deliberately connecting back to PROB-04's energy/log-probability framing and PROB-03's KL divergence.
 
 ---
 

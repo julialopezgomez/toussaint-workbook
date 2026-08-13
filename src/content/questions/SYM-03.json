@@ -1,0 +1,73 @@
+{
+  "moduleId": "SYM-03",
+  "exercises": [
+    {
+      "id": "SYM-03-ex1-strips-frame-assumption",
+      "objective": "Apply the STRIPS frame assumption to derive the resulting state after an action.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 196, "originalNumber": "4.7:3" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "State $s=\\{\\text{box}(a),\\text{box}(b),\\text{ball}(c),\\text{table}(d),\\text{on}(a,b),\\text{on}(b,d),\\text{on}(c,d),\\text{inhand}(\\text{nil})\\}$. Action $\\text{grab}(c)$ has effect $\\{\\text{inhand}(c),\\neg\\text{on}(c,d)\\}$. State whether $\\text{on}(a,b)$ is true in the resulting state $s'$, and explain why, using the frame assumption.",
+      "hints": [
+        "The frame assumption says every fact *not mentioned in the effect* stays unchanged after the action.",
+        "$\\text{on}(a,b)$ does not appear in $\\text{grab}(c)$'s effect $\\{\\text{inhand}(c),\\neg\\text{on}(c,d)\\}$ at all.",
+        "So $\\text{on}(a,b)$ is unaffected by the frame assumption and remains true in $s'$, exactly as it was in $s$; only $\\text{inhand}$ and $\\text{on}(c,d)$ actually change."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "SYM-03-ex2-state-space-numeric",
+      "objective": "Compute the order of magnitude of a symbolic state space for a modest number of objects.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 197, "originalNumber": "4.7:7" },
+      "difficulty": "core",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For $n=20$ objects, the state space size is roughly $2^{n^2}$. Compute $\\log_{10}(2^{400})$ to confirm the source's claim that this is $\\approx10^{120}$. Enter a decimal (round to 1 decimal place).",
+      "hints": [
+        "$\\log_{10}(2^{400})=400\\log_{10}(2)$.",
+        "$\\log_{10}(2)\\approx0.301$.",
+        "$400\\times0.301\\approx120.4$: confirming $2^{400}\\approx10^{120.4}$, an astronomically large state space from just 20 objects, far too large to observe densely enough to safely infer deterministic rules. (Independently verified with Python while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "SYM-03-ex3-ndr-probability-numeric",
+      "objective": "Compute the probability that a probabilistic relational rule's intended effect fails to occur.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 198, "originalNumber": "4.7:8" },
+      "difficulty": "core",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For the $\\text{grab}(X)$ rule with outcomes $0.7:\\text{inhand}(X),\\neg\\text{on}(X,Y)$; $0.2:\\text{on}(X,Z),\\neg\\text{on}(X,Y)$; $0.1:\\text{noise}$, compute the probability that the grab does *not* result in the object being in hand. Enter a decimal.",
+      "hints": [
+        "'In hand' corresponds only to the first outcome, with probability $0.7$.",
+        "The probability of *not* achieving this is the sum of the other two outcomes' probabilities.",
+        "$0.2+0.1=0.3$: a 30% chance the grab fails to put the object in hand (it either slides to a new location or produces an unmodeled/noisy outcome)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "SYM-03-ex4-uncertainty-learning-conceptual",
+      "objective": "Explain why uncertainty in a rule representation makes it learnable, connecting to ML-02's regularization.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 198, "originalNumber": "4.7:9" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["SYM-03-ex3-ndr-probability-numeric"],
+      "answerType": "short-text",
+      "prompt": "Explain why a deterministic STRIPS rule is an 'all-or-nothing' target for learning from noisy data, and why a probabilistic relational rule doesn't have this problem, connecting explicitly to ML-02's regularization idea.",
+      "hints": [
+        "A deterministic rule claims a single, fixed outcome always occurs; a single observed exception (noise, an unusual outcome, sensor error) directly contradicts the rule, forcing either a wrong rule or an ever-more-specific, ever-less-general rule carved out to handle every exception separately.",
+        "A probabilistic rule instead just assigns exceptions a small, honest outcome probability (like the grab rule's $0.1:\\text{noise}$ term), absorbing noisy or rare observations without needing to explain them away individually.",
+        "This is structurally the same move as ML-02's regularization: rather than forcing a model to fit every last data point exactly (risking an overly complex, brittle fit), allowing some 'slack' (regularization penalty there, an explicit noise-outcome probability here) trades a small amount of fit for a much more compact, strongly-generalizing rule set, learnable from far less data."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

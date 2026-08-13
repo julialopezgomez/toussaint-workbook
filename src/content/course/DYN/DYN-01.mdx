@@ -1,0 +1,120 @@
+---
+id: DYN-01
+block: DYN
+title: "Deriving the Equations of Motion: Newton-Euler & Euler-Lagrange"
+tier: 1
+estimatedHours: 4
+prerequisites: ["KIN-03", "ODE-02"]
+objectives:
+  - "Derive the robot equations of motion $u=M(q)\\ddot q+F(q,\\dot q)$ via Newton-Euler and per-body Jacobians."
+  - "Derive the 'force kinematics' identity $u=J^\\top(f,\\tau)$ from conservation of power."
+  - "Derive the same equations of motion via the Euler-Lagrange equation, and show $M(q)$ agrees between both routes."
+  - "Apply both derivations to the simple pendulum, and connect its linearization to ODE-02's stability classification."
+sources:
+  - { sourceId: "robotkin", pages: "Forward Kinematics & Jacobian, Force Kinematics, Dynamics sections (HTML-sourced)", role: "primary" }
+concepts:
+  - "Mass matrix $M(q)$, bias forces $F(q,\\dot q)$"
+  - "Newton-Euler equation"
+  - "Force kinematics (Jacobian transpose)"
+  - "Euler-Lagrange equation, kinetic/potential energy"
+  - "Simple pendulum"
+notation:
+  - { symbol: "$M(q)$", meaning: "configuration-dependent mass matrix, $M(q)=\\sum_iJ_i^\\top M_iJ_i$" }
+  - { symbol: "$F(q,\\dot q)$", meaning: "bias forces: Coriolis/centrifugal + gravity terms" }
+  - { symbol: "$u\\in\\mathbb{R}^n$", meaning: "joint torques/forces" }
+  - { symbol: "$L=T-U$", meaning: "Lagrangian: kinetic minus potential energy" }
+cheatsheetLinks: []
+nextModules: ["DYN-02"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+This module derives $u=M(q)\ddot q+F(q,\dot q)$, the standard-form robot equations of motion that appear (in some notation) in essentially every robotics dynamics/control paper, including the optimal-control formulation your own thesis report builds on. Two genuinely independent derivations (Newton-Euler via Jacobians, and Euler-Lagrange via energy) arrive at the *same* mass matrix $M(q)$, which is worth seeing explicitly rather than taking on faith, it's a real consistency check on both routes, not a coincidence.
+
+## Prerequisites & readiness check
+
+You should have the Jacobian construction (KIN-03) and linear ODE systems (ODE-02) fresh.
+
+<ReadinessCheck
+  question="From KIN-03, what does the Jacobian relate, and via what equation?"
+  answer="$J(q)$ relates joint velocities $\dot q$ to a body's velocity: $(v,w)=J(q)\dot q$."
+/>
+
+## Setup: bodies, Jacobians, per-body dynamics
+
+A robot is a tree of rigid bodies; body $i$ has mass $m_i$, inertia tensor $\bar I_i\in\mathbb{R}^{3\times3}$ (symmetric PD, in world coordinates: $\bar I_i=R_iI_iR_i^\top$ for body-frame inertia $I_i$), and a Jacobian $J_i(q)\in\mathbb{R}^{6\times n}$ (stacking position and angular parts) giving its velocity $(v_i,w_i)=J_i(q)\dot q$ (exactly KIN-03's Jacobian, now including both position and rotation).
+
+## Newton-Euler: forces from acceleration
+
+Differentiating the velocity relation gives the acceleration: $(\dot v_i,\dot w_i) = J_i\ddot q+\dot J_i\dot q$ (the $\dot J_i\dot q$ term captures the Coriolis/centrifugal effect, present even at $\ddot q=0$, since the Jacobian itself changes as the robot moves). The **Newton-Euler equation** says the inertia force/torque this acceleration requires is:
+
+$$\begin{pmatrix}f_i\\\tau_i\end{pmatrix} = \begin{pmatrix}m_i\dot v_i\\\bar I_i\dot w_i+w_i\times\bar I_iw_i\end{pmatrix} = M_iJ_i\ddot q+c_i, \qquad M_i=\text{diag}(m_iI_3,\bar I_i),\ c_i=M_i\dot J_i\dot q+\begin{pmatrix}0\\w_i\times\bar I_iw_i\end{pmatrix}$$
+
+($w_i\times\bar I_iw_i$ is the gyroscopic/Coriolis torque of a spinning rigid body, zero unless the body is actually rotating.)
+
+## Force kinematics: from body wrench to joint torque
+
+Given a wrench (force+torque) $(f_i,\tau_i)$ needed at body $i$, what joint torques $u\in\mathbb{R}^n$ does that require?
+
+<ExerciseCard id="DYN-01-ex1-force-kinematics-derivation" />
+
+The result, $u = J_i^\top(f_i,\tau_i)$, is the **Jacobian transpose**, exactly the dual operation to the Jacobian itself (which mapped joint velocities *forward* to body velocity; its transpose maps body force/torque *backward* to joint torques). Summing every body's contribution (inertia forces plus gravity $g_i=(m_ige_z,0_3)$):
+
+$$u = \sum_iJ_i^\top\Big[M_iJ_i\ddot q+c_i+g_i\Big] = \underbrace{\left(\sum_iJ_i^\top M_iJ_i\right)}_{M(q)}\ddot q + \underbrace{\sum_iJ_i^\top(c_i+g_i)}_{F(q,\dot q)} = M(q)\ddot q+F(q,\dot q)$$
+
+the standard-form robot equations of motion. $M(q)$ (symmetric PSD, a sum of $J_i^\top M_iJ_i$ terms, [MATH-04](/course/MATH/MATH-04)'s covariance-matrix argument again) is invertible exactly when every DOF is actually articulated (every $J_i$ has full column-contribution); when it is, $\ddot q=M(q)^{-1}(u-F(q,\dot q))$ gives a genuine one-to-one map from commanded torques to accelerations.
+
+## Euler-Lagrange: the same equations from energy
+
+A completely different route: define the **Lagrangian** $L(q,\dot q)=T(q,\dot q)-U(q)$, kinetic minus potential energy, and the **Euler-Lagrange equation**:
+
+$$u = \frac{d}{dt}\frac{\partial L}{\partial\dot q}-\frac{\partial L}{\partial q}$$
+
+The system's total kinetic energy is $T(q,\dot q)=\sum_i\tfrac12m_iv_i^2+\tfrac12w_i^\top\bar I_iw_i = \tfrac12\dot q^\top\left(\sum_iJ_i^\top M_iJ_i\right)\dot q = \tfrac12\dot q^\top M(q)\dot q$: **the same $M(q)$ appears again**, now as the matrix of a quadratic form in $\dot q$ (exactly [MATH-02](/course/MATH/MATH-02)'s $\nabla(x^\top Ax)$ machinery, applied to velocities). Potential energy is $U(q)=\sum_im_igx_i^z$ (height of each body's center of mass). Working through the Euler-Lagrange derivative (product rule on $\partial L/\partial\dot q=M(q)\dot q$, since $M(q)$ itself depends on $q$) reproduces $u=M(q)\ddot q+F(q,\dot q)$, with the same mass matrix $M(q)=\sum_iJ_i^\top M_iJ_i$ falling out cleanly; the Coriolis terms are algebraically messier from this route (hidden inside $\dot M\dot q-\partial T/\partial q$) but must agree, since both routes describe the same physics.
+
+## Worked example: the simple pendulum
+
+A point mass $m$ at the end of a massless rod of length $L$, single revolute joint at the pivot, angle $q=\theta$ from the downward vertical. Position $p=(L\sin\theta,-L\cos\theta)$, so $\dot p = L\dot\theta(\cos\theta,\sin\theta)$, giving Jacobian $J=L(\cos\theta,\sin\theta)^\top$ and $M(q) = J^\top mI_2J = mL^2(\cos^2\theta+\sin^2\theta) = mL^2$ (constant here, since a point mass's distance from the pivot doesn't change). Kinetic energy $T=\tfrac12mL^2\dot\theta^2$ (matches $\tfrac12M(q)\dot\theta^2$ exactly). Potential energy $U=-mgL\cos\theta$ (height $-L\cos\theta$, zero at the bottom).
+
+$$L_{\text{lag}} = \tfrac12mL^2\dot\theta^2+mgL\cos\theta \;\Rightarrow\; \frac{d}{dt}\frac{\partial L_{\text{lag}}}{\partial\dot\theta} = mL^2\ddot\theta, \quad \frac{\partial L_{\text{lag}}}{\partial\theta} = -mgL\sin\theta$$
+
+$$\boxed{mL^2\ddot\theta + mgL\sin\theta = u}$$
+
+*(Verified symbolically with SymPy while authoring this module: the Euler-Lagrange derivative matches this boxed equation exactly.)* For $u=0$ (no motor torque, a free pendulum): $\ddot\theta = -(g/L)\sin\theta$, the classic nonlinear pendulum equation.
+
+<ExerciseCard id="DYN-01-ex2-pendulum-verify" />
+
+**Connecting to ODE-02**: linearizing around the stable equilibrium $\theta=0$ (hanging straight down), using $\sin\theta\approx\theta$ ([MATH-00](/course/MATH/MATH-00)'s first-order Taylor expansion), gives $\ddot\theta \approx -(g/L)\theta$, exactly [ODE-02](/course/ODE/ODE-02)'s harmonic-oscillator equation, with eigenvalues $\pm i\sqrt{g/L}$ (purely imaginary, a **center**): the linearized pendulum oscillates forever around the bottom, at angular frequency $\sqrt{g/L}$, neither growing nor decaying, exactly what you'd physically expect from an undamped pendulum, now derived rather than assumed.
+
+<ExerciseCard id="DYN-01-ex3-linearization-numeric" />
+
+## Summary
+
+- Newton-Euler, applied per-body and pulled back through the Jacobian transpose ("force kinematics," $u=J^\top(f,\tau)$, derived from power conservation), gives $u=M(q)\ddot q+F(q,\dot q)$ with $M(q)=\sum_iJ_i^\top M_iJ_i$.
+- Euler-Lagrange, applied to $L=T-U$ with $T(q,\dot q)=\tfrac12\dot q^\top M(q)\dot q$, reproduces the *same* $M(q)$, a genuine consistency check between two independent derivations.
+- The simple pendulum, $mL^2\ddot\theta+mgL\sin\theta=u$, is a clean worked instance of both routes, and its small-angle linearization reproduces ODE-02's harmonic-oscillator/center classification exactly.
+
+## Retrieval questions
+
+1. Derive $u=J^\top(f,\tau)$ from conservation of power, without looking back.
+2. Write $M(q)$ two ways (Newton-Euler's $\sum_iJ_i^\top M_iJ_i$, and Euler-Lagrange's role in $T=\tfrac12\dot q^\top M(q)\dot q$), and explain why they must agree.
+3. Derive the simple pendulum's equation of motion via Euler-Lagrange, without looking back.
+4. Why does the linearized pendulum correspond to ODE-02's "center" classification rather than a stable or unstable spiral?
+
+## Mastery checklist
+
+- [ ] Derived the force-kinematics identity $u=J^\top(f,\tau)$ from power conservation.
+- [ ] Can state $u=M(q)\ddot q+F(q,\dot q)$ and both routes ($M_i,J_i$ sum; kinetic-energy quadratic form) to $M(q)$.
+- [ ] Derived the simple pendulum's equation of motion via Euler-Lagrange.
+- [ ] Connected the pendulum's linearization to ODE-02's eigenvalue-based stability classification.
+
+## Source note
+
+This module's exposition, the Newton-Euler derivation, the force-kinematics (Jacobian-transpose) identity and its power-conservation derivation, the Euler-Lagrange derivation, and the resulting $u=M(q)\ddot q+F(q,\dot q)$ form are all adapted from Marc Toussaint's `robotkin` HTML note (Forward Kinematics & Jacobian, "Force Kinematics", and Dynamics sections). The simple-pendulum worked example and all exercises are newly authored and independently verified with SymPy.
+
+---
+
+**Next**: [DYN-02: PID & Point-Mass Control](/course/DYN/DYN-02)

@@ -1,0 +1,53 @@
+{
+  "moduleId": "PLAN-04",
+  "exercises": [
+    {
+      "id": "PLAN-04-ex1-local-minimum-conceptual",
+      "objective": "Explain why straight-line-initialized trajectory optimization can fail in a cluttered environment.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain precisely why initializing DYN-04's trajectory optimization with a straight line from $q_\\text{start}$ to $q_\\text{goal}$ can fail when an obstacle sits between them, even though the collision-cost term $\\Phi_t$ is included in the cost function.",
+      "hints": [
+        "Gradient-based optimization (Gauss-Newton, OPT-02) only ever follows the local downhill direction of the cost, exactly like PLAN-01's potential-field gradient descent.",
+        "Starting on a straight line that passes through (or very near) the obstacle, the collision-cost gradient can push the trajectory to locally reduce cost (e.g. nudging slightly to one side) without ever 'deciding' to commit to going all the way around.",
+        "There's no mechanism in local optimization for discovering that a large, qualitatively different detour (going around one side entirely) would give a much lower cost than any small local adjustment: exactly PLAN-01's local-minimum problem, one level up, now in trajectory space instead of potential-field space."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "PLAN-04-ex2-pipeline-conceptual",
+      "objective": "Explain the division of labor between sample-based path finding and trajectory optimization in the two-stage pipeline.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["PLAN-04-ex1-local-minimum-conceptual"],
+      "answerType": "short-text",
+      "prompt": "Explain what specifically a sample-based path finder (PRM/RRT) contributes to the two-stage pipeline that trajectory optimization cannot provide for itself, and vice versa.",
+      "hints": [
+        "PRM/RRT contribute a solution to the *global, topological* sub-problem: which side of each obstacle to go around, i.e. which homotopy class of path. They find this via random global exploration, exactly what local gradient-based methods cannot do.",
+        "Trajectory optimization contributes *local refinement*: turning a jagged, non-smooth, possibly dynamically-infeasible sampled path into something smooth, control-cost-minimizing, and respecting the robot's actual dynamics/non-holonomic constraints (PLAN-03).",
+        "Neither stage does the other's job: PRM/RRT don't need to optimize path quality much (their output can stay jagged), and trajectory optimization doesn't need to reason about global topology at all (it can safely assume its initial guess already picked the right side of every obstacle)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "PLAN-04-ex3-full-pipeline-synthesis",
+      "objective": "Trace the complete PLAN/DYN pipeline for a non-holonomic robot navigating a cluttered environment.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "For a car-like robot navigating a cluttered environment from a start to a goal pose, briefly state what each of the following modules contributes, in order: PLAN-01, PLAN-02/PLAN-03, PLAN-04, DYN-03.",
+      "hints": [
+        "PLAN-01: formalizes the space being searched ($\\mathcal{X}_\\text{fea}$/$Q_\\text{free}$) and explains why naive grid search or potential fields won't scale or won't escape local minima.",
+        "PLAN-02/PLAN-03: a control-based-sampling RRT (PLAN-03, since the car is non-holonomic) finds *some* feasible, differential-constraint-respecting path through $Q_\\text{free}$, solving the global topological problem.",
+        "PLAN-04: hands that jagged sampled path to DYN-04's trajectory optimization as an initial guess, producing a smooth, locally-optimal, dynamically-consistent reference trajectory. DYN-03: finally, operational-space or joint-space control (with PD-like tracking, DYN-02's machinery) executes that reference trajectory in real time, correcting for any remaining disturbance or model error as the car actually drives."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

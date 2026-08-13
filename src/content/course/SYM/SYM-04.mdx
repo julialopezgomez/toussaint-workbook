@@ -1,0 +1,98 @@
+---
+id: SYM-04
+block: SYM
+title: "Probabilistic Relational Models & Markov Logic Networks"
+tier: 2
+estimatedHours: 1.5
+prerequisites: ["SYM-03", "PROB-01"]
+objectives:
+  - "Explain Probabilistic Relational Models as a relational-database view of a grounded graphical model."
+  - "Define Markov Logic Networks and compute a grounded factor graph's structure for a small domain."
+  - "Explain MLNs' generality: what standard models they collapse to, and what the infinite-weight limit recovers."
+sources:
+  - { sourceId: "lecture-ai", pages: "p199-205 (§4.7)", role: "primary" }
+concepts:
+  - "Probabilistic Relational Models (PRMs)"
+  - "Markov Logic Networks (MLNs)"
+  - "Factor graph templates, grounding"
+notation:
+  - { symbol: "$(F_i,w_i)$", meaning: "an MLN pair: a first-order formula and its real-valued weight" }
+  - { symbol: "$F(X;D)$", meaning: "the grounded factor graph an MLN defines for domain $D$" }
+cheatsheetLinks: []
+nextModules: []
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+This closes Block SYM by fusing everything it built: FOL's relational representations (SYM-02), which generalize across object identity, with genuine probability (PROB-01), which SYM-03 already showed is what actually makes rule-learning tractable. **Probabilistic relational modeling**, of which Markov Logic Networks are the cleanest instance, is the general answer: define a template once, and it generates a full probabilistic graphical model for *any* domain of objects, with parameters automatically shared across every grounding.
+
+## Prerequisites & readiness check
+
+You should have SYM-03's probabilistic-relational-rule idea and PROB-01's probability basics fresh.
+
+<ReadinessCheck
+  question="From SYM-03, why does introducing uncertainty into a rule representation make it learnable?"
+  answer="A probabilistic rule can absorb noisy exceptions into a small outcome probability rather than needing a separate rule per exception, exactly like ML-02's regularization trading a little fit for much stronger generalization."
+/>
+
+## Probabilistic Relational Models (PRMs)
+
+Think of a relational database's tables as random variables that depend on each other: a paper's **A**cceptance might depend on its **Q**uality and a reviewer's **M**ood, via a conditional probability table $P(A\mid Q,M)$ that (crucially) doesn't depend on *which specific* paper or reviewer, only on the *values* of $Q,M$, exactly the object-identity-independent generalization SYM-02 flagged as FOL's real value. For a specific domain $D=\{A_1,A_2,P_1,P_2,P_3,R_1,R_2,R_3\}$ (specific papers/reviewers), the PRM defines a probability distribution over all grounded attribute instantiations; learning a PRM means learning these conditional probability tables from data; inference means constructing the full grounded Bayesian network (one random variable per grounded predicate) and running standard graphical-model inference on it.
+
+<ExerciseCard id="SYM-04-ex4-prm-vs-mln-conceptual" />
+
+## Markov Logic Networks (MLNs)
+
+A cleaner, more general formulation: an **MLN** is a set of pairs $\{(F_i,w_i)\}$, a first-order formula $F_i$ and a real-valued weight $w_i$. For a domain $D$, this generates a **factor graph**: one random variable per grounded predicate, one factor per *grounding* of each formula, with
+
+$$F(X;D) \propto \exp\Big\{\sum_i\sum_{\text{true groundings of }F_i\text{ in }X}w_i\Big\}$$
+
+<ExerciseCard id="SYM-04-ex1-mln-grounding-numeric" />
+
+**Worked example** (Friends & Smokers): $w_1=1.5:\ \text{cancer}(x)\leftarrow\text{smoking}(x)$; $w_2=1.1:\ \text{smoking}(x)\leftarrow\text{friends}(x,y)\wedge\text{smoking}(y)$. For domain $D=\{\text{Anna},\text{Bob}\}$, this defines a factor graph over the grounded predicates $\{\text{cancer}(A),\text{cancer}(B),\text{smoking}(A),\text{smoking}(B),\text{friends}(A,A),\text{friends}(A,B),\text{friends}(B,A),\text{friends}(B,B)\}$, with a factor for every satisfied grounding of $F_1,F_2$ across that domain.
+
+<ExerciseCard id="SYM-04-ex2-mln-factor-value-numeric" />
+
+**Inference**: construct the grounded factor graph, then run standard probabilistic inference on it. **Learning**: gradient descent on the (log-)likelihood of the weights $w_i$, often genuinely hard even with complete data (the gradient itself requires inference).
+
+## MLNs' generality
+
+<ExerciseCard id="SYM-04-ex3-infinite-weight-conceptual" />
+
+Two limits are worth knowing, since they locate MLNs precisely relative to everything else in this workbook: taking every predicate to be zero-arity (no relational structure at all) recovers a long list of standard, purely-propositional models as special cases: Markov networks/random fields, Bayesian networks, log-linear/exponential/max-entropy models, Gibbs distributions, Boltzmann machines, logistic regression (ML-02), HMMs, and CRFs (ML-02's brief mention, now precisely located as an MLN special case). Taking every weight $w_i\to\infty$ instead recovers **classical, hard first-order logic** (SYM-02): a formula with infinite weight becomes a hard constraint (any world violating it has zero probability), exactly a classical FOL entailment relationship, no uncertainty at all. **MLNs interpolate continuously between pure logic (infinite weights) and every standard flavor of graphical model (zero-arity predicates)**, which is precisely why they're described as unifying "the logical underpinnings of old AI with the power of statistics."
+
+## Closing the SYM block: uncertainty, structure, and generalization
+
+The theme running through this entire block, worth stating explicitly now that it's been built up piece by piece: **structured (relational/first-order) representations give strong generalization across object identity** (SYM-02); **deterministic rules over that structure are unlearnable from limited data** (SYM-03); **adding calibrated uncertainty on top of the structure is what actually makes learning tractable**, compressing noisy exceptions rather than requiring an ever-more-specific rule for each one (SYM-03, and MLNs' weighted-formula framework generally). Probabilistic relational modeling isn't a magic fix for every AI problem, but it is, as of today, close to the only principled way to represent and learn genuinely uncertain, genuinely generalizing knowledge about a world of objects, properties, and relations, exactly the setting TAMP operates in.
+
+## Summary
+
+- **PRMs** treat a relational database's attributes as random variables with conditional probability tables independent of object identity; a specific domain grounds them into a full Bayesian network.
+- **MLNs** are a cleaner formalization: weighted FOL formulas $\{(F_i,w_i)\}$ define, for any domain $D$, a grounded factor graph $F(X;D)\propto\exp\{\sum_i\sum_{\text{true groundings}}w_i\}$.
+- **Zero-arity predicates** collapse MLNs to standard graphical models (Markov/Bayesian networks, logistic regression, CRFs, ...); **infinite weights** recover classical hard FOL. MLNs interpolate continuously between the two.
+- The SYM block's throughline: relational structure gives generalization; deterministic rules over that structure are unlearnable; calibrated uncertainty is what makes learning tractable, exactly the setting TAMP needs.
+
+## Retrieval questions
+
+1. Explain PRMs' relational-database view and what "grounding" means for a PRM.
+2. Define an MLN and write its factor-graph formula, and compute the grounded random variable count for a small domain.
+3. What does taking every MLN weight to infinity recover, and what does zero-arity predicates recover?
+4. State the SYM block's overall throughline in one or two sentences.
+
+## Mastery checklist
+
+- [ ] Can explain PRMs and how they ground into a Bayesian network.
+- [ ] Can define an MLN, its factor-graph formula, and compute a grounded RV count.
+- [ ] Can state both of MLNs' limiting cases (zero-arity, infinite weight).
+- [ ] Can state the SYM block's overall throughline connecting structure, learnability, and uncertainty.
+
+## Source note
+
+This module's exposition, Probabilistic Relational Models, Markov Logic Networks (including the Friends & Smokers worked example, credited to standard MLN literature), the factor-graph formula, MLN learning/inference, and MLNs' generality (zero-arity and infinite-weight limits) are adapted from `lecture-ai`, §4.7 (pp. 199-205). The closing synthesis connecting this module back to SYM-02/SYM-03's throughline is newly authored. All exercises are newly authored; the grounded-variable count and factor-value computations were independently verified by direct computation while authoring this module.
+
+---
+
+**Next**: Return to the [curriculum overview](/curriculum) — Block SYM is complete.

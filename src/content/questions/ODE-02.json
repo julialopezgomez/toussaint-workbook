@@ -1,0 +1,69 @@
+{
+  "moduleId": "ODE-02",
+  "exercises": [
+    {
+      "id": "ODE-02-ex1-eigenvector-ansatz",
+      "objective": "Derive the eigenvector solution ansatz for a linear system of ODEs.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "For $\\dot x = Ax$, substitute the ansatz $x(t)=e^{\\lambda t}v$ (constant scalar $\\lambda$, constant vector $v$) into both sides, and show that this ansatz solves the ODE exactly when $Av=\\lambda v$, i.e. $v$ is an eigenvector of $A$ with eigenvalue $\\lambda$.",
+      "hints": [
+        "Differentiate the left side: $\\dot x(t) = \\dfrac{d}{dt}[e^{\\lambda t}v] = \\lambda e^{\\lambda t}v$ (differentiate the scalar $e^{\\lambda t}$, $v$ is constant).",
+        "Compute the right side: $Ax(t) = A(e^{\\lambda t}v) = e^{\\lambda t}(Av)$ (matrix-vector multiplication is linear, so the scalar $e^{\\lambda t}$ factors out).",
+        "For the ansatz to solve $\\dot x=Ax$, these must be equal for all $t$: $\\lambda e^{\\lambda t}v = e^{\\lambda t}(Av)$. Since $e^{\\lambda t}\\ne0$ ever, divide it out: $\\lambda v = Av$, i.e. $Av=\\lambda v$, exactly the eigenvector/eigenvalue equation."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ODE-02-ex2-numeric",
+      "objective": "Evaluate a linear system's closed-form solution at a specific time.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["ODE-02-ex1-eigenvector-ansatz"],
+      "answerType": "numeric",
+      "prompt": "Using the worked example's solution $x(t)=\\begin{pmatrix}2e^{-t}+e^{-3t}\\\\2e^{-t}-e^{-3t}\\end{pmatrix}$, compute the **first component**, $x_1(1)$. Enter a decimal to 3 decimal places.",
+      "hints": [
+        "$x_1(1) = 2e^{-1}+e^{-3}$.",
+        "$e^{-1}\\approx0.3679$, $e^{-3}\\approx0.0498$.",
+        "$x_1(1) = 2(0.3679)+0.0498 = 0.7358+0.0498 \\approx 0.786$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ODE-02-ex3-complex-conceptual",
+      "objective": "Interpret a complex eigenvalue pair as a decay rate and oscillation frequency.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "A linear system $\\dot x=Ax$ has eigenvalues $\\lambda=-0.5\\pm2i$. Describe the qualitative shape of its solutions: is the origin stable? Does the solution oscillate, and if so, roughly what period? Sketch (in words) what the trajectory would look like in the $(x_1,x_2)$-plane.",
+      "hints": [
+        "The real part is $-0.5<0$, so by the stability classification, this is asymptotically stable: all solutions decay toward the origin, with an $e^{-0.5t}$ decay envelope.",
+        "The imaginary part is $2$, giving oscillation at angular frequency $b=2$ (radians per unit time), i.e. period $T=2\\pi/b = 2\\pi/2=\\pi$.",
+        "In the plane, the trajectory spirals inward toward the origin, completing one full rotation roughly every $\\pi$ time units, while its distance from the origin shrinks by a factor of $e^{-0.5}$ each unit of time: a **stable spiral**."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ODE-02-ex4-stability-classify",
+      "objective": "Classify the stability and 2D taxonomy of a linear system from its eigenvalues.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["ODE-02-ex1-eigenvector-ansatz"],
+      "answerType": "short-text",
+      "prompt": "For $A=\\begin{pmatrix}1&0\\\\0&-2\\end{pmatrix}$, find the eigenvalues (trivial here, since $A$ is diagonal), state whether the origin is stable, unstable, or marginally stable, and name the 2D taxonomy category this falls into.",
+      "hints": [
+        "For a diagonal matrix, the eigenvalues are just the diagonal entries: $\\lambda_1=1$, $\\lambda_2=-2$.",
+        "One eigenvalue is positive ($\\lambda_1=1$), so by the stability rule (any positive real part ⟹ unstable), the origin is unstable overall: nearly every initial condition eventually grows without bound (specifically, along the $\\lambda_1$ eigendirection).",
+        "Real eigenvalues with opposite signs: this is a **saddle** point, stable along the $\\lambda_2=-2$ eigendirection (the $x_2$-axis here) but unstable along the $\\lambda_1=1$ eigendirection (the $x_1$-axis), the classic 'attracts along one direction, repels along another' picture."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

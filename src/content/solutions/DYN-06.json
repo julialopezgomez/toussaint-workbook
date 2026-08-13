@@ -1,0 +1,40 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "DYN-06-ex1-controllability-expansion",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly differentiates and substitutes to get xdd = A^2x + ABu + Budot." },
+          { "points": 2, "description": "Correctly explains the direct-vs-indirect distinction between B and AB." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "xdd = A*xdot + B*udot = A(Ax+Bu) + B*udot = A^2x + ABu + B*udot.\nx_i is influenced by u directly through row i of B (no A factor). xdd_i is influenced by u only after passing through the dynamics matrix A once (via row i of AB): u first moves some xdot_j through B, and A then propagates that into xdd_i, hence 'indirect.' Stacking B, AB, A^2B, ... as columns of C collects every level of directness."
+    },
+    {
+      "exerciseId": "DYN-06-ex2-controllability-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 2, "tolerance": 0 },
+      "fullSolution": "AB = [[0,0],[1,0]]@[1,0]^T = [0,1]^T. C = [B AB] = [[1,0],[0,1]], the 2x2 identity, rank 2. (Independently verified with NumPy while authoring this module.)"
+    },
+    {
+      "exerciseId": "DYN-06-ex3-eigenvalue-stability-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": -0.5, "tolerance": 0.01 },
+      "fullSolution": "Discriminant Kd^2-4mKp = 1-16 = -15 < 0, complex roots. Re(omega) = -Kd/(2m) = -1/2 = -0.5, negative, so asymptotically stable (oscillatory-damped). (Independently verified with NumPy eigenvalue computation while authoring this module: eigenvalues -0.5 +/- 1.936j.)"
+    },
+    {
+      "exerciseId": "DYN-06-ex4-energy-lyapunov-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly applies the product rule to compute Vdot." },
+          { "points": 2, "description": "Correctly substitutes the closed-loop dynamics and simplifies to -Kd*qdot^2, noting the cancellation." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Vdot = m*qdot*qddot + Kp(q-q*)qdot.\nSubstitute m*qddot = -Kp(q-q*)-Kd*qdot: m*qdot*qddot = -Kp(q-q*)qdot - Kd*qdot^2.\nVdot = [-Kp(q-q*)qdot - Kd*qdot^2] + Kp(q-q*)qdot = -Kd*qdot^2. The Kp(q-q*)qdot terms cancel exactly. (Independently verified symbolically with SymPy while authoring this module.)"
+    }
+  ]
+}

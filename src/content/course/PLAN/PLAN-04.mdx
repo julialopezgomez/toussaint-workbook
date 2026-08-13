@@ -1,0 +1,81 @@
+---
+id: PLAN-04
+block: PLAN
+title: "Path Optimization: From Sampled Paths to Smooth Trajectories"
+tier: 1
+estimatedHours: 2
+prerequisites: ["PLAN-02", "DYN-04"]
+objectives:
+  - "Explain why trajectory optimization alone (without a global path finder) can fail via local minima."
+  - "Explain the standard two-stage pipeline: sample-based path finding for global feasibility, then trajectory optimization for local refinement."
+  - "Trace how each PLAN/DYN module contributes to a complete path-to-motion pipeline."
+sources:
+  - { sourceId: "lecture-robotics", pages: "p90-91 (§5), synthesis with DYN-04", role: "primary" }
+concepts:
+  - "Path finding as trajectory-optimization initialization"
+  - "Global feasibility vs. local optimality"
+cheatsheetLinks: []
+nextModules: []
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+This is a short, deliberately connective module: DYN-04 already built trajectory optimization in full, and PLAN-02/PLAN-03 already built sample-based path finding in full. Neither is presented as a re-derivation here; this module's entire job is to explain *why you need both together*, closing PLAN-01's opening claim that path finding, trajectory optimization, and feedback control are three genuinely different tools solving three genuinely different problems.
+
+## Prerequisites & readiness check
+
+You should have DYN-04's trajectory-optimization cost function and PLAN-01's local-vs-global distinction fresh.
+
+<ReadinessCheck
+  question="From DYN-04, is trajectory optimization a local or global method, and what does that mean in practice?"
+  answer="Local: it converges to whatever nearby optimum its initial guess is closest to, with no mechanism for discovering which side of an obstacle to route around."
+/>
+
+## Why trajectory optimization alone can fail
+
+Recall DYN-04's trajectory-optimization cost, directly reusing its own notation:
+
+$$f(q_{0:T}) = \sum_{t}\|q_{t-1}-q_t\|_W^2+\sum_t\|\Phi_t(q_t)\|^2$$
+
+Suppose you initialize this optimization with the straightforward guess: a straight line from $q_\text{start}$ to $q_\text{goal}$. If an obstacle sits between them, the task-cost term $\Phi_t$ (via a collision/clearance penalty) creates a smooth but genuinely local cost landscape around that straight line; gradient-based optimization (Gauss-Newton, OPT-02) will happily push the trajectory to locally reduce collision cost, but has no mechanism for discovering it should route *all the way around* the obstacle rather than locally nudging through or against it. This is PLAN-01's local-minimum problem again, now in trajectory space instead of potential-field space: exactly the same failure mode, one level up.
+
+<ExerciseCard id="PLAN-04-ex1-local-minimum-conceptual" />
+
+## The two-stage pipeline
+
+The standard fix, and the practical reason PLAN-02/PLAN-03 exist at all: use a sample-based path finder (PRM, RRT) to solve the **global, topological** sub-problem first (which side of each obstacle, i.e. which homotopy class of path), producing *some* feasible, if jagged and non-smooth, path; then hand that path to DYN-04's trajectory optimization as its **initial guess**, letting local optimization do what it's actually good at: smoothing, respecting dynamics/non-holonomic constraints (PLAN-03), and locally minimizing control effort, all without ever needing to solve the hard global search problem itself.
+
+<ExerciseCard id="PLAN-04-ex2-pipeline-conceptual" />
+
+This is precisely why PLAN-02's algorithms only need to find *some* feasible path (they explicitly don't optimize path quality much, e.g. RRT's raw output is visibly jagged, PLAN-02's own figure shows this) and why DYN-04's cost function never needs to reason about *global* topology (it can safely assume its initial guess is already on the right side of every obstacle): the two stages divide the problem exactly along the local/global line PLAN-01 first drew.
+
+<ExerciseCard id="PLAN-04-ex3-full-pipeline-synthesis" />
+
+## Summary
+
+- Trajectory optimization (DYN-04) alone can fail via local minima, exactly PLAN-01's local-minimum problem one level up: it has no mechanism for discovering which side of an obstacle to route around.
+- The standard fix is a **two-stage pipeline**: sample-based path finding (PLAN-02/PLAN-03) solves the global, topological feasibility problem once; trajectory optimization then locally refines that path into something smooth, dynamically feasible, and locally optimal.
+- This division of labor is exactly why PLAN-02's algorithms don't need to optimize path quality, and why DYN-04's cost function doesn't need to reason about global topology: each stage does only what it's actually suited for.
+
+## Retrieval questions
+
+1. Why can trajectory optimization alone, initialized with a straight line, fail in a cluttered environment?
+2. Describe the two-stage path-finding-then-optimization pipeline, and explain what each stage is responsible for.
+3. Trace the full PLAN/DYN pipeline for a non-holonomic robot (e.g. a car) navigating a cluttered environment, module by module.
+
+## Mastery checklist
+
+- [ ] Can explain trajectory optimization's local-minimum failure mode in a cluttered environment.
+- [ ] Can describe and justify the two-stage sample-then-optimize pipeline.
+- [ ] Can trace which PLAN/DYN module is responsible for which part of a complete path-to-motion pipeline.
+
+## Source note
+
+The path-optimization cost function referenced here is DYN-04's own (adapted from `lecture-robotics` §5, pp. 90-91; not re-derived in this module). The two-stage pipeline framing, the local-minimum-in-trajectory-space argument, and the division-of-labor explanation are newly authored synthesis, connecting DYN-04's already-covered trajectory optimization to PLAN-02/PLAN-03's already-covered path finding, matching this module's curriculum-scoped role as "connect sampling-based paths to trajectory optimization as a refinement step" rather than new source-derived content. All exercises are newly authored.
+
+---
+
+**Next**: Return to the [curriculum overview](/curriculum) — the PLAN block is complete.

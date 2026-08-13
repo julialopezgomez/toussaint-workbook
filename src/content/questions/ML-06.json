@@ -1,0 +1,73 @@
+{
+  "moduleId": "ML-06",
+  "exercises": [
+    {
+      "id": "ML-06-ex1-pca-projection-derivation",
+      "objective": "Derive PCA's optimal mu and z_i from the projection-error minimization objective.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 54, "originalNumber": "6:4" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "For fixed $V_p$, minimize $\\sum_{i=1}^n\\|x_i-(V_pz_i+\\mu)\\|^2$ over $\\mu$ and $z_{1:n}$ by setting the relevant partial derivatives to zero. Show $\\hat z_i=V_p^\\top(x_i-\\mu)$ for each $i$, assuming $V_p^\\top V_p=I$ (orthonormal columns).",
+      "hints": [
+        "Differentiate w.r.t. $z_i$ (each $z_i$ only appears in the $i$-th term of the sum): $\\frac{\\partial}{\\partial z_i}\\|x_i-V_pz_i-\\mu\\|^2 = -2V_p^\\top(x_i-V_pz_i-\\mu)$.",
+        "Setting this to zero: $V_p^\\top(x_i-\\mu) = V_p^\\top V_pz_i$. Using $V_p^\\top V_p=I$ (orthonormal columns), this simplifies directly.",
+        "$\\hat z_i = V_p^\\top(x_i-\\mu)$: the optimal latent code is just the orthogonal projection of the centered point onto $V_p$'s columns. (Differentiating w.r.t. $\\mu$ similarly, summing over $i$ and setting to zero, gives $\\hat\\mu=\\langle x_i\\rangle$, the data mean, using that $\\sum_i\\hat z_i$-related terms cancel once $\\mu$ is the mean.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-06-ex2-kernel-pca-conceptual",
+      "objective": "Explain the kernel PCA idea as an application of ML-05's kernel trick.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 60, "originalNumber": "6:18" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain what specifically has to be true about PCA's computation for it to be kernelizable the same way ridge regression was, and what capability kernel PCA gains as a result.",
+      "hints": [
+        "PCA's computation (finding eigenvectors of $X^\\top X=\\sum_i\\tilde x_i\\tilde x_i^\\top$) only ever needs inner products between (centered) data points, never the raw coordinates individually, exactly the condition ML-05 identified as kernelizable.",
+        "So replacing every inner product $\\tilde x_i^\\top\\tilde x_j$ with a kernel evaluation $k(x_i,x_j)$ gives 'kernel PCA': the eigendecomposition is now performed on the kernel (Gram) matrix $K$ instead of $X^\\top X$ directly.",
+        "The gain: kernel PCA implicitly operates in the kernel's (possibly infinite-dimensional, non-linear) feature space, so it can uncover structure (e.g. separating clusters) that no *linear* projection of the raw data ever could, exactly the same expressive gain the kernel trick gave ridge regression."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-06-ex3-kmeans-iteration-numeric",
+      "objective": "Run one iteration of k-means by hand on a small dataset and compute a new cluster center.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 67, "originalNumber": "6:37" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "Data points $(1,1),(1,2),(8,8),(9,9)$; initial centers $\\mu_1=(0,0),\\mu_2=(10,10)$. After one assignment step (each point to its nearest center) and one re-centering step, what is the $y$-coordinate of the new $\\mu_1$? Enter a decimal.",
+      "hints": [
+        "Compute each point's distance to $\\mu_1=(0,0)$ and $\\mu_2=(10,10)$: $(1,1)$ and $(1,2)$ are clearly much closer to $(0,0)$; $(8,8)$ and $(9,9)$ are clearly much closer to $(10,10)$.",
+        "So the assignment is $c(1,1)=c(1,2)=1$ and $c(8,8)=c(9,9)=2$.",
+        "New $\\mu_1$ = mean of $(1,1)$ and $(1,2)$ = $(1,\\,1.5)$. The $y$-coordinate is $1.5$. (Independently verified with NumPy while authoring this module; new $\\mu_2=(8.5,8.5)$ for reference.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-06-ex4-em-kmeans-connection",
+      "objective": "Explain how k-means arises as a limiting case of GMM/EM.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 69, "originalNumber": "6:41" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["ML-06-ex3-kmeans-iteration-numeric"],
+      "answerType": "short-text",
+      "prompt": "Explain what happens to the GMM E-step's soft assignment $q(c_i{=}k)$ as every cluster's covariance $\\Sigma_k\\to0$ (with equal, small, isotropic covariances), and why that recovers k-means's hard assignment.",
+      "hints": [
+        "$q(c_i{=}k)\\propto\\mathcal{N}(x_i\\mid\\mu_k,\\Sigma_k)\\pi_k$; as $\\Sigma_k\\to0$ (shrinking, equal across clusters), the Gaussian density becomes extremely sharply peaked around $\\mu_k$.",
+        "For a given $x_i$, whichever $\\mu_k$ is nearest will have overwhelmingly larger density than any other $\\mu_{k'}$ once the covariance is small enough, since the Gaussian density falls off so fast away from its mean.",
+        "So $q(c_i{=}k)\\to1$ for the nearest center and $\\to0$ for every other, exactly k-means's hard assignment $c(i)=\\operatorname*{argmin}_k\\|x_i-\\mu_k\\|^2$; the M-step's mean update also matches k-means's re-centering step in this limit, since the soft weights collapse to 0/1 indicators."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

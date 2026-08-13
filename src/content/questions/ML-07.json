@@ -1,0 +1,73 @@
+{
+  "moduleId": "ML-07",
+  "exercises": [
+    {
+      "id": "ML-07-ex1-weighted-regression-derivation",
+      "objective": "Derive weighted local regression's closed form from its loss function.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 72, "originalNumber": "7:3" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Starting from $L_\\text{local}(\\beta,x^*)=\\sum_iK(x^*,x_i)(y_i-x_i^\\top\\beta)^2+\\lambda\\|\\beta\\|^2$, writing $W=\\text{diag}(K(x^*,x_{1:n}))$, derive $\\hat\\beta=(X^\\top WX+\\lambda I)^{-1}X^\\top Wy$ by setting a gradient to zero.",
+      "hints": [
+        "Write the loss in matrix form: $L(\\beta)=(y-X\\beta)^\\top W(y-X\\beta)+\\lambda\\beta^\\top\\beta$ (using that $\\sum_iK(x^*,x_i)(y_i-x_i^\\top\\beta)^2$ is exactly the weighted quadratic form $(y-X\\beta)^\\top W(y-X\\beta)$ for diagonal $W$).",
+        "Differentiate (MATH-02's quadratic-form gradient rules, with $W$ symmetric): $\\nabla_\\beta L = -2X^\\top W(y-X\\beta)+2\\lambda\\beta$. Set to zero: $X^\\top WX\\beta+\\lambda\\beta=X^\\top Wy$.",
+        "$(X^\\top WX+\\lambda I)\\beta=X^\\top Wy \\Rightarrow \\hat\\beta=(X^\\top WX+\\lambda I)^{-1}X^\\top Wy$: identical to MATH-02B's ridge derivation, with $W$ inserted exactly where the ordinary sum-of-squares becomes a weighted one."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-07-ex2-adaboost-weight-numeric",
+      "objective": "Compute AdaBoost's classifier weight alpha_m from a weak classifier's error rate.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 78, "originalNumber": "7:18" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For a weak classifier with weighted misclassification rate $\\text{err}_m=0.3$, compute $\\alpha_m=\\log\\big[\\frac{1-\\text{err}_m}{\\text{err}_m}\\big]$. Enter a decimal.",
+      "hints": [
+        "$\\frac{1-\\text{err}_m}{\\text{err}_m}=\\frac{0.7}{0.3}\\approx2.333$.",
+        "$\\alpha_m=\\log(2.333)$.",
+        "$\\alpha_m\\approx0.847$. Since $\\text{err}_m<0.5$ (better than random), $\\alpha_m>0$, giving this classifier a positive vote weight; a classifier no better than random ($\\text{err}_m=0.5$) would get $\\alpha_m=0$, no vote at all."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-07-ex3-gradient-boosting-conceptual",
+      "objective": "Explain gradient boosting's function-space gradient descent interpretation.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 79, "originalNumber": "7:21-22" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain, connecting to OPT-01's gradient descent, in what precise sense gradient boosting is 'gradient descent, but in function space.'",
+      "hints": [
+        "Ordinary gradient descent (OPT-01) takes a parameter vector $\\theta$ and updates $\\theta\\leftarrow\\theta-\\alpha\\nabla_\\theta L(\\theta)$: a step in parameter space, in the direction that locally reduces the loss the fastest.",
+        "Gradient boosting instead treats the *entire function* $f$ as the thing being optimized, and asks the analogous question: 'which direction in function space would reduce the loss $L(f)$ fastest,' which is the functional derivative $\\partial L(f)/\\partial f$, evaluated pointwise at each training input.",
+        "Since you can't literally 'add a gradient vector' to a function the way you add a vector to $\\theta$, gradient boosting instead *fits a new weak learner* $f_m$ to approximate that functional gradient, and adds $\\alpha_mf_m$ to the running sum $f=f_0+\\alpha_1f_1+\\alpha_2f_2+\\cdots$: each step is a genuine (approximate) gradient step, just in an infinite-dimensional space of functions rather than a finite parameter vector."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-07-ex4-dropout-bayesian-conceptual",
+      "objective": "Explain why repeated stochastic dropout forward passes give a genuine uncertainty estimate.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-machinelearning", "page": 93, "originalNumber": "8:25" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain why running $T$ stochastic forward passes with dropout left *active* at prediction time, and looking at the spread of the resulting predictions, gives a meaningful uncertainty estimate rather than just noise.",
+      "hints": [
+        "Gal & Ghahramani's result shows a dropout-trained network is mathematically equivalent to an approximate Deep Gaussian Process, a genuine Bayesian model with an actual posterior over functions, not merely a regularization trick.",
+        "Each stochastic forward pass (a specific random dropout pattern) corresponds to sampling one function from that approximate posterior, exactly analogous to how ML-05's Bayesian ridge regression posterior $P(\\beta\\mid D)$ could, in principle, be sampled from.",
+        "So the spread (variance) across $T$ such samples approximates the posterior predictive variance of the underlying (approximate) GP, the same kind of genuine, calibrated 'error bars' ML-05's exact Bayesian methods provide analytically, here obtained by Monte Carlo sampling from a network that was never explicitly built as Bayesian."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "moduleId": "RLEARN-06",
+  "exercises": [
+    {
+      "id": "RLEARN-06-ex1-privileged-teacher-grasp-labels",
+      "objective": "Explain why model-based grasp labeling is an instance of the privileged-teacher pattern.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 84, "originalNumber": "1.11:15" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain precisely what plays the role of the 'privileged teacher' and what plays the role of the 'sensor-based student' in model-based grasp-label generation (compute a force-closure score, then train a network on RGB-D).",
+      "hints": [
+        "The privileged teacher needs information unavailable at deployment; computing a force-closure score requires exact ground-truth object poses and shapes, information a deployed robot's real-time RGB-D sensor doesn't reliably provide.",
+        "The 'teacher' here is the force-closure metric itself (MANIP-01), computed offline with privileged (exact) shape/pose knowledge, generating grasp-quality labels for many candidate grasps.",
+        "The 'student' is the trained network, which only ever sees realistic RGB-D input at both training and deployment time, learning to predict what the privileged force-closure computation would have said, without ever needing exact poses/shapes itself."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-06-ex2-simulation-labels-numeric",
+      "objective": "Compute the number of successful grasps in a large simulation-based grasp dataset.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 86, "originalNumber": "1.11:17" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "ACRONYM simulates 17,744,000 candidate grasps, of which 59.21% succeed. Compute the number of successful grasps. Enter an integer (round to the nearest thousand).",
+      "hints": [
+        "Multiply the total count by the success fraction: $17{,}744{,}000\\times0.5921$.",
+        "This gives approximately $10{,}506{,}000$.",
+        "$\\approx10{,}506{,}000$, matching the source's own stated 'approximately 10.5 million grasps.' (Independently verified with Python while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-06-ex3-architecture-conceptual",
+      "objective": "Explain why GraspNet-style architectures predict grasp parameters in structured stages rather than one monolithic regression.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 84, "originalNumber": "1.11:11" },
+      "difficulty": "core",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "GraspNet-1Billion first classifies each scene point for grasp viability, and only then predicts the remaining geometric parameters (direction, rotation, width). Why might this staged structure be preferable to predicting all parameters jointly in one step?",
+      "hints": [
+        "Most points in a typical scene are not viable grasp locations at all (empty space, unreachable surfaces, points on the wrong side of an object); predicting detailed geometric parameters for every point regardless of viability would waste model capacity and training signal on points that don't matter.",
+        "Separating 'is this point viable at all' from 'given viability, what's the best direction/rotation/width' lets each sub-task use its own loss function tailored to its own output type (a classification loss for viability, regression losses for continuous geometric parameters), rather than forcing one loss to handle both.",
+        "This staged decomposition also means most of the network's geometric-parameter capacity is only ever trained on points that are already known to be plausible grasps, a cleaner learning signal than mixing viable and non-viable points together in one regression target."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-06-ex4-beyond-mdp-conceptual",
+      "objective": "Explain why manipulation learning is often described as 'beyond the MDP/RL framework.'",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 87, "originalNumber": "1.11:22" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "RL-01's MDP setting is about learning a low-level state-to-action policy. Explain why most successful manipulation-learning work (grasp prediction, flow-field prediction) doesn't fit that framing directly.",
+      "hints": [
+        "An MDP policy $\\pi(a\\mid s)$ outputs a low-level control at every state, trained (implicitly or explicitly) against a reward signal accumulated over a full trajectory.",
+        "Grasp prediction outputs a single structured target (a gripper pose, or for FlowBot3D a whole flow field over the object's surface) from a single observation, with no sequential decision-making or reward accumulation involved at all.",
+        "That structured target is then handed to *classical* model-based control (DYN-03's operational-space control, KIN-03's IK) to actually execute, so the learning problem itself is a one-shot structured-prediction problem, not a sequential MDP; this is exactly why it's described as beyond the MDP/RL framework, even though it's still squarely a robot learning problem."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

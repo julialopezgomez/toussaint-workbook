@@ -1,0 +1,54 @@
+{
+  "moduleId": "DYN-03",
+  "exercises": [
+    {
+      "id": "DYN-03-ex1-naive-tracking-instability",
+      "objective": "Explain why naive reference-acceleration tracking is unstable.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 47, "originalNumber": "§3.3:30" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Suppose you command $u=M(q)\\ddot q^{\\text{ref}}_t+F(q,\\dot q)$ directly, using the reference trajectory's own acceleration with no correction term. Explain why small errors (numerical, modeling, or disturbance-induced) accumulate unboundedly over time, rather than the system settling back onto the reference.",
+      "hints": [
+        "This command has no dependence on the *actual* current error $q^{\\text{ref}}_t-q_t$ at all, it only knows the reference's own acceleration, not how far the real system has already drifted from it.",
+        "If a small error appears at some time step (e.g. from numerical integration, an unmodeled disturbance, or an approximation in $M,F$), nothing in this control law actively pulls the system back, the next command still just replays the reference acceleration, oblivious to the accumulated drift.",
+        "Errors from every previous step simply carry forward and compound, since there's no restoring force analogous to DYN-02's $K_p$ term. This is exactly why a feedback (error-correcting) term is essential, not optional, even when you know the dynamics and reference trajectory perfectly."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-03-ex2-tracking-error-dynamics",
+      "objective": "Derive that PD-corrected trajectory tracking makes the position error obey DYN-02's PD equation exactly.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": ["DYN-03-ex1-naive-tracking-instability"],
+      "answerType": "derivation",
+      "prompt": "Using $\\ddot q^*_t=\\ddot q_t^{\\text{ref}}+K_p(q_t^{\\text{ref}}-q_t)+K_d(\\dot q_t^{\\text{ref}}-\\dot q_t)$ and inverse dynamics $u=M(q)\\ddot q_t^*+F(q,\\dot q)$ (so forward dynamics gives $\\ddot q=\\ddot q_t^*$ exactly, the nonlinearity cancels), define the tracking error $e(t)=q^{\\text{ref}}(t)-q(t)$. Derive the ODE satisfied by $e(t)$, and show it's exactly DYN-02's PD characteristic equation (with unit mass).",
+      "hints": [
+        "Since $u=M\\ddot q^*+F$ and forward dynamics is $\\ddot q=M^{-1}(u-F)$, substituting gives $\\ddot q = M^{-1}(M\\ddot q^*+F-F) = \\ddot q^*$ exactly: the actual acceleration equals the commanded desired acceleration, the nonlinear $M,F$ terms have cancelled completely.",
+        "So $\\ddot q = \\ddot q^{\\text{ref}}+K_p(q^{\\text{ref}}-q)+K_d(\\dot q^{\\text{ref}}-\\dot q)$. Differentiate $e(t)=q^{\\text{ref}}(t)-q(t)$ twice: $\\dot e = \\dot q^{\\text{ref}}-\\dot q$, $\\ddot e = \\ddot q^{\\text{ref}}-\\ddot q$.",
+        "Substitute $\\ddot q$ from above: $\\ddot e = \\ddot q^{\\text{ref}} - \\big[\\ddot q^{\\text{ref}}+K_p(q^{\\text{ref}}-q)+K_d(\\dot q^{\\text{ref}}-\\dot q)\\big] = -K_pe-K_d\\dot e$, i.e. $\\ddot e+K_d\\dot e+K_pe=0$. This is *exactly* DYN-02's PD closed-loop ODE (with $m=1$, since inverse dynamics already absorbed the true mass matrix), confirming the error dynamics really do behave like a unit-mass point mass under PD control, regardless of how complicated the underlying robot's true $M(q),F(q,\\dot q)$ are."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-03-ex3-operational-space-derivation",
+      "objective": "Derive the task-space acceleration formula from the task-space velocity relation.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Starting from $\\dot\\phi(q(t)) = J(q(t))\\dot q(t)$ (the task-space velocity relation), derive $\\ddot\\phi(q) = J\\ddot q+\\dot J\\dot q$ using the product rule.",
+      "hints": [
+        "$\\dot\\phi(q(t))=J(q(t))\\dot q(t)$ is a product of two time-dependent quantities, $J(q(t))$ and $\\dot q(t)$. Differentiate using the product rule: $\\ddot\\phi = \\dfrac{d}{dt}[J(q(t))]\\dot q(t) + J(q(t))\\dfrac{d}{dt}[\\dot q(t)]$.",
+        "The second term is immediate: $J(q(t))\\ddot q(t) = J\\ddot q$. The first term, $\\frac{d}{dt}[J(q(t))]$, is exactly $\\dot J$ (the total time-derivative of the Jacobian as the robot moves along $q(t)$), multiplied by $\\dot q(t)$.",
+        "Combining: $\\ddot\\phi(q) = \\dot J\\dot q + J\\ddot q$, i.e. $\\ddot\\phi(q)=J\\ddot q+\\dot J\\dot q$. (Independently verified against a finite-difference computation on a 2-link arm while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

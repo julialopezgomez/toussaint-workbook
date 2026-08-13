@@ -2,6 +2,23 @@
   "moduleId": "PROB-03",
   "exercises": [
     {
+      "id": "PROB-03-ex0-coin-nll",
+      "objective": "Compute the neg-log-likelihood (surprise, in bits) of a concrete event.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 12, "originalNumber": "§1.2:5" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 6,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For a fair coin, let $x$ be the event \"5 heads in a row.\" Compute $p(x)$, then $-\\log_2p(x)$ (the surprise, in bits). Enter the surprise value as a decimal (it should come out to a whole number).",
+      "hints": [
+        "$p(x) = 0.5^5$ (five independent fair coin flips, all heads).",
+        "$p(x) = 1/32 = 0.03125$.",
+        "$-\\log_2(0.03125) = -\\log_2(2^{-5}) = 5$. Matches the general pattern: $n$ heads in a row has surprise exactly $n$ bits, 'as much information as $n$ coin tosses.'"
+      ],
+      "reviewCardIds": []
+    },
+    {
       "id": "PROB-03-ex1-why-expected-surprise",
       "objective": "Explain why entropy is described as expected surprise.",
       "provenance": "source-adapted",

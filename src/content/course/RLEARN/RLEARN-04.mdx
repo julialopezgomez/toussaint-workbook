@@ -1,0 +1,107 @@
+---
+id: RLEARN-04
+block: RLEARN
+title: "Offline RL & Sim2Real"
+tier: 1
+estimatedHours: 3
+prerequisites: ["RLEARN-03"]
+objectives:
+  - "Distinguish on-policy, off-policy, and offline RL, and explain why offline RL suffers a distributional-shift problem analogous to RLEARN-02's imitation learning."
+  - "State the naive offline RL objective and explain why it fails without an explicit penalty for leaving the data distribution."
+  - "Explain domain randomization and the privileged-teacher/sensor-based-student pattern as sim2real solutions."
+sources:
+  - { sourceId: "lecture-robotlearning", pages: "p66-72 (§1.9)", role: "primary" }
+concepts:
+  - "On-policy vs. off-policy vs. offline RL"
+  - "Offline RL distribution shift, TD3+BC"
+  - "Domain randomization, privileged teacher & sensor-based student"
+  - "Domain adaptation"
+notation:
+  - { symbol: "$\\mathcal{D}=\\{(s_i,a_i,r_i,s_{i+1})\\}$", meaning: "a fixed dataset, possibly collected by any agent, used for offline RL" }
+  - { symbol: "$\\Theta$", meaning: "a simulation parameter (e.g. friction, mass) randomized across episodes" }
+cheatsheetLinks: []
+nextModules: ["RLEARN-05"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+RLEARN-03 flagged real-robot data collection as expensive. This module covers the two standard responses: **offline RL** (learn optimal behavior from whatever data already exists, never collecting more) and **sim2real** (collect unlimited cheap data in simulation, then transfer to reality). Both turn out to hit the *same* distributional-shift problem RLEARN-02 already diagnosed for imitation learning, a genuinely satisfying unification: it's one underlying issue, showing up in three different guises across this block.
+
+## Prerequisites & readiness check
+
+You should have RL-03's off-policy Q-learning and RLEARN-02's distributional-shift/compound-error result fresh.
+
+<ReadinessCheck
+  question="From RLEARN-02, why does behavior cloning's training objective fail to match what happens at deployment?"
+  answer="Training loss is evaluated only at expert-visited states, but at deployment the policy's own (possibly erroneous) choices determine which states get visited, states the policy may never have been trained on."
+/>
+
+## On-policy, off-policy, offline: a spectrum
+
+- **On-policy**: estimate $V^\pi$ or $Q^\pi$ *while executing* $\pi$ itself (e.g. TD-learning, RL-03); every update directly depends on the current $\pi$.
+- **Off-policy**: estimate $Q^*$ *while executing a different* behavior policy (e.g. Q-learning, RL-03); the data-collecting policy and the policy being evaluated/improved can differ.
+- **Offline**: one step further still, the data $\mathcal{D}$ could come from *anywhere* (other agents, human behavior, even video), not collected by your own agent at all, and no more data collection happens during training.
+
+<ExerciseCard id="RLEARN-04-ex1-onoff-classification" />
+
+**Why bother with offline RL specifically?** *Separation of concerns*: real-world data collection is expensive regardless of algorithm, so it makes sense to ask "given whatever data we already have, what's the best we can extract from it," entirely separately from how that data was collected.
+
+## The naive offline RL formulation, and why it fails
+
+The obvious approach: minimize RL-04's Bellman residual directly on the fixed dataset $\mathcal{D}$,
+
+$$\min_\theta\ \mathbb{E}_{(s,a,r,s')\sim\mathcal{D}}\big\{[r+\gamma Q_{\bar\theta}(s',\pi(s'))-Q_\theta(s,a)]^2\big\}, \qquad \pi\approx\operatorname*{argmax}_\pi\mathbb{E}_{(s,a)\sim\mathcal{D}}\{Q_\theta(s,a)\}$$
+
+This is well-posed (every term has a gradient), but **fails badly in practice**, for exactly RLEARN-02's reason: nothing in this loss penalizes the learned policy $\pi$ for drifting toward actions *outside* what $\mathcal{D}$ actually demonstrates. Unlike DAgger's fix for imitation learning, there's no option to collect more data at the states $\pi$ ends up preferring, the dataset is fixed, so $\pi$ can freely learn to "exploit" arbitrarily overoptimistic $Q_\theta$ values in regions $\mathcal{D}$ never covered, with nothing to correct the resulting error.
+
+<ExerciseCard id="RLEARN-04-ex2-offline-distribution-shift-conceptual" />
+
+**The fix, in every modern approach**: add an explicit penalty for leaving the data distribution. Two concrete, simple examples:
+
+- **TD3+BC** (Fujimoto & Gu, 2021): simply add a behavior-cloning term directly to the policy objective, $\pi\approx\operatorname*{argmax}_\pi\mathbb{E}_{(s,a)\sim\mathcal{D}}\{\lambda Q_\theta(s,a)+(\pi(s)-a)^2\}$, a minimal one-line fix pulling $\pi$ back toward the dataset's own actions.
+- **S4RL** (Sinha, Mandlekar & Garg, 2022): apply strong data augmentation directly inside the Bellman-residual loss itself, averaging the target/prediction over several perturbed variants of $(s,s')$, implicitly smoothing $Q_\theta$'s estimate near (rather than only exactly at) the observed data.
+
+<ExerciseCard id="RLEARN-04-ex3-td3bc-conceptual" />
+
+## Sim2Real
+
+Simulation is fast, safe, fully explorable, and (increasingly) provides realistic sensor rendering, exactly what real-world data collection isn't. But simulation never matches reality exactly: **parametric mismatches** (wrong friction, inertia, motor delay values) and **non-parametric mismatches** (unsimulated effects entirely: wind, exact fluid dynamics, dust) both cause policies trained purely in sim to fail when deployed for real.
+
+**Domain randomization** (Tobin et al., 2017): let $\Theta$ be a simulation parameter, $x_{t+1}=f(x_t,u_t;\Theta)$; instead of fixing $\Theta$, **randomly resample $\Theta\sim p(\Theta)$ at the start of every training episode**, then run standard RL. The resulting policy, having never been able to rely on any single fixed $\Theta$, is forced to become robust across the whole randomized range, at the cost of a genuinely harder RL problem (the world is now "more uncertain" from the policy's perspective).
+
+<ExerciseCard id="RLEARN-04-ex4-domain-randomization-conceptual" />
+
+**Privileged teacher & sensor-based student** (extending RLEARN-02's pattern to RL specifically): first train a **privileged teacher** $\hat\pi(s_t,\Theta)$ with *direct access to $\Theta$* (much easier: ordinary RL, since the true simulation parameters are given, not hidden); then train a **sensor-based student** $\pi(y_{0:t})$ (only real sensor observations, no $\Theta$) to imitate $\hat\pi$ via DAgger (RLEARN-02), which is efficient precisely because $\hat\pi$ can be queried at any state the student reaches. A refinement: give the student a **secondary loss** predicting (a latent representation of) $\Theta$ from $y_{0:t}$ too, improving its learned representation even though $\Theta$ is never used at deployment. This exact pattern (train with full information first, then distill to sensor-only) is, per the source's own framing, "a core paradigm beyond RL": develop a method assuming full information (a planner, an RL agent with $\Theta$), then train a policy to imitate it using only what's actually available at deployment.
+
+**Domain adaptation**: any controller that adapts to varying, unobserved $\Theta$ based on past observations $y_{0:t}$. **Explicit**: train an estimator $\psi:y_{0:t}\mapsto\hat\Theta$, then a policy $\pi(y_{0:t},\psi(y_{0:t}))$ conditioned on the estimate. **Implicit**: just train $\pi(y_{0:t})$ directly, optionally imposing (via the secondary-loss trick above) a representation that's *also* predictive of $\Theta$, without ever explicitly outputting $\hat\Theta$. (This connects to a broader control-theory area, **adaptive control**: estimating unknown, possibly time-varying environment parameters online and controlling accordingly, with **robust control** as the conservative variant, maintaining a full belief $p(\Theta\mid y_{0:T})$ and choosing actions robust to every plausible $\Theta$ rather than betting on a point estimate.)
+
+## Summary
+
+- **On-policy** evaluates $\pi$ while executing $\pi$; **off-policy** evaluates $\pi^*$ while executing a different behavior policy; **offline** goes further still, no new data collection at all, from any source.
+- The naive offline-RL Bellman-residual objective fails from the *same* distributional-shift problem as RLEARN-02's behavior cloning, with no DAgger-style fix available (the dataset is fixed); TD3+BC and S4RL both add an explicit anti-distribution-shift penalty.
+- **Domain randomization** trains across randomized simulation parameters $\Theta\sim p(\Theta)$ for robustness; **privileged teacher & sensor-based student** trains with full information first, then distills to sensor-only via DAgger; **domain adaptation** (explicit or implicit) adapts online to unobserved $\Theta$.
+
+## Retrieval questions
+
+1. Distinguish on-policy, off-policy, and offline RL.
+2. Explain why the naive offline-RL objective fails, connecting explicitly to RLEARN-02's distributional shift.
+3. State TD3+BC's fix, and explain what it trades off.
+4. Explain domain randomization and the privileged-teacher/sensor-based-student pattern.
+
+## Mastery checklist
+
+- [ ] Can distinguish on-policy, off-policy, and offline RL.
+- [ ] Can explain the naive offline-RL failure mode and its connection to distributional shift.
+- [ ] Can state TD3+BC's and S4RL's fixes.
+- [ ] Can explain domain randomization, privileged teacher/sensor-based student, and domain adaptation.
+
+## Source note
+
+This module's exposition, on-policy/off-policy/offline definitions, the naive offline-RL formulation and its failure mode, TD3+BC (Fujimoto & Gu, 2021) and S4RL (Sinha, Mandlekar & Garg, 2022), domain randomization (Tobin et al., 2017), the privileged-teacher/sensor-based-student pattern, and domain/adaptive control are adapted from `lecture-robotlearning`, §1.9 (pp. 66-72). All exercises are newly authored.
+
+---
+
+**Next**: [RLEARN-05: Inverse RL](/course/RLEARN/RLEARN-05)

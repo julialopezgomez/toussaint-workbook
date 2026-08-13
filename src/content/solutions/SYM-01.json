@@ -1,0 +1,39 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "SYM-01-ex1-truth-evaluation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 4, "description": "Correctly evaluates the sentence as true, with correct reasoning for both sub-terms." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "not P = true (since P=false). Q or R = true (since R=true). true and true = true."
+    },
+    {
+      "exerciseId": "SYM-01-ex2-entailment-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly distinguishes entailment as a semantic/model fact from derivability as a procedural fact." },
+          { "points": 2, "description": "Correctly explains sound-but-incomplete." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "KB |= alpha is a semantic fact about models, independent of any algorithm. KB |-_i alpha is about what a specific procedure i can actually produce. Sound but not complete: everything i derives is genuinely entailed (no false conclusions), but some genuinely entailed sentences are not derived by i, i.e. trustworthy but not exhaustive."
+    },
+    {
+      "exerciseId": "SYM-01-ex3-modus-ponens-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly derives B from C, D, and C∧D⇒B." },
+          { "points": 2, "description": "Correctly derives A from B and B⇒A." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "From C, D, and C∧D⇒B, Modus Ponens gives B. Then from B and B⇒A, Modus Ponens gives A. Firing whichever rule's premises are currently satisfied, repeatedly, is forward chaining."
+    }
+  ]
+}

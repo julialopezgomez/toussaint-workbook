@@ -1,0 +1,128 @@
+---
+id: ML-01
+block: ML
+title: "Computation Graphs & Automatic Differentiation"
+tier: 1
+estimatedHours: 3
+prerequisites: ["MATH-02"]
+objectives:
+  - "Distinguish partial from total derivatives, and explain why this distinction matters in a computation graph."
+  - "Define a computation graph as a DAG, and state the forward-mode and backward-mode chain rules."
+  - "Derive why backward mode (backpropagation) is the efficient choice for training neural networks."
+  - "Explain what PyTorch's autograd actually does, in terms of this module's formalism."
+sources:
+  - { sourceId: "lecture-ai", pages: "p5-9 (§1.1)", role: "primary" }
+concepts:
+  - "Partial derivative vs. total derivative"
+  - "Computation graph (DAG)"
+  - "Forward-mode and backward-mode chain rule"
+  - "Jacobian"
+  - "Reverse-mode automatic differentiation"
+notation:
+  - { symbol: "$x_i=f_i(x_{[i]})$", meaning: "a computation graph node: variable $x_i$ as a deterministic function of its parent variables $x_{[i]}$" }
+  - { symbol: "$\\partial f/\\partial g$", meaning: "partial derivative: how $f$ varies with $g$ alone, treating $g$'s own dependencies as fixed" }
+  - { symbol: "$df/dx$", meaning: "total derivative: how $f$ varies with $x$, accounting for every path of dependency through the graph" }
+cheatsheetLinks: []
+nextModules: ["ML-02"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+ML-03 already had you compute a full backward pass by hand, but it built the chain rule up informally, one arrow at a time. This module gives that informal picture a name and a precise formalism (**computation graphs**), and answers a question ML-03 simply assumed: why does backprop walk the graph *backward*, and not forward? The answer turns out to be a clean complexity argument, not a matter of convention, and it's exactly why every deep learning framework (PyTorch included) is built around reverse-mode automatic differentiation.
+
+## Prerequisites & readiness check
+
+You should have MATH-02's chain rule and Jacobian definition fresh.
+
+<ReadinessCheck
+  question="From MATH-02, for $y=g(h(x))$ with $x,h,y$ all vectors, what shape is $\partial y/\partial x$, and how is it computed?"
+  answer="A Jacobian matrix, shape (dim y)×(dim x), computed as the matrix product of the local Jacobians: ∂y/∂x = (∂y/∂h)(∂h/∂x)."
+/>
+
+## Partial vs. total derivatives
+
+Consider $f(x,g)=3x+2g$ with $g(x)=2x$. "What's the derivative of $f$ with respect to $x$?" is genuinely ambiguous until you specify which of two different questions you mean:
+
+$$\frac{\partial}{\partial x}f(x,g) = 3 \qquad\text{(treating $g$ as an independent, fixed argument)}$$
+
+$$\frac{d f}{d x} = \frac{\partial}{\partial x}\big[3x+2(2x)\big] = 7 \qquad\text{(accounting for $g$'s own dependence on $x$)}$$
+
+<ExerciseCard id="ML-01-ex1-partial-total-numeric" />
+
+The **partial derivative** $\partial f/\partial g$ only asks how $f$'s output varies with one of its *direct* arguments, ignoring whatever those arguments might themselves depend on. The **total derivative** $df/dx$ accounts for *every* path of dependency: here, $x$ influences $f$ directly (the "$3x$" term) and also indirectly, through $g$ (the "$2g$" term, since $g$ itself depends on $x$). Formalizing "every path of dependency" precisely is exactly what a computation graph is for.
+
+## Computation graphs
+
+A **computation graph** (or function network) is a directed acyclic graph (DAG) of $n$ variables $x_1,\ldots,x_n$, where each variable is a deterministic function of a set of *parent* variables:
+
+$$x_i = f_i(x_{[i]}), \qquad x_{[i]} := (x_j)_{j\in[i]}$$
+
+with $[i]\subset\{1,\ldots,n\}$ the indices of $x_i$'s parents. (This is precisely ML-03's forward-pass diagram, $x_0\to z_1=W_0x_0\to x_1=\sigma(z_1)\to\cdots$, just named formally: each arrow is one $f_i$, each node one $x_i$.) Given such a graph, the **total derivative** $df/dx$ asks: given a small variation $dx$ of one variable, how does another variable $f$ vary, accounting for *every* directed path from $x$ to $f$ through the DAG?
+
+## Two chain rules: forward and backward
+
+<ExerciseCard id="ML-01-ex2-forward-mode-derivation" />
+
+**Forward-mode**: compute $df/dx$ by first knowing, for every parent $g$ of $f$, the total derivative $dg/dx$ (already propagated forward from $x$), then combining:
+
+$$\frac{df}{dx} = \sum_{g\in[f]}\frac{\partial f}{\partial g}\frac{dg}{dx}$$
+
+("Forward" because you've already computed $dg/dx$ moving forward through the graph from $x$, and now take one more forward step to $df/dx$. This is exactly the pattern behind robotics Jacobians, KIN-03's $J_i(q)=\partial_q\phi_i(q)$ built up link by link from the base.)
+
+<ExerciseCard id="ML-01-ex3-backward-mode-derivation" />
+
+**Backward-mode**: compute $df/dx$ by first knowing, for every *child* $g$ of $x$ (every node that uses $x$ directly), the total derivative $df/dg$ (already propagated backward from $f$), then combining:
+
+$$\frac{df}{dx} = \sum_{g\,:\,x\in[g]}\frac{df}{dg}\frac{\partial g}{\partial x}$$
+
+("Backward" because you've already computed $df/dg$ moving backward through the graph from $f$, and now take one more backward step to $df/dx$. This is exactly ML-03's backward pass: "every gradient is a local Jacobian times the gradient that arrived from downstream" was this formula, stated informally.)
+
+For vector-valued variables, every $\partial f/\partial g$ and $\partial g/\partial x$ is a full **Jacobian** matrix (MATH-02), and the chain rule's sums become matrix products and additions.
+
+## Why backward mode wins for neural networks
+
+Consider the simplest possible chain, three variables $x\to y(x)\to z(y)$, and ask: forward or backward?
+
+- **Forward**: compute $dy/dx\in\mathbb{R}^{d_y\times d_x}$, then $dz/dx\in\mathbb{R}^{d_z\times d_x}$. Every intermediate quantity's size scales with $d_x$.
+- **Backward**: compute $dz/dy\in\mathbb{R}^{d_z\times d_y}$, then $dz/dx\in\mathbb{R}^{d_z\times d_x}$. Every intermediate quantity's size scales with $d_z$.
+
+<ExerciseCard id="ML-01-ex4-complexity-numeric" />
+
+**For neural network training, $x\equiv\theta$ (all the parameters, potentially millions-dimensional) and $z\equiv\ell$ (a single scalar loss, $d_z=1$)**: backward mode's cost scales with the *tiny* output dimension, forward mode's would scale with the *enormous* parameter dimension. This is not a minor implementation detail, it's the entire reason training a million-parameter network is tractable at all: reverse-mode automatic differentiation (**backpropagation**) is just this backward-mode chain rule, applied systematically to the whole computation graph.
+
+## What PyTorch's autograd actually does
+
+Every forward-pass line you write in PyTorch implicitly builds exactly this computation graph (each operation is one node $x_i=f_i(x_{[i]})$, recorded automatically). Calling `.backward()` then walks that graph using the backward-mode formula above, propagating $d\ell/d(\cdot)$ from the scalar loss back to every parameter, one local Jacobian at a time, exactly ML-03's manual backward pass, just automated and never making an arithmetic slip.
+
+## Summary
+
+- **Partial derivatives** ($\partial f/\partial g$) ignore indirect dependencies; **total derivatives** ($df/dx$) account for every path through the full dependency structure.
+- A **computation graph** is a DAG where each variable is a deterministic function of its parents, $x_i=f_i(x_{[i]})$; it's the formal object that makes "every path of dependency" precise.
+- **Forward-mode** chain rule propagates $dg/dx$ forward from $x$; **backward-mode** propagates $df/dg$ backward from $f$; both are the same chain rule, applied in opposite directions.
+- Forward mode's cost scales with the *input* dimension, backward mode's with the *output* dimension; since neural network training has a huge input (parameters) and a scalar output (loss), **backward mode (backpropagation) is dramatically cheaper**.
+- PyTorch's autograd builds the computation graph implicitly as you write forward-pass code, then executes exactly the backward-mode chain rule when you call `.backward()`.
+
+## Retrieval questions
+
+1. Give an example (like $f(x,g)=3x+2g,\ g(x)=2x$) where $\partial f/\partial x\neq df/dx$, and explain why.
+2. Define a computation graph formally, and state both the forward-mode and backward-mode chain rules.
+3. Derive why backward mode is dramatically cheaper for neural network training, using the $d_x\gg d_z$ argument.
+4. In one sentence, what does PyTorch's `.backward()` actually compute?
+
+## Mastery checklist
+
+- [ ] Can distinguish partial from total derivatives with a concrete example.
+- [ ] Can define a computation graph as a DAG and state both chain rule directions.
+- [ ] Derived why backward mode is preferred for neural network training.
+- [ ] Can explain what PyTorch's autograd does in terms of this module's formalism.
+
+## Source note
+
+This module's exposition, the partial/total derivative distinction and its motivating example, the computation graph definition, both chain rule formulas, the Jacobian-shaped generalization, and the forward-vs-backward complexity argument are adapted from `lecture-ai`, §1.1 (pp. 5-9). All exercises are newly authored and independently verified (the partial/total derivative example symbolically with SymPy).
+
+---
+
+**Next**: [ML-02: Regression & Classical Supervised ML](/course/ML/ML-02)

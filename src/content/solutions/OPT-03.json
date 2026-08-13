@@ -16,6 +16,21 @@
       "fullSolution": "The constrained optimum only needs to be the best point AMONG those satisfying h(x)=0, not the best point in all of R^n, so there's no reason the unconstrained stationarity condition should hold there. Geometrically: picture f as a bowl and h(x)=0 as a curve carved on the ground. The point where f is smallest ALONG that curve generally isn't the unconstrained bottom of the bowl, and the gradient of f there generally still points somewhere (just not along a direction that would let you improve f while staying on the curve). The actual condition is that grad f(x) has no component tangent to the constraint surface at the optimum (only a component perpendicular to it, along grad h(x)), which is a much weaker condition than grad f(x)=0 everywhere."
     },
     {
+      "exerciseId": "OPT-03-ex1b-kkt-geometry",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly argues the constraint must be active and identifies x*=(-1,0)." },
+          { "points": 1, "description": "Correctly solves for lambda=0.5 from stationarity." },
+          { "points": 2, "description": "Correctly verifies all four KKT conditions explicitly." }
+        ],
+        "commonErrors": [
+          "Forgetting to check dual feasibility (lambda>=0) as a separate condition from stationarity."
+        ]
+      },
+      "fullSolution": "Since minimizing x1 alone is unbounded below, the constraint x1^2+x2^2<=1 must be active at the optimum: x1^2+x2^2=1. Minimizing x1 on this circle gives x*=(-1,0) (leftmost point).\nStationarity: grad f=(1,0), grad g(x*)=(2*(-1),2*0)=(-2,0). Solve (1,0)+lambda*(-2,0)=0: 1-2*lambda=0, lambda=0.5.\nCheck: primal feasibility g(x*)=1+0-1=0<=0 (holds); dual feasibility lambda=0.5>=0 (holds); complementarity lambda*g(x*)=0.5*0=0 (holds, since g(x*)=0 exactly). All four KKT conditions verified."
+    },
+    {
       "exerciseId": "OPT-03-ex2-lagrangian-derivation",
       "checkMode": "rubric",
       "rubric": {
@@ -50,6 +65,12 @@
         ]
       },
       "fullSolution": "If g(x*) < 0 strictly (the constraint isn't touching its boundary, it's slack), complementary slackness forces lambda=0: intuitively, a constraint that isn't binding at the optimum shouldn't have any effect on where that optimum sits, so it makes sense its multiplier (which measures how much the constraint is 'pushing' on the solution) is zero.\n\nIf lambda > 0 (the multiplier is genuinely positive, meaning the constraint IS actively influencing the solution), complementary slackness forces g(x*)=0: the constraint must be exactly tight/active, since a nonzero multiplier only makes sense if the constraint is actually restricting where the optimum can be; if the constraint weren't tight, there'd be no reason for it to be exerting any 'force' on the solution at all."
+    },
+    {
+      "exerciseId": "OPT-03-ex5-duality-gap",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": -1.25, "tolerance": 0.01 },
+      "fullSolution": "l(1) = -1/(4*1) - 1 = -0.25 - 1 = -1.25. Since -1.25 <= -1 = p*, weak duality holds. (Numerically verified via grid search over x1 while authoring this module: min of x1+lambda*(x1^2+x2^2-1) at lambda=1 is exactly -1.25, and at lambda=0.5 is exactly -1, matching p* and confirming strong duality at the optimal lambda*=0.5.)"
     }
   ]
 }

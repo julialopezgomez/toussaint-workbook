@@ -1,0 +1,122 @@
+---
+id: MATH-03B
+block: MATH
+title: "Scalar Products, Metric Tensors & Orthonormal Bases"
+tier: 1
+estimatedHours: 4
+prerequisites: ["MATH-03"]
+objectives:
+  - "State the formal definition of a scalar product (Definition 3.10) as a symmetric positive-definite 2-form."
+  - "State the formal definition of a positive (semi-)definite matrix, and use Sylvester's criterion for quick checks."
+  - "State the metric tensor definition and compute $\\langle v,w\\rangle=v^\\top Gw$ for a general (non-orthonormal) basis."
+  - "Explain why the metric tensor is the identity for an orthonormal basis, and what that simplifies."
+  - "Derive and apply the orthogonal-projection formula onto the span of orthonormal vectors."
+sources:
+  - { sourceId: "lecture-maths", pages: "p28-31 (§3.3)", role: "primary" }
+concepts:
+  - "Scalar product / inner product"
+  - "Positive (semi-)definite matrix"
+  - "Metric tensor"
+  - "Orthonormal basis"
+  - "Orthogonal projection"
+notation:
+  - { symbol: "$\\langle v,w\\rangle$", meaning: "scalar product (inner product) of $v$ and $w$" }
+  - { symbol: "$g_{ij}$ or $G$", meaning: "metric tensor: $g_{ij}=\\langle e_i,e_j\\rangle$, so $\\langle v,w\\rangle=v^\\top Gw$" }
+  - { symbol: "$v\\succ0$ / $v\\succeq0$ (for a matrix)", meaning: "positive definite / positive semi-definite" }
+cheatsheetLinks: []
+nextModules: ["MATH-04"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Positive (semi-)definiteness is one of the single most-used properties in this entire course: it's the condition for a stationary point being a genuine minimum (MATH-02's Hessian eigenvalues), the condition for a valid covariance matrix (PROB block), the condition for a valid kernel (GP regression, MATH-02B), and the condition that makes ridge regression, Gauss-Newton, and Newton's method all well-posed. Despite that ubiquity, the source only ever *uses* the term "positive definite" (in Definition 3.10, defining a scalar product) without a single dedicated, spelled-out Definition box for what it means for a general matrix. This module fills that gap explicitly, right where the concept first becomes unavoidable.
+
+## Prerequisites & readiness check
+
+You should be comfortable with the taxonomy of linear functions (1-forms, 2-forms) and dual spaces from [MATH-03](/course/MATH/MATH-03).
+
+<ReadinessCheck
+  question="What is a 2-form, and give one example you've already seen."
+  answer="A 2-form is a bilinear function $f:V\times V\to\mathbb{R}$: linear in each of its two vector arguments separately. Example: the Hessian's action $d^2f|_x(v,w)$, or (as this module formalizes) the scalar product $\langle\cdot,\cdot\rangle$."
+/>
+
+## The scalar product
+
+So far, everything in [MATH-03](/course/MATH/MATH-03) (bases, coordinates, dual spaces, matrices) never referred to a scalar product or a transpose at all, those concepts were fully independent of any notion of "length" or "angle." Now we introduce one:
+
+> **Definition 3.10 (scalar product).** A scalar product (also called **inner product**) of $V$ is a symmetric, positive definite 2-form
+> $$\langle\cdot,\cdot\rangle: V\times V\to\mathbb{R}, \qquad \langle v,w\rangle=\langle w,v\rangle, \qquad \langle v,v\rangle>0 \;\;\forall v\neq0\in V$$
+
+This packs together two separate requirements, both worth unpacking on their own since they recur constantly outside this specific context:
+
+> **Definition (positive semi-definite / positive definite matrix).** A symmetric matrix $M\in\mathbb{R}^{n\times n}$ is:
+> - **positive semi-definite (PSD)**, written $M\succeq0$, if $v^\top Mv \geq 0$ for **all** $v\in\mathbb{R}^n$;
+> - **positive definite (PD)**, written $M\succ0$, if $v^\top Mv > 0$ for **all** $v\neq0$.
+>
+> Equivalently (a fact you'll prove in [MATH-05](/course/MATH/MATH-05) via the eigendecomposition $M=\sum_i\lambda_ih_ih_i^\top$ from MATH-02): $M\succeq0$ iff all its eigenvalues $\lambda_i\geq0$; $M\succ0$ iff all $\lambda_i>0$.
+
+So Definition 3.10's requirement "$\langle v,v\rangle>0\;\forall v\neq0$" is *exactly* saying: whatever matrix $G$ represents this scalar product in a chosen basis (formalized below as the metric tensor) must be positive definite. This is not a coincidental overlap in terminology, a scalar product **is**, by definition, "a PD matrix, viewed as a 2-form."
+
+A fast practical check for small matrices, worth having on hand: **Sylvester's criterion** says a symmetric matrix is PD iff all its leading principal minors (determinants of the top-left $k\times k$ submatrices, for $k=1,..,n$) are positive. For a $2\times2$ symmetric matrix $\begin{pmatrix}a&b\\b&d\end{pmatrix}$, this reduces to: $a>0$ and $ad-b^2>0$.
+
+<ExerciseCard id="MATH-03B-ex1-psd-check" />
+
+## The metric tensor
+
+Given a scalar product and a basis $(e_i)_{i=1}^n$, we can express $\langle\cdot,\cdot\rangle$ in coordinates:
+
+> **Definition 3.13 (metric tensor).** Given a scalar product and basis $(e_i)_{i=1}^n$, the metric tensor is $g_{ij}=\langle e_i,e_j\rangle$, the coordinates of the 2-form $\langle\cdot,\cdot\rangle$. This implies
+> $$\langle v,w\rangle = \sum_{ij}v_iw_j\langle e_i,e_j\rangle = \sum_{ij}v_iw_jg_{ij} = v^\top Gw$$
+
+(Don't confuse $g_{ij}$ with the unrelated notion of a metric $d(\cdot,\cdot)$ in a metric space, same word, different concept, despite the name.) $G$ must itself be symmetric positive definite (inheriting Definition 3.10's requirements directly), so everything above about PD matrices applies to $G$ specifically.
+
+<ExerciseCard id="MATH-03B-ex2-metric-tensor-numeric" />
+
+## Orthonormal bases: where everything simplifies
+
+> **Definition 3.12 (orthonormal).** Given a scalar product, a set of vectors $\{v_i\}_{i=1}^n$ is called orthonormal iff $\langle v_i,v_j\rangle=\delta_{ij}$.
+
+If the basis $(e_i)$ is itself orthonormal, the metric tensor collapses to the identity, $g_{ij}=\langle e_i,e_j\rangle=\delta_{ij}=I$ (this special case is called a **Euclidean** metric), so $\langle v,w\rangle = v^\top w$, the ordinary dot product, no $G$ needed. This is *why* the ordinary dot product "just works" as an inner product for the standard basis of $\mathbb{R}^n$: it's the orthonormal special case of the general $v^\top Gw$ formula, not a separate, more fundamental notion.
+
+A second important simplification: for an orthonormal basis, the scalar-product-induced dual vector $e_i^*=\langle e_i,\cdot\rangle$ (Definition 3.11) becomes **identical** to the purely coordinate-based dual basis $\hat e_i$ from [MATH-03](/course/MATH/MATH-03) (which needed no scalar product at all to define). In general, these two "dual" notions are different 1-forms; orthonormality is exactly the condition that collapses them into one.
+
+This also gives a clean formula for **orthogonal projection**. The projection of $x$ onto a single orthonormal basis vector $e_i$ is $e_i\langle e_i,x\rangle$; the projection onto the span of several orthonormal vectors $(e_1,..,e_k)$ is
+
+$$P_{\text{span}(e_1,..,e_k)}(x) = \sum_{i=1}^ke_i\langle e_i,x\rangle$$
+
+<ExerciseCard id="MATH-03B-ex3-projection-derivation" />
+
+Finally, note $v^*(w)=\langle v,w\rangle=v^\top w$ for an orthonormal basis: $v^\top$ really is the coordinate representation of the 1-form $v^*=\langle v,\cdot\rangle$, tying together the "row vector eats a vector, outputs a scalar, therefore a 1-form" intuition from MATH-03 with the scalar product concretely, for the first time using a transpose in a way that *does* encode a genuine scalar product (rather than just "undoing" a definitional transpose, as in the gradient notation of MATH-02).
+
+## Summary
+
+- A scalar product (Definition 3.10) is a symmetric, positive-definite 2-form, i.e. exactly "a PD matrix, viewed as a bilinear form."
+- $M\succeq0$ (PSD) means $v^\top Mv\geq0\;\forall v$; $M\succ0$ (PD) means $v^\top Mv>0\;\forall v\neq0$; both are equivalent to conditions on $M$'s eigenvalues. Sylvester's criterion gives a fast check via leading principal minors.
+- The metric tensor $g_{ij}=\langle e_i,e_j\rangle$ encodes the scalar product in coordinates: $\langle v,w\rangle=v^\top Gw$.
+- For an orthonormal basis, $G=I$ (the Euclidean case), the scalar product reduces to the ordinary dot product, and orthogonal projection onto a span of orthonormal vectors is $\sum_ie_i\langle e_i,x\rangle$.
+
+## Retrieval questions
+
+1. State Definition 3.10 (scalar product) and the formal definition of a positive definite matrix, from memory.
+2. State Sylvester's criterion for a $2\times2$ symmetric matrix.
+3. Why does $\langle v,w\rangle=v^\top w$ (the plain dot product) only work directly for an orthonormal basis, and what's the general formula otherwise?
+4. Derive the projection-onto-span formula for orthonormal vectors.
+
+## Mastery checklist
+
+- [ ] Can state Definition 3.10 and the general PSD/PD matrix definition precisely, including the eigenvalue characterization.
+- [ ] Can apply Sylvester's criterion to check a $2\times2$ (or $3\times3$) matrix for positive definiteness.
+- [ ] Can state the metric tensor definition and compute $\langle v,w\rangle=v^\top Gw$ for a concrete non-orthonormal $G$.
+- [ ] Can explain why an orthonormal basis makes the metric tensor collapse to the identity.
+- [ ] Derived the orthogonal projection formula $\sum_ie_i\langle e_i,x\rangle$ for orthonormal vectors.
+
+## Source note
+
+This module's definitions (3.10-3.13), the orthonormal-basis simplifications, and the projection formula are adapted from `lecture-maths`, §3.3 (pp. 28-31). The general positive (semi-)definite matrix definition, the eigenvalue characterization, and Sylvester's criterion are newly authored (standard linear algebra background not spelled out as its own box in the source, added here directly in response to this being a previously under-specified gap). All exercises are newly authored.
+
+---
+
+**Next**: [MATH-04: SVD & Eigendecomposition](/course/MATH/MATH-04)

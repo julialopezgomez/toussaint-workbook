@@ -1,0 +1,73 @@
+{
+  "moduleId": "MANIP-02",
+  "exercises": [
+    {
+      "id": "MANIP-02-ex1-support-polygon-numeric",
+      "objective": "Determine static stability by computing barycentric coordinates of the CoG projection relative to a triangular support polygon.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 165, "originalNumber": "§11:7" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "A tripod support polygon has foot contacts at $A=(0,0)$, $B=(1,0)$, $C=(0.5,1)$. The CoG projects to $P=(0.5,0.4)$. Using barycentric coordinates $P=uA+vB+wC$ (with $u+v+w=1$), compute $w$ (the weight on vertex $C$). Enter a decimal.",
+      "hints": [
+        "Set up the barycentric system using $v_0=B-A,\\ v_1=C-A,\\ v_2=P-A$, and solve $v=\\dfrac{(v_1\\cdot v_1)(v_2\\cdot v_0)-(v_0\\cdot v_1)(v_2\\cdot v_1)}{(v_0\\cdot v_0)(v_1\\cdot v_1)-(v_0\\cdot v_1)^2}$ for $v$ (weight on $B$), and the analogous formula for $w$ (weight on $C$).",
+        "Working through the numbers (or solving the equivalent $2\\times2$ linear system directly): $u=0.3,\\ v=0.3,\\ w=0.4$.",
+        "$w=0.4$. Since all three of $u,v,w\\in[0,1]$, $P$ lies inside the triangle: the pose is statically stable. (Independently verified with NumPy while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MANIP-02-ex2-zmp-fully-actuated-conceptual",
+      "objective": "Explain why ZMP-stability lets a legged robot be controlled with DYN-03's fully-actuated operational-space machinery.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 168, "originalNumber": "§11:13" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain precisely why 'the ZMP stays within the support polygon' implies the stance foot can be treated as fixed to the ground, and why that in turn lets DYN-03's operational-space control apply directly.",
+      "hints": [
+        "If the ZMP were outside the support polygon, the foot would necessarily start rotating about its edge (tipping), since the ground can't supply a large enough counteracting moment at that contact area; a ZMP inside the polygon means the ground reaction forces available are, in principle, enough to prevent any such rotation.",
+        "So a ZMP-stable stance foot behaves exactly as if it were bolted to the ground: no uncontrolled rotation, a fixed base just like a stationary robot arm's mounting point.",
+        "With the stance foot effectively fixed, every joint acceleration q̈ in the kinematic chain from that foot upward becomes freely commandable again (nothing 'floats'), exactly the fully-actuated assumption DYN-03's operational-space control derivation relies on; the legged robot reduces, dynamically, to a conventional fixed-base arm."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MANIP-02-ex3-passive-dynamics-connection",
+      "objective": "Explain why the Compass Gait's swing-phase dynamics are exactly DYN-01's general form with u=0.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 173, "originalNumber": "§11:19" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "DYN-01's general robot dynamics are $M(q)\\ddot q+F(q,\\dot q)=u$ (with $F=C\\dot q+G$). Explain why the Compass Gait's swing-phase equation $M(q)\\ddot q+C(q,\\dot q)\\dot q+G(q)=0$ is literally a special case of this, not a new equation.",
+      "hints": [
+        "$C(q,\\dot q)\\dot q+G(q)$ is exactly DYN-01's $F(q,\\dot q)$ bundle (Coriolis/centripetal plus gravitational terms).",
+        "So the Compass Gait equation reads $M(q)\\ddot q+F(q,\\dot q)=0$, identical in structure to DYN-01's $M(q)\\ddot q+F(q,\\dot q)=u$.",
+        "It's the same equation with $u=0$: during the swing phase there genuinely is no actuation (the swing leg is not in contact with the ground and no motor torque is applied, this is the 'passive' in passive dynamic walking), so the general form specializes exactly, no new physics is needed."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MANIP-02-ex4-hybrid-dynamics-conceptual",
+      "objective": "Explain why legged locomotion is a hybrid dynamical system and list the impact-model assumptions.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 174, "originalNumber": "§11:22" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["MANIP-02-ex3-passive-dynamics-connection"],
+      "answerType": "short-text",
+      "prompt": "Explain what specifically makes legged locomotion a 'hybrid' dynamical system (as opposed to the purely continuous dynamics assumed throughout the DYN block), and briefly state the standard simplifying assumptions used to model the impact event.",
+      "hints": [
+        "The swing phase is ordinary continuous-time dynamics (a smooth ODE, DYN-01/ODE-02's machinery), but at touchdown, the system switches to a *different* continuous-time regime (the new stance leg becomes the pivot); this switch is a discrete, instantaneous event, not part of any smooth ODE.",
+        "'Hybrid' means exactly this: continuous dynamics (the ODE) interleaved with discrete events (impacts) that can instantaneously reset part of the state (velocities) while leaving the rest (configuration) unchanged.",
+        "Standard impact-model assumptions: no rebound or slipping at touchdown; the old stance leg lifts off without force interaction; the impact is instantaneous, modeled as an impulsive force; velocities can jump discontinuously, but configuration cannot change instantaneously; and actuators (finite force) contribute nothing during the impact itself."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

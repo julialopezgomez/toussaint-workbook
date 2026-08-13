@@ -1,0 +1,73 @@
+{
+  "moduleId": "RL-03",
+  "exercises": [
+    {
+      "id": "RL-03-ex1-td-error-sign-conceptual",
+      "objective": "Explain why the TD error's sign drives V(s) in the intuitively correct direction.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 73, "originalNumber": "2.2:14" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain, in terms of the TD error $r+\\gamma V(s')-V(s)$, why receiving more reward than expected increases $V(s)$, and less reward than expected decreases it.",
+      "hints": [
+        "$V(s)$ was our old estimate of the expected total future return from $s$; $r+\\gamma V(s')$ is a fresh, one-sample re-estimate using what actually just happened.",
+        "If $r+\\gamma V(s')>V(s)$ (more reward than the old estimate implied), the TD error is positive, so the update $V(s)\\leftarrow V(s)+\\alpha[\\text{TD error}]$ increases $V(s)$, nudging it toward the better-than-expected outcome.",
+        "Symmetrically, if $r+\\gamma V(s')<V(s)$, the TD error is negative and $V(s)$ decreases: the update always moves the old estimate a small step toward whatever was actually just observed, exactly why it's called 'reinforcement.'"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-03-ex2-qlearning-derivation",
+      "objective": "Derive Q-learning's update rule from the Bellman optimality equation for Q*.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 73, "originalNumber": "2.2:16" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Starting from RL-02's Bellman optimality equation $Q^*(s,a)=R(s,a)+\\gamma\\sum_{s'}P(s'\\mid s,a)\\max_{a'}Q^*(s',a')$, derive Q-learning's update rule by replacing the exact expectation with a single sampled transition $(s,a,r,s')$.",
+      "hints": [
+        "The exact Bellman equation requires summing over every possible $s'$, weighted by $P(s'\\mid s,a)$; without a known model, replace this with the single $s'$ actually observed, and $R(s,a)$ with the single observed $r$: the resulting one-sample estimate of the right-hand side is $r+\\gamma\\max_{a'}Q(s',a')$.",
+        "This one-sample estimate is noisy, so instead of overwriting $Q(s,a)$ entirely, take a small step of size $\\alpha$ toward it, exactly like TD-learning's update for $V$.",
+        "$Q_\\text{new}(s,a)=Q_\\text{old}(s,a)+\\alpha\\big[r+\\gamma\\max_{a'}Q_\\text{old}(s',a')-Q_\\text{old}(s,a)\\big]$: Q-learning's update, with $r+\\gamma\\max_{a'}Q_\\text{old}(s',a')-Q_\\text{old}(s,a)$ the TD error."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-03-ex3-td-vs-qlearning-conceptual",
+      "objective": "Distinguish what TD-learning and Q-learning each estimate, regardless of the policy actually followed.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 74, "originalNumber": "2.2:17" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["RL-03-ex2-qlearning-derivation"],
+      "answerType": "short-text",
+      "prompt": "Explain precisely what TD-learning estimates versus what Q-learning estimates, and why Q-learning can use an exploratory ($\\epsilon$-greedy) policy while still learning the *optimal* Q-function.",
+      "hints": [
+        "TD-learning's update, $r+\\gamma V(s')$, uses the *actual next action* $a=\\pi(s)$ the policy took (implicitly, via whatever transition was observed under $\\pi$): it estimates $V^\\pi$, the value of the specific policy generating the data.",
+        "Q-learning's update instead uses $\\max_{a'}Q(s',a')$, the *best possible* next action, regardless of what action was actually taken next: it estimates $Q^*$, the value of acting optimally from here on, no matter which policy generated the data used to learn it.",
+        "This is exactly why Q-learning tolerates (indeed needs) an exploratory, non-optimal behavior policy like $\\epsilon$-greedy: since the target uses $\\max_{a'}$ rather than the actually-taken action, the data-generating policy's own suboptimality never contaminates what's being learned, an important property called 'off-policy' learning."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-03-ex4-nstep-numeric",
+      "objective": "Compute an n-step return estimate.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 81, "originalNumber": "2.2:35" },
+      "difficulty": "core",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For $r_t=2,\\ r_{t+1}=3,\\ \\gamma=0.5$, and bootstrap estimate $V(s_{t+2})=10$, compute the 2-step return $R_t^{(2)}=r_t+\\gamma r_{t+1}+\\gamma^2V(s_{t+2})$. Enter a decimal.",
+      "hints": [
+        "$r_t=2$ (unchanged).",
+        "$\\gamma r_{t+1}=0.5\\times3=1.5$. $\\gamma^2V(s_{t+2})=0.25\\times10=2.5$.",
+        "$R_t^{(2)}=2+1.5+2.5=6.0$. (Independently verified with Python while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

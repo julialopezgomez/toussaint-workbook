@@ -1,0 +1,46 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "MANIP-02-ex1-support-polygon-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.4, "tolerance": 0.01 },
+      "fullSolution": "Solving the barycentric system: u=0.3, v=0.3, w=0.4. All three in [0,1], so P is inside the triangle: statically stable. (Independently verified with NumPy.)"
+    },
+    {
+      "exerciseId": "MANIP-02-ex2-zmp-fully-actuated-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains why ZMP-within-polygon prevents foot rotation/tipping." },
+          { "points": 2, "description": "Correctly connects a fixed stance foot to DYN-03's fully-actuated operational-space control." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "If the ZMP were outside the support polygon, the foot would necessarily start rotating about its edge, since ground reaction forces can't supply enough counteracting moment there. ZMP inside the polygon means the available ground reaction is enough to prevent any such rotation, so the foot behaves as if bolted down. With the stance foot effectively fixed, every joint acceleration in the chain above it becomes freely commandable again, exactly the fully-actuated assumption DYN-03's operational-space control relies on; the robot reduces to a conventional fixed-base arm."
+    },
+    {
+      "exerciseId": "MANIP-02-ex3-passive-dynamics-connection",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies C(q,qdot)qdot+G(q) as DYN-01's F(q,qdot) bundle." },
+          { "points": 2, "description": "Correctly identifies u=0 as the reason (no actuation during swing phase)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "C(q,qdot)qdot+G(q) is exactly DYN-01's F(q,qdot) bundle. So the Compass Gait equation reads M(q)qddot+F(q,qdot)=0, identical in structure to DYN-01's M(q)qddot+F(q,qdot)=u. It's the same equation with u=0: during swing phase there is genuinely no actuation (no ground contact, no motor torque applied), so the general form specializes exactly."
+    },
+    {
+      "exerciseId": "MANIP-02-ex4-hybrid-dynamics-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains the discrete-event/continuous-ODE distinction that makes it hybrid." },
+          { "points": 2, "description": "Correctly lists at least three of the standard impact-model assumptions." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "The swing phase is ordinary continuous ODE dynamics, but touchdown switches to a different continuous regime via a discrete, instantaneous event (not part of any smooth ODE) that can instantaneously reset velocities while leaving configuration unchanged. Standard impact-model assumptions: no rebound/slipping at touchdown; old stance leg lifts off without force interaction; impact is instantaneous (impulsive force); velocities jump but configuration doesn't; actuators contribute nothing during the impact."
+    }
+  ]
+}

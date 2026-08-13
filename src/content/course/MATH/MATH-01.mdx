@@ -3,36 +3,43 @@ id: MATH-01
 block: MATH
 title: "Functions, Derivatives & the Chain Rule"
 tier: 1
-estimatedHours: 2.5
+estimatedHours: 4
 prerequisites: ["MATH-00"]
 objectives:
+  - "Use the course's core notation conventions fluently (norms, Kronecker delta, diag, Hadamard product)."
+  - "State the formal definitions of continuity, differentiability, and smoothness for a function."
   - "Distinguish partial and total derivatives, and explain why they differ."
-  - "Derive the multivariable chain rule for a total derivative from a first-order Taylor expansion."
+  - "Define a computation graph (function network) formally, and state both the forward and backward chain rule as sum-over-paths identities."
   - "Compute total derivatives via the chain rule, both symbolically and numerically."
-  - "Read a computation graph and sum contributions over multiple paths."
 sources:
-  - { sourceId: "lecture-maths", pages: "p8-11 (§2.1-2.2)", role: "primary" }
+  - { sourceId: "lecture-maths", pages: "p5-11, p19 (Ch.1, §2.1-2.2, §2.6.1)", role: "primary" }
 concepts:
+  - "Notation conventions (norms, Kronecker delta, diag, Hadamard product)"
   - "Continuity, differentiability, smoothness"
+  - "Basis functions (polynomials, RBFs, splines)"
   - "Partial derivative"
   - "Total derivative"
-  - "Multivariable chain rule"
-  - "Computation graph"
+  - "Computation graph / function network"
+  - "Multivariable chain rule (forward and backward versions)"
 notation:
   - { symbol: "$\\partial f/\\partial x$", meaning: "partial derivative: rate of change of $f$ w.r.t. $x$ alone, other variables fixed" }
   - { symbol: "$df/dt$", meaning: "total derivative: rate of change of $f$ w.r.t. $t$, accounting for every variable that depends on $t$" }
-  - { symbol: "$\\dot x(t)$", meaning: "shorthand for $dx/dt$" }
-  - { symbol: "$o(\\delta)$", meaning: "little-o: a quantity that vanishes faster than $\\delta$ as $\\delta \\to 0$" }
+  - { symbol: "$\\pi(i)$", meaning: "the set of parents of node $i$ in a computation graph" }
+  - { symbol: "$[a=b]$", meaning: "indicator function: 1 if $a=b$, else 0 (also written $\\delta_{ab}$, the Kronecker delta)" }
+  - { symbol: "$\\|x\\|_p$", meaning: "$p$-norm: $\\left(\\sum_i |x_i|^p\\right)^{1/p}$; $p=2$ is the usual Euclidean length" }
+  - { symbol: "$A\\circ B$", meaning: "Hadamard (elementwise) product of two matrices/vectors" }
+  - { symbol: "$\\text{diag}(a_1,..,a_n)$", meaning: "diagonal matrix with $a_1,..,a_n$ on the diagonal" }
 cheatsheetLinks: []
 nextModules: ["MATH-02"]
 ---
 
 import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
 import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+import SourceFigure from '../../../components/SourceFigure.astro';
 
 ## Why this matters
 
-Every gradient you'll ever compute, whether it's a robot dynamics Jacobian, a loss function's gradient in a learning algorithm, or a trajectory optimizer's cost gradient, is built out of the chain rule applied systematically. This module rebuilds that foundation from scratch: not just recalling the chain rule formula, but understanding *why* it's true, so you can apply it correctly even when a problem doesn't look like a textbook example.
+Every gradient you'll ever compute, whether it's a robot dynamics Jacobian, a loss function's gradient in a learning algorithm, or a trajectory optimizer's cost gradient, is built out of the chain rule applied systematically. This module rebuilds that foundation from scratch, including the notation and formal definitions the rest of this course leans on constantly, so you never have to stop and wonder "wait, what does this symbol mean again" mid-derivation.
 
 ## Prerequisites & readiness check
 
@@ -43,21 +50,66 @@ You should have just come from [MATH-00](/course/MATH/MATH-00) (Taylor expansion
   answer="$f(x+\delta) \approx f(x) + f'(x)\delta$, derived by rearranging the definition of the derivative, $f'(x) = \lim_{\delta\to0}[f(x+\delta)-f(x)]/\delta$, for finite (not infinitesimal) $\delta$."
 />
 
+## Notation conventions
+
+Toussaint's notes open with a short but important chapter on notation, worth internalizing now rather than guessing later. A handful of conventions recur throughout this whole course:
+
+- $[a=b] \in \{0,1\}$ is the **indicator function** (also written $\delta_{ab}$, the **Kronecker delta**): 1 if $a=b$, else 0.
+- The **$p$-norm** is $\|x\|_p = \left(\sum_i |x_i|^p\right)^{1/p}$. By default, $\|x\| = \|x\|_2$, the ordinary **Euclidean length**. The **$L^1$-norm** $\|x\|_1 = \sum_i|x_i|$ (Manhattan distance) also plays an important role, especially in sparsity-inducing optimization.
+- $\text{diag}(a_1,..,a_n)$ is the diagonal matrix with $a_1,..,a_n$ on the diagonal; conversely $\text{diag}(A) = (A_{11},..,A_{nn})$ extracts the diagonal of a square matrix $A$.
+- $\mathbf{0}_n, \mathbf{1}_n \in \mathbb{R}^n$ are the all-zeros/all-ones vectors; $\mathbf{I}_n = \text{diag}(\mathbf{1}_n)$ is the identity matrix; $e_i$ is the $i$-th standard basis vector (all zeros except a 1 in position $i$).
+- $A \circ B$ is the **Hadamard product** (elementwise product) of two matrices or vectors, the same $\odot$ notation you saw in ML-03 and KIN-02.
+
+**Type-checking discipline**: within any equation, always know exactly what type each term is (scalar? vector? matrix? tensor?) and whether both sides agree in type and dimension. This sounds trivial but is the single most common source of bugs in hand-derived equations, check it explicitly, every time, especially once matrix calculus (MATH-02B) gets involved.
+
+## Continuity, differentiability, smoothness
+
+Formal definitions worth having precisely, not just "vaguely remembered":
+
+- $f:\mathbb{R}\to\mathbb{R}$ is **continuous** at $x$ if $\lim_{h\to0}f(x+h) = f(x)$ (the limit exists and equals $f(x)$, from both sides).
+- $f$ is **differentiable** at $x$ if $f'(x) = \lim_{h\to0}\dfrac{f(x+h)-f(x)}{h}$ exists. Differentiable $\Rightarrow$ continuous (but not conversely, e.g. $|x|$ is continuous but not differentiable at $0$).
+- $f$ is $\mathcal{C}^k$ if it's $k$-fold continuously differentiable ($\mathcal{C}^0$ = continuous, $\mathcal{C}^2$ = twice continuously differentiable, the level Hessian-based methods in MATH-02/OPT-01 generally assume).
+- $f \in \mathcal{C}^\infty$ is called **smooth** (infinitely differentiable). Polynomials, $\sin$, $\cos$, $\exp$ are all smooth; a piecewise-linear function is continuous but not differentiable at the "kinks."
+
+## Basis functions, briefly
+
+A **polynomial** of degree $p$ is a weighted sum of monomials, $f(x) = \sum_{i=0}^p a_ix^i$. More generally, a set of **basis functions** $\{e_1,..,e_n\}$ defines the space of all their linear combinations, $f = \sum_i \alpha_i e_i$. Common choices beyond monomials: trigonometric functions (the Fourier basis), and **radial basis functions** $\varphi(|x-c_i|)$ centered at points $c_i$, a very common one being the squared exponential $\varphi(d)=\exp(-ld^2)$ (a non-normalized Gaussian bell curve, which you'll meet properly in PROB-05). **Splines** (KIN's motion-primitive module territory, and Toussaint's own `splines` note) are piecewise polynomials, continuously joined; a spline of degree $p$ is $\mathcal{C}^{p-1}$, one derivative less smooth than a true degree-$p$ polynomial, because the piece boundaries limit how many derivatives can be guaranteed continuous.
+
 ## Partial vs. total derivatives
 
-Consider $z = f(x,y)$, a function of two variables. The **partial derivative** $\partial f/\partial x$ answers: if I nudge $x$ alone, holding $y$ fixed, how does $z$ change? It treats $x$ and $y$ as independent.
+Consider $z = f(x,y)$, a function of two variables. Formally:
 
-Now suppose $x$ and $y$ *aren't* actually independent: both depend on a third variable, $x=x(t)$, $y=y(t)$. The **total derivative** $dz/dt$ answers a different question: if I nudge $t$, how does $z$ actually change, given that nudging $t$ moves both $x$ and $y$ at once?
+> **Definition (partial derivative).** The partial derivative of $f(x_1,..,x_n)$ w.r.t. one argument is the ordinary derivative treating every other argument as fixed: $\dfrac{\partial}{\partial x_i}f(x_1,..,x_n) = \lim_{h\to0}\dfrac{f(x_1,..,x_i+h,..,x_n)-f(x_1,..,x_n)}{h}$.
+
+Now suppose $x$ and $y$ *aren't* actually independent: both depend on a third variable, $x=x(t)$, $y=y(t)$. The **total derivative** $dz/dt$ answers a different question: if I nudge $t$, how does $z$ actually change, given that nudging $t$ moves both $x$ and $y$ at once? The bottom line: the partial derivative depends entirely on what you explicitly declared as the function's arguments, if you suddenly treat $z$ as depending on $t$ through both $x(t)$ and $y(t)$, "the derivative of $z$" is genuinely ambiguous until you say which one you mean.
 
 <ExerciseCard id="MATH-01-ex1-partial-vs-total" />
 
-## Deriving the chain rule
+## Computation graphs and the two chain rules
 
-The total derivative isn't a new kind of derivative, it's built entirely out of partial derivatives, combined via the chain rule:
+To handle dependency chains of arbitrary depth cleanly, Toussaint introduces a formal structure:
 
-$$\frac{dz}{dt} = \frac{\partial f}{\partial x}\frac{dx}{dt} + \frac{\partial f}{\partial y}\frac{dy}{dt}$$
+> **Definition (computation graph / function network).** A directed acyclic graph (DAG) of $n$ quantities $x_i$, where each is a deterministic function of a set of parents $\pi(i)\subset\{1,..,n\}$: $x_i = f_i(x_{\pi(i)})$.
 
-This is worth deriving properly once, rather than just memorizing, because the *reasoning* (a first-order Taylor expansion, the same one you derived from scratch in [MATH-00](/course/MATH/MATH-00)) is exactly the reasoning you'll reuse for every multivariable derivative in this course.
+Given a small variation of an input, how do all downstream values vary? It turns out there are **two** equivalent chain rules, depending on which direction you propagate:
+
+<SourceFigure
+  src="/figures/lecture-maths/fig1-chainrule.png"
+  alt="Two DAG diagrams showing forward and backward chain rule propagation between f, several intermediate g nodes, and x"
+  caption="General chain rule. Left: forward version (propagate from x up to f). Right: backward version (propagate from f down to x). The gray arc denotes the direct dependence ∂f/∂x."
+  source="Lecture-Maths.pdf"
+  page="11"
+/>
+
+> **Forward-version chain rule:** $\dfrac{df}{dx} = \displaystyle\sum_{g\in\pi(f)} \dfrac{\partial f}{\partial g}\dfrac{dg}{dx}$ (with $dx/dx\equiv1$, in case $x\in\pi(f)$).
+>
+> Read as: "the change of $f$ with $x$ is the sum of changes that come from its direct dependence on each $g\in\pi(f)$, each multiplied by the change of that $g$ with $x$."
+>
+> **Backward-version chain rule:** $\dfrac{df}{dx} = \displaystyle\sum_{g:\,x\in\pi(g)} \dfrac{df}{dg}\dfrac{\partial g}{\partial x}$ (with $df/df\equiv1$).
+>
+> Read as: "the change of $f$ with $x$ is the sum of changes that arise from all $g$ which directly depend on $x$."
+
+If you recursively expand either one, they yield the *same* expression in terms of partial derivatives only, they're two equivalent ways of walking the same graph. The backward version is exactly what backprop does (you met this concretely in ML-03): propagate gradients from $f$ down toward $x$, one step at a time.
 
 <ExerciseCard id="MATH-01-ex2-chainrule-derivation" />
 
@@ -79,32 +131,39 @@ Matches the direct computation exactly, as it must.
 
 ## Multiple paths: the computation-graph view
 
-When $z$ depends on $t$ through *more than one* intermediate variable, each path from $t$ to $z$ contributes its own term, and the total derivative sums over all paths. This is the computation-graph picture you'll use constantly from here on: draw $t \to x \to z$ and $t \to y \to z$ as two separate arrows-chains, and the chain rule is just "multiply along each chain, then add the chains up."
+When $z$ depends on $t$ through *more than one* intermediate variable, each path from $t$ to $z$ contributes its own term, and the total derivative sums over all paths. This is exactly the forward-version chain rule above, applied when a node has multiple parents.
 
 <ExerciseCard id="MATH-01-ex4-multipath-challenge" />
 
+## A 3D warm-up: derivatives with the skew matrix
+
+<ExerciseCard id="MATH-01-ex5-skew-challenge" />
+
 ## Summary
 
+- Core notation: $[a=b]$/Kronecker delta, $p$-norms, $\text{diag}(\cdot)$, Hadamard product $\circ$, standard basis vectors $e_i$.
+- Continuity $\Leftarrow$ differentiability $\Leftarrow$ smoothness ($\mathcal{C}^\infty$); these are a strict chain of implications, not equivalent.
 - $\partial f/\partial x$ isolates one direct effect; $dz/dt$ sums *all* the indirect effects of $t$ on $z$, through every variable that depends on $t$.
-- The chain rule formula follows directly from a first-order Taylor expansion of $f$, it's not a separate rule to memorize independently of Taylor expansions.
-- When multiple paths connect a variable to the output, sum the chain-rule contribution of each path.
+- A computation graph formalizes dependency chains; the forward and backward chain rules are two equivalent ways to compute a total derivative by walking that graph, backprop is the backward version.
 
 ## Retrieval questions
 
 1. Write the multivariable chain rule for $z=f(x,y)$, $x=x(t)$, $y=y(t)$, from memory.
-2. What mathematical tool is the chain rule's derivation actually built from?
-3. If $z$ depends on $s$ through three different intermediate variables, how many terms does $\partial z/\partial s$ have?
+2. State the formal definitions of continuity and differentiability, and explain why differentiability implies continuity but not the reverse.
+3. Write both the forward and backward chain rule identities for a computation graph, from memory.
 
 ## Mastery checklist
 
+- [ ] Comfortable with the notation conventions (indicator/Kronecker delta, norms, diag, Hadamard product).
+- [ ] Can state the formal definitions of continuity, differentiability, and smoothness.
 - [ ] Can explain the difference between a partial and a total derivative in one sentence each.
-- [ ] Derived the chain rule from a Taylor expansion, not just recalled the formula.
+- [ ] Can state both chain rule versions (forward/backward) for a computation graph from memory.
 - [ ] Computed a total derivative via the chain rule and got the same answer as direct substitution.
 - [ ] Applied the sum-over-paths rule to a multi-path computation graph.
 
 ## Source note
 
-This module's topic and page range are from `lecture-maths`, §2.1-2.2 (pp. 8-11). All exposition, the worked example, and every exercise in this module are newly authored for this workbook (paraphrased/synthesized, not quoted from the source); the source's own treatment of this material is significantly more compact. The "backprop in a neural net" exercises from this same chapter of `lecture-maths` (Exercises 4 and 5, §2.7-2.8) are covered separately in [ML-03](/course/ML/ML-03), where they fit thematically better alongside neural network content.
+This module's exposition, definitions, and Figure 1 are adapted from `lecture-maths`, Chapter 1 (pp. 5-9, notation and basis functions) and §2.1-2.2 (pp. 8-11, continuity/differentiability, partial/total derivatives, the chain rule identities and figure), used with attribution per this repository's README. The "more derivatives" exercise is adapted from §2.6.1 (p. 19). The worked example and the remaining exercises are newly authored. The "backprop in a neural net" exercises from this same chapter (§2.7-2.8) are covered separately in [ML-03](/course/ML/ML-03); the matrix-calculus identities, worked examples (GP/logistic regression), and remaining exercises from §2.4 are covered in [MATH-02B](/course/MATH/MATH-02B).
 
 ---
 

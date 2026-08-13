@@ -1,0 +1,172 @@
+---
+id: RL-06
+block: RL
+title: "Monte Carlo Tree Search & UCT"
+tier: 2
+estimatedHours: 3.5
+prerequisites: ["RL-02", "OPT-06"]
+objectives:
+  - "State the basic tree-search algorithm and the complexity tradeoffs between BFS, DFS, and iterative deepening."
+  - "Derive the generic MCTS scheme from flat Monte Carlo estimation, via 1-step and then sequential UCB."
+  - "State UCT's tree policy, and explain precisely how it is OPT-06's UCB1 applied at every node of a growing tree."
+sources:
+  - { sourceId: "lecture-ai", pages: "p52-66 (§2.1), p112-121 (§4.1, compact tree-search prereq)", role: "primary" }
+concepts:
+  - "Basic tree search (BFS, DFS, iterative deepening)"
+  - "Decision trees for MDPs, POMDPs, and games"
+  - "Flat Monte Carlo, 1-step UCB"
+  - "Monte Carlo Tree Search (MCTS), UCT"
+  - "Minimax, negamax, evaluation functions"
+notation:
+  - { symbol: "$b,d,m$", meaning: "branching factor, solution depth, maximum search depth" }
+  - { symbol: "$Q_v,n_v$", meaning: "a tree node's accumulated return and visit count" }
+  - { symbol: "$\\hat V(s)$", meaning: "a learned evaluation function, replacing/supplementing random rollouts" }
+cheatsheetLinks: []
+nextModules: ["RL-07"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+RL-02 through RL-05 all *propagate values backward* from the Bellman equation. **MCTS is the other paradigm**: it *searches forward*, from the current state, using simulation. It's the standard approach behind AlphaGo/AlphaZero and, directly relevant to your own research area, a large fraction of modern sampling-based planning literature. UCT, MCTS's most common form, turns out to be nothing more than OPT-06's UCB1 applied independently at *every node* of a growing search tree, this module's central, genuinely satisfying result.
+
+## Prerequisites & readiness check
+
+You should have RL-01's MDP formalism and OPT-06's UCB1 formula fresh.
+
+<ReadinessCheck
+  question="From OPT-06, what is UCB1's action-selection rule?"
+  answer="Pick the arm maximizing μ_a + β√(2 ln n / n_a): the empirical mean plus a confidence bonus that shrinks with more visits to that arm."
+/>
+
+## A compact tree-search primer
+
+Before MCTS, the classical (deterministic, fully-observable) tree search toolbox, needed as background:
+
+```
+TreeSearch(s0, goal_states, succ, cost):
+  1: root <- Node(state=s0, parent=nil, cost=0, depth=0)
+  2: fringe <- [root]
+  3: while fringe is not empty:
+  4:     n <- fringe.pop()
+  5:     if n.state in goal_states: return n
+  6:     fringe.insert( Expand(n, succ, cost) )
+  7: return nil
+```
+*(Marc Toussaint, `Lecture-AI.pdf`, p.116, §4.1:12.)* A **strategy** is just a choice of fringe ordering:
+
+| Strategy | Fringe | Complete? | Time | Space | Optimal? |
+|---|---|---|---|---|---|
+| Breadth-first | FIFO | Yes (finite $b$) | $O(b^{d+1})$ | $O(b^{d+1})$ | Yes (unit step cost) |
+| Depth-first | LIFO | Yes (finite $m$) | $O(b^m)$ | $O(bm)$ | No |
+| Iterative deepening | repeated depth-limited | Yes | $O(b^d)$ | $O(bd)$ | Yes (unit step cost) |
+
+with $b$ the branching factor, $d$ the depth of the shallowest solution, $m$ the maximum search depth. **Iterative deepening** (repeat depth-first with an increasing depth limit) sounds wasteful (re-exploring shallow nodes every round) but is asymptotically as fast as breadth-first while using only *linear* space, since the repeated shallow work is dwarfed by the exponentially-larger final round.
+
+<ExerciseCard id="RL-06-ex1-tree-search-complexity-numeric" />
+
+## Decision trees for MDPs, POMDPs, and games
+
+RL-01's MDP diagram, unrolled forward from a state, *is* a decision tree, just with two kinds of branching interleaved: the agent's own decision $a$, and the environment's (stochastic) response. Different problem settings interleave different branch types:
+
+| Setting | Branch 1 | Branch 2 |
+|---|---|---|
+| Deterministic search | action | (none, deterministic) |
+| MDP | action | stochastic state transition |
+| POMDP | action | stochastic observation |
+| 2-player game | my action | opponent's action |
+
+A node in any of these trees represents not "a state," but **the sequence of events the agent has experienced so far** (for an MDP: $(s_{0:t},a_{0:t-1})$), exactly the "node vs. state" distinction the basic tree-search primer already drew.
+
+## Flat Monte Carlo and 1-step UCB
+
+To decide the *first* action $a_0$ from $s_0$, without a known model, use RL-01's Monte Carlo idea (cross-referencing PROB-02's basic MC estimator, $\mathbb{E}_p\{f(x)\}\approx\frac1N\sum_if(x_i)$, not re-derived here): simulate many random rollouts and average the returns.
+
+```
+Flat-MC(s0, n simulations):
+  1: initialize Q_a, n_a <- 0 for every first action a
+  2: for i = 1..n:
+  3:     reset simulation to s0; choose a RANDOM first decision a
+  4:     random rollout to the end; receive total return R
+  5:     n_a += 1; Q_a += R
+  6: estimate Q(s0,a) ~ Q_a/n_a; take argmax_a Q(s0,a) for real
+```
+*(Marc Toussaint, `Lecture-AI.pdf`, p.60, §2.1:19.)* This wastes simulation budget on obviously-bad first actions. **1-step UCB** fixes exactly this, by choosing the *simulated* first action using OPT-06's UCB1 (based on the running $Q_a,n_a$) instead of uniformly at random, focusing simulation budget on promising actions:
+
+<ExerciseCard id="RL-06-ex2-1step-ucb-conceptual" />
+
+## From 1-step UCB to full MCTS
+
+1-step UCB only ever refines the estimate of the *first* decision; every later decision in each rollout is still uniformly random. The natural next step, **sequential UCB**, applies UCB not just to $a_0$ but to *every* decision along the simulated path, requiring a **growing tree data structure** to store $(Q_v,n_v)$ for every node visited so far (not just the root's children):
+
+```
+Generic-MCTS(root n0, T simulations):
+  1: initialize tree V = {n0}   // each node stores parent, n, Q, children
+  2: for i = 1..T:
+  3:     n <- n0; reset simulation
+  4:     while not terminal:                          // "Selection"
+  5:         a <- TreePolicy(n)
+  6:         if a in n.children: n <- n.children[a]
+  7:         else: n <- n.children[a] = new_node(n); break   // "Expansion"
+  8:     while not terminal:                           // "Simulation" / rollout
+  9:         a <- RolloutPolicy(); step
+  10:    R <- total return of this simulated episode
+  11:    while n != n0:                                 // "Backup"
+  12:        n.Q += R; n.n += 1; n <- n.parent
+  13: estimate Q(n0,a) ~ n0.children[a].Q / n0.children[a].n
+  14: take argmax_a Q(n0,a) for real
+```
+*(Marc Toussaint, `Lecture-AI.pdf`, p.62, §2.1:23; Browne et al.'s "Selection/Expansion/Simulation/Backpropagation" naming is noted but not used here, per the source's own preference for the more descriptive names above.)* Once a node has no stored data (never selected before), the rollout falls back to a simple (typically random) **rollout policy** for the remainder of the episode.
+
+## UCT: UCB1, applied at every tree node
+
+**UCT** (Upper Confidence Trees, Kocsis & Szepesvári, 2006) is the generic MCTS scheme above with `TreePolicy` set to exactly OPT-06's UCB1, applied locally at each node:
+
+$$\text{TreePolicy}(v) = \operatorname*{argmax}_{v'\in\partial(v)}\ \frac{Q_{v'}}{n_{v'}}+\beta\sqrt{\frac{2\ln n_v}{n_{v'}}}$$
+
+(choosing an as-yet-unvisited child, $n_{v'}=0$, automatically first, since the bonus is unbounded there). **This is literally OPT-06's UCB1 formula**, with the bandit "arms" being $v$'s children, run *independently at every node of the tree*, all the way down: each node runs its own local multi-armed-bandit problem over which child to explore next.
+
+<ExerciseCard id="RL-06-ex3-uct-selection-numeric" />
+
+**Does it converge to optimal decisions?** Flat MC only estimates $Q(s_0,a)$ correctly *under the assumption of a subsequently-random rollout*, not accounting for future decisions being made well. UCT is stronger: Kocsis & Szepesvári extend UCB1's bounded-regret guarantee from single-armed bandits (OPT-06) to the full tree, proving UCT converges to the *truly* optimal action at every level, correctly accounting for optimal play at every future decision too, not just the current one (though it may still require very many rollouts in practice).
+
+## Minimax and evaluation functions
+
+For **2-player zero-sum games** (agent maximizes $R$, opponent minimizes it), the standard backup, $n_v\mathrel{+}=1,\ Q_v\mathrel{+}=R$, needs one small fix: while propagating $R$ up the tree, flip its sign at every alternating level (**negamax**), so each player's own node always accumulates the return *from that player's own perspective*.
+
+<ExerciseCard id="RL-06-ex4-negamax-conceptual" />
+
+Random rollouts are a crude way to estimate a node's value; a trained **evaluation function** $\hat V(s)$ (a regression model, ML-02/ML-04's territory, trained on massive self-play or historical game data mapping states to eventual outcomes) can replace or supplement rollouts entirely, mixing them as $R\leftarrow(1-\lambda)\hat V(s)+\lambda R$. This combination, MCTS's search structure plus a learned $\hat V(s)$ (a "value network") and even a learned policy prior over which moves to try first (a "policy network"), is exactly **AlphaGo/AlphaZero**'s architecture, trained partly by imitating expert human play and partly through self-play reinforcement learning (RL-03/RL-04's machinery).
+
+## Summary
+
+- The classical tree-search toolbox (BFS/DFS/iterative deepening) trades completeness, time, space, and optimality; iterative deepening matches BFS's guarantees with DFS's linear space.
+- MDPs, POMDPs, and 2-player games are all decision trees, differing only in what the second (environment/opponent) branch represents.
+- **Flat MC** estimates only the first decision by uniform random rollouts; **1-step UCB** applies OPT-06's UCB1 to just the first decision; **sequential UCB** (full **MCTS**) applies it at every level, requiring a growing tree data structure.
+- **UCT** is exactly OPT-06's UCB1, run independently at every tree node as the `TreePolicy`; it provably converges to truly optimal play (Kocsis & Szepesvári), not just optimal-assuming-random-future-play.
+- **Negamax** correctly extends the backup to 2-player zero-sum games; **evaluation functions** (learned $\hat V(s)$) replace/supplement rollouts, the core idea behind AlphaGo/AlphaZero.
+
+## Retrieval questions
+
+1. State the BFS/DFS/iterative-deepening time and space complexities, and explain why iterative deepening is preferred.
+2. Trace the progression from flat Monte Carlo to 1-step UCB to full sequential UCB/MCTS.
+3. State UCT's tree policy, and explain precisely why it's "OPT-06's UCB1, run at every node."
+4. Why does negamax need to flip the sign of $R$ at alternating levels?
+
+## Mastery checklist
+
+- [ ] Can state the BFS/DFS/iterative-deepening complexity tradeoffs.
+- [ ] Can state the decision-tree branching structure for MDPs, POMDPs, and games.
+- [ ] Can derive the progression from flat MC through 1-step UCB to full MCTS.
+- [ ] Can state UCT's tree policy and its connection to OPT-06's UCB1.
+- [ ] Can explain negamax and the role of learned evaluation functions.
+
+## Source note
+
+This module's exposition, the basic tree-search algorithm and complexity table, the MDP/POMDP/game decision-tree taxonomy, flat Monte Carlo, 1-step UCB, the generic MCTS scheme (including its pseudocode), UCT (Kocsis & Szepesvári, 2006), minimax/negamax, and evaluation functions/AlphaGo are adapted from `lecture-ai`, §2.1 (pp. 52-66) and the compact tree-search prerequisite in §4.1 (pp. 112-121). The basic Monte Carlo estimator itself is deliberately not re-derived here, cross-referenced to [PROB-02](/course/PROB/PROB-02), which already covers it; UCT's UCB1 formula is likewise cross-referenced to, not re-derived from, [OPT-06](/course/OPT/OPT-06). All exercises are newly authored; the UCT node-selection example and the tree-search node-count comparison were independently verified with direct computation while authoring this module.
+
+---
+
+**Next**: [RL-07: Decision Theory & Value Alignment](/course/RL/RL-07)

@@ -3,21 +3,24 @@ id: PROB-01
 block: PROB
 title: "Probability Foundations"
 tier: 2
-estimatedHours: 3
+estimatedHours: 4.5
 prerequisites: ["MATH-01"]
 objectives:
-  - "Distinguish joint, marginal, and conditional probability."
-  - "Derive Bayes' rule from the definition of conditional probability."
+  - "State the formal definition of a probability measure and a random variable."
+  - "Distinguish joint, marginal, and conditional probability, from their formal definitions."
+  - "Derive Bayes' rule from the definition of conditional probability, and name each of its terms."
   - "Apply Bayes' rule to compute a posterior probability, and recognize the base-rate effect."
   - "Compute a marginal distribution from a joint distribution table."
 sources:
   - { sourceId: "lecture-ai", pages: "p10-17 (§1.2, through Multivariate Distributions)", role: "primary" }
 concepts:
+  - "Probability measure, sample space, random variable"
   - "Joint, marginal, conditional probability"
-  - "Bayes' rule"
+  - "Product rule, Bayes' rule"
   - "Base rate"
-  - "Standard distribution families"
+  - "Conditional independence, Bayesian networks (briefly)"
 notation:
+  - { symbol: "$\\Omega$", meaning: "sample space (domain of possible outcomes)" }
   - { symbol: "$P(X,Y)$", meaning: "joint distribution" }
   - { symbol: "$P(X)$", meaning: "marginal distribution" }
   - { symbol: "$P(X\\mid Y)$", meaning: "conditional distribution" }
@@ -42,11 +45,40 @@ Just basic algebra; this is a fresh start on probability, assuming only that you
   answer="$1/6$."
 />
 
+## Formal definitions: probability measure and random variable
+
+> **Definition (probability measure).** The **sample space** (or domain) $\Omega$ is the space of possible outcomes of an experiment (e.g. $\Omega=\{1,2,3,4,5,6\}$ for a die). A probability measure is a mapping $P:A\subseteq\Omega\mapsto[0,1]$ such that:
+> - $p(A)\ge0$ for any $A\subseteq\Omega$ (**non-negativity**);
+> - $p(\bigcup_iA_i)=\sum_ip(A_i)$ if $A_i\cap A_j=\emptyset$ (**additivity**, for disjoint sets);
+> - $p(\Omega)=1$ (**normalization**).
+
+From just these three axioms, several familiar facts follow directly: $0\le p(A)\le1$; $p(\emptyset)=0$; $A\subseteq B\Rightarrow p(A)\le p(B)$; $p(A\cup B)=p(A)+p(B)-p(A\cap B)$ (inclusion-exclusion, needed once $A,B$ aren't disjoint); $p(\Omega\setminus A)=1-p(A)$.
+
+> **Definition (random variable).** For a discrete domain $\Omega$, $p(X{=}x)\in\mathbb{R}$ denotes the specific probability that $X=x$; $p(X)$ denotes the whole probability *distribution* (a function over $\Omega$), with $\sum_{x\in\Omega}p(X{=}x)=1$. Formally, a random variable is a mapping $X:\Omega\to\mathbb{R}$ from the sample space to $\mathbb{R}$ (or another measurable space); this pushes the probability measure onto $\mathbb{R}$: $p(X\in A)=p(\{\omega:X(\omega)\in A\})$.
+
+For a die, $\Omega=\{1,..,6\}$ and $p(X)$ is literally "the probability table," a single number for each outcome. The same machinery extends directly to **continuous** distributions, replacing $\sum_x$ with $\int dx$: e.g. $\Omega=\mathbb{R}$, $p(x{=}1)=1.5$ is a **density** value (not itself a probability, densities can exceed 1), with $\int_{-\infty}^\infty p(x)\,dx=1$.
+
+<ExerciseCard id="PROB-01-ex0-axioms-check" />
+
 ## Joint, marginal, conditional
+
+> **Definitions (joint, marginal, conditional).** For two random variables $X,Y$: $p(X,Y)$ denotes their **joint distribution**. Based on this, define the **marginal** $p(X)=\sum_Yp(X,Y)$, and the **conditional** $p(X\mid Y)=\dfrac{p(X,Y)}{p(Y)}$, which satisfies $\forall Y:\sum_Xp(X\mid Y)=1$.
+>
+> $X$ is **independent** of $Y$ iff $p(X,Y)=p(X)p(Y)$, or equivalently, $p(X\mid Y)=p(X)$.
 
 <ExerciseCard id="PROB-01-ex1-joint-vs-conditional" />
 
-## Bayes' rule
+## Product rule and Bayes' rule
+
+From the two definitions above, $p(X)=\sum_Yp(X,Y)$ and $p(X\mid Y)=p(X,Y)/p(Y)$, it follows directly that
+
+$$p(X,Y) = p(X\mid Y)\,p(Y) = p(Y\mid X)\,p(X) \qquad\text{(product rule)}$$
+
+$$p(X\mid Y) = \frac{p(Y\mid X)\,p(X)}{p(Y)} \qquad\text{(Bayes' rule)}$$
+
+The individual terms in Bayes' rule have standard names, worth having automatic since you'll see this vocabulary constantly (Bayesian optimization, Bayesian filtering, Bayesian inference generally):
+
+$$\underbrace{p(X\mid Y)}_{\text{posterior}} = \frac{\overbrace{p(Y\mid X)}^{\text{likelihood}}\cdot\overbrace{p(X)}^{\text{prior}}}{\underbrace{p(Y)}_{\text{evidence}}}$$
 
 <ExerciseCard id="PROB-01-ex2-bayes-derivation" />
 
@@ -68,28 +100,38 @@ Despite a 95% accurate test, a positive result only means about a 16% chance of 
 
 <ExerciseCard id="PROB-01-ex4-marginalization-challenge" />
 
+## More variables, and a first look at Bayesian networks
+
+Everything above generalizes directly to $n$ random variables $X_{1:n}$: the joint $p(X_{1:n})$ can (by definition!) always be **factored** via repeated application of the product rule, e.g. $p(X_{1:n})=\prod_{i=1}^np(X_i\mid X_{i+1:n})$, and $X$ is **conditionally independent** of $Y$ given $Z$ iff $p(X\mid Y,Z)=p(X\mid Z)$.
+
+Often, a variable only depends on *some* others, not all of them, which is very useful to know for simplifying computations. A **Bayesian network** formalizes this: a directed acyclic graph where each node is a random variable $X_i$, associated with a conditional distribution $p(X_i\mid\text{Parents}(X_i))$, generalizing the computation-graph idea from [MATH-01](/course/MATH/MATH-01) to probabilistic dependencies. E.g. instead of the fully general $p(X_{1:4})=p(X_1)p(X_2|X_1)p(X_3|X_1,X_2)p(X_4|X_1,X_2,X_3)$, a graph might tell you $p(X_{1:4})=p(X_1)p(X_2|X_1)p(X_3|X_2)p(X_4|X_3)$ instead, far cheaper to represent and compute with. This is background context for later, richer modules; it isn't developed further here.
+
 ## Summary
 
-- Joint $P(X,Y)$ is the complete description; marginal $P(X)$ sums out $Y$; conditional $P(X\mid Y{=}y)$ slices at $Y{=}y$ and renormalizes.
-- Bayes' rule follows directly from writing the same joint two ways via the two conditional-probability definitions.
+- A probability measure satisfies non-negativity, additivity (on disjoint sets), and normalization; a random variable formally maps outcomes to $\mathbb{R}$.
+- Joint $P(X,Y)$ is the complete description; marginal $P(X)=\sum_YP(X,Y)$ sums out $Y$; conditional $P(X\mid Y{=}y)=P(X,y)/P(y)$ slices at $Y{=}y$ and renormalizes.
+- Bayes' rule follows directly from writing the same joint two ways via the two conditional-probability definitions; its terms are named posterior/likelihood/prior/evidence.
 - A rare prior can make even an accurate test's positive result much less conclusive than it first appears, always check the base rate.
+- Bayesian networks generalize the computation-graph idea to probabilistic dependencies, factoring a joint distribution using only the dependencies that actually matter.
 
 ## Retrieval questions
 
-1. Derive Bayes' rule from the definition of conditional probability, without looking back.
-2. Why did the diagnostic test example's posterior come out so much lower than the test's stated accuracy?
-3. How do you compute a marginal from a joint distribution table?
+1. State the three probability-measure axioms from memory.
+2. Derive Bayes' rule from the definition of conditional probability, without looking back, and name all four terms.
+3. Why did the diagnostic test example's posterior come out so much lower than the test's stated accuracy?
+4. How do you compute a marginal from a joint distribution table?
 
 ## Mastery checklist
 
-- [ ] Can distinguish joint, marginal, and conditional probability precisely.
-- [ ] Derived Bayes' rule from the definition of conditional probability.
+- [ ] Can state the probability-measure axioms and the formal random-variable definition.
+- [ ] Can distinguish joint, marginal, and conditional probability precisely, from their definitions.
+- [ ] Derived Bayes' rule from the definition of conditional probability, and can name all four terms.
 - [ ] Computed a posterior probability via Bayes' rule and can explain the base-rate effect.
 - [ ] Computed a marginal from a joint distribution table.
 
 ## Source note
 
-This module's topic and page range are from `lecture-ai`, §1.2 (pp. 10-17), which covers standard distribution families (Bernoulli, Binomial, Beta, Multinomial, Dirichlet, conjugate priors) in more depth than this module does (not yet incorporated). All exposition, the worked example, and every exercise here are newly authored, paraphrasing the source's topic coverage.
+This module's formal definitions (probability measure, random variable, joint/marginal/conditional, product rule, Bayes' rule, Bayesian networks) are adapted from `lecture-ai`, §1.2 (pp. 10-17), which also covers standard distribution families (Bernoulli, Binomial, Beta, Multinomial, Dirichlet, conjugate priors) as explicitly-marked background material "not relevant for the lecture/exam" (source's own words); not incorporated here for the same reason. The worked example and every exercise here are newly authored.
 
 ---
 

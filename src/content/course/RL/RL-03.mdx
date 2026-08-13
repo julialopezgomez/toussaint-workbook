@@ -1,0 +1,129 @@
+---
+id: RL-03
+block: RL
+title: "Model-Free RL: TD Learning & Q-Learning"
+tier: 1
+estimatedHours: 3
+prerequisites: ["RL-02"]
+objectives:
+  - "Derive TD-learning's update rule from the recursive value-function property, without assuming a known model."
+  - "Derive Q-learning's update rule from the Bellman optimality equation."
+  - "Explain Q-learning's convergence as a stochastic approximation of Q-iteration."
+sources:
+  - { sourceId: "lecture-ai", pages: "p71-80 (§2.2)", role: "primary" }
+concepts:
+  - "Model-based vs. data-based (model-free) RL"
+  - "Temporal-difference (TD) learning"
+  - "Q-learning, ε-greedy action selection"
+  - "TD error"
+notation:
+  - { symbol: "$\\alpha$", meaning: "learning rate" }
+  - { symbol: "$r+\\gamma V(s')-V(s)$", meaning: "TD error: the discrepancy between observed and expected one-step return" }
+  - { symbol: "$\\mathcal{D}=\\{(s_t,a_t,r_t,s_{t+1})\\}$", meaning: "experience data: the only thing model-free RL has access to" }
+cheatsheetLinks: []
+nextModules: ["RL-04"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+RL-02's value/Q-iteration need $P(s'\mid s,a)$ and $R(s,a)$ known exactly, the **model-based** setting. Most of the time, you don't have a model, only **data**: a stream of experienced $(s,a,r,s')$ tuples from actually interacting with the world. TD-learning and Q-learning are what value/Q-iteration turn into once you replace "loop over all states, take an exact expectation" with "use whatever single experience you just observed," the foundational move of essentially all practical RL.
+
+## Prerequisites & readiness check
+
+You should have RL-01's recursive value property and RL-02's Q-iteration fresh.
+
+<ReadinessCheck
+  question="From RL-01, what recursive equation does V^π(s) satisfy?"
+  answer="V^π(s) = R(s,π(s)) + γ Σ_s' P(s'|s,π(s)) V^π(s')."
+/>
+
+## TD learning: learning $V^\pi$ from data
+
+RL-01's recursive property, $V^\pi(s)=R(s,\pi(s))+\gamma\sum_{s'}P(s'\mid s,\pi(s))V^\pi(s')$, is an *exact expectation* over next states, unusable without knowing $P$. **Temporal-difference (TD) learning** replaces the expectation with a single sampled experience $(s,a,r,s')$, and takes a small step toward consistency with it:
+
+$$V_\text{new}(s) = V_\text{old}(s)+\alpha\underbrace{\big[r+\gamma V_\text{old}(s')-V_\text{old}(s)\big]}_{\text{TD error}}$$
+
+<ExerciseCard id="RL-03-ex1-td-error-sign-conceptual" />
+
+```
+TD-Learning(learning rate alpha, policy pi):
+  1: initialize V(s) = 0 for all s
+  2: repeat (loop over episodes):
+  3:     initialize start state s ~ P(s0)
+  4:     repeat (loop over steps):
+  5:         take action a = pi(s), observe r, s'
+  6:         V(s) <- V(s) + alpha * [r + gamma*V(s') - V(s)]
+  7:         s <- s'
+  8:     until end of episode
+  9: until V(s) converged
+```
+*(Marc Toussaint, `Lecture-AI.pdf`, p.73, §2.2:15.)* TD-learning **evaluates** a *given* policy $\pi$ (estimates $V^\pi$), it does not by itself improve $\pi$.
+
+## Q-learning: learning $Q^*$ directly
+
+Applying the identical replace-expectation-with-a-sample idea to RL-02's Bellman *optimality* equation for $Q^*$ gives **Q-learning** (Watkins, 1988):
+
+$$Q_\text{new}(s,a) = Q_\text{old}(s,a)+\alpha\underbrace{\Big[r+\gamma\max_{a'}Q_\text{old}(s',a')-Q_\text{old}(s,a)\Big]}_{\text{TD error}}$$
+
+<ExerciseCard id="RL-03-ex2-qlearning-derivation" />
+
+The crucial difference from TD-learning: Q-learning learns $Q^*$ directly (via the $\max_{a'}$, exactly RL-02's Q-iteration update, not $Q^\pi$ for whatever policy is currently being followed), so it needs actions chosen with **some** exploration, most simply **$\epsilon$-greedy** (act greedily with probability $1-\epsilon$, randomly otherwise), to guarantee every state-action pair keeps getting visited:
+
+```
+Q-learning(learning rate alpha, exploration epsilon):
+  1: initialize Q(s,a) = 0 for all s,a
+  2: repeat (loop over episodes):
+  3:     initialize start state s ~ P(s0)
+  4:     repeat (loop over steps):
+  5:         choose a = argmax_a Q(s,a) with probability 1-epsilon, random otherwise
+  6:         take action a, observe r, s'
+  7:         Q(s,a) <- Q(s,a) + alpha * [r + gamma*max_a' Q(s',a') - Q(s,a)]
+  8:         s <- s'
+  9:     until end of episode
+  10: until Q converged
+```
+*(Marc Toussaint, `Lecture-AI.pdf`, p.74, §2.2:17.)*
+
+<ExerciseCard id="RL-03-ex3-td-vs-qlearning-conceptual" />
+
+## Why Q-learning converges
+
+**Theorem** (Watkins, 1988): Q-learning converges to $Q^*$ with probability 1. Q-learning is a **stochastic approximation** of RL-02's Q-iteration: writing Q-iteration's deterministic update as $Q_{k+1}=T(Q_k)$ (the Bellman-optimality backup operator RL-02 already proved contracts toward $Q^*$), Q-learning's update is $Q_{k+1}=(1-\alpha)Q_k+\alpha[T(Q_k)+\eta_k]$, where $\eta_k$ is the noise from using one sampled transition instead of the true expectation. Watkins shows $\eta_k$ is zero-mean, so on average Q-learning still moves in RL-02's proven-contracting direction; standard stochastic-approximation theory (small enough, appropriately-decreasing $\alpha$) then gives convergence, riding directly on RL-02's contraction proof rather than needing an entirely new argument.
+
+## A brief note on faster credit assignment
+
+Vanilla TD/Q-learning only propagate reward information back one step per update, which can be slow (a reward received now takes many episodes to influence value estimates many steps earlier). **$n$-step updates** are a straightforward fix: instead of bootstrapping after one step, accumulate $n$ real rewards before bootstrapping, $R_t^{(n)}=r_t+\gamma r_{t+1}+\cdots+\gamma^{n-1}r_{t+n-1}+\gamma^nV(s_{t+n})$, and update $V(s_t)\leftarrow V(s_t)+\alpha[R_t^{(n)}-V(s_t)]$ (analogously for $Q$). *(Eligibility traces, a classical alternative achieving a similar effect for tabular value functions, are impractical for continuous state spaces and neural value functions, and are skipped here, consistent with the source's own framing that modern methods prefer $n$-step updates and explicit data storage instead.)*
+
+<ExerciseCard id="RL-03-ex4-nstep-numeric" />
+
+## Summary
+
+- **TD-learning** replaces RL-01's exact expectation with a single sampled transition, updating $V(s)$ toward $r+\gamma V(s')$ (the **TD error**); it evaluates a *given* policy.
+- **Q-learning** applies the same idea to RL-02's Bellman *optimality* equation, learning $Q^*$ directly regardless of the (exploratory) policy actually followed; $\epsilon$-greedy action selection ensures adequate exploration.
+- Q-learning's convergence is a **stochastic approximation** of RL-02's already-proven Q-iteration convergence: the noise from sampling instead of taking exact expectations is zero-mean, so convergence rides on the same contraction argument.
+- **$n$-step updates** propagate reward information back further per update, addressing vanilla TD/Q-learning's slow credit assignment.
+
+## Retrieval questions
+
+1. Derive TD-learning's update rule from RL-01's recursive value property.
+2. Derive Q-learning's update rule from RL-02's Bellman optimality equation for $Q^*$, and explain why $\epsilon$-greedy exploration is needed.
+3. Explain why Q-learning's convergence proof rides on RL-02's Q-iteration convergence proof rather than needing an entirely new argument.
+4. What problem do $n$-step updates address, and how?
+
+## Mastery checklist
+
+- [ ] Derived TD-learning's update rule.
+- [ ] Derived Q-learning's update rule and can explain the role of $\epsilon$-greedy exploration.
+- [ ] Can explain Q-learning's convergence as a stochastic approximation of Q-iteration.
+- [ ] Can explain $n$-step updates' motivation.
+
+## Source note
+
+This module's exposition, TD-learning (including its pseudocode), Q-learning (including its pseudocode and the TD-Gammon history, Tesauro 1991-1995), the convergence-as-stochastic-approximation argument (Watkins, 1988), and $n$-step updates are adapted from `lecture-ai`, §2.2 (pp. 71-80). Eligibility traces are deliberately not covered, consistent with the source's own note that they are impractical outside tabular/discrete settings and that modern methods prefer $n$-step updates and explicit replay data instead (elaborated further in [RL-04](/course/RL/RL-04)). All exercises are newly authored.
+
+---
+
+**Next**: [RL-04: Policy Gradient & Deep RL](/course/RL/RL-04)

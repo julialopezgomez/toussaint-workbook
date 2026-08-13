@@ -1,0 +1,128 @@
+---
+id: RLEARN-05
+block: RLEARN
+title: "Inverse RL"
+tier: 1
+estimatedHours: 3
+prerequisites: ["RL-04", "RLEARN-02"]
+objectives:
+  - "Derive the linear-in-features IRL objective, and state the Max Margin (Apprenticeship Learning) algorithm."
+  - "State the Max Entropy IRL formulation."
+  - "Derive Adversarial IRL's discriminator decomposition, and connect it explicitly to RLEARN-03's reward shaping."
+  - "State the Bradley-Terry preference model used in preference-based RL."
+sources:
+  - { sourceId: "lecture-robotlearning", pages: "p73-79 (§1.10, excluding Value Alignment)", role: "primary" }
+concepts:
+  - "Inverse RL general approach"
+  - "Max Margin IRL (Apprenticeship Learning)"
+  - "Max Entropy IRL"
+  - "Adversarial IRL"
+  - "Preference-based RL, Bradley-Terry model"
+notation:
+  - { symbol: "$\\mu(\\pi)$", meaning: "expected discounted feature counts under policy $\\pi$, $\\mathbb{E}_\\pi\\{\\sum_t\\gamma^t\\phi(s_t,a_t)\\}$" }
+  - { symbol: "$A(s,a)$", meaning: "the advantage function, recovered by Adversarial IRL's discriminator decomposition" }
+cheatsheetLinks: []
+nextModules: ["RLEARN-06"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+RLEARN-02's imitation learning extracts a *policy* from demonstrations. **Inverse RL (IRL)** extracts the *reward function* instead, a genuine instance of imitation learning (same input: demonstrations, no external reward), but a different, arguably deeper target: a reward generalizes to states the demonstrator never visited and to entirely different domains, and a learned agent can in principle *exceed* the demonstrator once it has genuine understanding of what the demonstrator was actually optimizing for.
+
+## Prerequisites & readiness check
+
+You should have RL-04's expected-return objective $J(\pi)$ and RLEARN-02's imitation-learning landscape fresh.
+
+<ReadinessCheck
+  question="From RL-04, what is J(π)?"
+  answer="The expected discounted return under policy π, J(π) = E_ξ~Pπ{Σ_t γᵗR(sₜ,aₜ)}."
+/>
+
+## General approach
+
+Given expert data (assumed approximately optimal for some unknown $R$), find $R$ such that $J(\pi^*)\geq J(\pi)$ for every other policy $\pi$. Assuming $R(s,a)=w^\top\phi(s,a)$ (linear in given features $\phi$, RLEARN-01/ML-02's familiar "linear in features" trick):
+
+$$J(\pi) = w^\top\underbrace{\mathbb{E}_\pi\Big\{\sum_t\gamma^t\phi(s_t,a_t)\Big\}}_{=:\mu(\pi)}$$
+
+<ExerciseCard id="RLEARN-05-ex1-linear-reward-derivation" />
+
+so the entire problem reduces to finding $w$ with $\forall\pi\neq\pi^*:w^\top\mu(\pi^*)\geq w^\top\mu(\pi)$.
+
+## Max Margin IRL (Apprenticeship Learning)
+
+Abbeel & Ng (2004): since $\pi^*$ itself isn't literally given, first *estimate* $\mu(\pi^*)$ directly from the demonstration data (the only information about $\pi^*$ actually used). Then iteratively:
+
+```
+Apprenticeship-Learning(estimated mu_expert):
+  1: initialize pi_0
+  2: for i = 0, 1, 2, .. :
+  3:     w, t <- argmax_{w,t in R} t   s.t. ||w|| <= 1,
+                for all j in {0,..,i}: w^T mu_expert >= w^T mu(pi_j) + t
+  4:     pi_{i+1} <- argmax_pi J(pi)     // an ordinary RL subproblem!
+```
+*(Abbeel & Ng, 2004; as presented in `Lecture-RobotLearning.pdf`, p.75, §1.10:7.)* Step 3 is a genuine max-margin classification problem (OPT-03's territory): find the reward weights $w$ that discriminate the expert's features $\mu(\pi^*)$ from every previously-generated policy $\pi_j$'s features, by as large a margin $t$ as possible. Step 4 uses that reward to compute a *new* candidate policy $\pi_{i+1}$ (an ordinary RL problem, RL-02/RL-04's machinery), which then joins the set to discriminate against next round.
+
+<ExerciseCard id="RLEARN-05-ex2-max-margin-conceptual" />
+
+## Max Entropy IRL
+
+Ziebart, Maas, Bagnell & Dey (2008): a different way to handle the demonstrator possibly being noisy/suboptimal. Assume trajectories are generated with probability proportional to their exponentiated return, $P(\xi;w)=\exp\{w^\top\mu(\xi)\}/\int\exp\{w^\top\mu(\xi')\}\,d\xi'$ (a Boltzmann-style distribution, PROB-04's energy-based framing), then find $w$ maximizing the **entropy** of $P(\cdot;w)$ *subject to* matching the expert's observed feature expectations:
+
+$$\min_w\ \int P(\xi;w)\log P(\xi;w)\,d\xi \qquad\text{s.t.}\qquad \mathbb{E}_{\xi\sim P(\xi;w)}\{\mu(\xi)\}=\mu(\pi^*)$$
+
+Intuitively: among *all* reward-induced distributions consistent with the observed data, pick the one making the *fewest* additional assumptions beyond that data, exactly the maximum-entropy principle's standard justification.
+
+## Adversarial IRL
+
+Recall GAN's minimax objective (RLEARN-02): $\min_G\max_D\mathbb{E}_{x\sim p_\text{data}}\{\log D(x)\}+\mathbb{E}_{y=G(z)}\{\log[1-D(y)]\}$, training a discriminator to separate real data from generated samples. Max Margin IRL is structurally similar (discriminate the expert from generated policies), suggesting a direct adversarial formulation. **AIRL** (Fu, Luo & Levine, 2018) parameterizes the discriminator on state-action-state triplets as
+
+$$D_{\theta,\phi}(s,a,s') = \frac{\exp\{f_{\theta,\phi}(s,a,s')\}}{\exp\{f_{\theta,\phi}(s,a,s')\}+\pi(a\mid s)}, \qquad f_{\theta,\phi}(s,a,s') := g_\theta(s,a)+\gamma h_\phi(s')-h_\phi(s)$$
+
+<ExerciseCard id="RLEARN-05-ex3-airl-reward-shaping-connection" />
+
+**This decomposition is exactly RLEARN-03's potential-based reward shaping formula**, $g_\theta(s,a)+\gamma h_\phi(s')-h_\phi(s)$ has the identical algebraic shape as $R(s,a)+\gamma\Phi(s')-\Phi(s)$, with $h_\phi$ playing $\Phi$'s role. RLEARN-03 showed this exact form leaves the optimal policy unchanged while reshaping $Q$ by $-\Phi(s)$; here, training $f_{\theta,\phi}$ this way means $f_{\theta,\phi}(s,a,s')\approx r(s,a)+\gamma V(s')-V(s)=A(s,a)$, the **advantage function**. The training automatically gives $g_\theta$ "reward semantics" and $h_\phi$ "value semantics," a genuinely elegant emergent structure, purely from choosing this particular functional form for the discriminator.
+
+## Preference-based RL
+
+A different route around "demonstrations may be hard to elicit or noisy": instead of full demonstrations, collect **preferences**, pairwise comparisons $\xi_i\succ\xi_j$ ("this behavior is better than that one," easy for a human to judge even without being able to demonstrate optimal behavior directly). Find $R$ such that $\xi_i\succ\xi_j\Rightarrow\sum_tR(s_t^i,a_t^i)>\sum_tR(s_t^j,a_t^j)$. Assuming noisy human judgments (the **Bradley-Terry model**):
+
+$$P(\xi_i\succ\xi_j;R) = \frac{\exp\{\sum_tR(s_t^i,a_t^i)\}}{\exp\{\sum_tR(s_t^i,a_t^i)\}+\exp\{\sum_tR(s_t^j,a_t^j)\}}$$
+
+<ExerciseCard id="RLEARN-05-ex4-bradley-terry-numeric" />
+
+trained by maximizing $\sum_{\xi_i\succ\xi_j}\log P(\xi_i\succ\xi_j;R_\psi)$ over all human-provided preferences (Christiano et al., 2017, "Deep RL from Human Preferences"). This is essentially a *sequential* generalization of PROB's/ML's ranking-loss idea, and it directly avoids IRL's usual bottleneck (needing many, often hard-to-elicit, full demonstrations).
+
+## Summary
+
+- General IRL: assuming $R$ linear in features $\phi$, $J(\pi)=w^\top\mu(\pi)$; find $w$ discriminating the expert's $\mu(\pi^*)$ from other policies.
+- **Max Margin IRL** alternates a max-margin discrimination step (find $w$) with an RL step (find a new policy to discriminate against).
+- **Max Entropy IRL** picks the maximum-entropy reward-induced distribution consistent with the expert's observed feature expectations, robust to demonstrator noise.
+- **Adversarial IRL**'s discriminator decomposition $g_\theta(s,a)+\gamma h_\phi(s')-h_\phi(s)$ is exactly RLEARN-03's reward-shaping form, automatically recovering a reward ($g_\theta$) and value function ($h_\phi$), with the trained quantity converging to the advantage function.
+- **Preference-based RL** replaces full demonstrations with pairwise preferences, using the Bradley-Terry model to fit a reward directly from noisy comparative judgments.
+- Value Alignment (the broader "how do we even define a good objective" question) is already covered in RL-07 and not repeated here.
+
+## Retrieval questions
+
+1. Derive $J(\pi)=w^\top\mu(\pi)$ from a linear reward assumption.
+2. State the Max Margin IRL algorithm, and explain what each step (max-margin, RL) is doing.
+3. State AIRL's discriminator decomposition, and explain its connection to RLEARN-03's reward shaping.
+4. State the Bradley-Terry preference model, and explain when preference-based RL is preferable to full-demonstration IRL.
+
+## Mastery checklist
+
+- [ ] Derived the linear-in-features IRL objective.
+- [ ] Can state and explain Max Margin IRL's algorithm.
+- [ ] Can state Max Entropy IRL's formulation.
+- [ ] Derived AIRL's connection to reward shaping and the advantage function.
+- [ ] Can state the Bradley-Terry preference model.
+
+## Source note
+
+This module's exposition, the general IRL approach, Max Margin IRL/Apprenticeship Learning (Abbeel & Ng, 2004), Max Entropy IRL (Ziebart, Maas, Bagnell & Dey, 2008), Adversarial IRL (Fu, Luo & Levine, 2018), and preference-based RL/the Bradley-Terry model (Christiano et al., 2017) are adapted from `lecture-robotlearning`, §1.10 (pp. 73-79). Value Alignment (the same section's closing topic) is deliberately not repeated here, already covered in full in [RL-07](/course/RL/RL-07). The AIRL-reward-shaping connection is newly authored connecting commentary, not stated explicitly in the source. All exercises are newly authored; the Bradley-Terry numeric example was independently verified by direct computation while authoring this module.
+
+---
+
+**Next**: [RLEARN-06: Manipulation & Grasp Learning](/course/RLEARN/RLEARN-06)

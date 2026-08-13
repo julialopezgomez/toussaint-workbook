@@ -1,0 +1,118 @@
+---
+id: PLAN-01
+block: PLAN
+title: "Configuration Space & Geometric Feasibility"
+tier: 1
+estimatedHours: 3
+prerequisites: ["KIN-03"]
+objectives:
+  - "Formally define configuration space and feasible configuration space, and connect them to $C_\\text{free}$/$C_\\text{obs}$ terminology from the wider planning literature."
+  - "State the degrees-of-freedom/minimal-coordinates relationship for a holonomically-constrained system."
+  - "Explain the feedback-control/trajectory-optimization/path-finding triad, and where each is strong and weak."
+  - "Explain potential-field path finding as gradient descent, connect it to DYN-02's P control, and explain the local-minimum problem it inherits."
+  - "Explain why grid-based search (wavefront/Dijkstra) doesn't scale to high-dimensional configuration spaces."
+sources:
+  - { sourceId: "robotkin", pages: "Fundamental Kinematics Concepts section (HTML-sourced)", role: "primary" }
+  - { sourceId: "lecture-robotics", pages: "p52-68 (§4, §4.1)", role: "primary" }
+concepts:
+  - "Configuration space, feasible configuration space"
+  - "Generalized/minimal coordinates, degrees of freedom"
+  - "Feedback control / trajectory optimization / path finding"
+  - "Potential fields, local minima"
+  - "Grid search (wavefront, Dijkstra), curse of dimensionality"
+notation:
+  - { symbol: "$\\mathcal{X}$", meaning: "configuration space (generic embedding space for the system's pose description)" }
+  - { symbol: "$\\mathcal{X}_\\text{fea}$ (a.k.a. $C_\\text{free}$)", meaning: "feasible configuration space: configurations respecting joint limits and non-penetration" }
+  - { symbol: "$p=n-d$", meaning: "true degrees of freedom, given $n$ generalized coordinates and $d$ independent holonomic constraints" }
+  - { symbol: "$U(q)$", meaning: "potential function guiding feedback control, $U=U_\\text{att}+U_\\text{rep}$" }
+cheatsheetLinks: []
+nextModules: ["PLAN-02"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+KIN-03 built the forward-kinematics map $q\mapsto\phi(q)$ and solved IK for a single target configuration. Path planning asks a different question: not "what's one good $q$," but "what's the whole *space* of valid $q$'s, and how do I find a route through it?" This module formalizes that space, then surveys the classical heuristics (potential fields, grid search) whose failure modes motivate the sampling-based methods of [PLAN-02](/course/PLAN/PLAN-02).
+
+## Prerequisites & readiness check
+
+You should have KIN-03's forward-kinematics map and Jacobian fresh.
+
+<ReadinessCheck
+  question="From KIN-03, what does the forward-kinematics map $\phi_i(q)$ compute?"
+  answer="The pose $x_i\in SE(3)$ of body $i$, given the joint vector $q$, by chaining relative transforms from the world to body $i$."
+/>
+
+## Configuration space and feasible configuration space
+
+For a multibody system, the poses $x_{1:m}$ of all bodies fully describe its **configuration**. Introducing coordinates $q\in\mathbb{R}^n$ (the joint vector) for this description, the embedding space of $q$ is the **configuration space** $\mathcal{X}$ (e.g. $\mathcal{X}=SE(3)^m$ generically, or $\mathbb{R}^n$ once coordinates are chosen). Not every $q\in\mathcal{X}$ is physically realizable: joints have limits, and body shapes cannot interpenetrate. The **feasible configuration space** $\mathcal{X}_\text{fea}\subseteq\mathcal{X}$ collects exactly the configurations respecting both. *(Note on terminology: the wider motion-planning literature, e.g. LaValle's* Planning Algorithms*, calls this same set $C_\text{free}$, with $C_\text{obs}:=\mathcal{X}\setminus\mathcal{X}_\text{fea}$ its complement; both names refer to the identical object, and this workbook uses them interchangeably from here on, matching whichever source is being discussed.)*
+
+When a system has $d$ independent **holonomic constraints** $h(q,t)=0$ (a $d$-dimensional constraint function restricting which $q\in\mathcal{X}$ are even kinematically possible, before considering collisions), the generalized coordinates $q\in\mathbb{R}^n$ are not minimal: the true **degrees of freedom** are $p=n-d$. **Minimal coordinates** are generalized coordinates chosen with $n=p$ directly (no further holonomic constraint needed). It's often still convenient to use non-minimal coordinates anyway: e.g. representing a point on $S^1$ with redundant $(x,y)$ plus the constraint $x^2+y^2=1$, rather than a single angle (avoiding the modulo-$2\pi$ wraparound issue); the same tradeoff motivates using quaternion coordinates $\mathbb{R}^4$ for $SO(3)$ instead of a 3-parameter minimal representation (KIN-01/KIN-02).
+
+<ExerciseCard id="PLAN-01-ex1-dof-counting" />
+
+## Feedback control, trajectory optimization, path finding: one triad, three roles
+
+DYN-03 and DYN-04 already gave you two of the three standard approaches to getting a robot from $q_\text{start}$ toward a goal:
+
+- **Feedback control** (DYN-03): a *local*, reactive policy, e.g. $q_{t+1}=q_t+J^\sharp(y^*-\phi(q_t))$, correcting error at every step from the current state.
+- **Trajectory optimization** (DYN-04): $\operatorname*{argmin}_{q_{0:T}}f(q_{0:T})$, a *local* refinement of an entire trajectory, converging to whatever nearby local optimum the initial guess is closest to.
+- **Path finding** (this module and PLAN-02): find *some* $q_{0:T}$ consisting only of valid (feasible) configurations, a fundamentally *global* / discrete search problem, not a local optimization.
+
+The word "local" in the first two is the key limitation both share: neither feedback control nor trajectory optimization has any mechanism for discovering *which side* of an obstacle to go around; both simply follow the local gradient/error signal from wherever they start, and get stuck if that leads into a dead end. Path finding exists precisely to solve this global, topological sub-problem, so that feedback control and trajectory optimization can be handed a starting point (or full initial trajectory) that's already on the right side of every obstacle.
+
+## Classical path-finding heuristics
+
+Before the sampling-based methods of PLAN-02 (the actual state of practice), it's worth seeing why the two obvious classical approaches (gradient-following, grid search) each fall short.
+
+### Potential fields: path finding as gradient descent
+
+Define a **total potential** $U(q):=U_\text{att}(q)+U_\text{rep}(q)$: an attractive term pulling toward the goal (e.g. $U_\text{att}(q)=\tfrac12K_p\|q-q^*\|^2$) plus a repulsive term pushing away from obstacles (growing sharply as $q$ approaches $\mathcal{X}\setminus\mathcal{X}_\text{fea}$). Following the negative gradient, $F(q)=-\nabla U(q)$, as a feedback control law is **exactly gradient descent**, and for the attractive term alone, $F_\text{att}(q)=-\nabla U_\text{att}(q)=K_p(q^*-q)$: **exactly DYN-02's proportional control law**, now reframed as gradient descent on a quadratic potential. This is a genuinely useful reframing: it means "potential field path finding" and "P control toward a goal" are the same computation, and it immediately explains potential fields' central weakness.
+
+<ExerciseCard id="PLAN-01-ex2-potential-field-gradient" />
+
+**The local minimum problem**: because $F(q)=-\nabla U(q)$ only ever follows the *local* downhill direction, the combined potential $U=U_\text{att}+U_\text{rep}$ can have local minima that aren't the goal (e.g. a concave obstacle "cups" the attractive pull into a dead end); gradient descent gets permanently stuck there, with no mechanism to detect or escape it. This is the same local-vs-global limitation named above, now concrete: potential fields *are* feedback control, so they inherit feedback control's blindness to global topology.
+
+### Grid search: wavefront propagation and Dijkstra
+
+An alternative: discretize $\mathcal{X}_\text{fea}$ into a grid, and treat it as a graph search problem. The **wavefront algorithm** starts at the goal cell (value $0$) and repeatedly labels every unlabeled cell adjacent to a labeled cell with (labeled-neighbor-value $+1$), propagating outward like a wavefront until every reachable cell is labeled; following the gradient of these labels (always stepping to a strictly smaller-numbered neighbor) from any start cell produces a shortest grid path, and (unlike potential fields) is provably free of local minima, since a labeled cell's value is exactly its graph-shortest-path distance to the goal. **Dijkstra's algorithm** generalizes this to an arbitrary weighted graph, incrementally labeling nodes with their distance-from-start and provably producing optimal (shortest) paths.
+
+<ExerciseCard id="PLAN-01-ex3-grid-search-scaling" />
+
+Both wavefront and Dijkstra require an actual grid (or graph) over $\mathcal{X}_\text{fea}$ to search: fine in 2D or 3D, but a grid over an $n$-dimensional configuration space has $O(k^n)$ cells for $k$ cells per dimension, the **curse of dimensionality**. A 6-DOF arm at even a coarse $k=20$ per joint already needs $20^6=64$ million cells. This is exactly the gap [PLAN-02](/course/PLAN/PLAN-02)'s sampling-based methods (PRM, RRT) are designed to close: searching $\mathcal{X}_\text{fea}$ via random sampling instead of exhaustive discretization.
+
+<ExerciseCard id="PLAN-01-ex4-space-definitions-conceptual" />
+
+## Summary
+
+- **Configuration space** $\mathcal{X}$ is the embedding space for a system's pose description; the **feasible configuration space** $\mathcal{X}_\text{fea}$ (equivalently $C_\text{free}$) is the subset respecting joint limits and non-penetration.
+- $d$ independent holonomic constraints reduce $n$ generalized coordinates to $p=n-d$ true **degrees of freedom**; **minimal coordinates** set $n=p$ directly, though non-minimal coordinates are often more convenient in practice.
+- **Feedback control** and **trajectory optimization** are both *local* methods; **path finding** is the *global*, discrete search problem that hands them a topologically-correct starting point.
+- **Potential fields** are literally gradient descent (their attractive term is exactly DYN-02's P control), and inherit gradient descent's local-minimum problem.
+- **Grid search** (wavefront, Dijkstra) is provably free of local minima but suffers the curse of dimensionality, motivating sampling-based methods.
+
+## Retrieval questions
+
+1. Define $\mathcal{X}$ and $\mathcal{X}_\text{fea}$, and state their equivalent names in the wider planning literature.
+2. Derive the true degrees of freedom $p$ given $n$ generalized coordinates and $d$ holonomic constraints.
+3. State the feedback control / trajectory optimization / path finding triad, and explain why the first two are both "local."
+4. Derive that potential-field attractive-term gradient descent is exactly DYN-02's P control, and explain the local-minimum problem this creates.
+5. Why does grid-based search not scale to high-dimensional configuration spaces?
+
+## Mastery checklist
+
+- [ ] Can define $\mathcal{X}$/$\mathcal{X}_\text{fea}$ and connect them to $C_\text{free}$/$C_\text{obs}$.
+- [ ] Can derive $p=n-d$ and explain minimal vs. generalized coordinates.
+- [ ] Can state the feedback control/trajectory optimization/path finding triad and each one's role.
+- [ ] Derived that potential fields are gradient descent, and can explain the local-minimum problem.
+- [ ] Can explain the curse of dimensionality for grid-based search.
+
+## Source note
+
+The formal $\mathcal{X}$/$\mathcal{X}_\text{fea}$/generalized-and-minimal-coordinates/degrees-of-freedom exposition is adapted from Marc Toussaint's `robotkin` HTML note ("Fundamental Kinematics Concepts" section), previously unused by KIN-01/KIN-03 (which drew on that same note's kinematics/Jacobian and inverse-kinematics sections instead). The feedback-control/trajectory-optimization/path-finding triad, the Bug-algorithm framing, potential fields, and the wavefront/Dijkstra grid-search treatment are adapted from `lecture-robotics`, §4-4.1 (pp. 52-68); the Bug1/Bug2 algorithms themselves are credited in the source to Howie Choset's CMU lectures and are described only briefly here as historical/heuristic context, since the source itself treats them as a brief aside before the sampling-based methods that are the chapter's real focus. The $C_\text{free}$/$C_\text{obs}$ terminology equivalence is standard across the wider motion-planning literature (e.g. LaValle, *Planning Algorithms*), noted here since Toussaint's own notes use $\mathcal{X}_\text{fea}$/$Q_\text{free}$ instead. All exercises are newly authored and independently verified (the potential-field gradient algebraically, the grid-cell-count scaling numerically).
+
+---
+
+**Next**: [PLAN-02: Sample-Based Path Finding](/course/PLAN/PLAN-02)

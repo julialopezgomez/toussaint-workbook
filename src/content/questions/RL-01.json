@@ -1,0 +1,56 @@
+{
+  "moduleId": "RL-01",
+  "exercises": [
+    {
+      "id": "RL-01-ex1-markov-property-conceptual",
+      "objective": "Distinguish a valid Markov state description from an insufficient one.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 53, "originalNumber": "2.1:3" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "For a moving car, explain why 'current position only' fails the Markov property as a state description, but 'current position and velocity' succeeds (assuming no other unmodeled forces).",
+      "hints": [
+        "The Markov property requires that the future be conditionally independent of the past, given the state: nothing about how the car got to its current position should matter for predicting where it goes next, once the state is known.",
+        "Position alone doesn't determine future position: a car at the same location moving at 60 mph continues very differently than the same car momentarily stopped there, so 'future given position alone' still depends on the (unobserved) velocity, which came from the past.",
+        "Position and velocity together determine (under simple physics, no unknown forces) exactly how the car evolves next, with no residual dependence on how it got there: this pair satisfies the Markov property, while position alone does not."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-01-ex2-recursive-value-derivation",
+      "objective": "Derive the recursive property of the value function from its definition.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 69, "originalNumber": "2.2:6" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Starting from $V^\\pi(s)=\\mathbb{E}\\{r_0+\\gamma r_1+\\gamma^2r_2+\\cdots\\mid s_0=s;\\pi\\}$, split off the $r_0$ term and condition on the next state $s_1$ to derive $V^\\pi(s)=R(s,\\pi(s))+\\gamma\\sum_{s'}P(s'\\mid s,\\pi(s))V^\\pi(s')$.",
+      "hints": [
+        "Split the expectation: $V^\\pi(s)=\\mathbb{E}\\{r_0\\mid s_0=s;\\pi\\}+\\gamma\\,\\mathbb{E}\\{r_1+\\gamma r_2+\\cdots\\mid s_0=s;\\pi\\}$. The first term is exactly $R(s,\\pi(s))$ by definition.",
+        "For the second term, condition on $s_1$: $\\mathbb{E}\\{r_1+\\gamma r_2+\\cdots\\mid s_0=s;\\pi\\}=\\sum_{s'}P(s'\\mid s,\\pi(s))\\,\\mathbb{E}\\{r_1+\\gamma r_2+\\cdots\\mid s_1=s';\\pi\\}$.",
+        "The inner expectation, $\\mathbb{E}\\{r_1+\\gamma r_2+\\cdots\\mid s_1=s'\\}$, is exactly $V^\\pi(s')$ (the same expected-return-from-here quantity, now started one step later at $s'$). Substituting: $V^\\pi(s)=R(s,\\pi(s))+\\gamma\\sum_{s'}P(s'\\mid s,\\pi(s))V^\\pi(s')$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-01-ex3-bellman-optimality-numeric",
+      "objective": "Solve the Bellman optimality equation directly for a trivial single-state MDP.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 69, "originalNumber": "2.2:7-8" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["RL-01-ex2-recursive-value-derivation"],
+      "answerType": "numeric",
+      "prompt": "For a single-state MDP where every action gives reward $R=1$ and always returns to the same state, with $\\gamma=0.9$, solve $V^*=\\max_a[R+\\gamma V^*]$ for $V^*$. Enter a decimal.",
+      "hints": [
+        "Since every action gives the same reward and the same (only) next state, the $\\max_a$ is trivial: $V^*=1+0.9V^*$.",
+        "Solve for $V^*$: $V^*-0.9V^*=1\\Rightarrow0.1V^*=1$.",
+        "$V^*=10$. (Independently verified by directly summing the geometric series $\\sum_{t=0}^\\infty0.9^t\\times1$ in Python while authoring this module, which also converges to 10.)"
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

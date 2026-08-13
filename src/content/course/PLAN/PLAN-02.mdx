@@ -1,0 +1,179 @@
+---
+id: PLAN-02
+block: PLAN
+title: "Sample-Based Path Finding: PRM & RRT"
+tier: 1
+estimatedHours: 3.5
+prerequisites: ["PLAN-01"]
+objectives:
+  - "Derive the PRM construction algorithm and explain the role of the local planner and resolution parameter."
+  - "State and apply the PRM probabilistic-completeness bound, and explain why narrow passages break it."
+  - "Derive the simplest and goal-biased RRT algorithms, and explain why nearest-neighbor extension gives rapid, space-filling exploration."
+  - "Compare PRM and RRT on their single-query/multi-query and precomputation tradeoffs."
+sources:
+  - { sourceId: "lecture-robotics", pages: "p68-81 (§4.1-4.2)", role: "primary" }
+concepts:
+  - "Probabilistic Roadmaps (PRM)"
+  - "Rapidly-exploring Random Trees (RRT)"
+  - "Local planner, resolution parameter"
+  - "Probabilistic completeness, narrow passages"
+notation:
+  - { symbol: "$Q_\\text{free}$", meaning: "the feasible configuration space (same object as PLAN-01's $\\mathcal{X}_\\text{fea}$/$C_\\text{free}$)" }
+  - { symbol: "$G=(V,E)$", meaning: "PRM roadmap: vertices are sampled configurations, edges are locally-connected pairs" }
+  - { symbol: "$\\varrho$", meaning: "clearance: distance from a path to the nearest obstacle" }
+cheatsheetLinks: []
+nextModules: ["PLAN-03"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+import SourceFigure from '../../../components/SourceFigure.astro';
+
+## Why this matters
+
+PLAN-01 ended on the curse of dimensionality: exhaustive grid search over $Q_\text{free}$ doesn't scale past a handful of dimensions. **Probabilistic Roadmaps (PRM)** and **Rapidly-exploring Random Trees (RRT)** are the practical fix, and they're what actually gets used: instead of discretizing the whole space, sample randomly *within* $Q_\text{free}$ and build a graph/tree from those samples. Both are still standard tools in real motion-planning pipelines (including the kind directly relevant to TAMP).
+
+## Prerequisites & readiness check
+
+You should have PLAN-01's $Q_\text{free}$/$\mathcal{X}_\text{fea}$ and the curse-of-dimensionality motivation fresh.
+
+<ReadinessCheck
+  question="From PLAN-01, why doesn't grid-based search (wavefront/Dijkstra) scale to high-dimensional configuration spaces?"
+  answer="A grid with $k$ cells per dimension over an $n$-dimensional space needs $k^n$ cells, growing exponentially in the number of degrees of freedom."
+/>
+
+## Probabilistic Roadmaps (PRM)
+
+A PRM generates a graph $G=(V,E)$ of configurations such that every configuration along every edge lies in $Q_\text{free}$:
+
+```
+PRM-Generation(n samples, k nearest neighbors):
+  Input:  number n of samples, number k of nearest neighbors
+  Output: PRM graph G = (V, E)
+  1: initialize V = ∅, E = ∅
+  2: while |V| < n do
+  3:     q ← random sample from Q
+  4:     if q ∈ Q_free then V ← V ∪ {q}
+  5: end while
+  6: for all q ∈ V do
+  7:     N_q ← k nearest neighbors of q in V
+  8:     for all q' ∈ N_q do
+  9:         if path(q, q') ∈ Q_free then E ← E ∪ {(q, q')}
+  10:    end for
+  11: end for
+```
+*(Marc Toussaint, `Lecture-Robotics.pdf`, p.70, §4.2:31.)*
+
+`path(q, q')` is a **local planner**, most simply a straight line between the two configurations; since checking every point on that line is infeasible, the local planner instead tests collision at a finite resolution $\delta$ (a spacing parameter trading correctness against speed: too coarse a $\delta$ can miss a thin obstacle between checked points).
+
+<SourceFigure
+  src="/figures/lecture-robotics/fig5-prm-narrow-passage.png"
+  alt="A straight-line edge between two configurations q1 and q2, with collision-checked sample points spaced at resolution delta along it"
+  caption="The local planner's resolution parameter δ: collision is checked at finitely many points along the straight-line edge, not continuously."
+  source="Lecture-Robotics.pdf"
+  page="71"
+/>
+
+Once $G$ is built, finding a path from $q_\text{start}$ to $q_\text{goal}$ is just graph search (e.g. PLAN-01's Dijkstra) over $G$, which is why building the roadmap once and querying it many times is PRM's natural use case.
+
+<ExerciseCard id="PLAN-02-ex1-prm-trace" />
+
+### Probabilistic completeness and narrow passages
+
+For uniform sampling in a $d$-dimensional space, with $a,b\in Q_\text{free}$ connected by a path $\gamma$ of length $|\gamma|$ and **clearance** $\varrho$ (the minimum distance from $\gamma$ to any obstacle), the probability that a PRM finds a path after $n$ samples is bounded:
+
+$$P(\text{PRM-success}\mid n) \geq 1-\frac{2|\gamma|}{\varrho}e^{-\sigma\varrho^dn}, \qquad \sigma=\frac{|B_1|}{2^d|Q_\text{free}|}$$
+
+*(Kavraki, Švestka, Latombe & Overmars, 1995; stated as given in `Lecture-Robotics.pdf`, p.72, §4.2:34; $|B_1|$ is the volume of the unit ball in $d$ dimensions.)* This is called **probabilistic completeness**: the bound tends to $1$ as $n\to\infty$, so any target success probability is eventually achievable, but the required $n$ is exponential in $d$. Practically, the $1/\varrho$ and $\varrho^d$ factors mean this bound becomes vacuous (even negative, i.e. no guarantee at all) exactly when a passage is *narrow* (small $\varrho$): this is PRM's well-known **narrow passage problem**, uniform sampling is unlikely to ever land inside a thin gap.
+
+<ExerciseCard id="PLAN-02-ex2-completeness-bound-numeric" />
+
+A few refinements target this directly: **Gaussian sampling** (sample $q_1\sim\mathcal{U}$, $q_2\sim\mathcal{N}(q_1,\sigma)$; keep $q_1$ if exactly one of $q_1,q_2$ is in $Q_\text{free}$, biasing samples toward the boundary) and **bridge sampling** (sample $q_1,q_2$ similarly; if *both* are infeasible but their midpoint $q_3=(q_1+q_2)/2$ is feasible, keep $q_3$, directly targeting thin free-space corridors). Both trade the simplicity of uniform sampling for better narrow-passage coverage.
+
+## Rapidly-exploring Random Trees (RRT)
+
+RRTs address two different concerns: **single-query** efficiency (focus computation on one specific $(q_\text{start},q_\text{goal})$ pair rather than precomputing an exhaustive roadmap) and **control-based** exploration (incrementally growing using actually-controllable directions of motion, which extends naturally to differential constraints, PLAN-03's subject).
+
+```
+Simplest-RRT(q_start, n nodes, stepsize α):
+  Input:  q_start, number n of nodes, stepsize α
+  Output: tree T = (V, E)
+  1: initialize V = {q_start}, E = ∅
+  2: for i = 0 : n do
+  3:     q_target ← random sample from Q
+  4:     q_near ← nearest neighbor of q_target in V
+  5:     q_new ← q_near + α/|q_target - q_near| · (q_target - q_near)
+  6:     if q_new ∈ Q_free then V ← V ∪ {q_new}, E ← E ∪ {(q_near, q_new)}
+  7: end for
+```
+*(Marc Toussaint, `Lecture-Robotics.pdf`, p.76, §4.2:39.)*
+
+<SourceFigure
+  src="/figures/lecture-robotics/fig6-rrt-growth-sequence.png"
+  alt="A dense, evenly-spread branching tree filling a square region, the result of running the simplest RRT algorithm for many iterations"
+  caption="An RRT tree after many iterations: the nearest-neighbor-then-step-toward rule fills the free space remarkably evenly, without ever aiming explicitly for uniform coverage."
+  source="Lecture-Robotics.pdf"
+  page="76"
+/>
+
+<ExerciseCard id="PLAN-02-ex3-rrt-exploration-conceptual" />
+
+A **goal-biased** variant occasionally samples the goal itself directly, pulling the tree toward it rather than exploring purely at random:
+
+```
+Goal-biased-RRT(q_start, q_goal, n nodes, stepsize α, bias β):
+  Input:  q_start, q_goal, number n of nodes, stepsize α, bias probability β
+  Output: tree T = (V, E)
+  1: initialize V = {q_start}, E = ∅
+  2: for i = 0 : n do
+  3:     if rand(0,1) < β then q_target ← q_goal
+  4:     else q_target ← random sample from Q
+  5:     q_near ← nearest neighbor of q_target in V
+  6:     q_new ← q_near + α/|q_target - q_near| · (q_target - q_near)
+  7:     if q_new ∈ Q_free then V ← V ∪ {q_new}, E ← E ∪ {(q_near, q_new)}
+  8: end for
+```
+*(Marc Toussaint, `Lecture-Robotics.pdf`, p.77, §4.2:40.)*
+
+**Bi-directional search** grows two trees simultaneously, one from $q_\text{start}$ and one from $q_\text{goal}$, letting each grow toward the other (e.g. using the newest node of tree 1 as the sample target for tree 2), typically finding a connection much faster than a single tree searching for a small goal region. **RRT\*** (Karaman & Frazzoli, 2010) extends the basic RRT with a rewiring step that asymptotically converges to the *optimal* path, not merely a feasible one, at the cost of extra bookkeeping per iteration.
+
+## PRM vs. RRT
+
+| | PRM | RRT |
+|---|---|---|
+| Best for | Multi-query (many start/goal pairs, one environment) | Single-query (one specific start/goal pair) |
+| Precomputation | Exhaustive roadmap upfront (expensive, but amortized over queries) | None: builds only what's needed for this query |
+| Differential constraints | Not naturally (assumes a usable local planner between *any* two samples) | Naturally extensible (PLAN-03) |
+| Shared strengths | Algorithmically simple, highly explorative, probabilistic performance guarantees | Same |
+| Shared caveats | Nearest-neighbor metric choice can be critical; local planner may be non-trivial | Same |
+
+<ExerciseCard id="PLAN-02-ex4-prm-vs-rrt-conceptual" />
+
+## Summary
+
+- **PRM** builds a roadmap graph $G=(V,E)$ by sampling $n$ random configurations in $Q_\text{free}$ and connecting nearby pairs via a local planner (resolution-checked straight lines); once built, any query is a graph-search problem.
+- PRM is **probabilistically complete**: success probability $\to1$ as $n\to\infty$, but the bound becomes vacuous for narrow passages (small clearance $\varrho$), motivating Gaussian/bridge sampling.
+- **RRT** grows a single tree via nearest-neighbor-then-step-toward-a-random-sample, giving rapid, space-filling exploration without explicitly targeting uniform coverage; a goal-biased variant occasionally samples the goal directly.
+- PRM suits multi-query problems (amortized precomputation); RRT suits single-query problems and extends naturally to differential constraints (PLAN-03).
+
+## Retrieval questions
+
+1. Write the PRM generation algorithm from memory, and explain the role of the local planner and resolution parameter $\delta$.
+2. State the PRM probabilistic-completeness bound, and explain why narrow passages break it.
+3. Write the simplest RRT algorithm from memory, and explain why nearest-neighbor extension gives rapid exploration.
+4. Compare PRM and RRT on single-query vs. multi-query suitability, and explain why RRT extends more naturally to differential constraints.
+
+## Mastery checklist
+
+- [ ] Can derive/write the PRM generation algorithm and explain the local planner's role.
+- [ ] Can state the PRM completeness bound and explain the narrow-passage problem.
+- [ ] Can derive/write the simplest and goal-biased RRT algorithms.
+- [ ] Can compare PRM and RRT's tradeoffs.
+
+## Source note
+
+This module's exposition, the PRM and RRT algorithms (including both pseudocode boxes), the probabilistic-completeness bound (credited in the source to Kavraki, Švestka, Latombe & Overmars, 1995), the Gaussian/bridge sampling strategies, bi-directional search, and RRT* (credited to Karaman & Frazzoli, 2010) are adapted from `lecture-robotics`, §4.1-4.2 (pp. 68-81). Both embedded figures are reproduced directly from the source with citation. All exercises are newly authored; the completeness-bound numeric exercise is independently verified with a direct Python computation of the formula.
+
+---
+
+**Next**: [PLAN-03: Non-Holonomic Systems](/course/PLAN/PLAN-03)

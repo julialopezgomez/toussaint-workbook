@@ -1,0 +1,48 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "DYN-04-ex1-bellman-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly splits off the s=t term from the sum." },
+          { "points": 2, "description": "Correctly applies Bellman's principle to identify the remaining sum's minimum as V_{t+1}(f(x,u_t))." },
+          { "points": 1, "description": "Correctly assembles the final Bellman equation." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "sum_{s=t}^T c(x_s,u_s)+phi(x_T) = c(x_t,u_t) + [sum_{s=t+1}^T c(x_s,u_s)+phi(x_T)].\nBy Bellman's principle, whatever u_t is chosen, the remaining decisions from t+1 onward must be optimal given the resulting state x_{t+1}=f(x_t,u_t); the minimum of the bracketed remaining-sum term is therefore exactly V_{t+1}(f(x,u_t)) by definition.\nSo V_t(x) = min_{u_t}[c(x,u_t) + V_{t+1}(f(x,u_t))], i.e. the Bellman equation V_t(x)=min_u[c(x,u)+V_{t+1}(f(x,u))]."
+    },
+    {
+      "exerciseId": "DYN-04-ex2-riccati-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly computes dV/dx = 2x^T P(t) and substitutes into HJB." },
+          { "points": 2, "description": "Correctly minimizes over u, arriving at u*=-R^-1 B^T P(t) x." },
+          { "points": 2, "description": "Correctly substitutes back and argues matrix equality for all x to derive the Riccati equation." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "dV/dx = 2x^T P(t) (P symmetric, quadratic form gradient rule). HJB becomes: -x^T Pdot x = min_u[x^T Q x + u^T R u + 2x^T P(Ax+Bu)].\nMinimize over u: d/du[u^T R u + 2x^T P B u] = 2u^T R + 2x^T P B = 0, giving u*^T = -x^T P B R^-1, i.e. u* = -R^-1 B^T P x.\nSubstitute back: -x^T Pdot x = x^T Q x + x^T P A x + x^T A^T P x - x^T P B R^-1 B^T P x (after using symmetry to combine the cross terms). Since this holds for all x, the matrices multiplying x on each side must match: -Pdot = A^T P + P A - P B R^-1 B^T P + Q."
+    },
+    {
+      "exerciseId": "DYN-04-ex3-lqr-point-mass",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 3.464, "tolerance": 0.01 },
+      "fullSolution": "c = m*sqrt(eps*rho) = 2*sqrt(2*0.5) = 2*sqrt(1) = 2. b = m*sqrt(rho*(2c+eps)) = 2*sqrt(0.5*(4+2)) = 2*sqrt(3) ~= 3.464. Kd = b/(rho*m) = 3.464/(0.5*2) = 3.464/1 = 3.464. (Independently verified by substituting the resulting P back into the ARE with NumPy: residual ~1e-16.)"
+    },
+    {
+      "exerciseId": "DYN-04-ex4-unification-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies the shared 'control cost + task cost' squared-norm structure." },
+          { "points": 2, "description": "Correctly identifies what differs: the decision variable and hierarchy level (position/acceleration/whole trajectory/policy)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "All four minimize a sum of squared-norm terms: a control/deviation cost (how much am I moving/acting/costing) plus a task cost (how far from the target). What differs is the decision variable and the level of the control hierarchy it operates at: IK optimizes a single configuration q (position level, one-shot); operational space control optimizes a single control u (acceleration/torque level, one-shot); optimal control optimizes an entire policy or trajectory over time; trajectory optimization directly optimizes a whole discretized configuration sequence q_{0:T}. These are the same regularized-least-squares idea applied at different levels of a control hierarchy, from a single instantaneous decision up to an entire trajectory, which is why the same Gauss-Newton/SQP solvers handle all of them."
+    }
+  ]
+}

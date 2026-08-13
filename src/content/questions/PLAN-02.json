@@ -1,0 +1,73 @@
+{
+  "moduleId": "PLAN-02",
+  "exercises": [
+    {
+      "id": "PLAN-02-ex1-prm-trace",
+      "objective": "Explain the design purpose of the k-nearest-neighbor connection step in PRM construction.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 70, "originalNumber": "§4.2:31" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "In the PRM generation algorithm, step 7 only attempts to connect each sampled configuration $q$ to its $k$ nearest neighbors, not to every other vertex in $V$. Explain what this choice trades off, both in terms of computational cost and in terms of what kind of roadmap results.",
+      "hints": [
+        "Attempting to connect every pair of the $n$ sampled configurations would require $O(n^2)$ local-planner (collision-check) calls, one of the most expensive parts of PRM construction; restricting to $k$ nearest neighbors per vertex reduces this to $O(nk)$.",
+        "Since nearby configurations are far more likely to have a collision-free straight-line connection between them than distant ones, most of the value of an all-pairs connection attempt would be wasted on doomed-to-fail distant pairs anyway.",
+        "The tradeoff: a roadmap built this way can miss some possible edges (e.g. two configurations that happen to have a clear line between them despite being far apart in the chosen metric), but in practice a well-connected roadmap only needs enough local edges to let graph search (Dijkstra) find a path through the accumulated network, not literally every possible direct edge."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "PLAN-02-ex2-completeness-bound-numeric",
+      "objective": "Compute the PRM probabilistic-completeness bound for a narrow passage and observe that it becomes vacuous.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 72, "originalNumber": "§4.2:34" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "Using $P(\\text{PRM-success}\\mid n)\\geq1-\\frac{2|\\gamma|}{\\varrho}e^{-\\sigma\\varrho^dn}$ with $|\\gamma|=1,\\ \\sigma=1,\\ d=2,\\ n=5$, compute the bound for a narrow-passage clearance $\\varrho=0.1$. Enter a decimal (it will be negative, meaning the bound is vacuous, i.e. provides no real guarantee).",
+      "hints": [
+        "Compute the exponent first: $-\\sigma\\varrho^dn=-1\\times0.1^2\\times5=-0.05$, so $e^{-0.05}\\approx0.9512$.",
+        "Compute the prefactor: $\\frac{2|\\gamma|}{\\varrho}=\\frac{2\\times1}{0.1}=20$.",
+        "Bound $=1-20\\times0.9512\\approx1-19.02\\approx-18.02$: a negative lower bound, meaning the theorem gives literally no guarantee of success at this clearance and sample count. (Independently verified with a direct Python computation while authoring this module; compare $\\varrho=1.0$ with the same other parameters, which instead gives a bound of $\\approx0.987$, a near-certain guarantee.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "PLAN-02-ex3-rrt-exploration-conceptual",
+      "objective": "Explain why the nearest-neighbor-then-step-toward-random-sample rule produces rapid, space-filling exploration.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 76, "originalNumber": "§4.2:39" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "The simplest RRT algorithm always extends from the tree node nearest to a uniformly random target, not from a random existing node. Explain why this specific choice (nearest-neighbor extension) is what produces the tree's rapid, roughly space-filling growth, rather than, say, a tree that clusters densely near $q_\\text{start}$.",
+      "hints": [
+        "Regions of the space that are still sparsely covered by the tree are, on average, closer (in the nearest-neighbor sense) to a much larger share of uniformly random target samples than regions the tree has already densely filled.",
+        "So sparsely-covered regions get selected as 'nearest neighbor' far more often, pulling new growth preferentially toward the unexplored parts of the space, a self-correcting bias toward whatever's still empty.",
+        "This is why the tree ends up roughly evenly spread (as in the embedded figure) despite never computing or targeting 'uniform coverage' explicitly: it emerges purely from always extending toward whichever existing node happens to be nearest to each new random sample."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "PLAN-02-ex4-prm-vs-rrt-conceptual",
+      "objective": "Choose between PRM and RRT for a given planning scenario and justify the choice.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 73, "originalNumber": "§4.2:36-37" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "A warehouse robot needs to plan paths in a fixed, unchanging warehouse layout, but will be given hundreds of different pick-and-place (start, goal) pairs over its operating lifetime. Would you reach for PRM or RRT here, and why?",
+      "hints": [
+        "PRM's precomputation cost (building an exhaustive roadmap once) is expensive upfront, but is paid only once and then amortized over every subsequent query.",
+        "RRT's strength is the opposite: near-zero setup cost, but it has to redo its tree-growing work from scratch for every new (start, goal) pair.",
+        "Since the layout is fixed and there will be hundreds of queries against it, PRM is the better fit: pay the roadmap-construction cost once, then answer every pick-and-place query with a cheap graph search over the same precomputed graph."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

@@ -1,17 +1,19 @@
 ---
 id: PROB-05
 block: PROB
-title: "Gaussians: Identities & Manipulation"
+title: "Gaussians: Definition, Identities & Manipulation"
 tier: 2
-estimatedHours: 2
+estimatedHours: 4
 prerequisites: ["PROB-01"]
 objectives:
+  - "State the formal definition of the Gaussian density, in both 1D and n dimensions, moment and canonical form."
   - "Explain why the Gaussian's closure under products/marginals/conditionals is practically valuable."
   - "Derive the mean and variance of the product of two 1D Gaussians."
-  - "Compute the product of two concrete Gaussians by hand."
-  - "Know where to find the fuller set of Gaussian identities (product, marginal, conditional, KL) for later reference."
+  - "State and apply the marginal and conditional identities for a jointly-Gaussian distribution."
+  - "Know where to find the fuller set of Gaussian identities (convolution, expectations, entropy, KL) for later reference."
 sources:
   - { sourceId: "gaussians", pages: "p1-4 (HTML-sourced)", role: "primary" }
+  - { sourceId: "lecture-ai", pages: "p17-18 (§1.2, Gaussians)", role: "primary" }
 concepts:
   - "Gaussian distribution (moment and canonical form)"
   - "Product of Gaussians"
@@ -30,16 +32,33 @@ import ReadinessCheck from '../../../components/ReadinessCheck.astro';
 
 ## Why this matters
 
-Gaussians are the workhorse distribution of robotics and ML: Kalman filters, Gaussian processes, variational inference, and the Laplace approximation (next module) all lean on the specific algebraic identities this module covers. Because these identities get used constantly but are easy to misremember under pressure, this module is deliberately reference-style, expect to come back to it.
+Gaussians are the workhorse distribution of robotics and ML: Kalman filters, Gaussian processes (you met these in [OPT-06](/course/OPT/OPT-06)), variational inference, and the Laplace approximation (next module) all lean on the specific algebraic identities this module covers. Because these identities get used constantly but are easy to misremember under pressure, this module is deliberately reference-style, expect to come back to it.
 
 ## Prerequisites & readiness check
 
-You should have basic probability (PROB-01) fresh; matrix algebra from MATH-02/MATH-03 helps for the general (non-scalar) versions, though this module works mostly in 1D.
+You should have basic probability (PROB-01) fresh; matrix algebra from MATH-02/MATH-03/MATH-03B helps for the general (non-scalar) versions.
 
 <ReadinessCheck
   question="What does it mean for a covariance matrix $A$ to be symmetric positive-definite?"
-  answer="$A=A^\top$ and $x^\top A x>0$ for every nonzero $x$ (from MATH-05)."
+  answer="$A=A^\top$ and $x^\top A x>0$ for every nonzero $x$ (from MATH-03B)."
 />
+
+## The Gaussian density, formally
+
+> **Definition (Gaussian, 1D).** In one dimension, a Gaussian distribution is defined by mean $\mu\in\mathbb{R}$ and variance $\sigma^2\in\mathbb{R}$:
+> $$N(x\mid\mu,\sigma^2) = \frac{1}{|2\pi\sigma^2|^{1/2}}\,e^{-\frac12(x-\mu)^2/\sigma^2}$$
+> $\sigma$ is called the **standard deviation**. The **$z$-score** of a value $x$ is $z=(x-\mu)/\sigma$, its distance from the mean measured in units of standard deviation.
+
+> **Definition (Gaussian, $n$ dimensions).** In $n$ dimensions, a Gaussian is defined by mean $a\in\mathbb{R}^n$ and symmetric positive-definite covariance matrix $A\in\mathbb{R}^{n\times n}$ ([MATH-03B](/course/MATH/MATH-03B)'s formal PD definition applies directly here, a covariance matrix *must* be PD):
+> $$N(x\mid a,A) = \frac{1}{|2\pi A|^{1/2}}\exp\left\{-\tfrac12(x-a)^\top A^{-1}(x-a)\right\}$$
+
+<ExerciseCard id="PROB-05-ex0-density-eval" />
+
+There's also a **canonical form**, with symmetric positive-definite **precision matrix** $A$ (note: the same symbol $A$ now plays a different role, precision, not covariance, only its context/bracket-type tells you which):
+
+$$N[x\mid a,A] = \frac{\exp\{-\tfrac12a^\top A^{-1}a\}}{|2\pi A^{-1}|^{1/2}}\exp\left\{-\tfrac12x^\top Ax+x^\top a\right\}$$
+
+with the conversion $N[x\mid a,A]=N(x\mid A^{-1}a,A^{-1})$ (equivalently $N(x\mid a,A)=N[x\mid A^{-1}a,A^{-1}]$): moment-form mean $=$ precision $\times$ canonical-form "mean parameter," moment-form covariance $=$ inverse of canonical-form precision. The canonical form looks less intuitive at first, but it's the form in which **products of Gaussians add directly** (below), which is precisely why it exists as a named, separate convention rather than just being "the same thing written differently for no reason."
 
 ## Why closure matters
 
@@ -53,7 +72,11 @@ The full result (mean and variance both) for 1D Gaussians $N(x\mid a,A)$, $N(x\m
 
 $$\sigma_c^2 = \left(\frac1A+\frac1B\right)^{-1}, \qquad \mu_c = \sigma_c^2\left(\frac{a}{A}+\frac{b}{B}\right)$$
 
-This is a **precision-weighted average**: the combined mean leans toward whichever input has the tighter (smaller) variance, i.e. more confidence. The multivariable generalization replaces $1/A$ with $A^{-1}$ throughout (matrix inverse instead of scalar reciprocal); the reference identities for that general case are collected below.
+This is a **precision-weighted average**: the combined mean leans toward whichever input has the tighter (smaller) variance, i.e. more confidence. The multivariable generalization replaces $1/A$ with $A^{-1}$ throughout (matrix inverse instead of scalar reciprocal), and the general product identity is most naturally stated in canonical form (precisions really do just add):
+
+$$N(x\mid a,A)\,N(x\mid b,B) = N[x\mid A^{-1}a+B^{-1}b,\,A^{-1}+B^{-1}]\cdot N(a\mid b,A+B)$$
+
+(the trailing $N(a\mid b,A+B)$ factor is a normalizing constant, not depending on $x$, needed since the product of two normalized densities isn't itself normalized in general.)
 
 ## Worked example
 
@@ -61,38 +84,53 @@ $N(x\mid 2,1)$ and $N(x\mid 4,2)$: $\sigma_c^2 = (1/1+1/2)^{-1} = 0.6\overline{6
 
 <ExerciseCard id="PROB-05-ex3-numeric" />
 
+## Marginal and conditional of a joint Gaussian
+
+For a jointly-Gaussian $(x,y)$ with mean $(a,b)$ and covariance $\begin{pmatrix}A&C\\C^\top&B\end{pmatrix}$, the **marginal** of $x$ is simply $N(x\mid a,A)$ (drop the rows/columns for $y$ entirely), and the **conditional** is:
+
+$$N\left(\begin{pmatrix}x\\y\end{pmatrix}\Bigg|\begin{pmatrix}a\\b\end{pmatrix},\begin{pmatrix}A&C\\C^\top&B\end{pmatrix}\right) = N(x\mid a,A)\cdot N\big(y\mid b+C^\top A^{-1}(x-a),\ B-C^\top A^{-1}C\big)$$
+
+i.e. observing $x$ shifts $y$'s mean by a term proportional to the cross-covariance $C^\top$ and the "surprise" $(x-a)$, and *shrinks* $y$'s variance by $C^\top A^{-1}C$ (which is PSD, so the conditional variance is never larger than the marginal, observing a correlated variable can only reduce uncertainty, never increase it). **This is exactly the Kalman filter's update step.**
+
+<ExerciseCard id="PROB-05-ex4-conditional-numeric" />
+
 ## Reference: further Gaussian identities
 
 The source note collects a larger set of identities than this module derives in full; these are worth knowing exist so you can look them up precisely when needed, rather than re-deriving them each time:
 
-- **Marginal & conditional** of a jointly-Gaussian $(x,y)$: both are Gaussian, with the conditional's mean shifted by a term proportional to the cross-covariance (this is the exact mechanism behind the Kalman filter's update step).
 - **Convolution**: $\int_x N(x\mid a,A)\,N(y-x\mid b,B)\,dx = N(y\mid a+b, A+B)$, variances add under convolution.
+- **Linear transformation**: $N(Fx+f\mid a,A) = \frac{1}{|F|}N(x\mid F^{-1}(a-f),\,F^{-1}AF^{-\top})$, needed whenever you push a Gaussian belief through a linear map (e.g. a linearized dynamics model).
 - **Expectations**: $\mathbb{E}_x\{x\}=a$, $\mathbb{E}_x\{xx^\top\}=A+aa^\top$.
-- **Entropy**: $H(N(a,A)) = \tfrac12\log|2\pi e A|$.
-- **KL divergence between two Gaussians**: a closed form in terms of $a,A,b,B$ (no sampling needed).
+- **Entropy**: $H(N(a,A)) = \tfrac12\log|2\pi eA|$.
+- **KL divergence between two Gaussians**: $2D(N(a,A)\|N(b,B)) = \log\frac{|B|}{|A|}+\text{tr}(B^{-1}A)+(b-a)^\top B^{-1}(b-a)-n$, a closed form in terms of $a,A,b,B$ (no sampling needed).
 
 ## Summary
 
+- A Gaussian is formally $N(x\mid a,A)=\frac{1}{|2\pi A|^{1/2}}\exp\{-\tfrac12(x-a)^\top A^{-1}(x-a)\}$, with covariance $A$ required to be symmetric positive-definite (MATH-03B); the canonical form $N[x\mid a,A]$ uses a precision matrix instead.
 - Gaussians are closed under products, marginals, and conditionals, the property that makes sequential Bayesian filtering with fixed-size representations possible.
 - Product of two Gaussians: precisions add ($1/\sigma_c^2 = 1/A+1/B$); the combined mean is a precision-weighted average.
-- A fuller reference set of identities (marginal/conditional, convolution, expectations, entropy, KL) exists in the source note for lookup as needed.
+- The conditional of a joint Gaussian shifts the mean by a cross-covariance-weighted correction and shrinks the variance, exactly the Kalman filter update.
+- A fuller reference set of identities (convolution, linear transformation, expectations, entropy, KL) exists in the source note for lookup as needed.
 
 ## Retrieval questions
 
-1. Derive the combined variance of a product of two 1D Gaussians, without looking back.
-2. Why does the combined mean lean toward the more confident (lower-variance) input?
-3. What property of Gaussians makes the Kalman filter possible?
+1. Write the 1D Gaussian density formula from memory, and identify each symbol.
+2. Derive the combined variance of a product of two 1D Gaussians, without looking back.
+3. Write the joint-Gaussian conditional mean and variance formulas from memory, and explain why the conditional variance can never exceed the marginal variance.
+4. What property of Gaussians makes the Kalman filter possible?
 
 ## Mastery checklist
 
+- [ ] Can state the formal Gaussian density (1D and $n$D, moment and canonical form) from memory.
 - [ ] Can explain why closure under products/marginals/conditionals matters practically.
 - [ ] Derived the product-of-Gaussians variance formula.
 - [ ] Computed a product of two concrete Gaussians by hand.
+- [ ] Applied the joint-Gaussian conditional formula to a concrete numeric example.
 - [ ] Knows where to look up the fuller set of Gaussian identities when needed.
 
 ## Source note
 
-This module's definitions, the closure motivation, and the product derivation are adapted from Marc Toussaint's `gaussians` lecture note (HTML-sourced, identical to the PDF, itself written in a reference/cheat-sheet style), used with attribution per this repository's README. The reference section above summarizes further identities from that same source without full derivation. The worked example and numeric exercise are newly authored.
+This module's formal density definitions (moment and canonical form, both 1D and $n$D) are adapted from `lecture-ai` §1.2 (pp. 17-18) and Marc Toussaint's `gaussians` lecture note (HTML-sourced, identical to the PDF, itself written in a reference/cheat-sheet style), used with attribution per this repository's README. The product, marginal/conditional, and reference-identity sections are adapted from the same `gaussians` note. The worked examples and numeric exercises are newly authored and independently verified (NumPy, including a 2-million-sample Monte Carlo cross-check of the conditional-Gaussian formula while authoring this module).
 
 ---
 

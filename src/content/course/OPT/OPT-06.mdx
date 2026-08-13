@@ -1,0 +1,153 @@
+---
+id: OPT-06
+block: OPT
+title: "Bayesian Optimization & Bandits"
+tier: 2
+estimatedHours: 4
+prerequisites: ["OPT-05", "PROB-01", "PROB-05"]
+objectives:
+  - "Explain the exploration/exploitation tradeoff and the multi-armed bandit problem formulation."
+  - "State and apply the UCB1 policy and its regret bound."
+  - "State the Gaussian Process definition and its posterior mean/variance formulas."
+  - "State the standard acquisition functions (MPI, EI, UCB) and the Bayesian optimization algorithm."
+sources:
+  - { sourceId: "lecture-optimization", pages: "p71-77 (§3.3)", role: "primary" }
+  - { sourceId: "lecture-ai", pages: "p45-51 (§1.4)", role: "primary" }
+concepts:
+  - "Multi-armed bandits"
+  - "Exploration vs. exploitation"
+  - "Upper Confidence Bound (UCB1)"
+  - "Gaussian Process (GP)"
+  - "Acquisition functions"
+  - "Bayesian optimization"
+notation:
+  - { symbol: "$\\hat\\mu_a, n_a$", meaning: "empirical mean reward and play count of bandit arm $a$" }
+  - { symbol: "$k(x,x')$", meaning: "GP covariance function (kernel)" }
+  - { symbol: "$\\alpha(x;D)$", meaning: "acquisition function: how 'interesting' it is to query $x$ next, given data $D$" }
+cheatsheetLinks: []
+nextModules: ["PROB-01"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Bayesian optimization and bandits are the standard tools whenever evaluating your objective is *itself* expensive: tuning a robot controller's gains on real hardware, hyperparameter search, or any setting where "just run gradient descent" isn't available because you can't even compute a gradient, only expensive, noisy function values. UCB (from bandits) also underlies exploration strategies across RL, active learning, and planning, you'll meet the same "optimism in the face of uncertainty" idea again there.
+
+## Prerequisites & readiness check
+
+You should have SGD/blackbox optimization (OPT-05) and the Gaussian identities (PROB-05) fresh; PROB-01's Bayes' rule is used directly.
+
+<ReadinessCheck
+  question="What does it mean for an estimator (like a mini-batch gradient) to be 'unbiased'?"
+  answer="Its expected value equals the true quantity being estimated, even though any single sample may differ from it."
+/>
+
+## Multi-armed bandits: the minimal exploration/exploitation problem
+
+Sequential decisions $a\in\{1,..,K\}$ (choosing one of $K$ "bandit machines"), each giving a return $r\sim P(r|a)$ with **unknown** $P(r|a)$. Find a policy $\pi:D_t\mapsto a_t$ (where $D_t=\{(a_i,r_i)\}_{i=1}^{t-1}$ is all data so far) maximizing $\max_\pi\mathbb{E}\{\sum_{t=1}^nr_t\mid\pi\}$. No model, no data initially, the system has to collect its own data.
+
+This is the archetype for an entire family of problems (active learning, RL, global optimization, game engines): choosing an action has **two effects**, it collects reward (**exploitation**) and it collects information about that action (**exploration**). Pure exploitation ($\operatorname*{argmax}_a\hat\mu_a$, the empirically-best arm so far) risks getting stuck on an arm that only *looked* good from limited data; pure exploration (uniform random) wastes rounds on arms already known to be bad.
+
+<ExerciseCard id="OPT-06-ex1-explore-exploit" />
+
+Two naive strategies: **$\epsilon$-greedy** (with probability $\epsilon$, explore uniformly at random; else exploit $\operatorname*{argmax}_a\hat\mu_a$) and **alternating explore/exploit**. Both work, but neither uses *how uncertain* each estimate $\hat\mu_a$ actually is.
+
+## Upper Confidence Bound (UCB1)
+
+```
+Upper Confidence Bound (UCB1)
+1: Initialization: Play each machine once
+2: repeat
+3:   Play the machine a that maximizes μ̂ₐ + β·√(2·ln(n)/nₐ)
+4: until (resources exhausted, or forever — bandits are typically played continually)
+```
+*(Marc Toussaint, `lecture-ai.pdf`, p.48, following Auer, Cesa-Bianchi & Fischer, "Finite-time analysis of the multiarmed bandit problem," Machine Learning, 2002. μ̂ₐ is the average outcome of machine a so far, nₐ how often it's been played, n=Σₐnₐ the total rounds so far, and β is often chosen as β=1. The source's own algorithm box leaves line 4's stopping condition open-ended in exactly this way.)*
+
+The term $\Delta_a=\beta\sqrt{2\ln n/n_a}$ acts as a **confidence interval**: with high probability, $\hat\mu_a-\Delta_a<\mu_a<\hat\mu_a+\Delta_a$ (via a Chernoff/Hoeffding bound on the error of a mean estimator). UCB1 chooses the **upper bound** of this interval, "**optimism in the face of uncertainty**": an arm gets played either because it looks genuinely good ($\hat\mu_a$ large) or because it's barely been tried ($n_a$ small, so $\Delta_a$ large), automatically balancing exploration and exploitation without any tunable $\epsilon$.
+
+> **Theorem.** UCB1 (with $\beta=1$) has regret bounded by $O(\ln n)$, where regret after $n$ steps is $L(n)=\sum_a(\mu^*-\mu_a)\,\mathbb{E}\{n_a(n)\}$, $\mu^*=\max_a\mu_a$.
+
+<ExerciseCard id="OPT-06-ex2-ucb-numeric" />
+
+This "optimism" principle recurs constantly: it's related to how $A^*$ search over-estimates reward-to-go (equivalently, under-estimates cost-to-go) to guide exploration efficiently, just applied here in a genuinely probabilistic setting. UCB also extends directly to **contextual bandits for ML**: given an ensemble of $k$ models $\{f_j\}_{j=1}^k$ (from bootstrap resampling or $k$-fold cross-validation), estimate a prediction's mean $\hat\mu_a$ and standard error $\hat\sigma_a$ across the ensemble, then choose $a^*=\operatorname*{argmax}_a\hat\mu_a+\beta\hat\sigma_a$, exactly the same optimism-driven exploration idea used to build a confidence-aware active-learning or exploration policy on top of an ordinary supervised model.
+
+## Gaussian Processes
+
+Bandits assumed *no* structure linking different arms. **Bayesian optimization** goes further: it assumes the unknown function $f$ itself has smoothness structure, captured by maintaining a belief $b_t=P(f\mid D)$, specifically a **Gaussian Process**.
+
+> **Definition (Gaussian Process).** A GP defines a probability distribution over *functions*: for any finite set $\{x_1,..,x_M\}$, the function values $f(x_1),..,f(x_M)$ are jointly Gaussian, with $\mathbb{E}\{f(x_i)\}=\mu(x_i)$ (the **mean function**, often $0$) and $\text{Cov}\{f(x_i),f(x_j)\}=k(x_i,x_j)$ (the **covariance function** or **kernel**).
+
+A common kernel choice is the $\gamma$-exponential family, $k(x,x')=\exp\{-|(x-x')/l|^\gamma\}$ (the squared-exponential/RBF kernel, $\gamma=2$, is the most common special case, the same non-normalized-Gaussian bell shape you met as a basis function back in [MATH-01](/course/MATH/MATH-01)). Observations are further assumed noisy, $P(y|x,f)=\mathcal{N}(y\mid f(x),\sigma_0^2)$.
+
+<ExerciseCard id="OPT-06-ex3-gp-posterior-derivation" />
+
+Given a GP prior and data $D=\{(x_i,y_i)\}_{i=1}^n$, the posterior over $f$ at a new point $x$ is again Gaussian, with (using PROB-05's Gaussian conditioning identity):
+
+$$\mathbb{E}\{f(x)\mid D\} = \mu(x|D) = \kappa(x)^\top(K+\sigma_0^2I)^{-1}y$$
+
+$$\mathbb{E}\{[f(x)-\hat f(x)]^2\mid D\} = \sigma^2(x|D) = k(x,x) - \kappa(x)^\top(K+\sigma_0^2I_n)^{-1}\kappa(x)$$
+
+where $\kappa(x)=(k(x,x_1),..,k(x,x_n))^\top$ (covariances of $x$ to all data points), $K=(k(x_i,x_j))_{i,j=1}^n$ (covariances between all data points), $y=(y_1,..,y_n)^\top$. (This is exactly the ridge-regression-shaped formula from [MATH-02B](/course/MATH/MATH-02B), $\mu(x|D)$ is literally "Bayesian kernel ridge regression.")
+
+<ExerciseCard id="OPT-06-ex4-gp-numeric" />
+
+## Bayesian optimization
+
+```
+Bayesian Optimization Algorithm
+Input:    GP prior given as μ(x) and k(x,x'), black-box function f(x)
+Output:   x
+1: initialize empty data D = {}
+2: repeat
+3:   find optimal query  x ← argmax_x α(x|D)   (where α depends on μ(x|D), σ²(x|D))
+4:   query y ← f(x)
+5:   add to data D ← D ∪ {(x,y)}, update GP posterior μ(x|D), σ²(x|D)
+6: until resources
+```
+*(Marc Toussaint, `lecture-optimization.pdf`, p.74.)*
+
+$\alpha(x;D)$ is called the **acquisition function** (a discriminative function for the next decision, analogous to a $Q$-function in RL, just not learned). Standard choices:
+
+$$\alpha_{\text{MPI}}(x;D) = \int_{-\infty}^{y^*}\mathcal{N}(y\mid\mu_D(x),\sigma_D^2(x))\,dy \qquad\text{(maximize Probability of Improvement)}$$
+
+$$\alpha_{\text{EI}}(x;D) = \int_{-\infty}^{y^*}\mathcal{N}(y\mid\mu_D(x),\sigma_D^2(x))(y^*-y)\,dy \qquad\text{(maximize Expected Improvement)}$$
+
+$$\alpha_{\text{UCB}}(x;D) = \mu_D(x)+\beta_t\sigma_D(x) \qquad\text{(GP-UCB, often $\beta_t=1$)}$$
+
+Each $\operatorname*{argmax}_x\alpha(x)$ is itself an *analytical* optimization problem (since $\mu_D,\sigma_D^2$ are given in closed form, with gradients/Hessians available even though $f$ itself isn't), solved with the tools from earlier in this block (multi-restart gradient/Newton, since $\alpha$ is generally multi-modal). This is the whole point of Bayesian optimization: **trade a blackbox global optimization problem (expensive) for an analytical one (cheap), solved repeatedly**.
+
+<ExerciseCard id="OPT-06-ex5-acquisition-comparison" />
+
+**A real limitation, worth flagging honestly**: the entire approach hinges on the GP's kernel choice, i.e. the assumed prior $P(f)$. Too "small" a kernel length-scale gives an almost exhaustive search; too "wide" risks missing local optima entirely; the true $f$ might not even be stationary. Assuming you have the right prior is a genuinely strong assumption, not a minor implementation detail.
+
+## Summary
+
+- Multi-armed bandits formalize the minimal exploration/exploitation tradeoff: choosing an arm both collects reward and collects information.
+- UCB1 chooses the arm maximizing $\hat\mu_a+\beta\sqrt{2\ln n/n_a}$, "optimism in the face of uncertainty," with regret bounded by $O(\ln n)$; the same idea extends to contextual bandits via ensemble-based mean/std-error estimates.
+- A Gaussian Process defines a distribution over functions via a mean function and covariance/kernel function; its posterior mean/variance are the same ridge-regression-shaped formulas from MATH-02B.
+- Bayesian optimization repeatedly maximizes an acquisition function (MPI, EI, or UCB, all closed-form given the GP posterior) to pick the next query, trading a blackbox global search for a sequence of cheap analytical ones, contingent on the kernel being a reasonable prior for the true function.
+
+## Retrieval questions
+
+1. State the UCB1 policy and explain the "optimism in the face of uncertainty" principle in one sentence.
+2. State the Gaussian Process definition, and connect its posterior mean formula to the ridge-regression closed form from MATH-02B.
+3. Write all three standard acquisition functions (MPI, EI, UCB) from memory, and explain what problem solving $\operatorname*{argmax}_x\alpha(x)$ trades away.
+4. What's the real practical risk in Bayesian optimization's reliance on a GP prior?
+
+## Mastery checklist
+
+- [ ] Can state the multi-armed bandit problem formulation and explain exploration vs. exploitation.
+- [ ] Can state the UCB1 policy and its regret bound.
+- [ ] Can state the GP definition and its posterior mean/variance formulas.
+- [ ] Can state the Bayesian optimization algorithm and all three acquisition functions.
+- [ ] Can explain why Bayesian optimization trades a blackbox problem for a sequence of analytical ones, and its dependence on kernel choice.
+
+## Source note
+
+This module's exposition, UCB1 (including the regret theorem), the Gaussian Process definition and posterior formulas, the acquisition functions, and the Bayesian optimization algorithm are adapted from `lecture-optimization` §3.3 (pp. 71-77) and `lecture-ai` §1.4 (pp. 45-51, bandits/UCB1, plus the contextual-bandits/ensemble extension). The worked examples and exercises are newly authored and independently verified.
+
+---
+
+**Next**: Block PROB — [PROB-01: Probability Foundations](/course/PROB/PROB-01)

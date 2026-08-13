@@ -1,0 +1,71 @@
+{
+  "moduleId": "KIN-01",
+  "exercises": [
+    {
+      "id": "KIN-01-ex1-so3-check",
+      "objective": "Verify a candidate matrix is a valid rotation matrix.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Verify that $R=\\begin{pmatrix}0&-1&0\\\\1&0&0\\\\0&0&1\\end{pmatrix}$ (a 90° rotation about the $z$-axis) satisfies both $SO(3)$ conditions. Then explain why $R'=\\begin{pmatrix}0&-1&0\\\\1&0&0\\\\0&0&-1\\end{pmatrix}$ (same first two rows, but flipped sign in the bottom-right) is *not* a valid rotation matrix, even though its columns are still orthonormal.",
+      "hints": [
+        "Compute $R^\\top R$ directly (or note that the columns of $R$ are visibly unit length and mutually orthogonal, e.g. $(0,1,0)\\cdot(-1,0,0)=0$), confirming $R^\\top R=I$.",
+        "Compute $\\det(R)$ (e.g. by cofactor expansion along the third row, which has only one nonzero entry): $\\det(R) = 1\\times\\det\\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix} = 1\\times(0-(-1)) = 1$.",
+        "For $R'$: its columns are still orthonormal (the sign flip in one entry doesn't break orthogonality or unit length), so $R'^\\top R'=I$ still holds, but $\\det(R') = -1$ (the sign flip negates the determinant). $R'$ is an orthonormal matrix but a **reflection**, not a rotation, exactly why $SO(3)$ requires both conditions, orthonormality alone isn't enough to rule out reflections."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "KIN-01-ex2-rodrigues-numeric",
+      "objective": "Apply Rodrigues' formula to rotate a vector by hand.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 15, "originalNumber": "§2.1:8" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["KIN-01-ex1-so3-check"],
+      "answerType": "numeric",
+      "prompt": "Using Rodrigues' formula, rotate $v=(1,0,0)$ by $\\theta=\\pi/3$ (60°) about axis $\\hat w=(0,0,1)$. Report the **second component** ($y$) of the result. Enter a decimal to 3 decimal places.",
+      "hints": [
+        "$\\hat w\\times v = (0,0,1)\\times(1,0,0) = (0,1,0)$ (standard cross product), and $\\hat w^\\top v = 0$ (they're perpendicular), so the third term of Rodrigues' formula vanishes entirely here.",
+        "Rodrigues' formula reduces to $\\cos\\theta\\,v+\\sin\\theta\\,(\\hat w\\times v) = \\cos(\\pi/3)(1,0,0)+\\sin(\\pi/3)(0,1,0)$.",
+        "$\\cos(\\pi/3)=0.5$, $\\sin(\\pi/3)\\approx0.866$. Result $\\approx(0.5,\\,0.866,\\,0)$. Second component: $0.866$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "KIN-01-ex3-rdot-derivation",
+      "objective": "Derive the rotation-matrix angular-velocity identity from the geometric definition of angular velocity.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "quaternions", "page": 4, "originalNumber": "Angular velocity & derivative of a rotation matrix" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["KIN-01-ex1-so3-check"],
+      "answerType": "derivation",
+      "prompt": "Let $x_{\\text{body}}$ be a point fixed in a body rotating with angular velocity $w$, so its world position is $x(t)=R(t)x_{\\text{body}}$. The geometric definition of angular velocity says $\\dot x(t) = w\\times x(t)$ (a point rotating rigidly about the origin has velocity equal to $w\\times$ its current position). Using this, and that $x_{\\text{body}}$ is an *arbitrary* fixed body point, derive $\\dot R(t)=\\text{skew}(w)R(t)$.",
+      "hints": [
+        "Differentiate $x(t)=R(t)x_{\\text{body}}$ directly: $\\dot x(t) = \\dot R(t)x_{\\text{body}}$ (since $x_{\\text{body}}$ is constant).",
+        "Also, by the geometric definition, $\\dot x(t) = w\\times x(t) = \\text{skew}(w)x(t) = \\text{skew}(w)R(t)x_{\\text{body}}$ (using $\\text{skew}(w)v=w\\times v$ and substituting $x(t)=R(t)x_{\\text{body}}$).",
+        "Both expressions equal $\\dot x(t)$, so $\\dot R(t)x_{\\text{body}} = \\text{skew}(w)R(t)x_{\\text{body}}$. Since this holds for *every* choice of fixed body point $x_{\\text{body}}\\in\\mathbb{R}^3$ (not just one specific one), the matrices multiplying $x_{\\text{body}}$ on each side must themselves be equal: $\\dot R(t)=\\text{skew}(w)R(t)$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "KIN-01-ex4-homogeneous-composition",
+      "objective": "Compose two homogeneous transforms and convert a point's coordinates through both frames.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["KIN-01-ex1-so3-check"],
+      "answerType": "numeric",
+      "prompt": "World frame $W$, frame $A$: $R_{W\\to A}=I$, $t_{W\\to A}=(2,0,0)$. Frame $B$ relative to $A$: $R_{A\\to B}$ is a 90° rotation about $z$ (as in the first exercise), $t_{A\\to B}=(0,1,0)$. A point has coordinates $x^B=(1,0,0)$ in frame $B$. Compute $x^W$ (first convert $x^B\\to x^A$, then $x^A\\to x^W$), and report the **second component** ($y$). Enter a decimal.",
+      "hints": [
+        "First, $x^A = R_{A\\to B}x^B + t_{A\\to B} = \\begin{pmatrix}0&-1&0\\\\1&0&0\\\\0&0&1\\end{pmatrix}\\begin{pmatrix}1\\\\0\\\\0\\end{pmatrix}+\\begin{pmatrix}0\\\\1\\\\0\\end{pmatrix} = \\begin{pmatrix}0\\\\1\\\\0\\end{pmatrix}+\\begin{pmatrix}0\\\\1\\\\0\\end{pmatrix} = \\begin{pmatrix}0\\\\2\\\\0\\end{pmatrix}$.",
+        "Then, $x^W = R_{W\\to A}x^A+t_{W\\to A} = I\\begin{pmatrix}0\\\\2\\\\0\\end{pmatrix}+\\begin{pmatrix}2\\\\0\\\\0\\end{pmatrix}$.",
+        "$x^W = \\begin{pmatrix}2\\\\2\\\\0\\end{pmatrix}$. Second component: $2$."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

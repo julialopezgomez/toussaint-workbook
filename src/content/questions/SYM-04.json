@@ -1,0 +1,73 @@
+{
+  "moduleId": "SYM-04",
+  "exercises": [
+    {
+      "id": "SYM-04-ex1-mln-grounding-numeric",
+      "objective": "Compute the number of grounded random variables an MLN generates for a small domain.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 202, "originalNumber": "4.7:23" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For predicates $\\text{cancer}(x)$ (unary), $\\text{smoking}(x)$ (unary), and $\\text{friends}(x,y)$ (binary), and domain $D=\\{\\text{Anna},\\text{Bob}\\}$ ($|D|=2$), compute the total number of grounded random variables. Enter an integer.",
+      "hints": [
+        "Each unary predicate has $|D|$ groundings: $\\text{cancer}(x)$ gives 2, $\\text{smoking}(x)$ gives 2.",
+        "The binary predicate $\\text{friends}(x,y)$ has $|D|^2$ groundings: $2^2=4$.",
+        "Total: $2+2+4=8$, matching the source's own enumeration $\\{\\text{cancer}(A),\\text{cancer}(B),\\text{smoking}(A),\\text{smoking}(B),\\text{friends}(A,A),\\text{friends}(A,B),\\text{friends}(B,A),\\text{friends}(B,B)\\}$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "SYM-04-ex2-mln-factor-value-numeric",
+      "objective": "Compute an MLN's unnormalized log-factor value from formula weights and their true-grounding counts.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 203, "originalNumber": "4.7:24" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For a world $X$ where $F_1$ (weight $w_1=1.5$) has 2 true groundings and $F_2$ (weight $w_2=1.1$) has 1 true grounding, compute $\\sum_i\\sum_{\\text{true groundings of }F_i}w_i$ (the exponent of $F(X;D)\\propto\\exp\\{\\cdots\\}$). Enter a decimal.",
+      "hints": [
+        "$F_1$'s contribution: $w_1\\times(\\text{number of true groundings})=1.5\\times2$.",
+        "$F_2$'s contribution: $w_2\\times1=1.1\\times1$.",
+        "Total: $3.0+1.1=4.1$. (Independently verified by direct computation while authoring this module.) A world with more satisfied high-weight formula groundings gets a larger exponent, hence higher unnormalized probability."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "SYM-04-ex3-infinite-weight-conceptual",
+      "objective": "Explain what the infinite-weight limit of an MLN recovers.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 203, "originalNumber": "4.7:25" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain precisely what happens to $F(X;D)\\propto\\exp\\{\\sum_iw_i\\times(\\text{true groundings of }F_i)\\}$ as some $w_i\\to\\infty$, and why this recovers classical hard first-order logic.",
+      "hints": [
+        "If $w_i\\to\\infty$, any world $X$ where $F_i$ has *fewer* true groundings than the maximum possible (i.e. $F_i$ is violated by at least one grounding) gets an exponent that goes to $-\\infty$ relative to worlds where $F_i$ is fully satisfied, so its (normalized) probability goes to exactly zero.",
+        "So an infinite-weight formula effectively becomes a **hard constraint**: any world violating even one grounding of it is assigned probability zero, not just 'unlikely.'",
+        "This is exactly classical FOL entailment: a hard constraint that must hold in every possible world is indistinguishable from a formula that's simply required to be true, no uncertainty at all, recovering SYM-02's classical (non-probabilistic) first-order logic as the infinite-weight limiting case."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "SYM-04-ex4-prm-vs-mln-conceptual",
+      "objective": "Distinguish PRMs and MLNs by what each models directly.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 200, "originalNumber": "4.7:21" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain the structural difference between how a PRM and an MLN each specify their probabilistic model.",
+      "hints": [
+        "A PRM is framed around a relational database: it defines conditional probability tables for table attributes (e.g. $P(A\\mid Q,M)$), directly mirroring a database schema's structure.",
+        "An MLN instead defines a set of weighted first-order logic formulas $\\{(F_i,w_i)\\}$; there's no database-schema framing at all, just formulas and weights.",
+        "Both ultimately ground into the same kind of object, a factor graph/Bayesian network over grounded predicates for a specific domain $D$, but a PRM's specification is organized around database tables and their dependencies, while an MLN's is organized around logical formulas and how strongly each should hold, generally considered the cleaner, more general formulation (per the source's own stated preference)."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

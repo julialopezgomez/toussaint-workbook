@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const modules = await getCollection('course');
+
+const byConcept = new Map<string, { id: string; block: string; title: string }[]>();
+for (const m of modules) {
+  for (const c of m.data.concepts) {
+    if (!byConcept.has(c)) byConcept.set(c, []);
+    byConcept.get(c)!.push({ id: m.data.id, block: m.data.block, title: m.data.title });
+  }
+}
+const sortedConcepts = [...byConcept.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+---
+<BaseLayout title="Concept Index">
+  <nav class="no-print breadcrumb"><a href="/">Start</a> / <a href="/curriculum">Curriculum</a> / Concepts</nav>
+  <h1>Concept index</h1>
+  <p>
+    Every <code>concepts[]</code> entry across all {modules.length} modules, aggregated at build time, alphabetical.
+    Concepts are written per-module in whatever phrasing fit that module's prose, so near-duplicates (e.g. slightly
+    different wording for the same idea in two modules) aren't automatically merged, use this as a starting point
+    for "where has this come up before," not a fully normalized taxonomy.
+  </p>
+  <ul class="concept-list">
+    {sortedConcepts.map(([concept, mods]) => (
+      <li>
+        <strong>{concept}</strong>
+        <div class="mod-links">
+          {mods.map((m, i) => (
+            <>
+              {i > 0 && ' · '}
+              <a href={`/course/${m.block}/${m.id}`}>{m.id}</a>
+            </>
+          ))}
+        </div>
+      </li>
+    ))}
+  </ul>
+  <style>
+    .breadcrumb { font-size: 0.85rem; opacity: 0.7; margin-bottom: 1rem; }
+    .breadcrumb a { color: inherit; }
+    .concept-list { list-style: none; padding: 0; }
+    .concept-list li { padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+    .mod-links { font-size: 0.82rem; opacity: 0.75; margin-top: 0.2rem; }
+  </style>
+</BaseLayout>

@@ -16,6 +16,36 @@
       "fullSolution": "The gradient is only a local, first-order (linear) approximation of f, accurate close to the current point. If alpha is too large, the step can move far enough that this local approximation no longer holds, potentially landing at a point with HIGHER f than the start, or causing oscillation/divergence across iterations. If alpha is too small, each step is safe (the local approximation holds fine) but makes only tiny progress toward the minimum, so the algorithm needs an impractically large number of iterations to converge, technically correct but practically useless."
     },
     {
+      "exerciseId": "OPT-01-ex1b-wolfe-check",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly computes both sides of the inequality." },
+          { "points": 1, "description": "Correctly concludes the condition holds (1.5 <= 1.6)." },
+          { "points": 1, "description": "Correctly explains what the condition means (slope has decreased enough along the search direction)." }
+        ],
+        "commonErrors": [
+          "Forgetting the absolute values, leading to a sign-confused comparison."
+        ]
+      },
+      "fullSolution": "grad_f(x)^T delta = 4*(-1) = -4, so RHS = 0.4*|-4| = 1.6. grad_f(x+alpha*delta)^T delta = -1.5*(-1) = 1.5, so LHS = |1.5| = 1.5. Since 1.5 <= 1.6, the condition holds: the slope along delta has decreased enough (from magnitude 4 down to 1.5) that the line search has landed close enough to a local minimum along that direction. If it failed, the step would need further adjustment (typically by continuing to search rather than accepting immediately)."
+    },
+    {
+      "exerciseId": "OPT-01-ex1c-steepest-descent-cholesky",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly substitutes delta=B^-1 z and simplifies the constraint to z^T z=1." },
+          { "points": 1, "description": "Correctly rewrites the objective as (B^-T grad f)^T z." },
+          { "points": 2, "description": "Correctly solves the unit-sphere linear minimization and transforms back to get delta* proportional to -A^-1 grad f(x)." }
+        ],
+        "commonErrors": [
+          "Losing track of which matrix is transposed/inverted when substituting back from z to delta (order matters since matrix operations don't commute)."
+        ]
+      },
+      "fullSolution": "Constraint: delta^T A delta = (B^-1 z)^T (B^T B)(B^-1 z) = z^T (B^-T B^T B B^-1) z = z^T z (using A=B^T B, and the B's cancel in pairs). So the constraint becomes z^T z = 1.\nObjective: grad f(x)^T delta = grad f(x)^T B^-1 z = (B^-T grad f(x))^T z.\nSo we minimize c^T z over unit z, with c = B^-T grad f(x). This is minimized at z* = -c/||c|| (directly opposite c).\nTransforming back: delta* = B^-1 z* is proportional to B^-1(-B^-T grad f(x)) = -(B^-1 B^-T) grad f(x) = -(B^T B)^-1 grad f(x) = -A^-1 grad f(x) (using B^-1 B^-T = (B^T B)^-1). So delta* is proportional to -A^-1 grad f(x), matching the steepest descent direction under metric A. (Numerically verified against a 200,000-sample brute-force search over the ellipse delta^T A delta=1 while authoring this module: matched to cosine similarity > 0.9999.)"
+    },
+    {
       "exerciseId": "OPT-01-ex2-newton-derivation",
       "checkMode": "rubric",
       "rubric": {
@@ -50,6 +80,21 @@
         ]
       },
       "fullSolution": "The right-hand side f(x) + c*alpha*grad_f(x)^T d, with 0<c<1, is a line through (0, f(x)) with a shallower slope than the true tangent line (slope grad_f(x)^T d), a 'lowered bar' that the actual function value after the step must clear. This guarantees the step achieves at least a small guaranteed FRACTION (c) of the decrease predicted by the local linear model, not just some arbitrarily tiny decrease. Without this, a line search could accept steps whose actual decrease is minuscule relative to the size of the step taken, i.e. steps that make negligible real progress while technically satisfying 'f decreased'), leading to extremely slow or effectively stalled convergence: the same failure mode as choosing alpha too small directly, just hidden behind an 'accepted' step."
+    },
+    {
+      "exerciseId": "OPT-01-ex5-fallback-check",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains why the Newton step at a saddle point isn't a sensible descent direction (min along one eigendirection, max along the other)." },
+          { "points": 1, "description": "Correctly applies the eigenvalue shift-invariance fact to find both shifted eigenvalues." },
+          { "points": 1, "description": "Correctly concludes lambda=3 is the minimal integer damping." }
+        ],
+        "commonErrors": [
+          "Only checking one of the two eigenvalues for positivity after shifting."
+        ]
+      },
+      "fullSolution": "(a) The Newton step is the exact stationary point of the local quadratic model. At a saddle point, that stationary point is a minimum along the eigendirection with positive curvature (eigenvalue 3) but a MAXIMUM along the eigendirection with negative curvature (eigenvalue -2). So blindly taking the Newton step can move the iterate uphill along that negative-curvature direction, the opposite of a sensible descent step.\n(b) Using the shift-invariance fact (eigenvalues of H+lambda*I are eigenvalues of H shifted by lambda, same eigenvectors): shifted eigenvalues are -2+lambda and 3+lambda. Need both > 0: -2+lambda>0 requires lambda>2 (the other, 3+lambda, is already positive for any lambda>2). Minimal integer lambda satisfying this is lambda=3. Adding lambda*I uniformly raises every directional curvature, eventually making even the previously-negative direction curve upward, so the damped Hessian is genuinely positive definite and its Newton step is a true descent direction."
     }
   ]
 }

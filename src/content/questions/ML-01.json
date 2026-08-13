@@ -1,0 +1,73 @@
+{
+  "moduleId": "ML-01",
+  "exercises": [
+    {
+      "id": "ML-01-ex1-partial-total-numeric",
+      "objective": "Compute and distinguish the partial and total derivative of a simple chained function.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 6, "originalNumber": "1.1:3" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For $f(x,g)=3x+2g$ with $g(x)=2x$, compute the total derivative $df/dx$ (not the partial derivative $\\partial f/\\partial x$). Enter an integer.",
+      "hints": [
+        "The partial derivative treats $g$ as fixed: $\\partial f/\\partial x=3$. The total derivative must also account for $x$'s indirect effect through $g$.",
+        "Substitute $g(x)=2x$ into $f$ first: $f(x)=3x+2(2x)=3x+4x=7x$.",
+        "$df/dx=7$: the direct effect (3, from the '$3x$' term) plus the indirect effect through $g$ (4, since $g=2x$ means a unit change in $x$ causes a 2-unit change in $g$, which causes a further $2\\times2=4$-unit change in $f$)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-01-ex2-forward-mode-derivation",
+      "objective": "Apply the forward-mode chain rule to the f(x,g)=3x+2g, g(x)=2x graph.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 7, "originalNumber": "1.1:6" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["ML-01-ex1-partial-total-numeric"],
+      "answerType": "derivation",
+      "prompt": "Using the forward-mode formula $\\dfrac{df}{dx}=\\sum_{g\\in[f]}\\dfrac{\\partial f}{\\partial g}\\dfrac{dg}{dx}$ (where $[f]=\\{x,g\\}$, since $f$ depends directly on both $x$ and $g$), compute $dg/dx$ first, then use it to compute $df/dx$. Confirm it matches your answer from the previous exercise.",
+      "hints": [
+        "First compute $dg/dx$ (moving forward from $x$): $g(x)=2x\\Rightarrow dg/dx=2$.",
+        "Now apply the forward-mode formula with $[f]=\\{x,g\\}$: $\\dfrac{df}{dx}=\\dfrac{\\partial f}{\\partial x}\\dfrac{dx}{dx}+\\dfrac{\\partial f}{\\partial g}\\dfrac{dg}{dx}=3(1)+2(2)$.",
+        "$df/dx=3+4=7$, matching the total derivative computed directly in the previous exercise, exactly as it must: forward mode is just a different bookkeeping order for the same total derivative."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-01-ex3-backward-mode-derivation",
+      "objective": "Apply the backward-mode chain rule to the f(x,g)=3x+2g, g(x)=2x graph.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 7, "originalNumber": "1.1:6" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["ML-01-ex1-partial-total-numeric"],
+      "answerType": "derivation",
+      "prompt": "Using the backward-mode formula $\\dfrac{df}{dx}=\\sum_{h\\,:\\,x\\in[h]}\\dfrac{df}{dh}\\dfrac{\\partial h}{\\partial x}$ (where $x$'s children are $g$ and $f$ itself, since both use $x$ directly), compute $df/dg$ first, then use it to compute $df/dx$. Confirm it matches your answers from the previous two exercises.",
+      "hints": [
+        "First compute $df/dg$ (moving backward from $f$): since $g$'s only child is $f$ directly, $df/dg=\\partial f/\\partial g=2$.",
+        "Now apply the backward-mode formula, summing over $x$'s children $\\{g,f\\}$: $\\dfrac{df}{dx}=\\dfrac{df}{df}\\dfrac{\\partial f}{\\partial x}+\\dfrac{df}{dg}\\dfrac{\\partial g}{\\partial x}=1(3)+2(2)$.",
+        "$df/dx=3+4=7$, matching both previous answers: forward and backward mode always compute the identical total derivative, they only differ in the order operations are performed and, crucially, in their computational cost (next exercise)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-01-ex4-complexity-numeric",
+      "objective": "Compute the cost ratio between forward-mode and backward-mode differentiation for a realistic neural network scale.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 8, "originalNumber": "1.1:9" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For a network with $d_x=1{,}000{,}000$ parameters and a scalar loss ($d_z=1$), forward-mode cost scales with $d_x$ and backward-mode cost scales with $d_z$. Compute the ratio $d_x/d_z$ (roughly how many times more expensive forward mode is). Enter an integer.",
+      "hints": [
+        "Forward mode's cost scales with the input dimension $d_x$; backward mode's scales with the output dimension $d_z$.",
+        "The ratio of costs is therefore approximately $d_x/d_z$.",
+        "$1{,}000{,}000/1=1{,}000{,}000$: forward-mode differentiation would be roughly a million times more expensive than backward mode for this network, which is exactly why every deep learning framework uses reverse-mode (backward) automatic differentiation."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "moduleId": "RLEARN-08",
+  "exercises": [
+    {
+      "id": "RLEARN-08-ex1-deepsets-numeric",
+      "objective": "Compute a Deep Sets aggregation and verify its permutation invariance.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 102, "originalNumber": "1.13:8" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "Using the Deep Sets formula $f(X)\\approx\\rho\\big(\\sum_{x\\in X}\\phi(x)\\big)$ with $\\phi(x)=x^2$, $\\rho(s)=\\sqrt{s}$, and $X=\\{1,2,3\\}$, compute $f(X)$. Give your answer to 3 decimal places.",
+      "hints": [
+        "First apply $\\phi$ to each element and sum: $1^2+2^2+3^2$.",
+        "That sum is $14$; now apply $\\rho$: $\\sqrt{14}$.",
+        "$f(X)=\\sqrt{14}\\approx3.742$. Note the sum is invariant to the order in which you add $1^2,2^2,3^2$, that's exactly why this construction is permutation-invariant regardless of the order neighbors are observed in."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-08-ex2-gnn-conceptual",
+      "objective": "Explain how a GNN's aggregate step generalizes Deep Sets.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 104, "originalNumber": "1.13:10" },
+      "difficulty": "core",
+      "estimatedMinutes": 8,
+      "prerequisites": ["RLEARN-08-ex1-deepsets-numeric"],
+      "answerType": "short-text",
+      "prompt": "Explain how a GNN node's aggregate step, $\\text{MLP}_\\rho\\big(\\sum_{m\\in N(n)}\\text{MLP}_\\phi(h_m^{(l)})\\big)$, is a direct instance of the Deep Sets formula, and what set is being aggregated over.",
+      "hints": [
+        "Compare term by term: $\\text{MLP}_\\phi$ plays the role of $\\phi$, the sum plays the role of $\\sum_{x\\in X}$, and $\\text{MLP}_\\rho$ plays the role of $\\rho$.",
+        "The set $X$ being aggregated over is node $n$'s neighborhood $N(n)$, a set of neighbor feature vectors $h_m^{(l)}$, not raw sensor readings; it's variable-size and unordered, exactly the setting Deep Sets was designed for.",
+        "So a GNN's aggregate step is literally a Deep Sets computation applied locally at every node, once per layer, over that node's (possibly changing) set of neighbors; the update step then combines this aggregated summary with the node's own previous feature."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-08-ex3-markov-game-conceptual",
+      "objective": "Explain how a Markov game generalizes RL-01's single-agent MDP.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 108, "originalNumber": "1.13:14" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "RL-01 defines an MDP as $(S,A,P,R,P_0,\\gamma)$. Explain precisely what changes, and what stays the same in form, when generalizing to a Markov game with $N$ robots.",
+      "hints": [
+        "$S$, $P_0$, and $\\gamma$ keep the same role and form; $S$ becomes the *joint* state space (the combined state of all $N$ robots) rather than one robot's state.",
+        "$A$ becomes the joint action space $A=A_1\\times\\cdots\\times A_N$: at every step, all $N$ robots choose an action simultaneously, and $P(s'\\mid s,a)$ depends on the whole joint action, not any single robot's action alone.",
+        "$R$ splits into $N$ (possibly distinct) reward functions $r_1,\\ldots,r_N$, one per robot; whether these coincide (fully cooperative) or sum to zero (competitive) determines the game's reward structure, a distinction that doesn't exist in the single-agent MDP at all."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-08-ex4-nonstationarity-conceptual",
+      "objective": "Explain why MARL's non-stationarity challenge doesn't arise in single-agent RL.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 110, "originalNumber": "1.13:17" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["RLEARN-08-ex3-markov-game-conceptual"],
+      "answerType": "short-text",
+      "prompt": "From a single robot's own point of view, training alongside other learning robots whose policies aren't directly observable, explain why the environment can appear non-Markovian even though the true underlying Markov game is stationary.",
+      "hints": [
+        "The true joint transition function $P(s'\\mid s,a)$ (over the joint state and joint action) is fixed and Markovian; that's not what's breaking.",
+        "But a single robot only observes its own state/action/reward, not the other robots' policies; from its narrow point of view, the same observed state can lead to different outcomes at different times, purely because the *other* robots' policies are changing (they're learning too), not because the world itself is changing.",
+        "So 'the same state leading to different outcomes over time' looks exactly like a non-Markovian environment from that single robot's restricted viewpoint, even though the full joint system is a perfectly well-defined, stationary Markov game; this is why independent learners in MARL are especially hard to get to converge."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

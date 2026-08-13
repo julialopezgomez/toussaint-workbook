@@ -3,26 +3,28 @@ id: OPT-03
 block: OPT
 title: "Constrained Optimization: KKT & the Lagrangian"
 tier: 1
-estimatedHours: 3
+estimatedHours: 5
 prerequisites: ["OPT-01"]
 objectives:
-  - "Explain geometrically why the unconstrained stationarity condition doesn't apply to constrained problems."
-  - "Derive the KKT stationarity condition from the Lagrangian for equality constraints."
-  - "Solve a small equality-constrained problem using the Lagrangian."
-  - "Explain complementary slackness for inequality constraints."
+  - "State the general constrained mathematical program and explain the force-balance geometric picture at an optimum."
+  - "State the full KKT theorem (stationarity, primal feasibility, dual feasibility, complementarity) precisely."
+  - "Derive the KKT stationarity condition from the Lagrangian, and solve small constrained problems by hand."
+  - "State the primal and dual problems, weak duality, and Slater's strong-duality condition."
 sources:
-  - { sourceId: "lecture-optimization", pages: "p21-34 (Part 2, §2.1-2.4)", role: "primary" }
+  - { sourceId: "lecture-optimization", pages: "p21-23, p30-34 (§2.1, §2.4)", role: "primary" }
   - { sourceId: "lecture-maths", pages: "p58-67 (§4.2-4.5)", role: "supplementary" }
 concepts:
-  - "Equality/inequality constraints"
-  - "Lagrangian"
+  - "Constrained NLP formulation"
   - "KKT conditions"
+  - "Lagrangian"
   - "Complementary slackness"
+  - "Primal/dual problems, weak & strong duality"
 notation:
-  - { symbol: "$h(x)=0$", meaning: "equality constraint" }
-  - { symbol: "$g(x)\\le 0$", meaning: "inequality constraint" }
-  - { symbol: "$L(x,\\lambda,\\kappa)$", meaning: "Lagrangian: $f(x) + \\kappa h(x) + \\lambda g(x)$" }
-  - { symbol: "$\\kappa, \\lambda$", meaning: "Lagrange multipliers for equality/inequality constraints (dual variables)" }
+  - { symbol: "$h(x)=0$", meaning: "equality constraint(s)" }
+  - { symbol: "$g(x)\\le 0$", meaning: "inequality constraint(s)" }
+  - { symbol: "$L(x,\\lambda,\\kappa)$", meaning: "Lagrangian: $f(x) + \\lambda^\\top g(x) + \\kappa^\\top h(x)$" }
+  - { symbol: "$\\kappa, \\lambda$", meaning: "Lagrange multipliers / dual variables for equality/inequality constraints" }
+  - { symbol: "$l(\\lambda)$", meaning: "the dual function, $l(\\lambda)=\\min_xL(x,\\lambda)$" }
 cheatsheetLinks: []
 nextModules: ["OPT-04"]
 ---
@@ -32,7 +34,7 @@ import ReadinessCheck from '../../../components/ReadinessCheck.astro';
 
 ## Why this matters
 
-Almost every real robotics optimization problem has constraints: joint limits, collision avoidance, dynamics feasibility, contact conditions. The Lagrangian and KKT conditions are the foundation every constrained solver (interior point, SQP, augmented Lagrangian, all covered later) builds on. Getting comfortable solving small constrained problems by hand here makes those later methods feel like variations on one idea, rather than a new toolbox each time.
+Almost every real robotics optimization problem has constraints: joint limits, collision avoidance, dynamics feasibility, contact conditions. The Lagrangian and KKT conditions are the foundation every constrained solver (interior point, SQP, augmented Lagrangian, all covered in [OPT-04](/course/OPT/OPT-04)) builds on. Getting comfortable solving small constrained problems by hand here makes those later methods feel like variations on one idea, rather than a new toolbox each time.
 
 ## Prerequisites & readiness check
 
@@ -43,15 +45,44 @@ You should have gradients (MATH-02) and Newton's method (OPT-01) fresh.
   answer="$\nabla f(x) = 0$."
 />
 
+## Problem formulation
+
+The general (constrained) **Non-linear Mathematical Program (NLP)**: for $x\in\mathbb{R}^n$, $f:\mathbb{R}^n\to\mathbb{R}$, $g:\mathbb{R}^n\to\mathbb{R}^m$, $h:\mathbb{R}^n\to\mathbb{R}^l$,
+
+$$\min_x f(x) \quad\text{s.t.}\quad g(x)\le0,\ h(x)=0$$
+
+We typically assume $f,g,h$ differentiable, and can query $f,\nabla f,g,\nabla g,h,\nabla h$ (and optionally $\nabla^2f$). By convention: costs $f(x)$ **pull**, constraints $g(x),h(x)$ **push back**.
+
 ## Why $\nabla f(x)=0$ isn't the right condition anymore
 
 <ExerciseCard id="OPT-03-ex1-why-not-just-zero-gradient" />
 
+At the optimum, there must be a **balance** between the cost gradient $-\nabla f(x)$ pulling, and the gradients of the *active* constraints $-\nabla g_i(x)$ pushing back (inactive constraints, not touching their boundary, contribute nothing).
+
+## The Karush-Kuhn-Tucker (KKT) conditions
+
+> **Theorem (Karush-Kuhn-Tucker conditions).** For any NLP, $x$ optimal $\Rightarrow$ there exist $\lambda\in\mathbb{R}^m,\kappa\in\mathbb{R}^l$ such that
+> $$\nabla f(x) + \sum_{i=1}^m\lambda_i\nabla g_i(x) + \sum_{j=1}^l\kappa_j\nabla h_j(x) = 0 \qquad \text{(stationarity)}$$
+> $$\forall j:\ h_j(x)=0, \qquad \forall i:\ g_i(x)\le0 \qquad \text{(primal feasibility)}$$
+> $$\forall i:\ \lambda_i\ge0 \qquad \text{(dual feasibility)}$$
+> $$\forall i:\ \lambda_ig_i(x)=0 \qquad \text{(complementarity)}$$
+
+Four conditions worth having named separately, each with its own job:
+
+- **Stationarity** is the "force balance": existence of $\lambda,\kappa$ making this hold is equivalent to $\nabla f(x)\in\text{span}\{\nabla g_{1..m}(x),\nabla h_{1..l}(x)\}$, i.e. the cost gradient has *no component* left over that the constraint gradients can't cancel. The values of $\lambda,\kappa$ tell you how strongly each constraint is pushing.
+- **Complementarity** ("the logic of constraint activity") elegantly packages two cases into one equation: either the constraint is **inactive** ($g_i(x)<0$) and its multiplier is zero ($\lambda_i=0$, it contributes nothing), or it's **active** ($g_i(x)=0$, touching its boundary) and can have $\lambda_i>0$. The combinatorics of *which* constraints end up active ($O(2^m)$ possibilities) is a core source of difficulty in constrained optimization; if you already knew which constraints were active, the problem would reduce to an easier equality-constrained one.
+
+<ExerciseCard id="OPT-03-ex1b-kkt-geometry" />
+
 ## The Lagrangian
 
-The Lagrangian packages the objective and constraint into a single function whose *unconstrained* stationarity condition captures the correct geometric picture:
+The Lagrangian packages the objective and all constraints into a single function:
 
-$$L(x,\kappa) = f(x) + \kappa\, h(x)$$
+$$L(x,\lambda,\kappa) = f(x) + \lambda^\top g(x) + \kappa^\top h(x) = f(x) + \sum_i\lambda_ig_i(x)+\sum_j\kappa_jh_j(x)$$
+
+where $\lambda_i\ge0,\kappa_j\in\mathbb{R}$ are called **dual variables** or Lagrange multipliers. Why define this? Three reasons: it relates directly to the KKT conditions; it's useful for computing optima analytically, on paper; and optima are necessarily **saddle points** of the Lagrangian, which motivates a **dual problem**, sometimes easier to solve than the original (**primal**) one.
+
+**Relations between the Lagrangian and KKT**: $\nabla_xL=0$ *implies* the 1st KKT condition (stationarity) directly; $\nabla_\kappa L=0$ implies primal feasibility for the equalities; and maximizing over $\lambda\ge0$, $\max_{\lambda\ge0}L(x,\lambda)$, is related to the remaining (2nd and 4th) KKT conditions for the inequalities (worked through in the exercise below). In short: **$\min_xL(x,\lambda,\kappa)$ reproduces the 1st KKT condition; $\max_{\lambda\ge0,\kappa}L(x,\lambda,\kappa)$ reproduces the rest.**
 
 <ExerciseCard id="OPT-03-ex2-lagrangian-derivation" />
 
@@ -71,32 +102,49 @@ Substituting into the constraint: $-\kappa-\kappa=1 \implies \kappa=-0.5$, givin
 
 ## Inequality constraints and complementary slackness
 
-For $g(x)\le 0$, the full KKT conditions add a subtlety: the constraint might or might not be "touching" its boundary at the optimum. **Complementary slackness**, $\lambda\, g(x^*)=0$, handles both cases in one equation.
-
 <ExerciseCard id="OPT-03-ex4-complementary-slackness-challenge" />
+
+## Primal, dual, and duality
+
+Restricting to inequalities for simplicity, define $F_\infty(x)=\max_{\lambda\ge0}L(x,\lambda)$ (this equals $f(x)$ when $g(x)\le0$, and $+\infty$ otherwise, an "infinity-barrier" reformulation of the constraint) and the **dual function** $l(\lambda)=\min_xL(x,\lambda)$. This defines two nested optimization problems:
+
+$$\min_x\underbrace{\max_{\lambda\ge0}L(x,\lambda)}_{F_\infty(x)} \qquad\text{(primal problem)} \qquad\qquad \max_{\lambda\ge0}\underbrace{\min_xL(x,\lambda)}_{l(\lambda)} \qquad\text{(dual problem)}$$
+
+The primal problem is, by construction, exactly the original constrained problem $\min_xf(x)$ s.t. $g(x)\le0$. The dual problem swaps the order of min and max, and (perhaps surprisingly) is *always* a **convex** problem, even when the primal isn't:
+
+> **Theorem.** The dual problem is convex (objective concave, constraints convex), even if the primal is non-convex. ($L(x,\lambda)$ is linear in $\lambda$; $l(\lambda)=\min_xL(x,\lambda)$ is a pointwise minimization of linear functions, hence concave.)
+
+**Weak duality** always holds: $l(\lambda)\le p^*$ for any $\lambda\ge0$ (the dual function is always a *lower bound* on the true optimum $p^*$, since swapping $\min$/$\max$ can only decrease the result in general, $\min_x\max_y \ge \max_y\min_x$). This means the dual gives you a certified lower bound even if you can't solve the (possibly non-convex) primal directly.
+
+> **Theorem (Slater's condition $\Rightarrow$ strong duality).** If the primal is convex, and there exists an interior point $x$ with $g_i(x)<0$ for all $i$ (**Slater's condition**), then **strong duality** holds: $\max_{\lambda\ge0}\min_xL(x,\lambda) = \min_x\max_{\lambda\ge0}L(x,\lambda)$, i.e. the primal and dual optimal values coincide exactly.
+
+<ExerciseCard id="OPT-03-ex5-duality-gap" />
 
 ## Summary
 
-- The constrained stationarity condition is that $\nabla f(x^*)$ is parallel to $\nabla h(x^*)$ (perpendicular to the constraint surface), not zero.
-- The Lagrangian $L=f+\kappa h$ packages this into an ordinary unconstrained stationarity condition, $\nabla_x L=0$ recovers the parallel-gradients condition, $\nabla_\kappa L=0$ recovers the constraint itself.
-- For inequality constraints, complementary slackness ($\lambda g(x^*)=0$) enforces: inactive constraints have zero multiplier, active constraints (positive multiplier) must be exactly tight.
+- The general NLP is $\min_xf(x)$ s.t. $g(x)\le0,h(x)=0$; at an optimum, the cost gradient must be balanced by the active constraint gradients.
+- The full KKT theorem has four named conditions: stationarity (force balance), primal feasibility, dual feasibility ($\lambda\ge0$), and complementarity ($\lambda_ig_i(x)=0$, packaging active/inactive cases into one equation).
+- The Lagrangian $L=f+\lambda^\top g+\kappa^\top h$ reproduces KKT via $\min_xL$ (stationarity) and $\max_{\lambda\ge0,\kappa}L$ (the rest); optima are saddle points of $L$.
+- The dual problem $\max_{\lambda\ge0}\min_xL(x,\lambda)$ is always convex and always a lower bound on the primal (weak duality); under Slater's condition (primal convex + a strictly-interior point), strong duality holds and the bound is exact.
 
 ## Retrieval questions
 
-1. Derive the KKT stationarity condition from the Lagrangian, without looking back.
-2. Why does $\nabla_\kappa L(x,\kappa)=0$ recover the original constraint?
-3. If a Lagrange multiplier for an inequality constraint comes out negative in a proposed solution, what does that tell you (hint: multipliers for $g(x)\le0$ must satisfy $\lambda\ge0$)?
+1. State all four KKT conditions from memory, and explain in one sentence what each one enforces.
+2. Derive the KKT stationarity condition from the Lagrangian, without looking back.
+3. Why does $\nabla_\kappa L(x,\kappa)=0$ recover the original equality constraint?
+4. State weak duality and Slater's condition for strong duality, from memory.
 
 ## Mastery checklist
 
-- [ ] Can explain geometrically why $\nabla f(x)=0$ is the wrong condition for a constrained optimum.
-- [ ] Derived the KKT stationarity condition from the Lagrangian.
-- [ ] Solved a small equality-constrained problem by hand using the Lagrangian.
+- [ ] Can state the general constrained NLP and explain the force-balance picture geometrically.
+- [ ] Can state all four KKT conditions precisely, including complementarity's dual role.
+- [ ] Derived the KKT stationarity condition from the Lagrangian, and solved a small equality-constrained problem by hand.
 - [ ] Can explain complementary slackness for both the active and inactive cases.
+- [ ] Can state weak duality and Slater's strong-duality condition, and explain why the dual problem is always convex.
 
 ## Source note
 
-This module's topic and page range are from `lecture-optimization`, §2.1-2.4 (pp. 21-34), with `lecture-maths` §4.2-4.5 (pp. 58-67) as a shorter parallel treatment. All exposition, the worked example, and every exercise here are newly authored, paraphrasing the sources' topic coverage.
+This module's exposition, the full KKT theorem, the Lagrangian/KKT relations, and the primal/dual/duality theorems (including Slater's condition) are adapted from `lecture-optimization`, §2.1 (pp. 21-23) and §2.4 (pp. 30-34), with `lecture-maths` §4.2-4.5 (pp. 58-67) as a parallel treatment. The worked example and exercises are newly authored.
 
 ---
 

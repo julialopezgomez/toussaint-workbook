@@ -1,0 +1,35 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "KIN-03-ex1-fk-chain",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 1, "tolerance": 0.01 },
+      "fullSolution": "p1 = (cos(0), sin(0)) = (1,0). p_eff_y = p1_y + sin(q1+q2) = 0 + sin(pi/2) = 1."
+    },
+    {
+      "exerciseId": "KIN-03-ex2-jacobian-column",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": -1, "tolerance": 0.01 },
+      "fullSolution": "p_eff - p2 = (1,1,0)-(1,0,0) = (0,1,0). a2 x (p_eff-p2) = (0,0,1) x (0,1,0) = (0*0-1*1, 1*0-0*0, 0*1-0*0) = (-1,0,0). First component: -1. (Verified against finite-difference derivative of the forward kinematics while authoring this module.)"
+    },
+    {
+      "exerciseId": "KIN-03-ex3-gauss-newton-ik-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.153, "tolerance": 0.003 },
+      "fullSolution": "J^T J = [[2,1],[1,1]]; + 0.1*I = [[2.1,1],[1,1.1]]. J^T(y*-phi(q0)) = [[-1,1],[-1,0]]@[0.2,0.2] = [0,-0.2]. Solve [[2.1,1],[1,1.1]]*delta = [0,-0.2]: det=2.1*1.1-1=1.31. delta1 = (0*1.1-(-0.2)*1)/1.31 = 0.2/1.31 ~= 0.1527, rounds to 0.153. (Verified with NumPy while authoring this module: delta = [0.15267, -0.32061].)"
+    },
+    {
+      "exerciseId": "KIN-03-ex4-singularity-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains the geometric rank-deficiency at full stretch (no joint combination moves the end-effector radially outward)." },
+          { "points": 1, "description": "Correctly connects rank(J)<d to JJ^T becoming singular." },
+          { "points": 1, "description": "Correctly explains why adding W>0 keeps J^T C J + W invertible." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "At full stretch, every joint's instantaneous motion moves the end-effector only tangentially (perpendicular to the fully extended arm); no combination of joint velocities can move it directly outward/inward along the arm's own direction. This means the columns of J no longer span all d output directions: rank(J)<d, a genuine rank deficiency.\nWhen rank(J)<d, JJ^T is singular (non-invertible), so the naive pseudo-inverse J^T(JJ^T)^-1 requires inverting a singular matrix, causing numerical blowup (an IK step could demand unbounded joint velocity).\nAdding W>0 inside (J^T C J + W)^-1 shifts J^T C J's eigenvalues up (MATH-04's shift-invariance fact), guaranteeing the sum stays strictly positive definite and invertible even when J^T C J alone is singular, the same ridge-regression/Levenberg-Marquardt fix used elsewhere in this course, here preventing IK from ever requesting an unbounded joint velocity near a singularity."
+    }
+  ]
+}

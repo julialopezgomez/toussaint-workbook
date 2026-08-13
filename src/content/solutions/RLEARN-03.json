@@ -1,0 +1,40 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RLEARN-03-ex1-reward-shaping-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly factors out -Phi(s) from the shaped Bellman equation." },
+          { "points": 2, "description": "Correctly substitutes the guess and confirms the fixed point, noting argmax_a is unchanged." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "V'(s) = -Phi(s) + max_a E_s'{R(s,a,s') + gamma[Phi(s')+V'(s')]}. Substituting V'(s')=V*(s')-Phi(s') gives Phi(s')+V'(s')=V*(s'). So V'(s) = -Phi(s) + max_a E_s'{R(s,a,s')+gamma*V*(s')} = -Phi(s)+V*(s), confirming the guess. Since Phi(s) doesn't depend on a, argmax_a is unchanged. (Independently verified numerically on a random MDP.)"
+    },
+    {
+      "exerciseId": "RLEARN-03-ex2-onpolicy-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly contrasts cheap parallelizable simulated rollouts with expensive real rollouts." },
+          { "points": 2, "description": "Correctly connects this to why on-policy requirements are a real bottleneck." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "In simulation, fresh rollouts cost only compute, cheap and parallelizable. On a physical robot, rollouts require real wall-clock time, wear, safety risk, and often supervision, none of which parallelize. An algorithm needing frequently-refreshed on-policy data (rather than reusing a stored buffer) imposes a real-world sample-collection cost dominating practical training time, why so much robot RL trains in simulation first."
+    },
+    {
+      "exerciseId": "RLEARN-03-ex3-exploration-noise-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains i.i.d. noise's self-cancelling jitter." },
+          { "points": 2, "description": "Correctly explains correlated noise's coherent excursions and the connection to RLEARN-01's coverage principle." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "I.i.d. per-step noise has zero correlation between steps, so effects tend to average out into small self-cancelling jitter rather than genuine excursions. Temporally-correlated noise pushes in a similar direction over several steps before reversing, producing coherent sustained excursions that actually explore new state-space regions per unit of real-robot time, directly RLEARN-01's frequency/state-coverage principle applied to exploration."
+    }
+  ]
+}

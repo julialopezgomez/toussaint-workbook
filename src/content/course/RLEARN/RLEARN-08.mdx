@@ -1,0 +1,93 @@
+---
+id: RLEARN-08
+block: RLEARN
+title: "Multi-Robot Learning (light touch)"
+tier: 3
+estimatedHours: 2
+prerequisites: ["RLEARN-04"]
+objectives:
+  - "State the Deep Sets and Graph Neural Network formulas, and explain why permutation invariance matters for multi-robot learning."
+  - "Define a Markov game as the multi-robot generalization of RL-01's MDP, and state MARL's core challenges."
+sources:
+  - { sourceId: "lecture-robotlearning", pages: "p100-114 (§1.13, Tier 3, survey level)", role: "primary" }
+concepts:
+  - "Permutation-invariant architectures: Deep Sets, GNNs"
+  - "Markov games, Multi-Agent RL (MARL)"
+  - "Non-stationarity, scalability"
+cheatsheetLinks: []
+nextModules: []
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+This closing module is deliberately a lighter, survey-level tour (Tier 3, matching the curriculum's own scope for it): multiple robots introduce a genuinely new structural problem, **a time-varying number of other agents to reason about**, that every earlier module in this workbook implicitly assumed away by considering a single robot in a (mostly) static environment.
+
+## Prerequisites & readiness check
+
+You should have RL-01's MDP definition and ML-04's neural network architectures fresh.
+
+<ReadinessCheck
+  question="From RL-01, what are the components of an MDP?"
+  answer="(S, A, P, R, P₀, γ): state space, action space, transition probabilities, reward function, initial state distribution, discount factor."
+/>
+
+## Handling a dynamic number of neighbors
+
+A distributed collision-avoidance policy, $f(Y)\mapsto u$ with $Y$ the set of observed neighbors, needs to handle a **dynamic, unordered** input: the number of neighbors changes over time, and there's no natural ordering among them (swapping two neighbors' labels shouldn't change the output). Simple fixes (feed neighbors into an LSTM, or encode them as an image for a CNN) work but don't structurally guarantee permutation invariance.
+
+**Deep Sets**: any continuous, permutation-invariant function of a set can be approximated as
+
+$$f(X) \approx \rho\Big(\sum_{x\in X}\phi(x)\Big)$$
+
+<ExerciseCard id="RLEARN-08-ex1-deepsets-numeric" />
+
+(learn a per-element representation $\phi$, sum it, then decode with $\rho$); a heterogeneous extension (Neural-Swarm2) uses a separate $\phi$ per neighbor *type* and a separate $\rho$ per receiving-agent *type*, still only needing $O(K)$ networks for $K$ types, however many actual neighbors exist.
+
+**Graph Neural Networks (GNNs)**: generalize Deep Sets to a full graph $G=(V,E)$, learning $D$-dimensional per-node features $h_n^{(l)}$ across $L$ layers via **aggregate** (combine neighbor features, e.g. $\text{MLP}_\rho\big(\sum_{m\in N(n)}\text{MLP}_\phi(h_m^{(l)})\big)$, a Deep-Sets-shaped aggregation over each node's neighborhood) and **update** (combine a node's own previous feature with the aggregated neighbor information, e.g. $f(W_\text{self}h_n^{(l)}+W_\text{neigh}z_n^{(l)}+b)$).
+
+<ExerciseCard id="RLEARN-08-ex2-gnn-conceptual" />
+
+**A recurring case-study pattern**: train a decentralized policy to imitate a centralized expert (a centralized multi-robot motion planner, or a centralized collision-avoidance solver), via behavior cloning and/or DAgger (RLEARN-02), exactly the privileged-teacher idea again, now with "privileged" meaning "has access to everyone's state at once," not just richer sensing.
+
+## Multi-Agent Reinforcement Learning (MARL)
+
+RL-01's single-robot MDP $(S,A,P,R,P_0,\gamma)$ generalizes to a **Markov game** $(N,S,A,P,R,P_0,\gamma)$: $N$ robots, a *joint* state space $S$, joint action space $A=A_1\times\cdots\times A_N$, and $N$ (possibly distinct) reward functions $r_1,\ldots,r_N=R(s,a)$.
+
+<ExerciseCard id="RLEARN-08-ex3-markov-game-conceptual" />
+
+**Reward structures**: fully cooperative ($r_1=\cdots=r_N$, no credit assignment between agents, but genuinely hard to train); competitive (zero-sum, $\sum_ir_i=0$); mixed cooperative-competitive (local reward shaping toward a shared goal, teams competing against other teams). **Training/execution paradigms**: fully centralized (treat the whole team as one big "stacked" robot); fully independent (each agent learns its own policy with no coordination at all); **Centralized Training, Decentralized Execution (CTDE)**, train with full information access, deploy each agent using only its own local information, the multi-agent analogue of RLEARN-04's privileged-teacher pattern.
+
+**Core challenges**: **non-stationarity** (if other agents' policies aren't directly observable, the environment appears non-Markovian from any single agent's perspective, since "the same state" can now lead to different outcomes depending on what the *other*, unobserved agents are currently doing); **scalability** (in standard policy-gradient methods, the probability of estimating the gradient correctly can decrease exponentially with the number of agents). Standard approaches: a centralized critic (MADDPG), factorized value functions (Value Decomposition Networks), or explicit communication-learning (train agents what to communicate, not just how to act).
+
+<ExerciseCard id="RLEARN-08-ex4-nonstationarity-conceptual" />
+
+## Summary
+
+- **Deep Sets** ($f(X)\approx\rho(\sum_x\phi(x))$) and their **GNN** generalization give permutation-invariant, variable-cardinality architectures for a changing number of neighbors, both trainable with the same DAgger/behavior-cloning tools already covered.
+- **Markov games** generalize RL-01's MDP to $N$ agents with a joint action space and per-agent rewards, spanning fully cooperative to fully competitive reward structures.
+- **Non-stationarity** (other agents' unobserved policy changes break the Markov property) and **scalability** (gradient-estimation quality degrading with agent count) are MARL's two core challenges; **CTDE** is the standard practical compromise between centralized and independent training.
+
+## Retrieval questions
+
+1. State the Deep Sets formula, and explain why permutation invariance matters for multi-robot policies.
+2. State a GNN's aggregate/update step, and how it generalizes Deep Sets.
+3. Define a Markov game, and state the three reward-structure categories.
+4. Explain MARL's non-stationarity and scalability challenges.
+
+## Mastery checklist
+
+- [ ] Can state the Deep Sets formula and explain the permutation-invariance requirement.
+- [ ] Can state a GNN's aggregate/update structure.
+- [ ] Can define a Markov game as the multi-robot generalization of an MDP.
+- [ ] Can explain MARL's non-stationarity and scalability challenges.
+
+## Source note
+
+This module's exposition, Deep Sets, GNN aggregate/update, the Markov game definition, MARL reward structures and training paradigms, and the non-stationarity/scalability challenges are adapted from `lecture-robotlearning`, §1.13 (pp. 100-114), covered at this module's own deliberately lighter, Tier-3 survey depth per its curriculum-scoped role (individual case studies, e.g. GLAS, Neural-Swarm2, and specific MARL algorithm papers, are cited by name but not derived in full, matching the source's own conference-paper-survey style for this closing section). All exercises are newly authored; the Deep Sets numeric example was independently verified by direct computation while authoring this module.
+
+---
+
+**Next**: Return to the [curriculum overview](/curriculum) — Block RLEARN is complete.

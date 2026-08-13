@@ -1,0 +1,31 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "DYN-01-ex1-force-kinematics-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly substitutes (v_i,w_i)=J_i*qdot into the body-power expression." },
+          { "points": 2, "description": "Correctly argues that power conservation for arbitrary qdot forces the coefficient matrices to match: u^T = (f_i,tau_i)^T J_i." },
+          { "points": 1, "description": "Correctly transposes to arrive at u = J_i^T(f_i,tau_i)." }
+        ],
+        "commonErrors": [
+          "Only verifying the power balance for one specific qdot instead of arguing it must hold for all qdot."
+        ]
+      },
+      "fullSolution": "(f_i,tau_i)^T(v_i,w_i) = (f_i,tau_i)^T J_i qdot. Power conservation: u^T qdot = (f_i,tau_i)^T J_i qdot. Since this must hold for ANY joint velocity qdot the system could have, the matrices multiplying qdot on both sides must be equal: u^T = (f_i,tau_i)^T J_i. Transposing: u = J_i^T (f_i,tau_i)."
+    },
+    {
+      "exerciseId": "DYN-01-ex2-pendulum-verify",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": -4.9, "tolerance": 0.02 },
+      "fullSolution": "With u=0: thetaddot = -(g/L)*sin(theta) = -(9.8/1)*sin(pi/6) = -9.8*0.5 = -4.90 rad/s^2. (Verified with NumPy/SymPy while authoring this module.)"
+    },
+    {
+      "exerciseId": "DYN-01-ex3-linearization-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 1.004, "tolerance": 0.005 },
+      "fullSolution": "g/L = 9.8/0.25 = 39.2. sqrt(39.2) ~= 6.261. T = 2*pi/6.261 ~= 1.0035, rounds to 1.004. (Verified with NumPy while authoring this module.)"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RLEARN-04-ex1-onoff-classification",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 4, "description": "Correctly classifies as offline with reasoning ruling out on-policy and off-policy." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Offline: the data comes from an entirely different agent, collected in the past, with no new data collection during training. Not on-policy (no execution of the learned policy occurring), not off-policy in the usual sense (that still assumes your own agent collects at least some data)."
+    },
+    {
+      "exerciseId": "RLEARN-04-ex2-offline-distribution-shift-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies DAgger's requirements (rollout access, expert query) as unavailable offline." },
+          { "points": 2, "description": "Correctly explains the resulting need to build the penalty into the objective instead." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "DAgger's fix requires rolling out the current policy in the real environment and querying an expert at reached states. Offline RL's premise is a fixed dataset with no further collection: no environment access to roll out in, often no expert to query. So drift toward uncovered regions can't be noticed or corrected by collecting more data; the penalty for leaving the data distribution must be built directly into the training objective instead (TD3+BC, S4RL)."
+    },
+    {
+      "exerciseId": "RLEARN-04-ex3-td3bc-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains the roles of the Q term and the BC term." },
+          { "points": 2, "description": "Correctly explains the lambda->0 and lambda->infinity limits." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Q_theta(s,a) is the usual RL objective (pick high-value actions). (pi(s)-a)^2 is a BC penalty pulling pi(s) toward the dataset's actual action at s, discouraging wandering into uncovered actions. As lambda->infinity, reduces to pure BC; as lambda->0, reduces to naive distribution-shift-prone offline RL. Lambda dials the tradeoff between exploiting Q and staying within the data distribution."
+    },
+    {
+      "exerciseId": "RLEARN-04-ex4-domain-randomization-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains why randomized Theta makes the problem harder (added apparent stochasticity)." },
+          { "points": 2, "description": "Correctly explains why the tradeoff is worth it (robustness across the sim2real gap)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "A fixed-Theta policy can exploit exact knowledge of dynamics; a randomized-Theta policy can't, since the same state can require different optimal actions depending on the hidden Theta, looking like added stochasticity/partial observability, a strictly harder problem. The payoff: instead of a policy brittle to any sim-real mismatch (a single parameter point), domain randomization forces robustness across the whole randomized range, directly targeting the parametric sim2real gap."
+    }
+  ]
+}

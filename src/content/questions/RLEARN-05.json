@@ -1,0 +1,73 @@
+{
+  "moduleId": "RLEARN-05",
+  "exercises": [
+    {
+      "id": "RLEARN-05-ex1-linear-reward-derivation",
+      "objective": "Derive J(pi) = w^T mu(pi) from a linear-in-features reward assumption.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 74, "originalNumber": "1.10:5" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Starting from $J(\\pi)=\\mathbb{E}_\\pi\\{\\sum_t\\gamma^tR(s_t,a_t)\\}$ and $R(s,a)=w^\\top\\phi(s,a)$, derive $J(\\pi)=w^\\top\\mu(\\pi)$ with $\\mu(\\pi):=\\mathbb{E}_\\pi\\{\\sum_t\\gamma^t\\phi(s_t,a_t)\\}$.",
+      "hints": [
+        "Substitute the linear reward directly: $J(\\pi)=\\mathbb{E}_\\pi\\{\\sum_t\\gamma^tw^\\top\\phi(s_t,a_t)\\}$.",
+        "$w$ doesn't depend on $t$ or the trajectory, so it can be pulled outside both the sum and the expectation: $J(\\pi)=w^\\top\\mathbb{E}_\\pi\\{\\sum_t\\gamma^t\\phi(s_t,a_t)\\}$.",
+        "The remaining expectation is exactly the definition of $\\mu(\\pi)$: $J(\\pi)=w^\\top\\mu(\\pi)$. This reduces IRL to a much lower-dimensional problem: instead of reasoning about $R$ over the whole state-action space, you only need $w\\in\\mathbb{R}^{\\dim(\\phi)}$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-05-ex2-max-margin-conceptual",
+      "objective": "Explain what each step of the Max Margin IRL algorithm accomplishes.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 75, "originalNumber": "1.10:7" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["RLEARN-05-ex1-linear-reward-derivation"],
+      "answerType": "short-text",
+      "prompt": "Explain what problem step 3 (the max-margin optimization over $w,t$) solves, what problem step 4 (argmax_π J(π)) solves, and why the algorithm needs to alternate between them rather than solving either just once.",
+      "hints": [
+        "Step 3 asks: given the expert's feature expectation $\\mu(\\pi^*)$ and every policy $\\pi_j$ generated so far, find reward weights $w$ that make the expert look better than *all* of them, by the largest possible margin $t$. This is a max-margin classification problem, distinguishing 'the expert's behavior' from 'everything tried so far.'",
+          "Step 4 asks: given the current best-guess reward $w$, what's the actual optimal policy under that reward? This is a completely ordinary RL problem (RL-02/RL-04), with no connection to the expert data at all beyond the reward $w$ it's handed.",
+        "One round isn't enough because a $w$ found in step 3 only discriminates against the *specific* policies seen so far; the resulting new optimal policy $\\pi_{i+1}$ from step 4 might exploit some other loophole reward-consistent with $\\mu(\\pi^*)$ but genuinely different from the expert. Adding $\\pi_{i+1}$ back into step 3's discrimination set on the next round closes exactly that loophole, iteratively narrowing down $w$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-05-ex3-airl-reward-shaping-connection",
+      "objective": "Explain why AIRL's discriminator decomposition converges to the advantage function.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 77, "originalNumber": "1.10:15" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Given $f_{\\theta,\\phi}(s,a,s')=g_\\theta(s,a)+\\gamma h_\\phi(s')-h_\\phi(s)$, and interpreting $g_\\theta\\approx r$ and $h_\\phi\\approx V$, show that $f_{\\theta,\\phi}(s,a,s')\\approx A(s,a)$, the advantage function $Q(s,a)-V(s)$.",
+      "hints": [
+        "Substitute the interpretations directly: $f_{\\theta,\\phi}(s,a,s')\\approx r(s,a)+\\gamma V(s')-V(s)$.",
+        "Recall RL-04's Bellman equation for $Q$: $Q(s,a)=r(s,a)+\\gamma\\mathbb{E}_{s'}\\{V(s')\\}$, so (for the specific $s'$ actually transitioned to) $r(s,a)+\\gamma V(s')\\approx Q(s,a)$.",
+        "Substituting: $f_{\\theta,\\phi}(s,a,s')\\approx Q(s,a)-V(s)=A(s,a)$, the advantage function, by definition. This is exactly why training this specific functional form automatically gives $g_\\theta$ 'reward semantics' and $h_\\phi$ 'value semantics': the algebra forces $f_{\\theta,\\phi}$ toward the advantage function, and the only way that can happen is if $g_\\theta,h_\\phi$ individually settle into playing the roles of $r,V$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-05-ex4-bradley-terry-numeric",
+      "objective": "Compute a preference probability under the Bradley-Terry model given two trajectory returns.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 79, "originalNumber": "1.10:22" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For $\\sum_tR(s_t^i,a_t^i)=3$ and $\\sum_tR(s_t^j,a_t^j)=1$, compute $P(\\xi_i\\succ\\xi_j;R)=\\dfrac{e^3}{e^3+e^1}$. Enter a decimal.",
+      "hints": [
+        "$e^3\\approx20.09$, $e^1\\approx2.72$.",
+        "$P=\\dfrac{20.09}{20.09+2.72}=\\dfrac{20.09}{22.80}$.",
+        "$P\\approx0.881$: an 88% predicted probability that a human would prefer $\\xi_i$ over $\\xi_j$, given the reward difference of 2. (Independently verified with Python while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

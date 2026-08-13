@@ -1,0 +1,39 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "SYM-03-ex1-strips-frame-assumption",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 4, "description": "Correctly states on(a,b) remains true and explains via the frame assumption." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "on(a,b) remains true in s'. The frame assumption says facts not mentioned in the effect stay unchanged; on(a,b) doesn't appear in grab(c)'s effect {inhand(c), not on(c,d)}, so it's unaffected."
+    },
+    {
+      "exerciseId": "SYM-03-ex2-state-space-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 120.4, "tolerance": 0.1 },
+      "fullSolution": "log10(2^400) = 400*log10(2) ~= 400*0.301 ~= 120.4. (Independently verified with Python.)"
+    },
+    {
+      "exerciseId": "SYM-03-ex3-ndr-probability-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.3, "tolerance": 0.01 },
+      "fullSolution": "P(not inhand) = 0.2 + 0.1 = 0.3."
+    },
+    {
+      "exerciseId": "SYM-03-ex4-uncertainty-learning-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains the all-or-nothing brittleness of deterministic rules." },
+          { "points": 2, "description": "Correctly connects probabilistic rules' noise-absorption to ML-02's regularization." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "A deterministic rule claims a single fixed outcome always occurs; one observed exception directly contradicts it, forcing an ever-more-specific rule set to handle every exception separately. A probabilistic rule instead assigns exceptions a small honest outcome probability, absorbing noise without explaining it away individually. This is the same move as ML-02's regularization: allowing some slack trades a bit of fit for a much more compact, strongly-generalizing model, learnable from far less data."
+    }
+  ]
+}

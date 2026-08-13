@@ -1,0 +1,46 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "ML-07-ex1-weighted-regression-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly writes the weighted loss in matrix form and differentiates." },
+          { "points": 2, "description": "Correctly sets the gradient to zero and solves for beta_hat." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "L(beta) = (y-X*beta)^T W (y-X*beta) + lambda*beta^T*beta. Gradient: -2X^T W(y-X*beta) + 2*lambda*beta. Setting to zero: X^T W X beta + lambda*beta = X^T W y, so beta_hat = (X^T W X + lambda I)^-1 X^T W y."
+    },
+    {
+      "exerciseId": "ML-07-ex2-adaboost-weight-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.847, "tolerance": 0.005 },
+      "fullSolution": "(1-0.3)/0.3 = 0.7/0.3 ~= 2.333. alpha_m = log(2.333) ~= 0.847."
+    },
+    {
+      "exerciseId": "ML-07-ex3-gradient-boosting-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly connects to OPT-01's parameter-space gradient descent." },
+          { "points": 2, "description": "Correctly explains fitting a weak learner as the function-space analogue of a gradient step." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Ordinary gradient descent updates theta <- theta - alpha*grad L(theta), a step in parameter space. Gradient boosting treats the whole function f as the optimization variable, asking for the functional derivative dL(f)/df pointwise. Since you can't literally add a gradient to a function, gradient boosting fits a weak learner f_m to approximate that functional gradient and adds alpha_m*f_m to the running sum: a genuine approximate gradient step, in function space instead of parameter space."
+    },
+    {
+      "exerciseId": "ML-07-ex4-dropout-bayesian-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly cites the dropout-as-Deep-GP equivalence." },
+          { "points": 2, "description": "Correctly connects sample spread to posterior predictive variance." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Gal & Ghahramani show a dropout-trained network is equivalent to an approximate Deep Gaussian Process, a genuine Bayesian model with an actual function posterior. Each stochastic forward pass samples one function from that approximate posterior, analogous to sampling from ML-05's Bayesian ridge posterior. The spread across T samples approximates the posterior predictive variance, genuine calibrated uncertainty obtained by Monte Carlo sampling rather than analytic computation."
+    }
+  ]
+}

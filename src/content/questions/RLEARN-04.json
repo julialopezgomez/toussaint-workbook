@@ -1,0 +1,73 @@
+{
+  "moduleId": "RLEARN-04",
+  "exercises": [
+    {
+      "id": "RLEARN-04-ex1-onoff-classification",
+      "objective": "Classify a training scenario as on-policy, off-policy, or offline.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 67, "originalNumber": "1.9:2-3" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "A team trains $Q(s,a)$ using a fixed dataset collected last year by a completely different robot running an unknown, undocumented policy, with no further data collection planned. Classify this as on-policy, off-policy, or offline, and justify.",
+      "hints": [
+        "On-policy requires the value estimates to be computed *while executing* the policy being evaluated; that's clearly not happening here (no data collection at all is occurring during training).",
+        "Off-policy allows a different behavior policy than the one being learned, but still implicitly assumes *your own agent* is the one interacting with the environment to collect (at least some of) the data.",
+        "This is **offline**: the data comes from an entirely different agent, collected in the past, with no new data collection during training at all, exactly the 'data could come from anywhere' definition."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-04-ex2-offline-distribution-shift-conceptual",
+      "objective": "Explain why offline RL's distribution-shift problem has no DAgger-style fix available.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 68, "originalNumber": "1.9:5" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "RLEARN-02's DAgger fixed behavior cloning's distributional shift by collecting more expert data exactly where the current policy goes wrong. Explain why this exact fix is unavailable in offline RL.",
+      "hints": [
+        "DAgger's fix fundamentally requires two things: the ability to roll out the current policy in the real environment, and access to an expert (or the environment's true reward/dynamics) to query at the states reached.",
+        "Offline RL's whole premise is a **fixed** dataset with **no further data collection**: there's no environment access to roll out $\\pi$ in and see where it actually goes, and often no expert to query even if there were.",
+        "So the learned policy can drift toward regions the fixed dataset never covered, exactly like behavior cloning's compound error, but with no mechanism available to notice this happening or correct it by collecting more data there; the only remaining option is to build the *penalty for leaving the data distribution* directly into the training objective itself (TD3+BC, S4RL), rather than fixing it by collecting more data."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-04-ex3-td3bc-conceptual",
+      "objective": "Explain what TD3+BC's added behavior-cloning term does to the learned policy.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 68, "originalNumber": "1.9:7" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["RLEARN-04-ex2-offline-distribution-shift-conceptual"],
+      "answerType": "short-text",
+      "prompt": "TD3+BC's policy objective is $\\pi\\approx\\operatorname*{argmax}_\\pi\\mathbb{E}_{(s,a)\\sim\\mathcal{D}}\\{\\lambda Q_\\theta(s,a)+(\\pi(s)-a)^2\\}$ (note: the BC term is actually subtracted as a penalty in the source's sign convention, minimized). Explain what role each term plays, and what happens as $\\lambda\\to0$ versus $\\lambda\\to\\infty$.",
+      "hints": [
+        "The $Q_\\theta(s,a)$ term is the usual RL objective: pick actions with high estimated value, exactly what the naive (unpenalized) offline RL objective already does.",
+        "The $(\\pi(s)-a)^2$ term is a plain behavior-cloning penalty (RLEARN-02): it pulls $\\pi(s)$ toward whatever action $a$ the dataset actually took at state $s$, discouraging $\\pi$ from wandering into actions the data never covers.",
+        "As $\\lambda\\to\\infty$, the objective reduces to pure behavior cloning (ignore $Q$ entirely, just copy the dataset's actions); as $\\lambda\\to0$, it reduces to the naive, distribution-shift-prone offline RL objective. $\\lambda$ is therefore a direct dial on the tradeoff between exploiting the learned $Q$-function and staying safely within the data distribution."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-04-ex4-domain-randomization-conceptual",
+      "objective": "Explain the tradeoff domain randomization makes between robustness and training difficulty.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 71, "originalNumber": "1.9:15" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain precisely why resampling the simulation parameter $\\Theta\\sim p(\\Theta)$ at the start of every training episode makes the underlying RL problem harder, and why that's an acceptable price for what it buys.",
+      "hints": [
+        "A policy trained under a single fixed $\\Theta$ can, in principle, fit its behavior tightly to that specific dynamics, exploiting exact knowledge of friction, mass, etc. A policy trained under randomized $\\Theta$ can never do this, since the same state can now require different optimal actions depending on the (hidden) $\\Theta$ for that episode.",
+        "From the policy's perspective, this looks like added stochasticity/partial-observability in the environment itself (it can't tell which $\\Theta$ it's currently in), a strictly harder learning problem than the single-$\\Theta$ case.",
+        "The payoff: instead of a policy brittle to any mismatch between simulation and reality (a single point in parameter space), domain randomization forces a policy robust across the whole randomized range, directly targeting the parametric sim2real mismatch problem, worth the added training difficulty since the real world is exactly one more unknown 'sample' from roughly that same parameter distribution."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

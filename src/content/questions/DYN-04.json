@@ -1,0 +1,73 @@
+{
+  "moduleId": "DYN-04",
+  "exercises": [
+    {
+      "id": "DYN-04-ex1-bellman-derivation",
+      "objective": "Derive the Bellman equation from the value function definition.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 129, "originalNumber": "§8.1:9" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Starting from $V_t(x)=\\min_\\pi\\left[\\sum_{s=t}^Tc(x_s,u_s)+\\phi(x_T)\\right]_{x_t=x}$, split off the $s=t$ term from the sum, and use Bellman's principle (the remaining decisions from $t+1$ onward must themselves be optimal) to derive $V_t(x)=\\min_u[c(x,u)+V_{t+1}(f(x,u))]$.",
+      "hints": [
+        "Split the sum: $\\sum_{s=t}^Tc(x_s,u_s)+\\phi(x_T) = c(x_t,u_t) + \\left[\\sum_{s=t+1}^Tc(x_s,u_s)+\\phi(x_T)\\right]$. The minimization over the whole policy $\\pi$ can be split into: choosing $u_t$ now, then choosing the remaining policy from $t+1$ onward.",
+        "By Bellman's principle, whatever $u_t$ is chosen, the remaining decisions must be optimal given the resulting state $x_{t+1}=f(x_t,u_t)$: so the inner minimization over the rest of the policy is exactly $V_{t+1}(f(x,u_t))$ by definition of the value function.",
+        "Putting it together: $V_t(x) = \\min_{u_t}\\big[c(x,u_t)+V_{t+1}(f(x,u_t))\\big]$, i.e. (relabeling $u_t$ as the single decision variable $u$) exactly the Bellman equation, $V_t(x)=\\min_u[c(x,u)+V_{t+1}(f(x,u))]$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-04-ex2-riccati-derivation",
+      "objective": "Derive the Riccati differential equation from the HJB equation in the LQ case.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 132, "originalNumber": "§8.1:17" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 20,
+      "prerequisites": ["DYN-04-ex1-bellman-derivation"],
+      "answerType": "derivation",
+      "prompt": "For linear dynamics $\\dot x=Ax+Bu$ and quadratic costs $c(x,u)=x^\\top Qx+u^\\top Ru$, substitute $V(x,t)=x^\\top P(t)x$ into the HJB equation $-\\frac{\\partial}{\\partial t}V=\\min_u[c(x,u)+\\frac{\\partial V}{\\partial x}f(x,u)]$, differentiate the right side w.r.t. $u$ and set to zero to find $u^*=-R^{-1}B^\\top Px$, then substitute back to derive the Riccati equation $-\\dot P=A^\\top P+PA-PBR^{-1}B^\\top P+Q$.",
+      "hints": [
+        "$\\frac{\\partial V}{\\partial x}=2x^\\top P(t)$ (MATH-02's quadratic-form gradient rule, $P$ symmetric). Substituting into HJB: $-x^\\top\\dot P(t)x = \\min_u\\big[x^\\top Qx+u^\\top Ru+2x^\\top P(t)(Ax+Bu)\\big]$.",
+        "Minimize the right side over $u$: differentiate w.r.t. $u$ and set to zero. $\\frac{\\partial}{\\partial u}[u^\\top Ru+2x^\\top P(t)Bu] = 2u^\\top R+2x^\\top P(t)B = 0^\\top$, giving $u^{*\\top}=-x^\\top P(t)BR^{-1}$, i.e. $u^*=-R^{-1}B^\\top P(t)x$ (transposing, using $R,P$ symmetric).",
+        "Substitute $u^*$ back into the HJB equation and collect terms into a single quadratic form in $x$ (using $P$ symmetric, $x^\\top PAx=x^\\top A^\\top Px$ after symmetrizing, etc.): $-x^\\top\\dot Px = x^\\top\\big[Q+A^\\top P+PA-PBR^{-1}B^\\top P\\big]x$. Since this must hold for every $x$, the matrices themselves must match (MATH-02's argument again): $-\\dot P = A^\\top P+PA-PBR^{-1}B^\\top P+Q$, the Riccati differential equation."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-04-ex3-lqr-point-mass",
+      "objective": "Solve the algebraic Riccati equation for the 1D point mass and recover PD gains.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 133, "originalNumber": "§8.1:20" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 20,
+      "prerequisites": ["DYN-04-ex2-riccati-derivation"],
+      "answerType": "numeric",
+      "prompt": "For the 1D point mass ($A=\\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}$, $B=\\begin{pmatrix}0\\\\1/m\\end{pmatrix}$, $Q=\\epsilon I$, $R=\\varrho$), with $m=2,\\varrho=0.5,\\epsilon=2$: using $P=\\begin{pmatrix}a&c\\\\c&b\\end{pmatrix}$, the ARE's $(1,1)$ entry gives $c=m\\sqrt{\\epsilon\\varrho}$, and its $(2,2)$ entry gives $b=m\\sqrt{\\varrho(2c+\\epsilon)}$. Compute $K_d=b/(\\varrho m)$ (the derivative gain). Enter a decimal to 3 decimal places.",
+      "hints": [
+        "First compute $c = m\\sqrt{\\epsilon\\varrho} = 2\\sqrt{2\\times0.5} = 2\\sqrt1 = 2$.",
+        "Then $b = m\\sqrt{\\varrho(2c+\\epsilon)} = 2\\sqrt{0.5(4+2)} = 2\\sqrt{3} \\approx 3.464$.",
+        "$K_d = b/(\\varrho m) = 3.464/(0.5\\times2) = 3.464/1 = 3.464$. (Independently verified by directly substituting the resulting $P$ back into the ARE with NumPy while authoring this module: residual $\\approx10^{-16}$.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-04-ex4-unification-conceptual",
+      "objective": "Identify the shared mathematical structure across optimal control, IK, operational space control, and trajectory optimization.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotics", "page": 134, "originalNumber": "§8.1:22, \"Relation to other topics\"" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Looking at the four boxed cost functions in this module (optimal control, IK, operational space control, trajectory optimization), identify what structural pattern all four share, and explain what specifically differs between them (what variable is being optimized, and at what 'level' of the system, position/velocity/acceleration/whole-trajectory).",
+      "hints": [
+        "All four minimize a sum of (at least) two squared-norm terms: one term penalizing 'how much am I deviating/costing to act' (control cost: $\\|q-q_0\\|_W^2$, $\\|u\\|_H^2$, $\\int c\\,dt$, $\\sum\\|\\Psi_t\\|^2$) and one penalizing 'how far am I from the task target' (task cost: $\\|\\phi(q)-y^*\\|_C^2$, $\\|\\ddot\\phi(q)-\\ddot y^*\\|_C^2$, $\\phi(x_T)$, $\\sum\\|\\Phi_t\\|^2$).",
+        "What differs is the decision variable and the 'level' it operates at: IK optimizes a single configuration $q$ (position level); operational space control optimizes a single control/torque $u$ (acceleration level); optimal control optimizes an entire policy/trajectory over continuous or discrete time; trajectory optimization optimizes an entire discretized configuration sequence $q_{0:T}$ directly.",
+        "The deep point: these aren't four different theories, they're the *same* regularized-least-squares idea, applied to different decision variables at different levels of a control hierarchy (as short-term as 'one torque command' or as long-term as 'an entire trajectory'), which is exactly why the same Gauss-Newton/SQP solvers from OPT-04 work for all of them."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

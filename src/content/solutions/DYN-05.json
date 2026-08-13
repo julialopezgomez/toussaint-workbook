@@ -1,0 +1,41 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "DYN-05-ex1-cubic-coefficients-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly derives d=x0, c=v0 from the t=0 conditions." },
+          { "points": 1, "description": "Correctly sets up the 2x2 linear system in a,b from the t=tau conditions." },
+          { "points": 2, "description": "Correctly solves for a and b." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "x(0)=d=x0. xdot(t)=3at^2+2bt+c, xdot(0)=c=v0.\nx(tau)=a*tau^3+b*tau^2+c*tau+d=x1 => a*tau^3+b*tau^2 = x1-x0-v0*tau.\nxdot(tau)=3a*tau^2+2b*tau+c=v1 => 3a*tau^2+2b*tau = v1-v0.\nSolving this 2x2 linear system (e.g. via substitution or Cramer's rule): a = (1/tau^3)[2(x0-x1)+tau(v0+v1)], b = (1/tau^2)[3(x1-x0)-tau(2v0+v1)]. (Independently verified by solving the linear system symbolically with SymPy while authoring this module.)"
+    },
+    {
+      "exerciseId": "DYN-05-ex2-cost-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 2.0, "tolerance": 0.01 },
+      "fullSolution": "D = (2-0) - (2/2)*(1+0) = 2-1 = 1. V = 0-1 = -1. 12/tau^3 * D^2 = 12/8*1 = 1.5. (1/tau)*V^2 = 0.5*1 = 0.5. Total = 2.0."
+    },
+    {
+      "exerciseId": "DYN-05-ex3-timing-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies PD's only-exponential (never-exact, no predictable time-to-target) convergence as one weakness." },
+          { "points": 2, "description": "Correctly identifies PD's backwards acceleration profile (large far away, small near target) as the other weakness." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "PD control converges only exponentially, never reaching the target exactly in finite time, so it provides no clean predictable time-to-target. Separately, PD's commanded acceleration Kp(x*-x) is largest far from the target and smallest close to it, an intuitively backwards profile for many macroscopic tasks. Timing-optimal control fixes both: it solves for a genuine finite tau (predictable time-to-target) and produces an acceleration profile shaped by an actual cost tradeoff rather than a fixed proportional law."
+    },
+    {
+      "exerciseId": "DYN-05-ex4-continuity-counting",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 9, "tolerance": 0 },
+      "fullSolution": "3+m = 3+6 = 9 free parameters remain for a C^2-continuous Hermite spline with 6 pieces."
+    }
+  ]
+}

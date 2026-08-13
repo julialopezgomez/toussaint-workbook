@@ -1,0 +1,114 @@
+---
+id: RL-05
+block: RL
+title: "Exploration Strategies"
+tier: 1
+estimatedHours: 2.5
+prerequisites: ["RL-03"]
+objectives:
+  - "State the model-based/model-free/policy-search taxonomy for what can be learned from RL data."
+  - "Explain optimistic initialization and UCB-style exploration, connecting directly to OPT-06's UCB1."
+  - "Explain R-max's strictly-optimistic mechanism and why it gives principled, provably-efficient exploration."
+sources:
+  - { sourceId: "lecture-ai", pages: "p82-89 (§2.3)", role: "primary" }
+concepts:
+  - "Model-based vs. model-free vs. policy-search RL"
+  - "Optimistic initialization, UCB exploration"
+  - "R-max, KWIK-R-max"
+  - "Bayesian RL / belief planning"
+notation:
+  - { symbol: "$c(s,a)$", meaning: "visit count for state-action pair $(s,a)$" }
+  - { symbol: "$m$", meaning: "R-max's known-vs-unknown visit-count threshold" }
+  - { symbol: "$b(m)$", meaning: "Bayesian RL's belief distribution over MDP models $m$" }
+cheatsheetLinks: []
+nextModules: ["RL-06"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+RL-03's Q-learning used $\epsilon$-greedy exploration without ever justifying it: act randomly some fraction of the time, hope it's enough. This module makes exploration itself the object of study, exactly the exploration-exploitation problem OPT-06 formalized for bandits, now in the harder sequential-decision setting where visiting a promising-looking state might itself require a whole plan to get there.
+
+## Prerequisites & readiness check
+
+You should have OPT-06's UCB1 formula fresh.
+
+<ReadinessCheck
+  question="From OPT-06, what does UCB1 add to a raw estimate to encourage exploration?"
+  answer="A confidence-bound bonus (roughly proportional to 1/√(visit count)), so under-visited/uncertain arms get an optimistic boost that shrinks as they're visited more."
+/>
+
+## What can be learned from RL data?
+
+Given data $\mathcal{D}_t=\{(s_i,a_i,r_i,s_{i+1})\}_{i=0}^t$, three distinct strategies:
+
+- **Model-based RL**: learn $\hat P(s'\mid s,a)$ and $\hat R(s,a)$ from data, then apply RL-02's value/Q-iteration (or planning) to the *learned* model.
+- **Model-free RL**: learn $V^*(s)$ or $Q^*(s,a)$ directly from data (RL-03's TD-learning/Q-learning), never explicitly representing $P$ or $R$.
+- **Policy search**: estimate the policy gradient directly (RL-04), or use black-box/evolutionary search, skipping value functions entirely.
+
+<ExerciseCard id="RL-05-ex1-taxonomy-conceptual" />
+
+This taxonomy matters directly for exploration: **model-based RL makes "planned exploration" far easier**, since you have an explicit model to plan a path toward an uncertain state with; model-free methods, knowing only $Q(s,a)$, have no such map, "visiting a state with high uncertainty is itself a planning problem" that model-free methods have no natural way to solve.
+
+## Beyond $\epsilon$-greedy: optimistic initialization and UCB
+
+$\epsilon$-greedy explores *undirected*: it doesn't distinguish "an action I've barely tried" from "an action I've tried a thousand times and it's still mediocre," both get the same random-exploration probability $\epsilon$. Two fixes, both already familiar from OPT-06:
+
+- **Optimistic initialization**: initialize $Q(s,a)$ to a deliberately high value (e.g. the theoretical maximum $Q(s,a)=R_\text{max}/(1-\gamma)$, the most reward achievable forever, discounted), so every action *looks* attractive until experience proves otherwise, naturally driving the agent to try everything at least once.
+
+<ExerciseCard id="RL-05-ex2-optimistic-init-numeric" />
+
+- **UCB-style exploration**: if you can estimate a confidence bound $\sigma(s,a)$ for $Q(s,a)$ (e.g. via bootstrap estimates), choose actions using $Q(s,a)+\beta\sigma(s,a)$, **exactly OPT-06's UCB1 formula**, $\mu_a+\beta\sqrt{2\ln n/n_a}$, applied to $Q$-values instead of bandit-arm means: the exploration bonus shrinks as $(s,a)$ gets visited more, automatically transitioning from exploration to exploitation.
+
+<ExerciseCard id="RL-05-ex3-ucb-connection-conceptual" />
+
+## R-max: provably efficient model-based exploration
+
+**R-max** (Brafman & Tennenholtz, 2002) makes optimism concrete and provably efficient in the model-based setting. Track a visit count $c(s,a)$; estimate $\hat R,\hat P$ from data only once $(s,a)$ is "known" (visited at least $m$ times); until then, use a strictly optimistic reward:
+
+$$R_\text{R-max}(s,a) = \begin{cases}R(s,a) & c(s,a)\geq m \quad\text{($s,a$ known)}\\ R_\text{max} & c(s,a)<m \quad\text{($s,a$ unknown)}\end{cases}$$
+
+<ExerciseCard id="RL-05-ex4-rmax-mechanism-derivation" />
+
+Planning (RL-02's value/Q-iteration) against $R_\text{R-max}$ means every insufficiently-visited state-action pair looks maximally attractive, so the resulting optimal policy *automatically* seeks out unvisited/under-visited $(s,a)$ pairs until they become "known," at which point planning naturally shifts toward genuine exploitation, all without any separate exploration bonus or hand-tuned $\epsilon$. R-max is **PAC-MDP** (probably-approximately-correct): it provably reaches a near-optimal policy within a number of exploratory steps polynomial in the size of the MDP.
+
+**KWIK-R-max** (Li, Littman, Walsh & Strehl, 2011) extends this to structured (parametric) transition models with $n\ll|\mathcal{S}|$ parameters, needing only polynomially-many-in-$n$ samples rather than polynomially-many-in-$|\mathcal{S}|$, a substantial efficiency gain whenever the model has real structure to exploit.
+
+## Bayesian RL: the theoretically optimal (but intractable) answer
+
+There *is* a formally optimal solution to exploration-exploitation: **belief planning**. Maintain a belief $b(m)$, a probability distribution over which MDP $m$ you're actually in (updated via Bayes' rule after every observation, ML-05's Bayesian machinery generalized from parameters to whole models), and solve
+
+$$V^\pi(b,s) = R(s,\pi(b,s))+\int_{b',s'}P(b',s'\mid b,s,\pi(b,s))\,V^\pi(b',s')$$
+
+The **Bayes-optimal policy** $\pi^*=\operatorname*{argmax}_\pi V^\pi(b,s)$ provably achieves the best possible expected reward under the prior over MDPs, genuinely solving exploration-exploitation optimally, at the cost of being tractable only for very simple problems (the belief space $b$ is itself a probability distribution over models, generally infinite-dimensional). R-max and KWIK-R-max are, in effect, practical approximations that capture most of belief planning's "seek out what you don't know" spirit without its intractability.
+
+## Summary
+
+- RL data supports three strategies: **model-based** (learn $P,R$, then plan), **model-free** (learn $V^*/Q^*$ directly), and **policy-search** (estimate the policy gradient or use black-box search); model-based RL makes directed exploration far easier.
+- **Optimistic initialization** and **UCB-style exploration** ($Q(s,a)+\beta\sigma(s,a)$, exactly OPT-06's UCB1 formula) both make under-explored actions look attractive until proven otherwise.
+- **R-max** treats every insufficiently-visited $(s,a)$ as maximally rewarding until visited $m$ times, giving provably-efficient (PAC-MDP) exploration with no separate exploration bonus needed; **KWIK-R-max** extends this to structured models.
+- **Bayesian RL** (belief planning) is the theoretically optimal answer to exploration-exploitation, generally intractable but the conceptual benchmark R-max-style methods approximate.
+
+## Retrieval questions
+
+1. State the model-based/model-free/policy-search taxonomy, and explain why model-based RL makes directed exploration easier.
+2. Explain optimistic initialization and UCB-style exploration, connecting the latter explicitly to OPT-06.
+3. State R-max's mechanism, and explain why it needs no separate exploration bonus.
+4. What does Bayesian RL/belief planning solve optimally, and why is it generally intractable?
+
+## Mastery checklist
+
+- [ ] Can state the model-based/model-free/policy-search taxonomy.
+- [ ] Can explain optimistic initialization and its connection to OPT-06's UCB1.
+- [ ] Can explain R-max's mechanism and its PAC-MDP guarantee.
+- [ ] Can explain what Bayesian RL solves and why it's generally intractable.
+
+## Source note
+
+This module's exposition, the model-based/model-free/policy-search taxonomy, optimistic initialization and UCB-style exploration, R-max (Brafman & Tennenholtz, 2002), KWIK-R-max (Li, Littman, Walsh & Strehl, 2011), and Bayesian RL/belief planning are adapted from `lecture-ai`, §2.3 (pp. 82-89). The UCB-style exploration formula is deliberately connected to, not re-derived from, [OPT-06](/course/OPT/OPT-06)'s UCB1, which already covers the exploration-bonus derivation in the simpler bandit setting. The source's own discussion of model-based-vs-model-free evidence in neuroscience/behavioral psychology (dopamine/TD-error correlates, goal-directed vs. habitual behavior) is acknowledged but not covered in depth here, as it's presented in the source itself as open discussion rather than settled, derivable content. All exercises are newly authored.
+
+---
+
+**Next**: [RL-06: Monte Carlo Tree Search & UCT](/course/RL/RL-06)

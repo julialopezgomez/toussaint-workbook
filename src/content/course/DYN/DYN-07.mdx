@@ -1,0 +1,118 @@
+---
+id: DYN-07
+block: DYN
+title: "Model Predictive Control (MPC)"
+tier: 1
+estimatedHours: 2.5
+prerequisites: ["DYN-04", "DYN-06"]
+objectives:
+  - "Explain why executing a single open-loop trajectory-optimization solution is fragile, and derive the receding-horizon principle that fixes it."
+  - "State the MPC algorithm as repeated re-solves of DYN-04's finite-horizon trajectory optimization problem."
+  - "Explain MPC as a closed-loop policy in DYN-06's sense, and why that gives robustness to model error and disturbances."
+  - "Explain the practical role of horizon length, terminal cost, and warm-starting."
+sources:
+  - { sourceId: "lecture-robotics", pages: "p90-91, p127-135 (§5, §8.1), synthesis", role: "primary" }
+  - { sourceId: "lecture-robotics", pages: "p135-142 (§8.2-8.3)", role: "supplementary" }
+concepts:
+  - "Receding-horizon control"
+  - "MPC as a closed-loop policy"
+  - "Terminal cost, horizon length"
+  - "Warm-starting"
+notation:
+  - { symbol: "$H$", meaning: "MPC planning horizon (number of steps re-solved at each control cycle)" }
+  - { symbol: "$\\pi_{\\text{MPC}}(x,t)$", meaning: "the MPC control law: first control of the horizon-$H$ solve starting from $x$" }
+externalSources:
+  - { citation: "Rawlings, Mayne & Diehl, Model Predictive Control: Theory, Computation, and Design, 2nd ed., 2020, Ch. 1-2", note: "Standard reference for the general receding-horizon principle, terminal-cost choice, and stability arguments; used to frame this module's synthesis, since lecture-robotics.pdf does not contain a section explicitly labeled MPC." }
+cheatsheetLinks: []
+nextModules: []
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+This module is the DYN block's closing synthesis: it doesn't introduce new machinery so much as show that everything already built, DYN-04's trajectory optimization, DYN-05's reactively-re-solved timing control, and DYN-06's closed-loop stability framework, combines into **Model Predictive Control**, the dominant paradigm for real-time robot control under uncertainty. If you've understood DYN-01 through DYN-06, MPC is genuinely just "do DYN-04's finite-horizon solve, but keep redoing it."
+
+## Prerequisites & readiness check
+
+You should have DYN-04's finite-horizon trajectory optimization and DYN-06's closed-loop-policy framing ($\dot x=f(x,\pi(x,t))$) fresh.
+
+<ReadinessCheck
+  question="From DYN-04, what does the trajectory-optimization cost function look like, in one line?"
+  answer="A sum of $k$-order control costs (finite differences penalizing velocity/acceleration/jerk) plus task costs, $\min_{x_{0:T}}\sum_t\|f_t(x_{t-k:t})\|^2$."
+/>
+
+## The problem with solving once
+
+DYN-04's trajectory optimization produces a single, complete trajectory $q_{0:T}^*$ by solving the finite-horizon problem once, at $t=0$, from the assumed initial state. Executing that trajectory **open-loop** (blindly playing out the precomputed controls, ignoring what the robot actually does) is fragile for an entirely practical reason: the assumed dynamics $x_{t+1}=f(x_t,u_t)$ are never exactly right (unmodeled friction, an inaccurate mass estimate, an external push), so the *actual* state $x_t$ drifts away from the planned $q_t^*$ as $t$ grows, and the precomputed controls, tuned for a trajectory the robot is no longer on, become increasingly wrong.
+
+## The receding-horizon principle
+
+The fix is exactly DYN-05's timing-optimal control idea, generalized from a single scalar decision ($\tau$) to a whole trajectory: **re-solve the optimization at every control cycle, using the actual current state as the new starting condition**, and only ever execute the very first control of each solve.
+
+```
+MPC(current state x, horizon H, dynamics f, cost terms f_t, constraints g_t,h_t):
+  loop forever, at every control cycle:
+    1. measure/estimate the actual current state x
+    2. solve DYN-04's finite-horizon problem over the next H steps,
+       starting from x_0 = x:
+         min_{x_1:H, u_0:H-1}  sum_t ||f_t(x_{t-k:t})||^2
+         s.t.  x_{t+1} = f(x_t, u_t),  g_t(x_t) <= 0,  h_t(x_t) = 0
+    3. apply only u_0*, the first control of the solved sequence
+    4. discard the rest of the plan; advance one step; go to 1
+```
+*(Newly authored, synthesizing DYN-04's finite-horizon problem into the standard receding-horizon control loop; see Rawlings, Mayne & Diehl, Model Predictive Control, Ch. 1 for the general algorithm this instantiates.)*
+
+<ExerciseCard id="DYN-07-ex1-mpc-loop-derivation" />
+
+## MPC is a closed-loop policy
+
+Re-solving with the *true* current state $x$ at every cycle means the control actually applied is a function of the current state alone, $\pi_{\text{MPC}}(x,t):=u_0^*(x)$ (the first control from a fresh horizon-$H$ solve starting at $x$): this is **exactly** DYN-06's closed-loop structure $\dot x=f(x,\pi(x,t))$, not an open-loop control sequence. Framed this way, MPC is doing for a full nonlinear trajectory-optimization problem what LQR already does for the linear-quadratic special case (DYN-04): both produce a state-feedback policy $u^*(x)$, LQR by solving the Riccati equation once in closed form, MPC by re-solving a (generally nonlinear, constrained) optimization at every step because no closed form exists in general.
+
+<ExerciseCard id="DYN-07-ex2-feedback-robustness-conceptual" />
+
+## Horizon length, terminal cost, and warm-starting
+
+Three practical design choices connect directly back to earlier modules:
+
+- **Horizon length $H$**: a short horizon is cheap to solve but myopic (it can't see task costs beyond $H$ steps ahead, e.g. a target only reachable via a detour); a long horizon approaches the true infinite-horizon optimal policy (DYN-04's stationary $V(x)$) but costs more to solve every cycle.
+- **Terminal cost**: replacing the truncated horizon's missing "tail" with a good estimate of the true cost-to-go mitigates short-horizon myopia without the cost of a long horizon. The natural choice is DYN-04's own infinite-horizon value function: for the LQ case, $\phi(x_H):=x_H^\top Px_H$ (the Riccati solution) as the terminal cost makes a short-horizon MPC solve approximate the true infinite-horizon optimal policy far more closely than a horizon with no terminal cost at all (equivalently $\phi\equiv0$, i.e. pretending the world ends at step $H$).
+- **Warm-starting**: consecutive MPC solves are nearly identical problems (the same trajectory, shifted by one step, with a slightly updated $x_0$), so initializing each new solve with the *previous* solution (shifted forward by one step, with one new step appended, e.g. by repeating the last control) gives OPT-01/OPT-02's Newton-type solvers an initial guess that's already close to optimal, letting each re-solve converge in far fewer iterations than solving from scratch, which is often what makes real-time re-solving computationally feasible at all.
+
+<ExerciseCard id="DYN-07-ex3-warmstart-conceptual" />
+
+## Closing the DYN block
+
+<ExerciseCard id="DYN-07-ex4-dyn-block-synthesis" />
+
+## Summary
+
+- Executing a single open-loop trajectory-optimization solution (DYN-04) is fragile: model error and disturbances make the actual state drift from the plan, and precomputed controls don't correct for it.
+- **MPC** fixes this by re-solving DYN-04's finite-horizon problem at every control cycle from the true current state, applying only the first control each time, exactly generalizing DYN-05's per-cycle timing re-solve to a full trajectory.
+- Because it's re-solved from the true state every cycle, MPC's applied control is a genuine state-feedback policy $\pi_{\text{MPC}}(x,t)$, DYN-06's closed-loop structure, not an open-loop plan; this is exactly what gives it robustness to model error.
+- Horizon length trades cost against foresight; a terminal cost built from DYN-04's infinite-horizon value function (e.g. the LQR $x^\top Px$) mitigates short-horizon myopia; warm-starting each solve from the previous (shifted) solution makes real-time re-solving computationally tractable.
+
+## Retrieval questions
+
+1. Why is executing a single open-loop trajectory-optimization solution fragile in practice?
+2. State the receding-horizon MPC algorithm from memory, without looking back.
+3. In what precise sense is MPC a closed-loop policy, and how does that connect to DYN-06?
+4. What role does a terminal cost play, and what's a natural choice for it?
+5. Why does warm-starting matter for real-time MPC, and which earlier module's machinery does it lean on?
+
+## Mastery checklist
+
+- [ ] Can explain why open-loop trajectory execution is fragile.
+- [ ] Can state and derive the receding-horizon MPC loop from DYN-04's finite-horizon problem.
+- [ ] Can explain why MPC is a closed-loop policy in DYN-06's sense, and why that gives robustness.
+- [ ] Can explain the roles of horizon length, terminal cost, and warm-starting.
+- [ ] Can trace how every DYN module (01-07) contributes to a complete robot control stack.
+
+## Source note
+
+`lecture-robotics.pdf` does not contain a section explicitly labeled MPC or "receding horizon"; this module is a **newly-authored synthesis**, built directly on DYN-04's finite-horizon trajectory-optimization formulation (`lecture-robotics` §5, pp. 90-91, and §8.1, pp. 127-135, both already cited in DYN-04) and DYN-06's closed-loop stability framing (`lecture-robotics` §8.2-8.3, pp. 135-142), combined with the standard receding-horizon control principle from the broader control-theory literature (see Rawlings, Mayne & Diehl, cited above). The original curriculum plan for this module also called for a direct cross-check against a specific definition (Def. 3) in the user's own PhD Year-1 report; that report was not accessible as a file within this project's approved source directories in this session, so that specific cross-check is **not included** here rather than fabricated or guessed at. If the report (or its Def. 3 specifically) is made available, this module should be revised to add the explicit notational cross-check as originally scoped. All exercises are newly authored.
+
+---
+
+**Next**: Return to the [curriculum overview](/curriculum) — the DYN block is complete.

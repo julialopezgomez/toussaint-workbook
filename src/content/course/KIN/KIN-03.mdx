@@ -1,0 +1,147 @@
+---
+id: KIN-03
+block: KIN
+title: "Forward/Inverse Kinematics & Jacobians (revision)"
+tier: 1
+estimatedHours: 3
+prerequisites: ["KIN-01", "OPT-03"]
+objectives:
+  - "State the forward-kinematics chaining formula and compute it for a small kinematic chain."
+  - "Construct a position/angular Jacobian column geometrically from a joint's axis and location."
+  - "State inverse kinematics as a regularized NLP, and recognize its Gauss-Newton closed form as an instance of MATH-02B's robotics exercise."
+  - "Explain why a single IK/Newton step should not be mistaken for a motion-generation policy."
+  - "Explain Jacobian singularities and the role of regularization."
+sources:
+  - { sourceId: "lecture-robotics", pages: "p18-26 (§2.2-2.3)", role: "primary" }
+  - { sourceId: "robotkin", pages: "Forward Kinematics & Jacobian, Inverse Kinematics sections (HTML-sourced)", role: "primary" }
+concepts:
+  - "Kinematic chain, forward kinematics map $\\phi(q)$"
+  - "Position/angular Jacobian, geometric construction"
+  - "Inverse kinematics as regularized least-squares"
+  - "Singularity, regularized pseudo-inverse, nullspace motion"
+notation:
+  - { symbol: "$q\\in\\mathbb{R}^n$", meaning: "joint/configuration vector" }
+  - { symbol: "$\\phi(q)$", meaning: "kinematic map, e.g. end-effector position/orientation as a function of $q$" }
+  - { symbol: "$J(q)=\\partial_q\\phi(q)$", meaning: "Jacobian of the kinematic map" }
+  - { symbol: "$J^\\sharp$", meaning: "regularized pseudo-inverse used for one IK/Gauss-Newton step" }
+cheatsheetLinks: []
+nextModules: ["DYN-01"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+import SourceFigure from '../../../components/SourceFigure.astro';
+
+## Why this matters
+
+This is a compact revision pass, connecting kinematics vocabulary you already know to machinery you've since built elsewhere in this workbook: the IK closed form here is *exactly* the robotics exercise you already solved in [MATH-02B](/course/MATH/MATH-02B), and "IK as a regularized NLP" is a direct instance of [OPT-03](/course/OPT/OPT-03)/[OPT-04](/course/OPT/OPT-04)'s constrained-optimization machinery. The point of this module is less "learn new facts," more "see your existing toolbox click into its most natural robotics application."
+
+## Prerequisites & readiness check
+
+You should have rotation matrices (KIN-01) and the Lagrangian/KKT picture (OPT-03) fresh.
+
+<ReadinessCheck
+  question="From MATH-02B, what is the Gauss-Newton closed-form update for $\min_\delta\|r+J\delta\|_C^2+\|\delta\|_W^2$?"
+  answer="$\delta^*=-(J^\top CJ+W)^{-1}J^\top Cr$."
+/>
+
+## Forward kinematics: chaining transforms
+
+A robot is a tree of rigid **links** connected by **joints**, each with a relative transform $Q_i(q_i)\in SE(3)$ depending on that joint's degree(s) of freedom. Stacking all DOFs into $q\in\mathbb{R}^n$, any body's (typically the end-effector's) pose is computed by **forward chaining**:
+
+$$T_{W\to\text{eff}}(q) = T_{W\to A}\,T_{A\to A'}(q)\,T_{A'\to B}\,T_{B\to B'}(q)\,\cdots$$
+
+i.e. alternating **fixed link transforms** (no $q$-dependence) and **joint transforms** (depending on that joint's DOF): a revolute joint contributes a rotation about its axis parameterized by its angle; a prismatic joint contributes a translation along its axis parameterized by its offset. More generally, a **kinematic map** $\phi:q\mapsto y$ is *any* differentiable feature of the pose, most commonly position $\phi^{\text{pos}}(q)=T_{W\to\text{eff}}(q)v$, a rotated direction $\phi^{\text{vec}}(q)=R_{W\to\text{eff}}(q)v$, or orientation itself.
+
+<ExerciseCard id="KIN-03-ex1-fk-chain" />
+
+## The Jacobian, constructed geometrically
+
+$J(q)=\partial_q\phi(q)\in\mathbb{R}^{d\times n}$ answers: a small joint-space step $\delta q$ produces what end-effector change, $\delta y=J(q)\delta q$? Rather than differentiating the chained transform symbolically, each *column* (one per DOF) can be read off directly from geometry:
+
+<SourceFigure
+  src="/figures/lecture-robotics/fig1-jacobian-rotational-dof.png"
+  alt="Diagram of a 2-link robot arm showing the i-th joint's rotation axis a_i and location p_i, the end-effector position p_eff, the lever vector d, and the resulting velocity direction a_i cross d"
+  caption="Jacobian column for a rotational DOF: varying joint i's angle rotates the entire downstream sub-tree about axis a_i (located at p_i), so the end-effector position changes by a_i × (p_eff − p_i), and any attached direction a_eff changes by a_i × a_eff."
+  source="Lecture-Robotics.pdf"
+  page="21"
+/>
+
+For DOF $i$ located at $p_i$ (in world coordinates) with world-frame rotation axis $a_i$: varying $q_i$ rotates the entire downstream sub-tree rigidly about $a_i$ through $p_i$, exactly [KIN-01](/course/KIN/KIN-01)'s $\dot R=\text{skew}(w)R$ picture applied locally. So the $i$-th columns of the position and (attached-vector) Jacobians are:
+
+$$J^{\text{pos}}_{\cdot i}(q) = a_i\times(p_{\text{eff}}-p_i), \qquad J^{\text{vec}}_{\cdot i}(q) = a_i\times a_{\text{eff}}$$
+
+(A prismatic DOF instead translates everything downstream along its axis $b_i$, contributing $J^{\text{pos}}_{\cdot i}=b_i$, $J^{\text{vec}}_{\cdot i}=0$, no rotation.) Since column $i$ is zero whenever DOF $i$ isn't on the path from the root to the end-effector, these Jacobians are naturally **sparse** for large multi-body/multi-robot systems.
+
+<ExerciseCard id="KIN-03-ex2-jacobian-column" />
+
+## Inverse kinematics, as an NLP
+
+**Inverse kinematics (IK)** means: find $q$ with $\phi(q)=y^*$. Since $\phi$ is generally neither injective (many $q$ reach the same $y^*$, redundancy) nor surjective (some $y^*$ are unreachable), the well-posed formulation is exactly [OPT-03](/course/OPT/OPT-03)'s constrained-optimization machinery:
+
+$$q^* = \operatorname*{argmin}_q\ \|\phi(q)-y^*\|_C^2 + \|q-q_0\|_W^2$$
+
+The first term (weight $C$) pulls toward the target, allowing near-misses if $y^*$ isn't exactly reachable; the second (weight $W$) disambiguates among the many solutions when $\phi$ is redundant, and keeps $q$ near a reference $q_0$. As $C\to\infty$ this enforces $\phi(q)=y^*$ exactly wherever feasible, recovering the "hard constraint" version of IK; finite $C,W$ give the SQP-flavored, always-well-posed version.
+
+Linearizing $\phi(q)\approx\phi(q_0)+J(q-q_0)$ (this problem, and its solution, is **exactly** the Gauss-Newton robotics exercise you already solved in [MATH-02B](/course/MATH/MATH-02B)):
+
+$$q^* = q_0 + J^\sharp(y^*-\phi(q_0)), \qquad J^\sharp=(J^\top CJ+W)^{-1}J^\top C$$
+
+<ExerciseCard id="KIN-03-ex3-gauss-newton-ik-numeric" />
+
+```
+Iterating IK to Follow a Trajectory
+Input:    initial state q0, desired y*, methods φ^pos and J^pos
+Output:   trajectory q_{0:T}
+1: set y0 ← φ^pos(q0)                                    // starting endeff position
+2: for t = 1, .., T do
+3:   y ← φ^pos(q_{t-1})                                   // current endeff position
+4:   J ← J^pos(q_{t-1})                                    // current endeff Jacobian
+5:   ŷ ← y0 + (t/T)(y* - y0)                                // interpolated endeff target
+6:   q_t ← q_{t-1} + J^sharp·(ŷ - y)                        // new joint positions
+7:   command q_t to all robot motors and compute all T_{W→i}(q_t)
+8: end for
+```
+*(Marc Toussaint, `lecture-robotics.pdf`, p.24. Iterating this equation in small steps, re-linearizing $J$ each time, is equivalent to Gauss-Newton, and is the standard way IK is actually used in a control loop, not a single big jump.)*
+
+**A genuinely common mistake, worth flagging explicitly**: it's tempting to read $q^*=q_0+J^\sharp(y^*-\phi(q_0))$ as *the* motion the robot should execute, scaled down by some small step size $\alpha$ each control tick. This conflates two different problems: IK's job is to find *where* to go ($q_T$ solving $\phi(q_T)=y^*$); getting *there* smoothly (a reference trajectory, then a tracking controller) is a separate problem, properly addressed with trajectory optimization or a motion profile/spline, not by literally executing scaled-down optimization steps as if they were physical robot motion.
+
+## Singularities and regularization
+
+<ExerciseCard id="KIN-03-ex4-singularity-conceptual" />
+
+A Jacobian is **singular** when $\text{rank}(J)<d$ (e.g. an arm fully outstretched, unable to move its end-effector in some direction instantaneously). Then $JJ^\top$ is singular too, and the naive pseudo-inverse $J^\top(JJ^\top)^{-1}$ blows up. The regularized version derived above, $J^\sharp=(J^\top CJ+W)^{-1}J^\top C$, is automatically **singularity-robust** whenever $W\succ0$ (the same PD-regularization idea as ridge regression, ODE-independent instances of the exact same fix recurring again).
+
+When $\phi$ is redundant ($d<n$), the **nullspace** $\{q:\phi(q)=y^*\}$ is a whole manifold; the $W$ term's reference $q_0$ (or a more general reference direction $a$, giving $\delta q = J^\sharp\delta y+(I-J^\sharp J)a$) lets you exploit that redundancy for a secondary objective (e.g. joint-limit avoidance, obstacle avoidance), called **nullspace motion**, entirely for free within this same formulation.
+
+## Summary
+
+- Forward kinematics chains fixed link transforms and $q$-dependent joint transforms; a kinematic map $\phi(q)$ is any differentiable feature of the resulting pose.
+- Each Jacobian column is read off geometrically: $a_i\times(p_{\text{eff}}-p_i)$ for a rotational DOF's effect on position, $b_i$ for a prismatic DOF, zero if DOF $i$ isn't upstream of the end-effector (giving natural sparsity).
+- IK is properly posed as a regularized NLP, $\min_q\|\phi(q)-y^*\|_C^2+\|q-q_0\|_W^2$; its Gauss-Newton closed form is exactly MATH-02B's robotics exercise, iterated in small steps (real algorithm box above) rather than executed as one big jump.
+- A single (scaled) IK/Newton step is not a motion-generation policy; that's a separate problem (trajectory optimization, motion profiles), a common student misconception worth avoiding explicitly.
+- Regularization ($W\succ0$) makes the IK pseudo-inverse automatically singularity-robust; redundancy ($d<n$) gives free nullspace motion for a secondary objective.
+
+## Retrieval questions
+
+1. Write the forward-kinematics chaining formula and explain which transforms depend on $q$.
+2. Derive (geometrically, not symbolically) the Jacobian column formula for a rotational DOF.
+3. State the IK NLP and its Gauss-Newton closed form, and connect it explicitly to MATH-02B's robotics exercise.
+4. Why is executing scaled-down IK/Newton steps directly as robot motion not "proper" IK, per the source's own warning?
+5. Why does regularization make the IK pseudo-inverse singularity-robust?
+
+## Mastery checklist
+
+- [ ] Can state and apply the forward-kinematics chaining formula.
+- [ ] Constructed a position Jacobian column geometrically from a joint axis and location.
+- [ ] Can state IK as a regularized NLP and its Gauss-Newton closed form, connecting it to MATH-02B.
+- [ ] Can explain why a single IK step isn't a motion policy, and what should be used instead.
+- [ ] Can explain Jacobian singularity, regularization, and nullspace motion.
+
+## Source note
+
+This module's exposition, the forward-kinematics chaining formula, the Jacobian geometric-construction figure, the IK-as-NLP formulation, the small-step IK algorithm, and the singularity/nullspace discussion are adapted from `lecture-robotics`, §2.2-2.3 (pp. 18-26). The "IK step is not a motion policy" caution and the sparsity/redundancy framing are adapted from Marc Toussaint's `robotkin` HTML note (Forward Kinematics & Jacobian, Inverse Kinematics sections). All numeric exercises are newly authored and independently verified with NumPy (including a finite-difference cross-check of the Jacobian construction).
+
+---
+
+**Next**: Block DYN — Robot Dynamics & Control (not yet built)

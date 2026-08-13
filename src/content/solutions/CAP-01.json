@@ -1,0 +1,52 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "CAP-01-ex1-notation-translation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly maps CS to X and CS_free to X_fea." },
+          { "points": 2, "description": "Correctly explains the product structure reflects joint robot+object tracking." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "CS corresponds to X (the generic configuration-space embedding), specialized to a composite robot+object system. CS_free corresponds to X_fea (equivalently C_free). The product C_rob x C_obj reflects that manipulation planning must track both the robot's and the object's pose jointly, since the object can only move when grasped by the robot, unlike classical motion planning where only the robot's own configuration matters."
+    },
+    {
+      "exerciseId": "CAP-01-ex2-bigM-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 2, "tolerance": 0 },
+      "fullSolution": "Worst case x=5 (the joint limit). Need 5 <= 3+M, so M >= 2. Smallest integer M = 2."
+    },
+    {
+      "exerciseId": "CAP-01-ex3-miqp-classification",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies the MIQP as mixed discrete+continuous." },
+          { "points": 2, "description": "Correctly identifies decomposition as preprocessing and GCS as purely continuous." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Convex decomposition: a geometric preprocessing step producing the regions P_j, not itself an optimization over planning variables. MIQP: mixed, continuous configurations x_i plus binary region/component-membership variables z_ij, requiring a mixed-integer solver. GCS: given fixed endpoints, a purely continuous shortest-path optimization through the decomposition, no discrete decisions remain."
+    },
+    {
+      "exerciseId": "CAP-01-ex4-lgp-parallel",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly maps binary variables/manipulation constraints/polytope constraints onto skeleton/phi-bar/phi-hat." },
+          { "points": 2, "description": "Correctly identifies the discrete-search-space-size/generality difference." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "z_ij (region membership) plays the skeleton s_1:K's role; manipulation constraints (object fixed/rigid) play phi-bar's role (continuous, within-mode); polytope-containment/connectivity constraints at each x_i play phi-hat's role (checked only at discrete points). Difference: RLEARN-07's skeleton search is over a small hand-defined symbolic-action set; this MIQP searches directly over many convex regions/grasp configurations, a larger but more geometrically explicit discrete space, since it's manipulation-specialized rather than general-purpose symbolic planning."
+    },
+    {
+      "exerciseId": "CAP-01-ex5-coverage-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 107.5, "tolerance": 0.1 },
+      "fullSolution": "78.5 + 29.0 = 107.5 seconds. Contrast with the 0.90-target row (31.2s coverage time but no valid trajectory): lower coverage can mean no usable plan at all, not just a cheaper one."
+    }
+  ]
+}

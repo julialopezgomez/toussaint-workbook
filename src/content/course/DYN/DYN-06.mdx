@@ -1,0 +1,158 @@
+---
+id: DYN-06
+block: DYN
+title: "Controllability & Stability"
+tier: 1
+estimatedHours: 3.5
+prerequisites: ["DYN-02", "DYN-04", "ODE-02"]
+objectives:
+  - "Define the controllability matrix for a linear system and use its rank to determine controllability."
+  - "State the three definitions of stability (Lyapunov, asymptotic, exponential) for a general nonlinear system."
+  - "Classify a linear system's stability from the eigenvalues of its state matrix, connecting directly to ODE-02."
+  - "Apply eigenvalue-based stability analysis to a PD-controlled point mass, connecting directly to DYN-02's characteristic equation."
+  - "State the Lyapunov function method and apply it to both an energy-based example and the LQR value function."
+sources:
+  - { sourceId: "lecture-robotics", pages: "p135-142 (§8.2-8.3)", role: "primary" }
+concepts:
+  - "Controllability matrix, rank condition"
+  - "Lyapunov stability, asymptotic stability, exponential stability"
+  - "Linear stability analysis via eigenvalues"
+  - "Lyapunov function method"
+notation:
+  - { symbol: "$C$", meaning: "controllability matrix, $[B\\ AB\\ A^2B\\ \\cdots\\ A^{n-1}B]$" }
+  - { symbol: "$V(x)$", meaning: "a Lyapunov function: candidate energy-like function proving stability" }
+cheatsheetLinks: []
+nextModules: ["DYN-07"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+DYN-04's Algebraic Riccati Equation will always hand you back an "optimal" controller, whether or not that controller actually has any chance of steering the system: **controllability** is the question of whether a system can be steered at all. And every controller this workbook has built so far (DYN-02's PD point mass, DYN-04's LQR) has been justified by *deriving* a closed-loop ODE and inspecting it; **stability** is the general theory of what "the closed loop behaves well" even means, and eigenvalue-based linear stability analysis is exactly ODE-02's machinery, now applied to a *closed loop* rather than an open-loop system.
+
+## Prerequisites & readiness check
+
+You should have ODE-02's eigenvalue-based stability classification and DYN-02's PD characteristic equation fresh.
+
+<ReadinessCheck
+  question="From ODE-02, for $\dot x=Ax$, what does the sign of an eigenvalue's real part tell you about that mode's long-run behavior?"
+  answer="Negative real part: exponential decay along that eigenvector direction. Positive real part: exponential blow-up. Zero real part: persists (oscillates, for a complex pair; stays constant, for a real eigenvalue)."
+/>
+
+## Controllability
+
+Consider a linear controlled system $\dot x = Ax+Bu$ with $x\in\mathbb{R}^n$. **Complete controllability** asks: can every element of $x$ be brought from an arbitrary initial condition to zero in finite time, using some choice of $u(t)$?
+
+Differentiating $\dot x=Ax+Bu$ repeatedly reveals which combinations of $u$ and its derivatives actually reach each state dimension:
+
+$$\dot x = Ax+Bu, \qquad \ddot x = A\dot x+B\dot u = A^2x+ABu+B\dot u, \qquad \dddot x = A^3x+A^2Bu+AB\dot u+B\ddot u,\ \ldots$$
+
+$x_i$ is influenced by $u$ directly through $B$; $\ddot x_i$ is influenced "indirectly" through $AB$ ($u$ directly influences some $\dot x_j$ via $B$, and the dynamics $A$ then propagate that into $\ddot x_i$); $\dddot x_i$ through $A^2B$ ("double-indirectly"); and so on. This motivates stacking these directions into the **controllability matrix**
+
+$$C := \big[\,B\ \ AB\ \ A^2B\ \ \cdots\ \ A^{n-1}B\,\big]$$
+
+**A system is completely controllable iff $C$ has full rank $n=\dim(x)$** (all rows linearly independent). The meaning of a row of $C$: the $i$-th row describes how the $i$-th element $x_i$ can be influenced by $u$ (directly via $B$, indirectly via $AB$, etc.). If a row is entirely zero, that state element cannot be controlled at all; if two rows are linearly dependent, those two state elements remain coupled forever, no choice of $u$ can move them independently.
+
+<ExerciseCard id="DYN-06-ex1-controllability-expansion" />
+
+<ExerciseCard id="DYN-06-ex2-controllability-numeric" />
+
+Why this matters practically: the Riccati equation (DYN-04) will *always* return some "optimal" controller gain, regardless of whether the underlying system can actually be steered. Controllability tells you whether that controller has any real chance of doing its job, a check that's entirely separate from, and prior to, solving for the gains themselves.
+
+## Stability: three definitions
+
+Stability is an analysis of the **closed loop**: once a controller $\pi(x,t)$ is fixed, system and controller together define a single autonomous dynamics $\dot x=f(x,\pi(x,t))=:f(x)$, and stability asks about *this* $f$, not the open-loop system or the controller in isolation. A point $x_0$ is an **equilibrium point** iff $f(x_0)=0$.
+
+- **Lyapunov stable** (uniformly stable): $\forall\epsilon\ \exists\delta$ such that $\|x(0)-x_0\|\leq\delta \Rightarrow \forall t:\|x(t)-x_0\|\leq\epsilon$. Starting $\delta$-close to $x_0$ keeps you $\epsilon$-near forever (but doesn't require ever getting closer).
+- **Asymptotically stable**: Lyapunov stable *and* $\lim_{t\to\infty}x(t)=x_0$.
+- **Exponentially stable**: asymptotically stable *and* $\exists\alpha,a$ such that $\|x(t)\|\leq ae^{-\alpha t}\|x(0)\|$ (a concrete decay rate, not just eventual convergence; this also bounds the "total error over time," $\int_0^\infty\|x(t)\|\,dt\leq\frac a\alpha\|x(0)\|$).
+
+Each definition is strictly stronger than the last: exponential $\Rightarrow$ asymptotic $\Rightarrow$ Lyapunov stable, but not conversely (ODE-02's undamped oscillator, a "center," is Lyapunov stable but not asymptotically stable: it stays bounded forever but never converges to the origin).
+
+### Linear stability analysis
+
+For a **linear** system $\dot x=Ax$, let $\lambda_i$ be the eigenvalues of $A$ (exactly ODE-02's eigenvalue decomposition): along each eigenvector direction the dynamics reduce to the scalar $\dot x_i=\lambda_ix_i$ with solution $x_i(t)=ae^{\lambda_it}$, so
+
+$$\text{asymptotically stable} \iff \forall i:\operatorname{Re}(\lambda_i)<0, \qquad \text{unstable} \iff \exists i:\operatorname{Re}(\lambda_i)>0, \qquad \text{marginally stable} \iff \forall i:\operatorname{Re}(\lambda_i)\leq0$$
+
+matching ODE-02's classification exactly: a negative real part is exponential decay, a positive real part is exponential blow-up, and a purely imaginary eigenvalue is undamped oscillation ("marginally stable," not asymptotically stable). "Linear" here also means "local": the same analysis applies to a **nonlinear** system *linearized* at an equilibrium point, exactly as ODE-02's linearization did.
+
+*(Side note, discrete time: for $x_{t+1}=Ax_t$, the analogous condition is on $|\lambda_i|$ rather than $\operatorname{Re}(\lambda_i)$: asymptotically stable iff $\forall i:|\lambda_i|<1$, unstable iff $\exists i:|\lambda_i|>1$, marginally stable iff $\forall i:|\lambda_i|\leq1$.)*
+
+### Worked example: the PD-controlled point mass, revisited
+
+DYN-02 derived the PD-controlled point mass's characteristic equation directly by substituting an ansatz; eigenvalue-based stability analysis reaches the identical equation from the state-space side. Closed-loop dynamics ($u=K_p(q^*-q)-K_d\dot q$, deviation coordinates $x=(q-q^*,\dot q)$):
+
+$$\dot x = \begin{pmatrix}\dot q\\ \ddot q\end{pmatrix} = \begin{pmatrix}0&1\\0&0\end{pmatrix}x+\frac1m\begin{pmatrix}0&0\\-K_p&-K_d\end{pmatrix}x = \underbrace{\begin{pmatrix}0&1\\-K_p/m&-K_d/m\end{pmatrix}}_{A}x$$
+
+The eigenvalue equation $\omega\binom{x_1}{x_2}=A\binom{x_1}{x_2}$ leads to $\omega x_2=\omega^2x_1=-\tfrac{K_p}mx_1-\tfrac{K_d}m\omega x_1$, i.e. $m\omega^2+K_d\omega+K_p=0$: **exactly DYN-02's PD characteristic equation**, now derived as the eigenvalue equation of the closed-loop state matrix $A$ rather than guessed as an ansatz. Its roots are $\omega=\dfrac{-K_d\pm\sqrt{K_d^2-4mK_p}}{2m}$, and since $\operatorname{Re}(\omega)=-K_d/(2m)$ whenever the discriminant is negative (complex roots), **positive derivative gain $K_d$ makes the closed loop asymptotically stable**, a one-line eigenvalue argument for a fact DYN-02 only showed regime-by-regime.
+
+<ExerciseCard id="DYN-06-ex3-eigenvalue-stability-numeric" />
+
+Zooming out: since a controller can be designed to directly minimize the (negative) eigenvalues' real parts, eigenvalue placement is itself a real alternative to Riccati-based optimal control, "design a controller with the fastest asymptotic convergence" rather than "design a controller that minimizes a cost function."
+
+## The Lyapunov function method
+
+Eigenvalue analysis only applies to linear (or linearized) systems. **Lyapunov's second method** proves stability for general nonlinear systems without solving the ODE at all. Let $D$ be a region around equilibrium point $x_0$. A **Lyapunov function** $V(x)$ for dynamics $\dot x=f(x)$ is:
+
+- **positive**: $V(x)>0$ everywhere in $D$ except at $x_0$, where $V(x_0)=0$;
+- **always decreasing**: $\dot V(x)=\frac{\partial V(x)}{\partial x}\dot x<0$ in $D$ except at $x_0$ (where $f(x_0)=0$ forces $\dot V(x_0)=0$ too).
+
+**If such a $D$ and $V(x)$ exist, the system is asymptotically stable; if $D$ is the whole state space, it's globally stable.** $V(x)$ can be *anything* that decreases (energy, cost-to-go, whatever); the method is general precisely because it doesn't prescribe what $V$ should be, a good guess is usually either the physical energy or the value function of an underlying optimal control problem.
+
+### Example 1: energy as a Lyapunov function
+
+For the PD-controlled point mass above, the natural candidate is **total mechanical energy**: kinetic energy plus the "virtual spring" potential energy stored by the proportional term, $V(x)=\tfrac12m\dot q^2+\tfrac12K_p(q-q^*)^2$ (writing $x=(q-q^*,\dot q)$ throughout). This is positive everywhere except at the origin, satisfying the first Lyapunov condition immediately.
+
+<ExerciseCard id="DYN-06-ex4-energy-lyapunov-derivation" />
+
+$$\dot V(x) = -K_d\dot q^2$$
+
+confirming, via a completely different route than the eigenvalue calculation above, that **$K_d>0$ is exactly what's needed for $\dot V<0$** (strictly, for $\dot q\neq0$; a fully careful treatment needs LaSalle's invariance principle to handle the boundary case $\dot q=0,q\neq q^*$, outside this module's scope, but the sign condition is the essential content).
+
+## Example 2: the LQR value function as a Lyapunov function
+
+DYN-04's infinite-horizon LQR solves the Algebraic Riccati Equation for $P$, giving value function $V(x)=x^\top Px$ and optimal control $u^*=-R^{-1}B^\top Px=Kx$. Differentiating along the closed loop $\dot x=(A+BK)x$:
+
+$$\dot V(x) = x^\top[(A+BK)^\top P+P(A+BK)]x = x^\top[A^\top P+PA+K^\top B^\top P+PBK]x$$
+
+Using the ARE, $A^\top P+PA=PBR^{-1}B^\top P-Q$, and $K=-R^{-1}B^\top P$ so $B^\top P=-RK$:
+
+$$\dot V(x) = x^\top[PBR^{-1}B^\top P-Q+K^\top(-RK)+(-K^\top R)K]x = x^\top[-Q-K^\top RK]x = -x^\top[Q+K^\top RK]x$$
+
+*(This algebra was independently re-derived and checked against a direct numerical simulation while authoring this module: for DYN-04's 1D point-mass LQR parameters, $\dot V(x)$ computed from the closed-loop trajectory matched $-x^\top[Q+K^\top RK]x$ to machine precision.)* So **$V(x)=x^\top Px$ is a Lyapunov function whenever $Q+K^\top RK$ is positive definite**, which it always is when $Q\succeq0,R\succ0$ (the usual LQR setup): the optimal controller is *automatically* stabilizing, no separate stability proof needed, because the cost structure itself guarantees $\dot V<0$. This is the deeper reason LQR is trusted as a default controller: optimality and stability come from the same computation.
+
+## Beyond this module: observability and adaptive control
+
+Two closely related ideas the source material raises but doesn't develop in depth (out of scope here, flagged for awareness): **observability** asks the dual question to controllability, whether the full state can be *inferred* from what's actually measured (relevant whenever some state dimensions, e.g. velocities, aren't directly sensed); an **observability matrix**, structurally analogous to $C$ above, answers it. **Adaptive control** addresses dynamics $\dot x=f(x,u,\beta)$ with unknown parameters $\beta$ (e.g. an unknown payload mass), either by estimating $\beta$ online and re-solving optimal control, or by designing a controller with a provably-stable online update rule for an estimate $\hat\beta$.
+
+## Summary
+
+- **Controllability**: $\dot x=Ax+Bu$ is completely controllable iff the controllability matrix $C=[B\ AB\ \cdots\ A^{n-1}B]$ has full rank $n$; a zero row means that state element can't be controlled at all, dependent rows mean two elements stay coupled forever.
+- **Stability** is a property of the closed loop $\dot x=f(x,\pi(x,t))=f(x)$: Lyapunov stable (stays $\epsilon$-near) $\subset$ asymptotically stable (also converges) $\subset$ exponentially stable (converges at a guaranteed rate).
+- For linear (or linearized) systems, stability reduces to the sign of $\operatorname{Re}(\lambda_i)$ for eigenvalues of $A$, exactly ODE-02's classification; applied to the closed-loop PD point mass, this reproduces DYN-02's characteristic equation exactly.
+- The **Lyapunov function method** proves stability for general nonlinear systems by finding any $V(x)$ that's positive away from equilibrium and always decreasing; energy and value functions are the two standard guesses, and the LQR value function is automatically a Lyapunov function, so the optimal controller is automatically stabilizing.
+
+## Retrieval questions
+
+1. State the controllability matrix and its rank condition, and explain what a zero row or a pair of dependent rows means physically.
+2. State all three stability definitions (Lyapunov, asymptotic, exponential) from memory, and give an example of a system that's Lyapunov stable but not asymptotically stable.
+3. Derive the closed-loop state matrix $A$ for the PD-controlled point mass, and show its eigenvalue equation reproduces DYN-02's characteristic equation.
+4. State the two conditions a Lyapunov function must satisfy, and explain why the LQR value function automatically satisfies them.
+
+## Mastery checklist
+
+- [ ] Can state and apply the controllability matrix rank condition.
+- [ ] Can state all three stability definitions and order them by strength.
+- [ ] Can derive linear stability from eigenvalues and connect it to ODE-02 and DYN-02.
+- [ ] Can state the Lyapunov function method's two conditions and apply it to both the energy and LQR-value-function examples.
+
+## Source note
+
+This module's exposition, the controllability matrix definition and its "meaning of $C$" derivation, the three stability definitions, linear eigenvalue-based stability analysis (including the discrete-time side note), the Lyapunov function method's two conditions, and both worked examples (energy, LQR value function) are adapted from `lecture-robotics`, §8.2-8.3 (pp. 135-142). The LQR-value-function Lyapunov derivation was independently re-derived algebraically and cross-checked numerically (closed-loop trajectory simulation matching the derived $\dot V$ formula to machine precision) while authoring this module. The energy Lyapunov example is presented using the standard total-mechanical-energy form (kinetic plus proportional-term "spring" potential energy); the source's own slide states only the kinetic-energy term as a shorthand and asserts a specific closed-form envelope for $\dot V(x)$'s decay that did not reproduce cleanly under direct verification, so that specific closed form is not asserted here, only the (verified) sign result $\dot V=-K_d\dot q^2$. All exercises are newly authored.
+
+---
+
+**Next**: [DYN-07: Model Predictive Control](/course/DYN/DYN-07)

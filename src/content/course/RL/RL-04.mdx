@@ -1,0 +1,121 @@
+---
+id: RL-04
+block: RL
+title: "Policy Gradient & Deep RL"
+tier: 1
+estimatedHours: 3.5
+prerequisites: ["RL-03", "ML-04"]
+objectives:
+  - "Explain how the Bellman residual loss generalizes Q-learning's TD update to a proper SGD-trainable loss."
+  - "Derive the policy gradient theorem via the log-derivative trick."
+  - "Explain, at a survey level, the standard deep-RL stabilization tricks and the model-based/model-free/policy-search taxonomy."
+sources:
+  - { sourceId: "lecture-ai", pages: "p76-81 (§2.2)", role: "primary" }
+  - { sourceId: "lecture-robotlearning", pages: "p60-65 (§1.8, robotics-flavored bridge)", role: "supplementary" }
+concepts:
+  - "Replay buffer, Bellman residual loss"
+  - "Policy gradient theorem"
+  - "Deterministic policy gradient"
+  - "Deep RL stabilization tricks"
+notation:
+  - { symbol: "$\\xi=(s_0,a_0,s_1,a_1,\\ldots)$", meaning: "a full trajectory" }
+  - { symbol: "$P_\\theta(\\xi)$", meaning: "probability of trajectory $\\xi$ under policy $\\pi_\\theta$" }
+  - { symbol: "$J(\\theta)$", meaning: "expected return as a function of policy parameters $\\theta$" }
+cheatsheetLinks: []
+nextModules: ["RL-05"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+RL-03's Q-learning update is a single-sample nudge to a table, $Q(s,a)$. To handle continuous states/actions with ML-04's neural networks, both $Q(s,a)$ and $\pi(s)$ need to become genuine SGD-trainable functions with real loss functions and real gradients, not table updates. This module derives both losses: the **Bellman residual** (turns Q-learning into supervised regression) and the **policy gradient theorem** (the mathematical core of essentially every modern deep-RL algorithm, DDPG, PPO, SAC included).
+
+## Prerequisites & readiness check
+
+You should have RL-03's Q-learning TD error and ML-01's log-derivative identity fresh.
+
+<ReadinessCheck
+  question="From ML-01, what identity lets you rewrite a gradient of a probability as an expectation?"
+  answer="∂P/∂θ = P · ∂(log P)/∂θ (the log-derivative trick), so ∫P(x)∂f(x)/∂θ dx-type integrals involving ∂P/∂θ become expectations of ∂(log P)/∂θ under P."
+/>
+
+## From table updates to loss functions: the Bellman residual
+
+Storing a full replay buffer $\mathcal{D}=\{(s_i,a_i,r_i,s_{i+1})\}$ of all past experience (rather than discarding each transition after one TD update), Q-learning's per-sample TD error becomes recognizable as a gradient step on a genuine squared-error loss:
+
+$$B_\mathcal{D}^\pi = \sum_{(s,a,r,s')\in\mathcal{D}}\big[r+\gamma\bar Q(s',\pi(s'))-Q(s,a)\big]^2$$
+
+<ExerciseCard id="RL-04-ex1-bellman-residual-conceptual" />
+
+This is now an ordinary regression problem (ML-02/ML-04's territory): train a neural network $Q_\theta(s,a)$ to minimize $B_\mathcal{D}^\pi$ via SGD (OPT-05), typically on a random mini-batch $\mathcal{B}\subset\mathcal{D}$ each step rather than the whole buffer. $\bar Q$ is a **delayed** (slowly-updated, low-pass-filtered) copy of $Q_\theta$'s own parameters, used only in the target, not the trainable network itself, a stabilization trick: training $Q_\theta$ against a target that also depends on the *current* $Q_\theta$ (a "moving target") is notoriously unstable, so freezing the target for a while breaks that feedback loop.
+
+## The policy gradient theorem
+
+Training $\pi_\theta$ directly maximizes expected return, $J(\theta)=\mathbb{E}_{\xi\sim P_\theta}\{R(\xi)\}=\int P_\theta(\xi)R(\xi)\,d\xi$ (a trajectory-space integral: $\xi$ is a full trajectory, $R(\xi)=\sum_t\gamma^tr_t$ its total discounted return). Differentiating a probability-weighted integral directly is awkward ($P_\theta$ sits *inside* the integral, weighting $\xi$'s likelihood); the **log-derivative trick** fixes this:
+
+<ExerciseCard id="RL-04-ex2-log-derivative-trick" />
+
+$$\frac{\partial}{\partial\theta}J(\theta) = \int\frac{\partial P_\theta(\xi)}{\partial\theta}R(\xi)\,d\xi = \int P_\theta(\xi)\frac{\partial\log P_\theta(\xi)}{\partial\theta}R(\xi)\,d\xi = \mathbb{E}_{\xi\sim P_\theta}\Big\{\frac{\partial\log P_\theta(\xi)}{\partial\theta}R(\xi)\Big\}$$
+
+**turning an unwieldy integral into an expectation you can Monte-Carlo estimate directly from sampled trajectories**, no need to differentiate through the environment's own (possibly unknown) dynamics at all. The trajectory probability factorizes as $P_\theta(\xi)=P(s_0)\prod_t\pi_\theta(a_t\mid s_t)P(s_{t+1}\mid s_t,a_t)$; only the $\pi_\theta$ factors depend on $\theta$, so:
+
+<ExerciseCard id="RL-04-ex3-trajectory-factorization-derivation" />
+
+$$\frac{\partial\log P_\theta(\xi)}{\partial\theta} = \sum_t\frac{\partial\log\pi_\theta(a_t\mid s_t)}{\partial\theta}$$
+
+**the environment's own dynamics $P(s'\mid s,a)$ drop out of the gradient entirely**, exactly why policy gradient works even with a completely unknown/non-differentiable environment. Combining, and using a standard causality argument (a reward $r_{t'}$ occurring *before* time $t$ can't statistically depend on the action taken at $t$, so those cross terms vanish in expectation, leaving only $t'\geq t$ terms), gives the **Policy Gradient Theorem**:
+
+$$\boxed{\frac{\partial}{\partial\theta}J(\theta) = \mathbb{E}_{\xi\sim P_\theta}\Big\{\sum_t\gamma^t\Big[\frac{\partial}{\partial\theta}\log\pi_\theta(a_t\mid s_t)\Big]\underbrace{\sum_{t'\geq t}\gamma^{t'-t}r_{t'}}_{Q^{\pi_\theta}(s_t,a_t)}\Big\}}$$
+
+Each term is "push up the log-probability of the action taken, weighted by how good it turned out to be" (its Q-value), exactly matching intuition: actions followed by high return get reinforced, actions followed by low return get suppressed.
+
+For a **deterministic** policy $a=\pi_\theta(s)$, an analogous (simpler, since there's no expectation over stochastic actions to handle) derivation via the ordinary chain rule gives the **deterministic policy gradient**, $\frac{\partial}{\partial\theta}J(\theta)=\mathbb{E}_s\big\{\frac{\partial Q(s,a)}{\partial a}\big|_{a=\pi_\theta(s)}\frac{\partial\pi_\theta(s)}{\partial\theta}\big\}$ (the foundation of DDPG), needing a differentiable $Q(s,a)$ (exactly what the Bellman residual above trains) to supply $\partial Q/\partial a$.
+
+## Deep RL in practice: interleaved training and stabilization tricks
+
+Modern deep RL (**actor-critic** methods: DDPG, TD3, SAC) interleaves gradient steps on the Bellman residual (training the "critic" $Q_\theta$) with gradient steps on the policy gradient (training the "actor" $\pi_\theta$), while continuously collecting more data. A grab-bag of tricks stabilizes this in practice, each addressing a specific failure mode:
+
+| Trick | Addresses |
+|---|---|
+| Replay buffer | Correlated, non-i.i.d. data from a single evolving trajectory |
+| Delayed/low-pass-filtered target $\bar Q$ | The "moving target" instability of training against your own current estimate |
+| Double Q-learning (two independent $Q_1,Q_2$, use $\min$) | Systematic overestimation bias in $\max_{a'}Q(s',a')$-style targets |
+| Smoothed policy samples (clipped noise) | Exploiting sharp, unrealistic peaks in an imperfectly-learned $Q$ |
+| Prioritized replay | Wasted gradient steps on already-well-fit transitions |
+
+<ExerciseCard id="RL-04-ex4-target-network-conceptual" />
+
+## A robotics-flavored note: why $Q$, not $V$?
+
+For continuous action spaces, $Q(s,a)$ directly hands you a gradient w.r.t. $a$ (needed for the deterministic policy gradient above); working with $V(s)$ alone would additionally require learning an *inverse dynamics model* to figure out which action increases $V$, an extra, error-compounding step. This is precisely the flip side of DYN-03/DYN-04's control-theory convention, where the **Hamilton-Jacobi-Bellman equation** is stated purely in terms of $V(x,t)$ (control theory typically *does* assume a known, differentiable dynamics model $f(x,u)$, so the extra step Q avoids in RL is trivial there): the choice of $V$ vs. $Q$ tracks whether the dynamics model is known and differentiable, exactly the model-based/model-free distinction RL-05 formalizes next.
+
+## Summary
+
+- The **Bellman residual** $B_\mathcal{D}^\pi$ generalizes Q-learning's single-sample TD update into a genuine squared-error loss, trainable by ordinary SGD on a replay buffer; a delayed target $\bar Q$ stabilizes the resulting "moving target" problem.
+- The **policy gradient theorem**, derived via the log-derivative trick, turns $\partial J/\partial\theta$ into a sampling-friendly expectation, $\mathbb{E}\{\sum_t\gamma^t[\partial\log\pi_\theta(a_t\mid s_t)/\partial\theta]\,Q^{\pi_\theta}(s_t,a_t)\}$, with the environment's own dynamics dropping out entirely.
+- The **deterministic policy gradient** needs a differentiable $Q(s,a)$ to supply $\partial Q/\partial a$, exactly what the Bellman residual trains.
+- Modern actor-critic deep RL interleaves both losses' gradient steps with data collection, stabilized by a standard set of tricks (replay buffer, delayed targets, double Q-learning, and more).
+
+## Retrieval questions
+
+1. Explain how the Bellman residual generalizes Q-learning's TD update into an SGD-trainable loss, and why a delayed target $\bar Q$ is used.
+2. Derive the policy gradient theorem's key steps: the log-derivative trick, and the trajectory-probability factorization.
+3. Why does the environment's own transition probability $P(s'\mid s,a)$ never appear in the final policy gradient formula?
+4. State at least three deep-RL stabilization tricks and the specific failure mode each addresses.
+
+## Mastery checklist
+
+- [ ] Can explain the Bellman residual and the delayed-target trick.
+- [ ] Derived the policy gradient theorem via the log-derivative trick.
+- [ ] Can explain why the environment's dynamics drop out of the policy gradient.
+- [ ] Can state several deep-RL stabilization tricks and their purposes.
+
+## Source note
+
+This module's exposition, the Bellman residual loss, the policy gradient theorem derivation, the deterministic policy gradient, and the deep-RL tricks survey are adapted from `lecture-ai`, §2.2 (pp. 76-81). The "why $Q$ not $V$" discussion and the robotics-flavored framing of on-policy data collection are adapted from `lecture-robotlearning`, §1.8 (pp. 60-65). The causality argument used in the policy gradient derivation (that pre-$t$ rewards don't depend on the action at $t$) is a standard result cited rather than fully re-derived here, matching the source's own level of detail. All exercises are newly authored; the log-derivative trick identity was independently verified symbolically with SymPy while authoring this module.
+
+---
+
+**Next**: [RL-05: Exploration Strategies](/course/RL/RL-05)

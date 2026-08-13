@@ -1,0 +1,119 @@
+---
+id: ML-06
+block: ML
+title: "Unsupervised Learning: PCA, Embeddings & Clustering"
+tier: 1
+estimatedHours: 3.5
+prerequisites: ["MATH-04", "ML-02"]
+objectives:
+  - "Derive PCA from projection-error minimization, and connect the optimal solution to MATH-04's eigendecomposition."
+  - "Explain the kernel-PCA idea as ML-05's kernel trick applied to PCA."
+  - "Derive the k-means algorithm from its objective, and explain GMM/EM as its soft-assignment generalization."
+sources:
+  - { sourceId: "lecture-machinelearning", pages: "p54-71 (§6)", role: "primary" }
+concepts:
+  - "PCA via projection-error minimization"
+  - "Kernel PCA, spectral methods (survey)"
+  - "k-means clustering"
+  - "Gaussian Mixture Models, EM algorithm"
+notation:
+  - { symbol: "$z_i\\in\\mathbb{R}^p$", meaning: "latent low-dimensional representation of data point $x_i$" }
+  - { symbol: "$V_p$", meaning: "projection matrix: the $p$ leading eigenvectors of the data covariance" }
+  - { symbol: "$c(i)$", meaning: "k-means cluster assignment of point $i$" }
+cheatsheetLinks: []
+nextModules: ["ML-07"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+MATH-04 already told you *that* a covariance matrix's eigenvectors are PCA's principal directions. This module derives *why*: PCA falls directly out of asking "what's the best lower-dimensional linear approximation to my data," an optimization problem, not an assertion. The same "compress, then work in the compressed space" idea reappears throughout your research area (state representations, learned world models), and clustering (k-means, GMMs) is the other half of unsupervised learning: finding structure in unlabeled data without any notion of "compression" at all.
+
+## Prerequisites & readiness check
+
+You should have MATH-04's covariance/PCA eigenvector fact and ML-02's regression machinery fresh.
+
+<ReadinessCheck
+  question="From MATH-04, what's the relationship between a data covariance matrix's eigenvectors/eigenvalues and PCA?"
+  answer="The eigenvectors (sorted by eigenvalue) are PCA's principal directions of maximal variance; the eigenvalues are the variance along each direction."
+/>
+
+## PCA via projection-error minimization
+
+MATH-04 introduced PCA by asserting the covariance-eigendecomposition connection. Here's *where that comes from*: postulate a lower-dimensional latent variable $z_i\in\mathbb{R}^p$ ($p<d$) for each $x_i\in\mathbb{R}^d$, related by $x_i\approx V_pz_i+\mu$, and ask for the $V_p,\mu,z_{1:n}$ that minimize the total reconstruction error:
+
+$$\min_{V_p,\mu,z_{1:n}}\ \sum_{i=1}^n\|x_i-(V_pz_i+\mu)\|^2$$
+
+<ExerciseCard id="ML-06-ex1-pca-projection-derivation" />
+
+Solving for $\mu,z_i$ first (for any fixed $V_p$) gives $\hat\mu=\langle x_i\rangle$ (the data mean) and $\hat z_i=V_p^\top(x_i-\hat\mu)$ (project the centered point onto $V_p$'s columns). Substituting back, centering the data $\tilde x_i:=x_i-\hat\mu$, the problem reduces to $\min_{V_p}\sum_i\|\tilde x_i-V_pV_p^\top\tilde x_i\|^2$, solved (this part *is* MATH-04's result) by taking $V_p$ to be the $p$ leading eigenvectors of $X^\top X=\sum_i\tilde x_i\tilde x_i^\top$, exactly the covariance-eigendecomposition connection, now derived rather than asserted.
+
+## The zoo of dimensionality reduction: a brief survey
+
+Several other embedding methods are worth recognizing by name, all closely related to PCA:
+
+- **Kernel PCA**: apply ML-05's kernel trick to PCA itself. Since PCA only needs the *inner products* between (centered) data points, not the raw features, it kernelizes exactly the same way ridge regression did: replace $\tilde x_i^\top\tilde x_j$ with $k(x_i,x_j)$, and PCA now finds nonlinear structure (e.g. it can separate clusters no *linear* projection could), because it's implicitly operating in the kernel's (possibly infinite-dimensional) feature space, never computed explicitly.
+- **Spectral clustering** and **metric multidimensional scaling (MDS)**: both provably reduce to kernel PCA with a particular choice of similarity/distance-derived kernel; spectral clustering uses a graph Laplacian's smallest eigenvectors instead of a kernel matrix's largest, but the underlying idea (eigendecompose a similarity structure, embed, then cluster) is the same family.
+- **ICA, Factor Analysis, Non-negative Matrix Factorization**: variants relaxing different assumptions of the basic linear-Gaussian PCA model (independence instead of Gaussianity for ICA; per-dimension noise for Factor Analysis; non-negativity constraints for NMF). Named here for recognition, not derived: each is its own optimization problem beyond this module's scope.
+- **Non-linear autoencoders**: relax $V_p,V_p^\top$ (linear encode/decode) to a neural network trained to reconstruct its own input, $\min\sum_i\|y_\theta(x_i)-x_i\|^2$ (ML-04's architectures); the network's bottleneck (narrowest hidden layer) is forced to find a good compressed representation, exactly PCA's goal, but with a non-linear encoder/decoder.
+
+<ExerciseCard id="ML-06-ex2-kernel-pca-conceptual" />
+
+## Clustering: k-means
+
+Given data $\{x_i\}$, find $K$ centers $\mu_k$ and an assignment $c:i\mapsto k$ minimizing $\sum_i\|x_i-\mu_{c(i)}\|^2$: unlike PCA, there's no linear-algebra closed form (the assignment is discrete), so **k-means** solves it by alternating minimization:
+
+```
+k-means(data, K):
+  1: pick K data points at random to initialize centers mu_1, .., mu_K
+  2: repeat until convergence:
+  3:     for each point i: c(i) <- argmin_k ||x_i - mu_k||^2   (reassign)
+  4:     for each cluster k: mu_k <- mean of all x_i with c(i)=k   (re-center)
+```
+*(Marc Toussaint, `Lecture-MachineLearning.pdf`, p.67, §6:37.)* Each step exactly minimizes the objective with the other variable held fixed (step 3 assigns each point to its nearest current center; step 4 sets each center to the mean of its currently-assigned points, the minimizer of $\sum_{i\in c^{-1}(k)}\|x_i-\mu_k\|^2$ over $\mu_k$), so the total cost never increases; it converges to a local minimum, not necessarily the global one, so multiple random restarts are standard practice.
+
+<ExerciseCard id="ML-06-ex3-kmeans-iteration-numeric" />
+
+## Gaussian Mixture Models: soft k-means
+
+A **GMM** is k-means's probabilistic generalization: $K$ Gaussians $\mathcal{N}(\mu_k,\Sigma_k)$, a random assignment $c_i\in\{1,\ldots,K\}$ with $P(c_i{=}k)=\pi_k$, and observed data $x_i\sim\mathcal{N}(\mu_{c_i},\Sigma_{c_i})$. Since $c_i$ is unobserved, fitting is done via the **EM algorithm**:
+
+- **E-step** (soft assignment): $q(c_i{=}k)\propto\mathcal{N}(x_i\mid\mu_k,\Sigma_k)\,\pi_k$ (a genuine probability distribution over cluster membership for each point, not a hard 0/1 choice).
+- **M-step** (update parameters): $\pi_k=\frac1n\sum_iq(c_i{=}k)$, $\mu_k=\frac{1}{n\pi_k}\sum_iq(c_i{=}k)\,x_i$, $\Sigma_k=\frac{1}{n\pi_k}\sum_iq(c_i{=}k)\,x_ix_i^\top-\mu_k\mu_k^\top$.
+
+<ExerciseCard id="ML-06-ex4-em-kmeans-connection" />
+
+## Agglomerative clustering and preprocessing
+
+**Agglomerative (bottom-up) hierarchical clustering** starts with every point as its own cluster and repeatedly merges the two closest clusters (by nearest-neighbor, furthest-neighbor, or group-average distance), producing a full hierarchy rather than a single fixed $K$. Finally, a practical note relevant to nearly every method in this module: **centering** (subtracting the mean) and **whitening** (transforming by $M^{-1}$ where $\text{Var}\{x\}=MM^\top$, its Cholesky factor, so the transformed data has identity covariance) are standard preprocessing steps, since PCA, k-means, and regularized regression's regularization strength all depend on the data's raw scale, not just its structure.
+
+## Summary
+
+- **PCA** falls out of minimizing total reconstruction error under a linear latent model $x_i\approx V_pz_i+\mu$; the optimal $\mu$ is the data mean, and the optimal $V_p$ is exactly MATH-04's leading eigenvectors of the (centered) data covariance.
+- **Kernel PCA**, spectral clustering, and MDS all reduce to the same "eigendecompose a similarity/kernel structure, then embed" idea; ICA/Factor Analysis/NMF relax different assumptions of the base linear-Gaussian model; non-linear autoencoders replace the linear encoder/decoder with a neural network.
+- **k-means** alternates hard cluster reassignment and re-centering, each step provably non-increasing the objective, converging to a local optimum.
+- **GMM/EM** generalizes k-means to soft (probabilistic) assignment; the E-step computes membership probabilities, the M-step updates means, covariances, *and* mixture weights.
+
+## Retrieval questions
+
+1. Set up PCA's projection-error minimization objective, and derive the optimal $\mu$ and $z_i$.
+2. Explain the kernel-PCA idea in one or two sentences, connecting it to ML-05's kernel trick.
+3. Derive/write the k-means algorithm from its objective, and explain why the objective never increases.
+4. State the GMM E-step and M-step, and explain how k-means arises as a limit of GMM/EM.
+
+## Mastery checklist
+
+- [ ] Derived PCA's optimal $\mu,z_i$ from the projection-error objective.
+- [ ] Can name and briefly describe kernel PCA, spectral clustering, and autoencoders as PCA relatives.
+- [ ] Can derive the k-means algorithm and explain its convergence property.
+- [ ] Can state GMM/EM's E-step and M-step and connect it to k-means.
+
+## Source note
+
+This module's exposition, the PCA projection-error derivation, the dimensionality-reduction survey (kernel PCA, spectral clustering, MDS, ICA/Factor Analysis/NMF, autoencoders), the k-means algorithm, the GMM/EM algorithm, agglomerative clustering, and the centering/whitening note are adapted from `lecture-machinelearning`, §6 (pp. 54-71). Several sub-topics in the source (ICA, PLS, kernel PCA's full derivation, spectral clustering's graph Laplacian, MDS, ISOMAP, NMF, Factor Analysis) are marked by the source itself as optional/advanced content; consistent with that, they're surveyed here by name and idea rather than fully derived, matching this module's Tier-1-but-moderate curriculum scope. All exercises are newly authored; the k-means iteration was independently verified with NumPy while authoring this module.
+
+---
+
+**Next**: [ML-07: Advanced Topics: Ensembles, Bayesian NNs & No Free Lunch](/course/ML/ML-07)

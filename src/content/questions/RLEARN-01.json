@@ -1,0 +1,73 @@
+{
+  "moduleId": "RLEARN-01",
+  "exercises": [
+    {
+      "id": "RLEARN-01-ex1-pe-vs-regression-conceptual",
+      "objective": "Choose between parameter estimation and full regression for a given scenario, and justify the choice.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 29, "originalNumber": "1.5:18" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "You need to estimate a robot arm's link masses and inertia tensors, values you know the equations of motion depend on exactly, from a handful of swing-test trials. Would you use parameter estimation or full regression, and why?",
+      "hints": [
+        "Parameter estimation assumes you know the *form* of the true dynamics equation, just not some numeric constants within it; full regression assumes nothing about the functional form at all.",
+        "Here, the functional form (Newton-Euler / Euler-Lagrange, DYN-01) is genuinely known; only specific physical constants (masses, inertias) are unknown.",
+        "Parameter estimation is the right choice: with the correct physics form assumed, a handful of trials can pin down a small number of physical constants precisely, whereas full regression would need to learn the entire functional form from scratch, requiring far more data for the same precision."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-01-ex2-residual-dynamics-derivation",
+      "objective": "Derive the residual-dynamics learning objective's gradient structure.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 27, "originalNumber": "1.5:12" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Starting from $L(\\theta)=\\sum_t\\|x_t-[f_M(x_{t-1},u_{t-1})+f_\\theta(x_{t-1},u_{t-1})]\\|^2$, explain what $f_\\theta$ is actually being trained to predict, and why this is a strictly easier learning problem than full regression whenever $f_M$ is a reasonable model.",
+      "hints": [
+        "Define the residual target $\\delta_t:=x_t-f_M(x_{t-1},u_{t-1})$ (what the nominal model $f_M$ fails to predict). Then $L(\\theta)=\\sum_t\\|\\delta_t-f_\\theta(x_{t-1},u_{t-1})\\|^2$, exactly an ordinary regression problem with *target* $\\delta_t$ instead of $x_t$.",
+        "If $f_M$ is a reasonable nominal model, $\\delta_t$ is typically small and much simpler in structure than $x_t$ itself (e.g. a smooth aerodynamic correction, rather than the full nonlinear dynamics).",
+        "So $f_\\theta$ only needs to learn a small, structurally simple correction, not the entire dynamics from scratch: strictly easier to fit accurately from limited data than full regression, which must capture everything $f_M$ would have captured for free, plus the correction."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-01-ex3-observation-model-conceptual",
+      "objective": "Explain the structural difference between autoregression, recurrent, and state-space observation-based dynamics models.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 27, "originalNumber": "1.5:2-3" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain what specifically distinguishes a state-space model from a recurrent model, given that both are described as 'also a recurrent model.'",
+      "hints": [
+        "Autoregression (NARX) uses a fixed, explicit window of past observations $y_{t-H:t-1}$ directly as input, with no learned latent summary at all.",
+        "A generic recurrent model (LSTM/GRU) learns an *implicit* latent summary $h_t$ of history, with no particular structural assumption about what $h_t$ represents.",
+        "A state-space model is also recurrent (it maintains a latent variable across time), but it *explicitly* commits to that latent variable being a genuine system state $x_t\\in\\mathbb{R}^d$, jointly training both a decoding $g:x\\mapsto y$ and dynamics $f:x,u\\mapsto x'$, giving an interpretable, physically-meaningful latent representation rather than an arbitrary learned hidden state."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-01-ex4-estimator-variance-numeric",
+      "objective": "Apply ML-02's estimator-variance formula to a dynamics-parameter-estimation scenario.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 31, "originalNumber": "1.5:21" },
+      "difficulty": "core",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For standardized inertia-parameter-estimation data with $X^\\top X=nI$ (so $\\text{Var}\\{\\Theta^*\\}=\\sigma^2/n$), measurement noise variance $\\sigma^2=0.8$, and $n=20$ swing-test trials, compute $\\text{Var}\\{\\Theta^*\\}$. Enter a decimal.",
+      "hints": [
+        "$\\text{Var}\\{\\Theta^*\\}=\\sigma^2/n$ in this standardized case (ML-02's formula, $\\lambda=0$).",
+        "Substitute: $0.8/20$.",
+        "$\\text{Var}\\{\\Theta^*\\}=0.04$. Running more trials (larger $n$) directly reduces this, exactly the 'good data' argument: more, well-spread swing tests give a more reliable inertia estimate."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

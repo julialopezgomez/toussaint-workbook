@@ -1,0 +1,140 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { BLOCKS, BLOCK_ORDER } from '../lib/curriculum/blocks';
+
+const modules = await getCollection('course');
+const byBlock = new Map<string, typeof modules>();
+for (const b of BLOCK_ORDER) byBlock.set(b, []);
+for (const m of modules) {
+  if (!byBlock.has(m.data.block)) byBlock.set(m.data.block, []);
+  byBlock.get(m.data.block)!.push(m);
+}
+for (const list of byBlock.values()) list.sort((a, b) => a.data.id.localeCompare(b.data.id));
+
+const tierLabel: Record<number, string> = {
+  1: 'Core',
+  2: 'Main route',
+  3: 'Optional branch',
+  4: 'Reference only',
+};
+
+const totalHours = modules.reduce((sum, m) => sum + m.data.estimatedHours, 0);
+const builtBlocks = BLOCKS.filter((b) => (byBlock.get(b.id) ?? []).length > 0);
+---
+<BaseLayout title="Curriculum">
+  <nav class="no-print breadcrumb"><a href="/">Start</a> / Curriculum</nav>
+  <h1>Full curriculum</h1>
+  <p>
+    {modules.length} modules authored across {builtBlocks.length} of {BLOCKS.length} blocks, ~{totalHours} estimated
+    study hours. Generated at build time directly from the content collection (<code>src/content/course/</code>),
+    so this page can't drift from what's actually built; the planning-time version with source pages and per-module
+    rationale lives in <code>data/curriculum/CURRICULUM.md</code>.
+  </p>
+
+  <div class="search-box no-print">
+    <input type="text" id="module-search" placeholder="Filter by ID, title, or concept…" autocomplete="off" />
+  </div>
+
+  <nav class="block-jump no-print" aria-label="Jump to block">
+    {BLOCKS.map((b) => (byBlock.get(b.id)?.length ?? 0) > 0 && (
+      <a href={`#${b.id}`}>{b.id}</a>
+    ))}
+  </nav>
+
+  {BLOCKS.map((block) => {
+    const mods = byBlock.get(block.id) ?? [];
+    if (mods.length === 0) return null;
+    const blockHours = mods.reduce((s, m) => s + m.data.estimatedHours, 0);
+    return (
+      <section class="block-section" id={block.id}>
+        <h2>{block.id} — {block.title}</h2>
+        <p class="rationale">{block.rationale} <span class="hours-total">(~{blockHours} hrs, {mods.length} modules)</span></p>
+        <ul class="module-list">
+          {mods.map((m) => (
+            <li
+              class={`module-row ${m.data.tier >= 3 ? 'optional' : ''}`}
+              data-search={`${m.data.id} ${m.data.title} ${m.data.concepts.join(' ')}`.toLowerCase()}
+            >
+              <a href={`/course/${m.data.block}/${m.data.id}`}>
+                <strong>{m.data.id}</strong>: {m.data.title}
+              </a>
+              <span class="row-meta">
+                <span class="badge">{tierLabel[m.data.tier]}</span>
+                <span class="badge">~{m.data.estimatedHours} hrs</span>
+              </span>
+              {m.data.prerequisites.length > 0 && (
+                <div class="prereqs">
+                  prereqs: {m.data.prerequisites.map((p: string, i: number) => (
+                    <>
+                      {i > 0 && ', '}
+                      <a href={`/course/${p.split('-')[0]}/${p}`}>{p}</a>
+                    </>
+                  ))}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+    );
+  })}
+
+  <section class="no-print">
+    <h2>Indexes</h2>
+    <p>
+      <a href="/concepts">Concept index</a> · <a href="/notation">Notation index</a> · <a href="/sources">Source index</a>
+    </p>
+  </section>
+
+  <style>
+    .breadcrumb { font-size: 0.85rem; opacity: 0.7; margin-bottom: 1rem; }
+    .breadcrumb a { color: inherit; }
+    .search-box { margin: 1.25rem 0; }
+    .search-box input {
+      width: 100%; padding: 0.6rem 0.9rem; font-size: 1rem; border-radius: 0.5rem;
+      border: 1px solid var(--border); background: var(--surface); color: var(--fg);
+    }
+    .block-jump { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 2rem; }
+    .block-jump a {
+      font-size: 0.8rem; font-family: ui-monospace, monospace; padding: 0.15rem 0.5rem;
+      border: 1px solid var(--border); border-radius: 0.3rem; color: inherit; text-decoration: none;
+    }
+    .block-jump a:hover { background: var(--surface-2); }
+    .block-section { margin-top: 2.5rem; scroll-margin-top: 1rem; }
+    .rationale { opacity: 0.8; font-size: 0.92rem; }
+    .hours-total { opacity: 0.65; }
+    .module-list { list-style: none; padding: 0; margin: 0.75rem 0; }
+    .module-row {
+      padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: 0.5rem;
+      margin-bottom: 0.5rem; background: var(--surface);
+    }
+    .module-row.optional { border-style: dashed; opacity: 0.85; }
+    .module-row a { text-decoration: none; }
+    .row-meta { float: right; display: flex; gap: 0.4rem; }
+    .badge {
+      background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px;
+      padding: 0.1rem 0.6rem; font-size: 0.75rem;
+    }
+    .prereqs { clear: both; font-size: 0.78rem; opacity: 0.65; margin-top: 0.3rem; }
+  </style>
+
+  <script>
+    const input = document.getElementById('module-search') as HTMLInputElement | null;
+    const rows = Array.from(document.querySelectorAll<HTMLElement>('.module-row'));
+    input?.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      for (const row of rows) {
+        const hay = row.dataset.search ?? '';
+        row.style.display = q === '' || hay.includes(q) ? '' : 'none';
+      }
+      // Hide block sections with zero visible rows so the block-jump/search stays useful.
+      document.querySelectorAll<HTMLElement>('.block-section').forEach((section) => {
+        const anyVisible = Array.from(section.querySelectorAll<HTMLElement>('.module-row')).some(
+          (r) => r.style.display !== 'none'
+        );
+        section.style.display = anyVisible ? '' : 'none';
+      });
+    });
+  </script>
+</BaseLayout>

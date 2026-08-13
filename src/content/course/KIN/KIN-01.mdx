@@ -1,0 +1,129 @@
+---
+id: KIN-01
+block: KIN
+title: "3D Rotations & Angular Velocity (revision)"
+tier: 1
+estimatedHours: 2
+prerequisites: ["MATH-03"]
+objectives:
+  - "State the SO(3)/pose/homogeneous-transform definitions precisely."
+  - "Explain why Euler angles suffer gimbal lock, and how the rotation-vector representation avoids it."
+  - "Apply Rodrigues' formula and the skew-matrix exponential map."
+  - "Derive $\\dot R(t) = \\text{skew}(w)R(t)$ from the geometric meaning of angular velocity."
+sources:
+  - { sourceId: "lecture-robotics", pages: "p14-16 (§2.1)", role: "primary" }
+  - { sourceId: "quaternions", pages: "p3-4 (HTML-sourced, Rodrigues'/angular-velocity appendix)", role: "primary" }
+concepts:
+  - "Pose, SO(3), homogeneous transformations"
+  - "Euler angles and gimbal lock"
+  - "Rotation vector, skew matrix, Rodrigues' formula"
+  - "Angular velocity and $\\dot R = \\text{skew}(w)R$"
+notation:
+  - { symbol: "$R \\in SO(3)$", meaning: "rotation matrix: $R^\\top R=I$, $\\det R=1$" }
+  - { symbol: "$T \\in \\mathbb{R}^{4\\times4}$", meaning: "homogeneous transform, $\\begin{pmatrix}R&t\\\\0&1\\end{pmatrix}$" }
+  - { symbol: "$w \\in \\mathbb{R}^3$", meaning: "rotation vector ($|w|=\\theta$, direction = axis) or angular velocity" }
+  - { symbol: "$\\text{skew}(w)$", meaning: "skew-symmetric matrix with $\\text{skew}(w)v = w\\times v$" }
+cheatsheetLinks: []
+nextModules: ["KIN-02"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+import SourceFigure from '../../../components/SourceFigure.astro';
+
+## Why this matters
+
+This is a compact revision pass, not a from-scratch build: given your Advanced Robotics teaching background, the goal here is to make sure the standard vocabulary (pose, $SO(3)$, homogeneous transforms, rotation vectors, Rodrigues' formula, angular velocity) is crisp and immediately available, with exercises for genuine refresh value, before KIN-02's full-length quaternion treatment (your actual flagged weak spot) and KIN-03's kinematic chains.
+
+## Prerequisites & readiness check
+
+You should have bases/coordinate transformations from MATH-03 fresh.
+
+<ReadinessCheck
+  question="What does it mean for a matrix to be orthonormal?"
+  answer="Its columns (and rows) are mutually orthogonal unit vectors, equivalently $R^\top R = I$."
+/>
+
+## Pose and $SO(3)$
+
+> **Definition.** A **pose** is a translation $p\in\mathbb{R}^3$ and a rotation $R\in SO(3)$. $R$ is **orthonormal** ($R^\top R=I$, $R^{-1}=R^\top$, columns/rows are orthogonal unit vectors) with $\det(R)=1$ (ruling out reflections, $\det=-1$).
+
+For world frame $(o,e_{1:3})$ and body frame $(o',e'_{1:3})$ with $e'_i=\sum_jR_{ji}e_j$ (the new basis vectors are $R$'s *columns*, in the old basis — exactly MATH-03's coordinate-transformation machinery), a point with body-frame coordinates $x'$ has world coordinates $x = p + Rx'$.
+
+<ExerciseCard id="KIN-01-ex1-so3-check" />
+
+## Alternative rotation representations
+
+**Euler angles** (e.g. yaw-pitch-roll, 3-2-1) describe a rotation as three consecutive rotations about (possibly moving) axes. Compact, but suffer a severe flaw:
+
+<SourceFigure
+  src="/figures/lecture-robotics/fig2-gimbal-lock.png"
+  alt="Diagram of a gimbal mechanism showing yaw, pitch, and roll rings; when two rotation axes align, one degree of freedom is lost"
+  caption="Gimbal lock: if two of the three rotation axes align, one degree of freedom of rotation is blocked entirely, a genuine 'singularity' of the Euler-angle parameterization."
+  source="Lecture-Robotics.pdf"
+  page="15"
+/>
+
+**Gimbal lock**: if two of the three rotation axes align (e.g. a 3-1-3 sequence with the second rotation at $0$ or $\pi$), one degree of freedom of rotation is blocked entirely, a genuine singularity of the parameterization, not just a numerical inconvenience.
+
+The **rotation vector** $w\in\mathbb{R}^3$ avoids this: $|w|=\theta$ is the rotation angle, $\hat w=w/\theta$ the axis. Applying it to a vector $v$ is **Rodrigues' formula**:
+
+$$w\cdot v = \cos\theta\,v + \sin\theta\,(\hat w\times v) + (1-\cos\theta)\,\hat w(\hat w^\top v)$$
+
+Defining the **skew matrix** $\text{skew}(w)=\begin{pmatrix}0&-w_3&w_2\\w_3&0&-w_1\\-w_2&w_1&0\end{pmatrix}$ (so $\text{skew}(w)v = w\times v$, turning the cross product into ordinary matrix multiplication), the equivalent matrix form is the **exponential map**:
+
+$$R(w) = \exp(\text{skew}(w)) = \cos\theta\,I + \sin\theta\,\widehat{\text{skew}}(w) + (1-\cos\theta)\,\hat w\hat w^\top, \qquad \widehat{\text{skew}}(w):=\text{skew}(\hat w)$$
+
+<ExerciseCard id="KIN-01-ex2-rodrigues-numeric" />
+
+(Quaternions, $S^3$'s solution to the *same* discontinuity/singularity problem via one extra redundant parameter, get the full-length treatment they deserve next module, KIN-02.)
+
+## Angular velocity
+
+For a body rotating with angular velocity $w\in\mathbb{R}^3$ (axis $\hat w$, speed $|w|$ rad/s), and orientation $R(t)$:
+
+$$\dot R(t) = \text{skew}(w)\,R(t)$$
+
+<ExerciseCard id="KIN-01-ex3-rdot-derivation" />
+
+This is worth having as a reflex: $\dot R$ must always have this form, since $R(t)$ staying in $SO(3)$ for all $t$ (orthonormal, $\det=1$) is a genuine constraint on what its derivative can look like, exactly analogous to how a point moving on a sphere must have a velocity tangent to the sphere. Given $R(0)=I$, the solution is $R(t)=\exp(t\,\text{skew}(w))$, another instance of the exponential map, this time generating a whole trajectory rather than a single fixed rotation.
+
+## Homogeneous transformations
+
+Packaging $p$ and $R$ into one $4\times4$ matrix makes chaining poses trivial matrix multiplication:
+
+$$T = \begin{pmatrix}R&t\\0&1\end{pmatrix} \in\mathbb{R}^{4\times4}, \qquad \begin{pmatrix}x^A\\1\end{pmatrix} = T_{A\to B}\begin{pmatrix}x^B\\1\end{pmatrix} = \begin{pmatrix}Rx^B+t\\1\end{pmatrix}$$
+
+**A genuinely easy point to get backwards**: $T_{A\to B}$ describes the *forward* **frame** transform (frame $B$'s pose relative to $A$), but the *backward* **coordinate** transform ($x^B\mapsto x^A$, not $x^A\mapsto x^B$). This is exactly MATH-03's vector/coordinate contra-variance distinction, made concrete: frames (like basis vectors) transform covariantly, coordinates transform contra-variantly. Composition chains left to right along frames, matching right to left along the coordinate transforms actually applied: $T_{W\to C}=T_{W\to A}T_{A\to B}T_{B\to C}$, and $x^W = T_{W\to A}T_{A\to B}T_{B\to C}\,x^C$.
+
+<ExerciseCard id="KIN-01-ex4-homogeneous-composition" />
+
+## Summary
+
+- Pose = translation + $R\in SO(3)$ ($R^\top R=I$, $\det R=1$); $x=p+Rx'$ converts body- to world-frame coordinates.
+- Euler angles are compact but suffer gimbal lock (a genuine singularity, not just numerical); the rotation vector + Rodrigues' formula / exponential map $R(w)=\exp(\text{skew}(w))$ avoids it, at the cost of a $\sin/\cos$ evaluation per use.
+- $\dot R(t)=\text{skew}(w)R(t)$ is the only form a rotation matrix's derivative can take, a direct consequence of $R(t)\in SO(3)$ for all $t$.
+- Homogeneous transforms $T\in\mathbb{R}^{4\times4}$ chain poses via ordinary matrix multiplication; $T_{A\to B}$ is the forward frame transform but the backward coordinate transform, exactly MATH-03's contra/covariance distinction in disguise.
+
+## Retrieval questions
+
+1. State the two defining properties of $R\in SO(3)$.
+2. Why does the Euler-angle representation suffer gimbal lock, and how does the rotation-vector representation avoid it?
+3. Derive $\dot R(t)=\text{skew}(w)R(t)$ from the geometric definition of angular velocity, without looking back.
+4. Why is $T_{A\to B}$ simultaneously the "forward" frame transform and the "backward" coordinate transform?
+
+## Mastery checklist
+
+- [ ] Can state the $SO(3)$ definition and the $x=p+Rx'$ pose-transform formula.
+- [ ] Can explain gimbal lock and why the exponential map avoids it.
+- [ ] Applied Rodrigues' formula and the skew-matrix exponential map to a concrete rotation.
+- [ ] Derived $\dot R=\text{skew}(w)R$.
+- [ ] Can explain the forward-frame/backward-coordinate distinction for $T_{A\to B}$.
+
+## Source note
+
+This module's definitions, figures, and formulas (pose/$SO(3)$, Euler angles/gimbal lock, the rotation vector/Rodrigues' formula/skew matrix/exponential map, homogeneous transforms) are adapted from `lecture-robotics`, §2.1 (pp. 14-16), with the $\dot R=\text{skew}(w)R$ derivation and its surrounding discussion adapted from the `quaternions` HTML note's closing appendix. All exercises are newly authored and independently verified with NumPy.
+
+---
+
+**Next**: [KIN-02: Quaternions: Exponential/Log Maps, Interpolation & Jacobians](/course/KIN/KIN-02)

@@ -1,0 +1,52 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "ML-02-ex1-rbf-feature-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.3679, "tolerance": 0.001 },
+      "fullSolution": "||x-c_j||^2 = 1+1 = 2. phi_j(x) = e^(-1) ~= 0.3679. (Independently verified with NumPy.)"
+    },
+    {
+      "exerciseId": "ML-02-ex2-estimator-variance-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.04, "tolerance": 0.001 },
+      "fullSolution": "Var{beta_hat} = sigma^2/n = 4/100 = 0.04."
+    },
+    {
+      "exerciseId": "ML-02-ex3-ridge-lasso-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains ridge's vanishing-gradient-near-zero shape." },
+          { "points": 2, "description": "Correctly explains lasso's constant-slope/corner-at-zero shape and why it produces exact zeros." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Ridge's penalty beta_j^2 has zero slope at beta_j=0: shrinking further costs less and less gradient pressure, so there's little push to reach exactly zero. Lasso's penalty |beta_j| has constant-magnitude slope everywhere except a non-differentiable corner at 0; this constant pull doesn't weaken as beta_j shrinks, so the optimum can land exactly at the corner if the loss gradient isn't enough to overcome it. Hence lasso performs feature selection (exact zeros), ridge only shrinks."
+    },
+    {
+      "exerciseId": "ML-02-ex4-cross-validation-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains why training error is always minimized at lambda=0." },
+          { "points": 2, "description": "Correctly explains why cross-validation instead gives a non-degenerate criterion." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Any regularization term can only pull beta away from the unregularized least-squares minimizer, which by definition minimizes training error; so training error is weakly worse for any lambda>0, meaning minimizing training error over lambda always picks lambda=0. But lambda=0 is the maximal-variance, most-overfitting-prone setting. Cross-validation estimates error on held-out data, which genuinely worsens as lambda->0 (overfitting) and as lambda->infinity (underfitting), giving a real, non-degenerate criterion."
+    },
+    {
+      "exerciseId": "ML-02-ex5-logistic-gradient-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly applies the chain rule through sigma_i to get the per-point derivative expression." },
+          { "points": 2, "description": "Correctly simplifies the bracket to (p_i - y_i) and assembles the full gradient." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Per-point: d/dbeta[y_i log p_i + (1-y_i) log(1-p_i)] = [y_i/p_i - (1-y_i)/(1-p_i)] * p_i(1-p_i) * phi(x_i). Simplify bracket*p_i(1-p_i) = y_i(1-p_i) - (1-y_i)p_i = y_i - p_i. So derivative of -[...] is (p_i-y_i)phi(x_i). Summing over i and adding 2*lambda*beta: grad L = X^T(p-y) + 2*lambda*beta. (Independently verified with SymPy.)"
+    }
+  ]
+}

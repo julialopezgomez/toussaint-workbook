@@ -1,0 +1,46 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "PLAN-03-ex1-holonomic-definitions-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains h(q,qdot,t)=0 as a restriction on achievable velocities." },
+          { "points": 2, "description": "Correctly connects dim(U_x)<dim(x) as the same restriction stated as a dimension-counting fact." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "h(q,qdot,t)=0 directly says not every qdot is achievable at a given q, only those satisfying the constraint. U_x is by definition exactly the set of xdot values achievable via some control u; if U_x is a proper subspace (dim < dim(x)), that IS a restriction on achievable velocities. Both name the same fact differently: one as an explicit constraint equation, one as a dimension-counting fact about the achievable-velocity set."
+    },
+    {
+      "exerciseId": "PLAN-03-ex2-car-constraint-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly substitutes xdot and ydot into the constraint expression." },
+          { "points": 2, "description": "Correctly simplifies to show the two terms cancel identically for any v, theta." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "xdot*sin(theta) - ydot*cos(theta) = (v*cos(theta))*sin(theta) - (v*sin(theta))*cos(theta) = v*sin(theta)*cos(theta) - v*sin(theta)*cos(theta) = 0, identically for any v, theta. Confirms this is a genuine constraint on velocity direction (perpendicular-to-heading motion is always zero), not something holding only for particular controls. (Independently verified symbolically with SymPy.)"
+    },
+    {
+      "exerciseId": "PLAN-03-ex3-tangent-space-dimension",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 2, "tolerance": 0 },
+      "fullSolution": "dim(U_q) = 2 (parameterized by the 2 free controls v, phi), while dim(q) = 3. Since 2 < 3, the car is confirmed non-holonomic by the general dim(U_x)<dim(x) definition."
+    },
+    {
+      "exerciseId": "PLAN-03-ex4-planning-comparison-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains that a straight-line local planner never checks differential-constraint achievability." },
+          { "points": 2, "description": "Correctly explains that control-based sampling only ever produces edges from actually-integrated real controls." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "A straight-line local planner only checks obstacle avoidance along the geometric path; it never checks whether that path is achievable given the differential constraint, so it can connect configurations requiring impossible motion. Control-based sampling never proposes a path and checks it after: it picks a real control, integrates the true equations of motion forward, and only then adds the resulting endpoint. Every edge is therefore, by construction, the result of an actually executable control sequence."
+    }
+  ]
+}

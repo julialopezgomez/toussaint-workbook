@@ -1,0 +1,40 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RL-06-ex1-tree-search-complexity-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 1111100, "tolerance": 0 },
+      "fullSolution": "10+100+1000+10000+100000+999990 = 1,111,100. Compare to IDS's 123,450 for the same b,d, roughly 9x fewer nodes."
+    },
+    {
+      "exerciseId": "RL-06-ex2-1step-ucb-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly maps candidate first actions to bandit arms." },
+          { "points": 2, "description": "Correctly explains the simulation-budget-allocation improvement over flat MC." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Each candidate first action a plays the role of a bandit arm: Q_a is its running mean return, n_a its simulation count, exactly OPT-06's bandit setting. Flat MC chooses the simulated first action uniformly at random, wasting budget on known-mediocre actions. 1-step UCB selects via UCB1's Q_a+beta*sqrt(2 ln n/n_a), directing more simulations toward promising or poorly-estimated actions, UCB1's exploration-exploitation balance applied to where to spend rollouts."
+    },
+    {
+      "exerciseId": "RL-06-ex3-uct-selection-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 6.146, "tolerance": 0.01 },
+      "fullSolution": "Q_B/n_B = 4. sqrt(2*ln(100)/2) = sqrt(ln(100)) ~= 2.146. Score ~= 4+2.146 = 6.146. Compare to A's score ~=5.960: B is selected despite lower average return due to its larger exploration bonus. (Independently verified with Python.)"
+    },
+    {
+      "exerciseId": "RL-06-ex4-negamax-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains why the standard backup is wrong for alternating opposing objectives." },
+          { "points": 2, "description": "Correctly explains how sign-flipping fixes each node's perspective." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "The standard backup assumes every node shares the same maximization objective; but alternating levels in a 2-player zero-sum game belong to agents with opposite objectives. Unchanged backup would make an outcome good for the maximizer look like high value for the opponent too, backwards from what the opponent wants. Flipping R's sign at alternating levels ensures each node's Q_v always measures return from that level's own player's perspective, so the same UCB formula correctly guides both players' selections."
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "moduleId": "OPT-06",
+  "exercises": [
+    {
+      "id": "OPT-06-ex1-explore-exploit",
+      "objective": "Explain the exploration/exploitation tradeoff in the bandit setting.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "In the multi-armed bandit problem, choosing an action $a_t$ has two simultaneous effects on your future performance. Name both effects, and explain with a concrete scenario why a policy that always plays $\\operatorname*{argmax}_a\\hat\\mu_a$ (the empirically best arm so far) can perform badly in the long run.",
+      "hints": [
+        "The two effects: it collects reward now (exploitation), and it collects information/data about that arm, improving your future knowledge (exploration).",
+        "Concrete scenario: suppose arm A gave a lucky high reward on your very first (and only) try, while arm B (actually better on average) gave one unlucky low reward on its first try. Pure exploitation would lock onto A forever, since $\\hat\\mu_A>\\hat\\mu_B$ from that point on, never trying B again to discover it's actually better.",
+        "This is exactly why exploration matters: without ever revisiting under-tried arms, you can get permanently stuck on a suboptimal arm based on early noise, this is the core failure mode UCB1 is designed to avoid by explicitly tracking confidence, not just the point estimate."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-06-ex2-ucb-numeric",
+      "objective": "Compute a UCB1 score for a bandit arm.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 48, "originalNumber": "§1.4:9" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["OPT-06-ex1-explore-exploit"],
+      "answerType": "numeric",
+      "prompt": "After $n=20$ total rounds, an arm has been played $n_a=5$ times with empirical mean $\\hat\\mu_a=0.3$. Using $\\beta=1$, compute its UCB1 score $\\hat\\mu_a+\\beta\\sqrt{2\\ln n/n_a}$. Enter a decimal to 3 decimal places.",
+      "hints": [
+        "$\\ln(20)\\approx2.9957$.",
+        "$\\sqrt{2(2.9957)/5} = \\sqrt{1.1983} \\approx 1.0947$.",
+        "Score $= 0.3+1.0947 \\approx 1.395$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-06-ex3-gp-posterior-derivation",
+      "objective": "Explain how the GP posterior formulas relate to the Gaussian conditioning identity and the ridge-regression closed form.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "The GP posterior mean $\\mu(x|D)=\\kappa(x)^\\top(K+\\sigma_0^2I)^{-1}y$ is obtained by treating $(f(x),y_1,..,y_n)$ as one big jointly-Gaussian vector and applying PROB-05's Gaussian conditioning identity. Explain (a) why the joint vector $(f(x),y_{1:n})$ is Gaussian at all (what GP property guarantees this), and (b) why $\\sigma_0^2$ (the observation noise variance) gets added to $K$'s diagonal specifically, rather than appearing elsewhere.",
+      "hints": [
+        "(a) By the GP definition itself: for *any* finite set of input points (here, the query point $x$ together with the $n$ training inputs), the corresponding function values are defined to be jointly Gaussian. So $(f(x),f(x_1),..,f(x_n))$ is Gaussian by construction, and adding independent Gaussian observation noise to each $f(x_i)$ (giving $y_i$) keeps the whole vector Gaussian (sums of jointly Gaussian and independent-Gaussian variables are still jointly Gaussian).",
+        "(b) $y_i=f(x_i)+\\text{noise}$, with the noise independent across data points and independent of $f$ itself. The covariance of $y_i$ with itself is $\\text{Cov}(f(x_i),f(x_i))+\\text{Var}(\\text{noise}) = k(x_i,x_i)+\\sigma_0^2$ (the noise variance adds only to the diagonal, since the noise terms for different $i$ are independent of each other and don't affect the off-diagonal covariances $k(x_i,x_j)$ between different training points).",
+        "This is exactly why $(K+\\sigma_0^2I)$ appears instead of plain $K$: it's the covariance matrix of the *observed* $y$'s (not the noise-free $f$'s), and only the diagonal changes, since observation noise at different points is assumed independent."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-06-ex4-gp-numeric",
+      "objective": "Compute a GP posterior mean at a query point given precomputed kernel quantities.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": ["OPT-06-ex3-gp-posterior-derivation"],
+      "answerType": "numeric",
+      "prompt": "For data $x=(0,1)$, $y=(1,2)$, squared-exponential kernel $k(x,x')=\\exp(-0.5(x-x')^2)$, noise $\\sigma_0=0.1$, and query $x^*=0.5$: $\\kappa(x^*)=(0.8825,0.8825)$, and $(K+\\sigma_0^2I)^{-1}=\\begin{pmatrix}1.5483&-0.9298\\\\-0.9298&1.5483\\end{pmatrix}$ (both precomputed for you). Compute $\\mu(x^*|D)=\\kappa(x^*)^\\top(K+\\sigma_0^2I)^{-1}y$. Enter a decimal to 2 decimal places.",
+      "hints": [
+        "First compute $(K+\\sigma_0^2I)^{-1}y = \\begin{pmatrix}1.5483&-0.9298\\\\-0.9298&1.5483\\end{pmatrix}\\begin{pmatrix}1\\\\2\\end{pmatrix} = \\begin{pmatrix}1.5483-1.8596\\\\-0.9298+3.0966\\end{pmatrix} = \\begin{pmatrix}-0.3113\\\\2.1668\\end{pmatrix}$.",
+        "Now dot this with $\\kappa(x^*)$: $\\mu(x^*|D) = 0.8825\\times(-0.3113) + 0.8825\\times2.1668$.",
+        "$= 0.8825\\times(2.1668-0.3113) = 0.8825\\times1.8555 \\approx 1.64$. Note this sits between the two observed $y$-values (1 and 2), closer to $y_2=2$ (the point $x_2=1$ is at the same kernel-distance from $x^*=0.5$ as $x_1=0$ here, so the pull is symmetric in kernel terms, but the posterior mean is a genuinely correlated blend, not a simple average, illustrating why GPs are called 'Bayesian kernel ridge regression')."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-06-ex5-acquisition-comparison",
+      "objective": "Compare the behavior of the three standard acquisition functions.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "MPI only integrates the probability mass beyond $y^*$ (current best), while EI additionally weights that mass by $(y^*-y)$ (how much better), and UCB uses $\\mu_D(x)+\\beta\\sigma_D(x)$ directly. Explain why MPI can behave poorly compared to EI (hint: think about a point with a tiny probability of a huge improvement vs. a point with a large probability of a tiny improvement), and what increasing $\\beta$ does to UCB's exploration/exploitation balance.",
+      "hints": [
+        "MPI treats 'any improvement, however small' the same as 'a huge improvement', as long as the probability of exceeding $y^*$ is the same. So MPI can favor a point offering a high probability of a negligible improvement over a point offering a lower probability of a massive improvement, which is usually the wrong choice for actually finding the true optimum.",
+        "EI fixes this by weighting the probability of improvement by the SIZE of that improvement, $(y^*-y)$, so a low-probability-but-huge-improvement point can outscore a high-probability-but-tiny-improvement one, generally a better-behaved criterion for global optimization.",
+        "For UCB, larger $\\beta$ up-weights the uncertainty term $\\sigma_D(x)$ relative to the mean $\\mu_D(x)$, pushing the acquisition function to favor genuinely unexplored regions (more exploration); smaller $\\beta$ makes it favor regions already believed to be good (more exploitation), exactly the same explore/exploit dial as the bandit setting's $\\beta$ in UCB1."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

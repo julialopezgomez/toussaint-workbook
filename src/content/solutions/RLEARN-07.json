@@ -1,0 +1,63 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RLEARN-07-ex1-abstraction-levels-classification",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 4, "description": "Correctly classifies all three (force, task, motion respectively)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "(a) Force-level (raw force specified directly). (b) Task-level (symbolic action/skill, abstracts away how). (c) Motion-level (kinematic trajectory specified)."
+    },
+    {
+      "exerciseId": "RLEARN-07-ex2-tamp-continuity-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains continuity as no teleporting between pick and place." },
+          { "points": 2, "description": "Correctly explains the entry point as the achieved grasp determining the place problem's feasible space." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Continuity: the place motion must start exactly where the pick motion ended, no teleporting, the robot's configuration is continuous across the mode switch. Entry point: the feasible space for placing (which depends on how the cup is held) is determined by exactly where/how the pick motion ended, not chosen independently; the achieved grasp becomes a parameter of the place problem."
+    },
+    {
+      "exerciseId": "RLEARN-07-ex3-lgp-constraints-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correct phi-bar example (continuous within-mode constraint)." },
+          { "points": 2, "description": "Correct phi-hat example (mode-transition constraint)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "phi-bar: 'while grasped, the object's pose is rigidly fixed relative to the gripper,' holding at every instant during the mode. phi-hat: 'at the moment of grasping, the fingers must be at the object's surface, correctly aligned,' checked only at the single mode-switch instant."
+    },
+    {
+      "exerciseId": "RLEARN-07-ex4-deep-visual-constraints-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies simulation trial-and-error data as the privileged source." },
+          { "points": 2, "description": "Correctly identifies that deployment only sees images, matching RLEARN-06's pattern." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Training labels come from trial-and-error data in simulation, with privileged access to exact shapes/poses/physics, same source as RLEARN-06's ACRONYM. At deployment, phi_theta only sees camera images I, never exact shapes/poses. Same pattern: a privileged simulator generates labels, the network reproduces the judgment from realistic image input, now supplying a full constraint function for the LGP."
+    },
+    {
+      "exerciseId": "RLEARN-07-ex5-plan-prediction-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly maps a_k/a_{1:k-1} to next-token/previous-tokens." },
+          { "points": 2, "description": "Correctly maps g,S to the fixed context/prompt." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "a_k corresponds to the next token, a_{1:k-1} to the previous tokens. g and S (goal and scene) correspond to the fixed context/prompt held throughout the sequence. So pi(a_k|g,a_{1:k-1},S) is exactly 'predict the next token given previous tokens and fixed context,' the same autoregressive structure as a language model, with symbolic actions instead of words."
+    }
+  ]
+}

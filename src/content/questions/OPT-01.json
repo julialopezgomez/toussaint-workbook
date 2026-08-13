@@ -18,6 +18,40 @@
       "reviewCardIds": ["RC-OPT-01-01"]
     },
     {
+      "id": "OPT-01-ex1b-wolfe-check",
+      "objective": "Apply the 2nd Wolfe (curvature) condition to a concrete step.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-optimization", "page": 8, "originalNumber": "§1.2, Wolfe conditions" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["OPT-01-ex1-why-stepsize-matters"],
+      "answerType": "short-text",
+      "prompt": "In a 1D line search, at the current point $\\nabla f(x)=4$ (so the descent direction is $\\delta=-1$), and after taking a step, $\\nabla f(x+\\alpha\\delta)=-1.5$. Using $\\varrho_{\\text{ls2}}=0.4$, does this step satisfy the 2nd Wolfe (curvature) condition $|\\nabla f(x+\\alpha\\delta)^\\top\\delta| \\le \\varrho_{\\text{ls2}}|\\nabla f(x)^\\top\\delta|$? Show the computation and state what the condition means if it fails.",
+      "hints": [
+        "Compute both sides: $\\nabla f(x)^\\top\\delta = 4\\times(-1)=-4$, so the right side is $\\varrho_{\\text{ls2}}\\times|-4| = 0.4\\times4=1.6$.",
+        "Compute the left side: $\\nabla f(x+\\alpha\\delta)^\\top\\delta = (-1.5)\\times(-1) = 1.5$, so $|1.5|=1.5$.",
+        "$1.5 \\le 1.6$: the condition holds. It means the slope along $\\delta$ has decreased enough (from magnitude 4 to magnitude 1.5, well under the 1.6 threshold) that the line search has found a point close enough to a local minimum along that direction, not just 'any decreasing point.' If it failed, the line search should keep decreasing $\\alpha$ (or, for some methods, increase it) rather than accepting the step."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-01-ex1c-steepest-descent-cholesky",
+      "objective": "Derive the steepest-descent-under-a-metric formula via the Cholesky-substitution argument.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-optimization", "page": 10, "originalNumber": "§1.3:2" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": ["OPT-01-ex1b-wolfe-check"],
+      "answerType": "derivation",
+      "prompt": "Derive $\\delta^*=-A^{-1}\\nabla f(x)$ starting from $\\delta^*=\\operatorname*{argmin}_\\delta\\nabla f(x)^\\top\\delta$ s.t. $\\delta^\\top A\\delta=1$, using the substitution $A=B^\\top B$ (Cholesky decomposition) and $z=B\\delta$.",
+      "hints": [
+        "Substitute $\\delta=B^{-1}z$ into both the objective and the constraint. The constraint becomes $\\delta^\\top A\\delta = (B^{-1}z)^\\top B^\\top B(B^{-1}z) = z^\\top(B^{-\\top}B^\\top B B^{-1})z = z^\\top z$ (the $B$'s cancel), so it simplifies to $z^\\top z=1$, an ordinary Euclidean unit-length constraint.",
+        "The objective becomes $\\nabla f(x)^\\top\\delta = \\nabla f(x)^\\top B^{-1}z = (B^{-\\top}\\nabla f(x))^\\top z$. So the problem is now: minimize $(B^{-\\top}\\nabla f(x))^\\top z$ over unit vectors $z$.",
+        "For a fixed vector $c$, $\\operatorname*{argmin}_{\\|z\\|=1}c^\\top z = -c/\\|c\\|$ (point directly opposite $c$). With $c=B^{-\\top}\\nabla f(x)$, this gives $z^*\\propto -B^{-\\top}\\nabla f(x)$, and transforming back, $\\delta^*=B^{-1}z^*\\propto B^{-1}[-B^{-\\top}\\nabla f(x)] = -(BB^\\top)^{-1}\\nabla f(x)$. Wait: check the order, $B^{-1}B^{-\\top}=(B^\\top B)^{-1}=A^{-1}$ (using $A=B^\\top B$, so $B^{-1}B^{-\\top} = (B^\\top B)^{-1}=A^{-1}$), giving $\\delta^*\\propto-A^{-1}\\nabla f(x)$, i.e. the steepest descent direction is (proportional to) $-A^{-1}\\nabla f(x)$."
+      ],
+      "reviewCardIds": []
+    },
+    {
       "id": "OPT-01-ex2-newton-derivation",
       "objective": "Derive Newton's method from the second-order Taylor expansion.",
       "provenance": "newly-authored",
@@ -62,6 +96,23 @@
         "The right-hand side $f(x) + c\\alpha \\nabla f(x)^\\top d$ is a line with a shallower slope than the true tangent line at $x$ (since $0<c<1$), it's a 'lowered bar' the actual decrease must clear.",
         "Armijo guarantees the step achieves at least a small guaranteed fraction of the decrease predicted by the linear approximation, not just some arbitrarily tiny decrease.",
         "Without this, an algorithm could accept steps with decrease so small (relative to the step size taken) that it makes negligible progress per iteration while still 'technically decreasing', leading to extremely slow or stalled convergence, exactly the 'too small effectively' failure mode from the first exercise, but now hidden inside an accepted step rather than an explicit step-size choice."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-01-ex5-fallback-check",
+      "objective": "Diagnose a non-positive-definite Hessian and determine the damping needed to fix it.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-optimization", "page": 13, "originalNumber": "§1.3:9-10" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["OPT-01-ex3-numeric"],
+      "answerType": "short-text",
+      "prompt": "At some point $x$, $\\nabla^2f(x)$ has eigenvalues $-2$ and $3$ (a saddle point, in MATH-02's classification). (a) Explain why a plain Newton step at this point is not a sensible descent direction. (b) What is the minimal integer damping $\\lambda$ such that $\\nabla^2f(x)+\\lambda I$ becomes positive definite (strictly), and why does adding $\\lambda I$ fix this?",
+      "hints": [
+        "(a) Recall from MATH-02: the Newton step is the exact stationary point of the local quadratic model, but at a saddle point that stationary point is neither a min nor a max, it's a min along the positive-eigenvalue direction and a max along the negative-eigenvalue direction, so blindly taking that step can move *uphill* along the negative-curvature direction.",
+        "(b) Use MATH-04's shift-invariance fact: if $\\nabla^2f(x)$ has eigenvalues $-2,3$, then $\\nabla^2f(x)+\\lambda I$ has eigenvalues $-2+\\lambda, 3+\\lambda$ (same eigenvectors, every eigenvalue shifted by $\\lambda$). For positive definiteness, you need *both* shifted eigenvalues to be strictly positive.",
+        "$-2+\\lambda>0 \\Rightarrow \\lambda>2$. The other eigenvalue $3+\\lambda$ is already positive for any $\\lambda>2$. So the minimal integer $\\lambda$ is $3$ (any $\\lambda>2$ works; $\\lambda=3$ is the smallest integer). Adding $\\lambda I$ shifts every directional curvature up by the same amount, eventually overwhelming the one negative direction and making the damped Hessian genuinely positive definite, so the resulting step is a true descent direction of the damped quadratic model."
       ],
       "reviewCardIds": []
     }

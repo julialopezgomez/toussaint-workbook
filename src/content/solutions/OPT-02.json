@@ -36,6 +36,40 @@
       "checkMode": "deterministic",
       "deterministic": { "expected": 1.667, "tolerance": 0.01 },
       "fullSolution": "J = [[1,0],[0,1],[1,1]], r(x0) = [-1,-2,-2]. J^T J = [[2,1],[1,2]]. J^T r(x0) = [-3,-4]. delta = -(J^T J)^-1 (J^T r) solves [[2,1],[1,2]] delta = [3,4], giving delta = [0.667, 1.667]. x1 = x0 + delta = [0.667, 1.667]. Second component: 1.667. (Verified with NumPy; since the residual is linear here, this Gauss-Newton step is exact, landing on the true least-squares solution in one step, not merely an approximation.)"
+    },
+    {
+      "exerciseId": "OPT-02-ex4-path-opt-structure",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly writes out phi_1, phi_2, phi_3 using the boundary values x_0=x_-1=0." },
+          { "points": 2, "description": "Correctly computes the Jacobian J, all six partial derivatives." },
+          { "points": 1, "description": "Correctly explains the zero entries as reflecting locality of dependence (banded structure)." }
+        ],
+        "commonErrors": [
+          "Forgetting to substitute the given boundary values x_0=x_-1=0 into phi_1, leaving unnecessary extra terms."
+        ]
+      },
+      "fullSolution": "phi_1 = x_1 + x_-1 - 2*x_0 = x_1 (boundary terms are zero). phi_2 = x_2 + x_0 - 2*x_1 = x_2 - 2*x_1. phi_3 = x_2 - 5.\nJ = [[d phi_1/dx_1, d phi_1/dx_2], [d phi_2/dx_1, d phi_2/dx_2], [d phi_3/dx_1, d phi_3/dx_2]] = [[1,0],[-2,1],[0,1]].\nThe zero entries (phi_1 not depending on x_2, phi_3 not depending on x_1) reflect that each term in the path-optimization cost only involves a small, local window of consecutive timesteps. In a path with many timesteps, this locality means J is banded/sparse (each row has only 2-3 nonzero entries regardless of path length), which is exactly what keeps J^T J sparse and Gauss-Newton tractable for long trajectories."
+    },
+    {
+      "exerciseId": "OPT-02-ex5-secant-check",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Correctly verifies H-hat*delta = y numerically." },
+          { "points": 1, "description": "Correctly counts 3 free parameters for a symmetric 2x2 matrix vs 2 scalar equations from the secant equation." },
+          { "points": 1, "description": "Correctly connects this underdetermination to why BFGS needs a specific update rule." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "H-hat*delta = [[2,1],[1,3]]@[1,0] = [2,1] = y. Yes, it satisfies the secant equation.\nA symmetric 2x2 matrix has 3 free parameters (2 diagonal entries + 1 off-diagonal, since the matrix is symmetric). The secant equation H-hat*delta=y is a vector equation with 2 scalar components. So 3 unknowns, 2 equations: underdetermined, a whole 1-parameter family of symmetric matrices satisfies this single secant equation exactly. This is why BFGS doesn't just 'solve' the secant equation: it specifies a particular rank-2 update rule that picks out one specific matrix from that family, one that also incorporates and smoothly updates the PREVIOUS estimate's information, rather than being arbitrary."
+    },
+    {
+      "exerciseId": "OPT-02-ex6-cg-quadratic",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.0, "tolerance": 0.05 },
+      "fullSolution": "A*delta1 = diag(1,4)@[-1.545,0.097] = [-1.545, 0.388]. delta0^T(A*delta1) = (-2)*(-1.545) + (-8)*(0.388) = 3.09 - 3.104 = approx -0.01, i.e. approximately zero (the tiny residual is rounding in the given delta1; exactly zero algebraically). This confirms delta0 and delta1 are H-conjugate, i.e. delta1 doesn't interfere with progress already made along delta0 under the metric induced by A, exactly the property CG's Polak-Ribiere construction guarantees for a quadratic objective. (Independently verified by running the full CG algorithm in NumPy while authoring this module: conjugacy held to floating-point precision, ~1e-16.)"
     }
   ]
 }

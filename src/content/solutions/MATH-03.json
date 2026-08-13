@@ -1,6 +1,21 @@
 {
   "solutions": [
     {
+      "exerciseId": "MATH-03-ex0-polynomial-vector-space",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Identifies the zero polynomial as the zero vector and argues closure under addition/scaling." },
+          { "points": 1, "description": "Gives a correct basis, e.g. {1, t, t^2}, and correctly states dim(P_2)=3." }
+        ],
+        "commonErrors": [
+          "Trying to verify every single axiom in exhaustive detail rather than noting they inherit directly from the real-number axioms applied coefficient-wise.",
+          "Giving a spanning set that isn't linearly independent (e.g. including a redundant polynomial) as the 'basis'."
+        ]
+      },
+      "fullSolution": "Zero vector: the zero polynomial p(t)=0 (all coefficients zero). Closure: adding two polynomials of degree <=2 gives coefficients that add componentwise, still degree <=2; scaling similarly preserves degree <=2. All the abelian-group and distributive axioms reduce directly to the corresponding real-number axioms applied to each coefficient a_0,a_1,a_2 independently, so they hold automatically. A basis is {1, t, t^2}: every p=a_0+a_1t+a_2t^2 is a unique linear combination of these three, so they're linearly independent and spanning, giving dim(P_2)=3. The coordinates of p in this basis are exactly (a_0,a_1,a_2)."
+    },
+    {
       "exerciseId": "MATH-03-ex1-why-coordinate-free",
       "checkMode": "rubric",
       "rubric": {
@@ -14,6 +29,22 @@
         ]
       },
       "fullSolution": "A vector like a physical displacement or velocity is a geometric object that exists independent of how you choose to describe it numerically. Its coordinates are just a particular numeric encoding relative to a chosen basis, and change if you change the basis, even though the underlying vector doesn't. Keeping this distinction matters practically: it lets you correctly reason about which quantities are basis-independent (physical relationships, the vector itself) versus basis-dependent (a specific list of numbers), which becomes essential once multiple coordinate frames are in play (e.g. robot base frame vs. end-effector frame vs. world frame), since conflating a vector with one specific coordinate list makes it easy to silently mix up which frame a set of numbers actually belongs to."
+    },
+    {
+      "exerciseId": "MATH-03-ex1b-dual-basis",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 1, "description": "Recognizes that the rows of B^-1 are exactly the dual basis 1-forms (coordinate-picking functions)." },
+          { "points": 1, "description": "Correctly computes B^-1 = [[1,0],[-1,1]]." },
+          { "points": 1, "description": "Verifies all four e-hat_i(b_j) = delta_ij relations explicitly." }
+        ],
+        "commonErrors": [
+          "Trying to find the dual basis via some other construction instead of recognizing the direct link to B^-1's rows.",
+          "Sign error in computing B^-1 for this particular (non-symmetric) basis matrix."
+        ]
+      },
+      "fullSolution": "Coordinates c=B^-1 v satisfy c_i = e-hat_i(v) by definition, so the rows of B^-1 ARE the dual basis vectors. B=[[1,0],[1,1]] (columns b1,b2). det(B)=1*1-0*1=1. B^-1 = (1/1)*[[1,0],[-1,1]] = [[1,0],[-1,1]]. So e-hat_1=(1,0), e-hat_2=(-1,1) (as row vectors/1-forms). Check: e-hat_1(b1)=1*1+0*1=1, e-hat_1(b2)=1*0+0*1=0, e-hat_2(b1)=-1*1+1*1=0, e-hat_2(b2)=-1*0+1*1=1. All match delta_ij. (Numerically verified by direct matrix inversion while authoring this module.)"
     },
     {
       "exerciseId": "MATH-03-ex2-change-of-basis-derivation",

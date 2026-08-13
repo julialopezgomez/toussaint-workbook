@@ -1,0 +1,121 @@
+---
+id: RLEARN-01
+block: RLEARN
+title: "Dynamics Learning"
+tier: 1
+estimatedHours: 3
+prerequisites: ["DYN-01", "ML-04", "RLEARN-00"]
+objectives:
+  - "Distinguish parameter estimation, full regression, and residual dynamics learning, with their loss functions."
+  - "Distinguish autoregression, recurrent, and state-space approaches to observation-based dynamics learning."
+  - "Explain what makes training data 'good' for dynamics learning, connecting explicitly to ML-02's estimator-variance formula and frequency-domain excitation."
+sources:
+  - { sourceId: "lecture-robotlearning", pages: "p23-34 (§1.5)", role: "primary" }
+concepts:
+  - "State-based dynamics learning: parameter estimation, regression, residual"
+  - "Observation-based dynamics learning: NARX, recurrent, state-space"
+  - "Estimator variance, frequency excitation"
+notation:
+  - { symbol: "$f_\\Theta(x_{t-1},u_{t-1})$", meaning: "dynamics model with unknown physical parameters $\\Theta$ (parameter estimation)" }
+  - { symbol: "$f_M$", meaning: "a nominal (assumed) physics model; a residual model $f_\\theta$ is learned on top of it" }
+  - { symbol: "$y_{t-H:t}$", meaning: "a history window of observations, used by autoregressive models" }
+cheatsheetLinks: []
+nextModules: ["RLEARN-02"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+DYN-01 derived $M(q)\ddot q+F(q,\dot q)=u$ from first principles, assuming every mass, inertia, and geometric parameter is known exactly. In practice, some of that is unknown, imprecisely known, or deliberately left unmodeled (aerodynamic drag, motor delay, friction). Dynamics learning is RLEARN-00's first "shortcut" row made concrete: instead of hand-deriving every physical effect, learn (some or all of) the model from data, then hand it to DYN-04's MPC or RL-02's value iteration exactly as if it were the true model.
+
+## Prerequisites & readiness check
+
+You should have DYN-01's general dynamics form and ML-02's estimator-variance formula fresh.
+
+<ReadinessCheck
+  question="From ML-02, what is the estimator variance of a ridge-regression fit, and what does it tell you about 'good data'?"
+  answer="Var{β̂} = (XᵀX+λI)⁻¹σ²; larger, more spread-out data (larger det(XᵀX)) directly reduces estimator variance, i.e. reduces overfitting."
+/>
+
+## State-based dynamics learning: three cases
+
+Given state $x_t$ (Markov: the future is conditionally independent of the past given $x_t$) and control $u_t$, learn $x_t=f(x_{t-1},u_{t-1})$ or $p(x_t\mid x_{t-1},u_{t-1})$. Three distinct cases:
+
+**Parameter estimation**: assume $f$ is the *correct* physics, with unknown parameters $\Theta$ (e.g. link masses, inertia tensors): $x_t=f_\Theta(x_{t-1},u_{t-1})$, fit via
+
+$$\min_\Theta\sum_t\|x_t-f_\Theta(x_{t-1},u_{t-1})\|^2$$
+
+Often $f_\Theta$ is *linear* in $\Theta$ (a fortunate structural fact for many robots' inertial parameters), making this an ordinary linear least-squares problem (MATH-02B); otherwise, black-box (CMA-ES) or gradient-based (SGD, Gauss-Newton) optimization.
+
+<ExerciseCard id="RLEARN-01-ex1-pe-vs-regression-conceptual" />
+
+**Full regression**: drop the physics assumption entirely, learn $f_\theta$ as a generic regression model (identical loss formula, but $\theta$ is now e.g. NN weights, not physical parameters); a *probabilistic* version replaces squared error with $\min_\theta-\sum_t\log p_\theta(x_t\mid x_{t-1},u_{t-1})$, e.g. a Gaussian Process (PILCO, Deisenroth et al., used learned GP dynamics to derive optimal controls directly, a genuinely influential result).
+
+**Residual dynamics**: keep a nominal model $f_M$ (assumed physics, possibly imperfect) and learn only the *correction*:
+
+$$\min_\theta\sum_t\big\|x_t-[f_M(x_{t-1},u_{t-1})+f_\theta(x_{t-1},u_{t-1})]\big\|^2$$
+
+<ExerciseCard id="RLEARN-01-ex2-residual-dynamics-derivation" />
+
+## Observation-based dynamics learning: three cases
+
+When the true state $x_t$ isn't directly observed, only sensor observations $y_t$ are, the history of $(y,u)$ pairs must substitute for state. Three approaches:
+
+- **Autoregression (NARX)**: learn $y_t=f_\theta(y_{t-H:t-1},u_{t-H:t-1})$ directly from a fixed history window of length $H$ (a modern version replaces the fixed window with a Transformer's attention over history).
+- **Recurrent model**: instead of an explicit history window, learn a *latent* representation $h_t$ that recursively summarizes all relevant past information (an LSTM/GRU, ML-04's architecture, trained to consume $(y,u)$ history and predict the next $y$).
+- **State-space model**: also recurrent, but *explicitly* posits a latent state $x_t\in\mathbb{R}^d$, jointly training an embedding/decoding $g:x\mapsto y$ and latent dynamics $f:x,u\mapsto x'$; since only $u_{1:T},y_{1:T}$ are observed, training maximizes a lower bound on the data likelihood (an **ELBO**, PROB-06's variational-inference machinery, now applied to a *sequence* model rather than a single latent variable).
+
+<ExerciseCard id="RLEARN-01-ex3-observation-model-conceptual" />
+
+**Tradeoffs** (Discussion, source's own framing): parameter estimation gives physical intuition/explainability and can be very precise when the model is right, but is "horribly imprecise" when it's wrong (unmodeled terms); full regression has no such assumption but no physical intuition either. State-space models retrieve an explicit, interpretable system description, but are harder to train than modern recurrent/Transformer models, which are more powerful in practice.
+
+## What makes training data "good"?
+
+This is, in the source's own words, "under-acknowledged": ideas about *data generation* often matter more than ML method details.
+
+**In linear regression**, recall ML-02's exact result: for $f_\theta(x)=\bar x^\top\theta$, $L(\theta)=\sum_i(y_i-f_\theta(x_i))^2+\lambda\|\theta\|^2$, the estimator variance is
+
+$$\text{Var}\{\theta^*\} = (X^\top X+\lambda I)^{-1}\sigma^2$$
+
+<ExerciseCard id="RLEARN-01-ex4-estimator-variance-numeric" />
+
+**Good data means reducing this variance**: either smaller $\sigma^2$ (less measurement noise) or larger $\det(X^\top X)$, i.e. *covering the input space well*, exactly the geometric intuition "collect data that's spread out, not clustered."
+
+**In (linear) system identification specifically**, "covering the input space" becomes "covering *frequency* space": Laplace-transforming linear dynamics into $Y(s)=H(s)U(s)$ (transfer function $H(s)$), a single sinusoidal probing signal $U(s)=\delta_{s'}$ excites exactly one frequency; stimulating the system with a *range* of control frequencies, $u(t)=\cos(kt/\tau_0)$ for varying $k$, is what actually characterizes $H(s)$ across the frequencies that matter. This generalizes directly: exploration in RL "beyond $\epsilon$-greedy" (RL-05), structured noise (pink noise, Ornstein-Uhlenbeck, rather than uncorrelated Brownian motion) for exploration, and explicit information-seeking objectives (RL-07's information gain) are all the *same* "good data means good coverage" idea, applied outside pure system identification.
+
+## Worked example: multirotor dynamics learning
+
+A multirotor's dynamics: state $x=(p,q,v,\omega)$ (position, orientation quaternion, velocity, angular velocity), controls $u_\Omega$ (per-rotor speeds), with forces/torques $f=Fu_\Omega,\ \tau=Mu_\Omega$ from the propellers, and Newton-Euler dynamics $m\dot v=mg+R(q)Fu_\Omega+f_a$, $J\dot\omega=-\omega\times J\omega+Mu_\Omega+\tau_a$ (with $f_a,\tau_a$ unmodeled aerodynamic terms, e.g. drag, wind, downwash). In practice: **parameter estimation** for hard-to-measure terms (inertia $J$, per-motor thrust/torque coefficients, delay); **residual dynamics learning** specifically for $f_a,\tau_a$ (NeuroBEM: input a history of past states/commands, since aerodynamic effects are genuinely non-Markovian, output the forces/torques the nominal model can't explain); full end-to-end dynamics learning is rarely done in practice (impossible to safely gather data everywhere in state space, and rotational symmetries are surprisingly hard to learn without imposing them structurally). **Main takeaway, stated directly by the source**: strong model/physics priors consistently outperform learning everything from scratch.
+
+Data collection details matter concretely: motion-capture systems (500 Hz, submillimeter accuracy, but €20-100k) versus on-board IMU logging (1000 Hz, much noisier); synchronizing the two data sources (accounting for clock skew and link delay); unobservable derivatives like velocity, either from an online filter (Extended Kalman Filter) or offline spline interpolation; and simply *how much* data is needed (a single careful 45-second flight for classical maximum-likelihood parameter estimation, versus 96 flights/75 minutes/1.8 million data points for NeuroBEM's full residual-learning approach).
+
+## Summary
+
+- **State-based dynamics learning**: parameter estimation (known physics form, unknown $\Theta$), full regression (no physics assumption), residual dynamics (nominal model + learned correction).
+- **Observation-based dynamics learning** (true state unobserved): autoregression/NARX (fixed history window), recurrent models (learned latent history summary), state-space models (explicit latent state, trained via ELBO).
+- **Good data** reduces estimator variance ($\propto\det(X^\top X)^{-1}$, ML-02's exact formula); in system identification specifically, this means covering *frequency* space via structured excitation signals, the same underlying idea as RL exploration.
+- **Multirotor case study**: parameter estimation for hard-to-measure constants, residual learning for unmodeled aerodynamics; strong physics priors consistently beat learning everything from scratch.
+
+## Retrieval questions
+
+1. State the three state-based dynamics-learning cases and their loss functions.
+2. State the three observation-based dynamics-learning cases, and explain when each is preferred.
+3. State ML-02's estimator-variance formula, and explain what "good data" means for both regression and system identification specifically.
+4. What does the multirotor case study's "main takeaway" say about physics priors, and why?
+
+## Mastery checklist
+
+- [ ] Can distinguish and write the loss functions for parameter estimation, full regression, and residual dynamics learning.
+- [ ] Can distinguish autoregression, recurrent, and state-space observation-based dynamics models.
+- [ ] Can state the estimator-variance formula and the frequency-excitation idea for good data.
+- [ ] Can summarize the multirotor case study's key lessons.
+
+## Source note
+
+This module's exposition, the three state-based and three observation-based dynamics-learning cases, the good-data/estimator-variance/frequency-excitation discussion, and the multirotor worked example (including NeuroBEM) are adapted from `lecture-robotlearning`, §1.5 (pp. 23-34). The estimator-variance formula is deliberately cross-referenced to, not re-derived from, [ML-02](/course/ML/ML-02), which already derives it in full. All exercises are newly authored; the estimator-variance numeric exercise was independently verified by direct computation while authoring this module.
+
+---
+
+**Next**: [RLEARN-02: Imitation Learning](/course/RLEARN/RLEARN-02)

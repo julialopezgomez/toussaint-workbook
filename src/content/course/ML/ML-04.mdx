@@ -1,0 +1,125 @@
+---
+id: ML-04
+block: ML
+title: "Neural Network Architecture Essentials"
+tier: 1
+estimatedHours: 3
+prerequisites: ["ML-03"]
+objectives:
+  - "Catalog the standard linear operators (fully-connected, convolution) and explain the parameter-efficiency argument for convolution."
+  - "Catalog the standard nonlinear operators (ReLU, sigmoid, softmax, pooling, layer-norm) and state which introduce parameters."
+  - "Explain, at a conceptual level, what problem each of CNN/LSTM/Transformer architectures is built to solve."
+  - "Explain why weight initialization scale matters, and how dropout acts as an implicit ensemble."
+sources:
+  - { sourceId: "lecture-ai", pages: "p36-45 (§1.3)", role: "primary" }
+concepts:
+  - "Linear operators: fully-connected, convolution"
+  - "Nonlinear operators: activations, pooling, softmax, layer-norm"
+  - "CNN, LSTM/GRU, Transformer (conceptual survey)"
+  - "Initialization"
+  - "Regularization: weight decay, dropout, data augmentation"
+notation:
+  - { symbol: "$W_k$", meaning: "a convolution kernel (shared weights across all spatial positions)" }
+  - { symbol: "$\\Gamma_f,\\Gamma_i,\\Gamma_o$", meaning: "LSTM forget/input/output gates" }
+cheatsheetLinks: []
+nextModules: ["ML-05"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+ML-03 built one specific computation graph (a small MLP) by hand. Every architecture you'll meet in practice, CNNs, LSTMs, Transformers, is the *same* idea (ML-01's computation graph, trained by ML-01's backward-mode chain rule), built from a small, reusable vocabulary of operators. This module catalogs that vocabulary, at the depth actually needed to read an architecture diagram and know what each piece is doing, not a full derivation of every architecture (Transformer internals especially are a deep enough topic that the source itself flags them as "out of scope for now" without dedicated study).
+
+## Prerequisites & readiness check
+
+You should have ML-01's computation graph and ML-03's forward/backward pass fresh.
+
+<ReadinessCheck
+  question="From ML-01, what is a computation graph, and what does 'training' a neural network mean in that language?"
+  answer="A DAG where each variable is a deterministic function of its parents; training means using backward-mode autodiff to compute the loss gradient w.r.t. every parameter, then taking a gradient step."
+/>
+
+## Linear operators
+
+Every "layer" in a network is either a **linear operator** (introduces trainable parameters) or a **non-linear operator** (usually doesn't):
+
+- **Fully connected**: $x\in\mathbb{R}^h\mapsto z\in\mathbb{R}^{h'}$, $z_i=\sum_jW_{ij}x_j+b_i$. Every output depends on every input; $W\in\mathbb{R}^{h'\times h}$ has $h'h$ parameters.
+- **Convolution (1D)**: $z_i=\sum_{d=-s}^s w_dx_{i+d}$. Each output depends only on a local **receptive field** of width $2s{+}1$; the weights $w_d$ (the **kernel**) are *shared* across every position $i$, a direct analogy to a continuous convolution $(f*g)(t)=\int g(\tau)f(t+\tau)\,d\tau$.
+- **Convolution (2D, multi-channel)**: input $\mathbb{R}^{H\times W\times C}$, output $\mathbb{R}^{H\times W\times C'}$; each output channel has its own $k\times k\times C$ kernel (its own "feature detector"), applied at every spatial position via weight sharing. Total parameters: $C'Ck^2$, **independent of the image size** $H,W$.
+
+<ExerciseCard id="ML-04-ex1-conv-parameter-count" />
+
+Weight sharing is the whole point: a fully-connected layer on a modestly-sized image would need a separate weight for every (pixel, output-unit) pair, while a convolution reuses the *same* small kernel everywhere, encoding the assumption that "a useful local pattern (an edge, a texture) is useful wherever it appears in the image," i.e. **translation invariance**, directly into the architecture rather than hoping the network learns it from data.
+
+## Nonlinear operators
+
+Nonlinear operators reshape or gate signal but (with rare exceptions) introduce no new trainable parameters:
+
+- **Elementwise activations**: ReLU $\sigma(x)=\max\{0,x\}$ (the modern default: cheap, avoids the vanishing-gradient problem sigmoid has for large $|x|$), leaky ReLU $\max\{0.01x,x\}$ (keeps a small gradient even for negative inputs), sigmoid (ML-03's activation).
+- **Pooling**: reduces layer size by summarizing a local group of activations, e.g. max-pooling, $z_i=\max\{x_{i/s+1},\ldots,x_{i/s+s}\}$, similar to convolution but taking a max instead of a weighted sum.
+- **Softmax** (a *layer-wise*, not elementwise, nonlinearity): $x_i=e^{z_i}/\sum_je^{z_j}$, exactly ML-02's softmax link, turning a layer's raw scores into a probability distribution.
+- **Layer-norm**: standardizes a layer's activations (subtract the mean, divide by the standard deviation, then apply learned elementwise scale/shift $w,b$), stabilizing training in deep networks; this one *does* introduce a small number of parameters ($w,b$).
+
+## A conceptual tour: CNN, LSTM/GRU, Transformer
+
+Three dominant architecture families, each built around a different structural assumption about the input:
+
+- **CNNs** (e.g. AlexNet, ResNet) stack convolution + nonlinearity + pooling layers, assuming **spatial/grid structure** (nearby pixels are related) and exploiting it via weight sharing.
+- **LSTMs and Gated Recurrent Units (GRUs)** process a sequence $x_t$ step by step, maintaining a memory signal $c_t$ gated by learned sigmoid signals: a **forget gate** $\Gamma_f$ (close to 1 preserves memory, letting gradients flow backward through time largely unimpeded), an **input gate** $\Gamma_i$ (close to 1 writes new information into memory), and an **output gate** $\Gamma_o$ (close to 1 exposes memory to the current output). They assume **sequential/temporal structure**.
+- **Transformers** assume neither: neglecting position embeddings, the architecture is fully **permutation invariant**, treating input tokens as a set and using an **attention** mechanism (matching learned "query" and "key" vectors between tokens, then mixing "value" vectors accordingly) to let tokens exchange information with each other directly, learning whatever ordering structure exists (temporal, spatial, or otherwise) from the position embeddings and data, rather than assuming it architecturally.
+
+<ExerciseCard id="ML-04-ex2-architecture-matching-conceptual" />
+
+All three are trained identically: empirical risk minimization, $\theta^*=\operatorname*{argmin}_\theta\sum_i\ell(f_\theta(x_i),y_i)$, via ML-01's backward-mode autodiff through whatever computation graph the architecture defines. **The advances are almost entirely in the choice of computation graph** (and occasionally, e.g. GANs/diffusion models, in the loss function itself), not in the training algorithm.
+
+## Initialization
+
+Badly-scaled initial weights make deep networks fail before training even gets going: if each layer's activations shrink (or grow) by even a small consistent factor, that factor compounds multiplicatively across many layers, exactly the exponential-decay-or-blowup behavior ODE-02/DYN-06's eigenvalue analysis already warned about, just across network depth instead of time. The standard fix: initialize each weight with standard deviation $\propto1/\sqrt{h_{l-1}}$ (the previous layer's width), so that if layer $l$'s activations have some standard deviation, layer $l{+}1$'s do too, roughly preserving signal scale forward (and gradient scale backward) through the whole network, rather than letting it drift geometrically with depth.
+
+<ExerciseCard id="ML-04-ex3-initialization-conceptual" />
+
+## Regularization for neural networks
+
+**Weight decay** is ML-02's L2/ridge penalty applied to every weight, but expressed as a *gradient-level* rule rather than a loss-level one: after computing the unregularized gradient as usual, simply add $\lambda W_{l,ij}$ to it before the weight update, "decaying" every weight slightly toward zero each step.
+
+**Dropout** is the modern default beyond weight decay: during both the forward pass and gradient computation, each unit independently "drops out" (its activation and gradient are set to zero) with probability $p\approx0.5$; at prediction time, activations are instead scaled by $p$ to approximate the effect of averaging over all the dropout patterns seen in training.
+
+<ExerciseCard id="ML-04-ex4-dropout-ensemble-conceptual" />
+
+**Data augmentation** (generating more training data by applying known invariances, e.g. rotating/cropping images the model should be invariant to) is regularization by *directly injecting domain knowledge* about what shouldn't matter, rather than penalizing model complexity abstractly. (Training ensembles/bagging is another standard regularizer, covered properly in [ML-07](/course/ML/ML-07).)
+
+**Mini-batch SGD** (computing the loss/gradient on a small random subset of the data each step rather than the full dataset) and its modern refinements (momentum, Adam) are OPT-05's machinery exactly, not re-derived here: OPT-05 already covers the full-batch/mini-batch tradeoff, SGD's convergence theorem, and Adam's update rule in depth.
+
+## Summary
+
+- **Linear operators** (fully-connected, convolution) carry the trainable parameters; convolution's weight sharing gives translation invariance and parameter counts independent of image size.
+- **Nonlinear operators** (ReLU, pooling, softmax, layer-norm) reshape/gate signal, mostly without new parameters.
+- **CNNs** assume spatial structure, **LSTMs/GRUs** assume sequential structure (via gated memory), **Transformers** assume neither (permutation-invariant attention, learning structure from position embeddings).
+- **Initialization** scale ($\propto1/\sqrt{h_{l-1}}$) prevents activation/gradient scale from drifting exponentially with network depth, the same kind of instability ODE-02/DYN-06 analyze for dynamical systems.
+- **Weight decay** is L2 regularization as a gradient-level rule; **dropout** approximates averaging over exponentially many sub-networks; **data augmentation** injects domain knowledge directly; **mini-batch SGD/Adam** are OPT-05's already-covered machinery.
+
+## Retrieval questions
+
+1. State the parameter count for a fully-connected layer vs. a convolutional layer, and explain the translation-invariance argument for convolution.
+2. List the standard nonlinear operators and state which (if any) introduce trainable parameters.
+3. For each of CNN/LSTM/Transformer, state the structural assumption it's built around.
+4. Why does initialization scale matter, and what's the standard fix?
+5. Explain dropout's ensemble interpretation.
+
+## Mastery checklist
+
+- [ ] Can state the linear operators and the parameter-efficiency argument for convolution.
+- [ ] Can list the nonlinear operators and which introduce parameters.
+- [ ] Can state each architecture family's core structural assumption.
+- [ ] Can explain why initialization scale matters.
+- [ ] Can explain dropout's ensemble interpretation and distinguish it from weight decay.
+
+## Source note
+
+This module's exposition, the linear/nonlinear operator catalog, the CNN/LSTM/Transformer conceptual survey, the initialization argument, and weight decay/dropout/data augmentation are adapted from `lecture-ai`, §1.3 (pp. 36-45). Mini-batch SGD and Adam are deliberately not re-derived here, cross-referenced to [OPT-05](/course/OPT/OPT-05) instead, which already covers them in full. All exercises are newly authored; the convolution-vs-fully-connected parameter count was independently verified by direct computation while authoring this module.
+
+---
+
+**Next**: [ML-05: Kernelization & Gaussian Processes](/course/ML/ML-05)

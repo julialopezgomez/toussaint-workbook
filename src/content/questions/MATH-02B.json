@@ -1,0 +1,139 @@
+{
+  "moduleId": "MATH-02B",
+  "exercises": [
+    {
+      "id": "MATH-02B-ex1-solve-i",
+      "objective": "Solve a linear matrix equation for an unknown matrix.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-maths", "page": 15, "originalNumber": "§2.4 (i)" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Let $X,A$ be arbitrary matrices, $A$ invertible. Solve for $X$: $XA+A^\\top = I$.",
+      "hints": [
+        "Isolate the term containing $X$ first: $XA = I - A^\\top$.",
+        "Now multiply both sides on the right by $A^{-1}$ (the side matters, matrices don't commute): $XAA^{-1} = (I-A^\\top)A^{-1}$.",
+        "$X = (I-A^\\top)A^{-1}$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-02B-ex2-solve-ii",
+      "objective": "Solve a linear matrix equation involving multiple transposes.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-maths", "page": 15, "originalNumber": "§2.4 (ii)" },
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": ["MATH-02B-ex1-solve-i"],
+      "answerType": "derivation",
+      "prompt": "Let $X,A,B$ be arbitrary (compatibly-shaped) matrices, $(C-2A^\\top)$ invertible. Solve for $X$: $X^\\top C = [2A(X+B)]^\\top$.",
+      "hints": [
+        "Expand the right-hand side first: $[2A(X+B)]^\\top = 2(X+B)^\\top A^\\top = 2X^\\top A^\\top+2B^\\top A^\\top$.",
+        "Collect all $X^\\top$ terms on the left: $X^\\top C - 2X^\\top A^\\top = 2B^\\top A^\\top$, i.e. $X^\\top(C-2A^\\top) = 2B^\\top A^\\top$.",
+        "Multiply on the right by $(C-2A^\\top)^{-1}$: $X^\\top = 2B^\\top A^\\top(C-2A^\\top)^{-1}$. Now transpose the whole equation, remembering $(UVW)^\\top=W^\\top V^\\top U^\\top$ reverses order: $X = [(C-2A^\\top)^{-1}]^\\top A B\\cdot 2 = 2(C^\\top-2A)^{-1}AB$ (using $[(C-2A^\\top)^{-1}]^\\top = [(C-2A^\\top)^\\top]^{-1} = (C^\\top-2A)^{-1}$)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-02B-ex3-normal-equations",
+      "objective": "Derive the least-squares normal equations from a first-order optimality condition.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-maths", "page": 15, "originalNumber": "§2.4 (iii)" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["MATH-02B-ex1-solve-i"],
+      "answerType": "derivation",
+      "prompt": "Let $x\\in\\mathbb{R}^n$, $y\\in\\mathbb{R}^d$, $A\\in\\mathbb{R}^{d\\times n}$ (not necessarily invertible, but $A^\\top A$ is). Solve for $x$: $(Ax-y)^\\top A = \\mathbf{0}_n^\\top$.",
+      "hints": [
+        "Transpose the whole equation: $A^\\top(Ax-y) = \\mathbf{0}_n$.",
+        "Distribute: $A^\\top Ax - A^\\top y = 0$, so $A^\\top Ax = A^\\top y$.",
+        "Since $A^\\top A$ is invertible, $x = (A^\\top A)^{-1}A^\\top y$. This is exactly the least-squares normal equation, the closed-form minimizer of $\\|Ax-y\\|^2$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-02B-ex4-regularized-normal-equations",
+      "objective": "Derive the Tikhonov-regularized normal equations.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-maths", "page": 15, "originalNumber": "§2.4 (iv)" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["MATH-02B-ex3-normal-equations"],
+      "answerType": "derivation",
+      "prompt": "As in the previous exercise, but additionally with a symmetric positive-definite $B\\in\\mathbb{R}^{n\\times n}$. Solve for $x$: $(Ax-y)^\\top A+x^\\top B = \\mathbf{0}_n^\\top$.",
+      "hints": [
+        "Transpose the whole equation: $A^\\top(Ax-y) + B^\\top x = \\mathbf{0}_n$. Since $B$ is symmetric, $B^\\top=B$.",
+        "Distribute and collect $x$ terms: $A^\\top Ax - A^\\top y + Bx = 0 \\Rightarrow (A^\\top A+B)x = A^\\top y$.",
+        "$x = (A^\\top A+B)^{-1}A^\\top y$. Compare this to the ridge-regression worked example above, with $B=\\lambda I$ this is exactly that formula."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-02B-ex5-identity-application",
+      "objective": "Apply Identity 2.3's bilinear product rule to a concrete expression.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["MATH-02B-ex4-regularized-normal-equations"],
+      "answerType": "derivation",
+      "prompt": "Using $\\frac{\\partial}{\\partial x}(Ax-b)^\\top(Cx-d) = (Ax-b)^\\top C+(Cx-d)^\\top A$ (a special case of Identity 2.3), derive the gradient (column-vector form) of $g(x) = \\|Ax-b\\|^2$, i.e. the special case $C=A$, $d=b$.",
+      "hints": [
+        "Substitute $C=A,d=b$ into the identity: $\\frac{\\partial}{\\partial x}(Ax-b)^\\top(Ax-b) = (Ax-b)^\\top A+(Ax-b)^\\top A = 2(Ax-b)^\\top A$.",
+        "This is the row-vector Jacobian form. Transpose to get the gradient (column vector): $\\nabla g(x) = 2A^\\top(Ax-b)$.",
+        "Sanity check against ex3 above: setting this gradient to zero gives $A^\\top(Ax-b)=0 \\Rightarrow A^\\top Ax = A^\\top b$, exactly the same normal equations, confirming consistency between the two derivation routes."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-02B-ex6-matrix-element-derivative",
+      "objective": "Derive a scalar-w.r.t.-matrix derivative using element-wise bookkeeping.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-maths", "page": 17, "originalNumber": "§2.4.1, eq. 49" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["MATH-02B-ex5-identity-application"],
+      "answerType": "derivation",
+      "prompt": "For $a\\in\\mathbb{R}^n$, $b\\in\\mathbb{R}^m$, $X\\in\\mathbb{R}^{n\\times m}$, derive $\\frac{\\partial}{\\partial X}a^\\top Xb = ab^\\top$ using the recommended approach: differentiate w.r.t. a single element $X_{ij}$ first, then assemble.",
+      "hints": [
+        "Write $a^\\top Xb$ in index notation: $a^\\top Xb = \\sum_{k,l}a_kX_{kl}b_l$.",
+        "Differentiate w.r.t. one specific element $X_{ij}$: only the single term with $k=i,l=j$ survives, so $\\frac{\\partial}{\\partial X_{ij}}a^\\top Xb = a_ib_j$.",
+        "Assembling this back into matrix form: the $(i,j)$ entry of the result is $a_ib_j$, which is exactly the $(i,j)$ entry of the outer product $ab^\\top$. So $\\frac{\\partial}{\\partial X}a^\\top Xb = ab^\\top$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-02B-ex7-logreg-check",
+      "objective": "Confirm the logistic regression Hessian's PSD structure with a concrete numeric check.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For a single data point with $p_i=\\sigma(x_i^\\top\\beta)=0.2$, the corresponding term of the Hessian's diagonal weighting is $p_i(1-p_i)x_ix_i^\\top$. Compute the scalar weight $p_i(1-p_i)$, and confirm it is at most $1/4$ (its maximum, attained at $p_i=0.5$). Enter $p_i(1-p_i)$ as a decimal to 3 decimal places.",
+      "hints": [
+        "$p_i(1-p_i) = 0.2\\times0.8$.",
+        "$0.2\\times0.8 = 0.16$, which is indeed $\\le 0.25=1/4$.",
+        "This weight is what appears on the diagonal of $\\text{diag}(p\\circ(1-p))$ in the Hessian $X^\\top\\text{diag}(p\\circ(1-p))X+2\\lambda I$; since it's always non-negative, each rank-1 term $p_i(1-p_i)x_ix_i^\\top$ is PSD, and their sum plus $2\\lambda I$ (for $\\lambda>0$) is PD."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-02B-ex8-gauss-newton-ik",
+      "objective": "Derive the Gauss-Newton linearized closed-form update for a nonlinear robotics least-squares objective.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-maths", "page": 15, "originalNumber": "§2.4 (vi)" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 25,
+      "prerequisites": ["MATH-02B-ex4-regularized-normal-equations", "MATH-02B-ex5-identity-application"],
+      "answerType": "derivation",
+      "prompt": "For $q,q_0\\in\\mathbb{R}^n$, $\\phi:\\mathbb{R}^n\\to\\mathbb{R}^d$ nonlinear but smooth, $y^*\\in\\mathbb{R}^d$, weight matrices $C,W$, consider $\\min_q\\|\\phi(q)-y^*\\|_C^2+\\|q-q_0\\|_W^2$. Using the local linearization $\\phi(q)\\approx\\phi(q_0)+J(q-q_0)$ with $J=\\partial\\phi/\\partial q|_{q_0}$, substitute $\\delta=q-q_0$ and derive the closed-form minimizer $\\delta^*$ (and hence $q^*=q_0+\\delta^*$) of the resulting linearized-quadratic problem.",
+      "hints": [
+        "Substitute the linearization and $\\delta=q-q_0$: the objective becomes $\\|\\,(\\phi(q_0)+J\\delta)-y^*\\|_C^2+\\|\\delta\\|_W^2$. Let $r=\\phi(q_0)-y^*$ (the residual at $q_0$), so this is $\\|r+J\\delta\\|_C^2+\\|\\delta\\|_W^2 = (r+J\\delta)^\\top C(r+J\\delta)+\\delta^\\top W\\delta$.",
+        "Differentiate w.r.t. $\\delta$ and set to zero, exactly as in the ridge-regression worked example: $2J^\\top C(r+J\\delta)+2W\\delta = 0 \\Rightarrow (J^\\top CJ+W)\\delta = -J^\\top Cr$.",
+        "$\\delta^* = -(J^\\top CJ+W)^{-1}J^\\top Cr = (J^\\top CJ+W)^{-1}J^\\top C(y^*-\\phi(q_0))$ (substituting back $r=\\phi(q_0)-y^*$ and flipping its sign). So $q^* = q_0+(J^\\top CJ+W)^{-1}J^\\top C(y^*-\\phi(q_0))$: exactly the ridge-regression closed form, with $A\\to J$, $y\\to(y^*-\\phi(q_0))$, $\\lambda I\\to W$. Applying this repeatedly (relinearizing $J$ at the new $q^*$ each time) is the Gauss-Newton method."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

@@ -3,13 +3,15 @@ id: PROB-02
 block: PROB
 title: "Monte Carlo & Sampling Methods"
 tier: 2
-estimatedHours: 2
+estimatedHours: 3
 prerequisites: ["PROB-01"]
 objectives:
+  - "State the Monte Carlo estimator (plain and weighted) formally."
   - "Explain when sampling methods are needed instead of exact integration."
   - "Derive the importance sampling identity from the definition of expectation."
   - "Compute importance weights and verify the identity on a discrete example."
   - "Understand rejection sampling's acceptance-rate tradeoff."
+  - "State the particle-approximation representation and connect it to particle filters / sample-based planning."
 sources:
   - { sourceId: "lecture-ai", pages: "p18-19, p24-26 (§1.2, Monte Carlo/sampling subsections)", role: "primary" }
 concepts:
@@ -17,6 +19,7 @@ concepts:
   - "Rejection sampling"
   - "Importance sampling"
   - "Importance weight"
+  - "Particle approximation"
 notation:
   - { symbol: "$\\mathbb{E}_p[f(x)]$", meaning: "expectation of $f$ under distribution $p$" }
   - { symbol: "$w(x) = p(x)/q(x)$", meaning: "importance weight, correcting for sampling from $q$ instead of $p$" }
@@ -43,6 +46,10 @@ You should have Bayes' rule and marginalization (PROB-01) fresh.
 
 ## Why sample at all?
 
+> **Monte Carlo estimation.** A Monte Carlo (MC) method generates samples $x_i\sim p(x)$ from a distribution $p(x)$, then uses them to estimate an expectation of anything depending on $x$:
+> $$\mathbb{E}_p\{f(x)\} = \int_xp(x)f(x)\,dx \approx \frac1N\sum_{i=1}^Nf(x_i)$$
+> A **weighted** variant generates weighted samples $(x_i,w_i)$ with $\sum_iw_i=1$: $\mathbb{E}_p\{f(x)\}\approx\sum_{i=1}^Nw_if(x_i)$.
+
 <ExerciseCard id="PROB-02-ex1-why-sampling" />
 
 ## Importance sampling
@@ -56,6 +63,18 @@ You should have Bayes' rule and marginalization (PROB-01) fresh.
 ## Rejection sampling, briefly
 
 An alternative when you can evaluate $p(x)$ pointwise but not sample from it directly: find a constant $M$ such that $p(x)\le Mq(x)$ for all $x$ (using an easy-to-sample proposal $q$), then sample $x\sim q$ and accept it with probability $p(x)/(Mq(x))$, rejecting (and resampling) otherwise. The accepted samples are then genuinely distributed according to $p$. The overall acceptance rate works out to exactly $1/M$, so a tight bound $M$ (as close to the true worst-case ratio $\max_x p(x)/q(x)$ as possible) matters a great deal for efficiency: a loose $M$ wastes most proposed samples on rejection.
+
+## Particle approximation of a distribution
+
+Directly relevant to sampling-based planning: a **particle distribution** represents $p(x)$ over a continuous domain $\mathbb{R}^n$ as a weighted set of $N$ discrete samples ("particles"),
+
+$$q(x) := \sum_{i=1}^Nw_i\,\delta(x-x_i), \qquad \sum_iw_i=1$$
+
+where $\delta(x-x_i)$ is the Dirac delta (a "spike" at $x_i$) and each particle has a location $x_i\in\mathbb{R}^n$ and weight $w_i$. Given such a set, the same weighted Monte Carlo formula from above applies directly: $\mathbb{E}_p\{f(x)\}\approx\sum_iw_if(x_i)$.
+
+<ExerciseCard id="PROB-02-ex4-particle-weighted-expectation" />
+
+This is a genuinely versatile representation (numeric, works for arbitrary, "difficult"/multi-modal distributions with no closed form), at the cost of needing many samples for high-dimensional or high-precision cases. It underlies **particle filters** (state estimation, e.g. robot localization) and **sample-based planning** (Monte Carlo Tree Search, and the sampling-based motion planners directly relevant to your own research), both of which you'll meet again in later blocks: whenever a distribution over states, actions, or trajectories has no tractable closed form, a particle approximation is often the practical fallback.
 
 ## Summary
 
@@ -78,7 +97,7 @@ An alternative when you can evaluate $p(x)$ pointwise but not sample from it dir
 
 ## Source note
 
-This module's topic and page range are from `lecture-ai`, §1.2 (pp. 18-19, 24-26). All exposition, the worked example, and every exercise here are newly authored, paraphrasing the source's topic coverage.
+This module's formal Monte Carlo estimator definition, rejection sampling and importance sampling algorithms, and the particle-approximation representation (weighted particles, Dirac delta form, connection to particle filters/MCTS) are adapted from `lecture-ai`, §1.2 (pp. 18-19, 24-26), including content the source explicitly marks as reference-only. All exposition beyond those definitions, the worked example, and every exercise here are newly authored.
 
 ---
 

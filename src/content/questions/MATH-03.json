@@ -2,6 +2,22 @@
   "moduleId": "MATH-03",
   "exercises": [
     {
+      "id": "MATH-03-ex0-polynomial-vector-space",
+      "objective": "Verify the vector space axioms for a non-tuple example, polynomials of bounded degree.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Let $P_2$ be the set of all polynomials of degree at most 2 in one variable $t$, i.e. $p(t)=a_0+a_1t+a_2t^2$ for real $a_0,a_1,a_2$, with the usual polynomial addition and scalar multiplication. Briefly argue that $P_2$ is a vector space (Definition 3.1): identify the zero vector, and explain why it's closed under addition and scaling. Then give a basis for $P_2$ and state $\\dim(P_2)$.",
+      "hints": [
+        "The zero vector is the zero polynomial $p(t)=0$ (i.e. $a_0=a_1=a_2=0$). Adding two degree-$\\le2$ polynomials, or scaling one, always yields another degree-$\\le2$ polynomial, so closure holds.",
+        "The abelian-group and distribution axioms all follow directly from the corresponding axioms for real numbers, applied coefficient-by-coefficient.",
+        "A natural basis is $\\{1, t, t^2\\}$ (the monomials up to degree 2): every $p\\in P_2$ is uniquely $p=a_0(1)+a_1(t)+a_2(t^2)$, so this is linearly independent and spanning. Hence $\\dim(P_2)=3$, and the coordinates of $p$ in this basis are exactly $(a_0,a_1,a_2)$, the polynomial and 'a triple of numbers' are secretly the same object once you fix this basis."
+      ],
+      "reviewCardIds": []
+    },
+    {
       "id": "MATH-03-ex1-why-coordinate-free",
       "objective": "Explain why distinguishing a vector from its coordinates matters.",
       "provenance": "newly-authored",
@@ -16,6 +32,22 @@
         "This distinction becomes essential once you compose transformations across multiple frames (e.g. robot base frame, end-effector frame, world frame): if you conflate a vector with one particular coordinate representation, it's easy to silently mix up which frame a set of numbers belongs to."
       ],
       "reviewCardIds": ["RC-MATH-03-01"]
+    },
+    {
+      "id": "MATH-03-ex1b-dual-basis",
+      "objective": "Compute the dual basis of a non-standard basis and verify the defining property.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 14,
+      "prerequisites": ["MATH-03-ex1-why-coordinate-free"],
+      "answerType": "derivation",
+      "prompt": "Let $b_1=\\begin{pmatrix}1\\\\1\\end{pmatrix}$, $b_2=\\begin{pmatrix}0\\\\1\\end{pmatrix}$ be a basis of $\\mathbb{R}^2$, with basis matrix $B=[b_1\\;b_2]$. Find the dual basis $\\hat e_1,\\hat e_2$ (as row vectors, i.e. 1-forms $\\hat e_i(v)=r_i^\\top v$), satisfying $\\hat e_i(b_j)=\\delta_{ij}$. (Hint: think about what $B^{-1}$ has to do with this.)",
+      "hints": [
+        "If $c=B^{-1}v$ gives the coordinates of $v$ in basis $(b_1,b_2)$, then by Definition 3.8, $c_i$ IS $\\hat e_i(v)$ (the $i$-th coordinate-picking 1-form). So the rows of $B^{-1}$ are exactly the dual basis vectors.",
+        "Compute $B^{-1}$: $\\det(B) = 1(1)-0(1)=1$, so $B^{-1} = \\begin{pmatrix}1&0\\\\-1&1\\end{pmatrix}$.",
+        "So $\\hat e_1 = (1,0)$ (as a row/1-form) and $\\hat e_2=(-1,1)$. Verify: $\\hat e_1(b_1)=1(1)+0(1)=1$, $\\hat e_1(b_2)=1(0)+0(1)=0$, $\\hat e_2(b_1)=-1(1)+1(1)=0$, $\\hat e_2(b_2)=-1(0)+1(1)=1$. All four match $\\delta_{ij}$ exactly."
+      ],
+      "reviewCardIds": []
     },
     {
       "id": "MATH-03-ex2-change-of-basis-derivation",

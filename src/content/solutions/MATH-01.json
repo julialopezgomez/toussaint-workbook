@@ -46,6 +46,24 @@
         "equivalenceNotes": "Any form algebraically equal to 2*s is accepted (e.g. s+s)."
       },
       "fullSolution": "partial z/partial x = y, partial z/partial y = x, partial x/partial s = 1, partial y/partial s = 1.\npartial z/partial s = y*1 + x*1 = x + y = (s+t) + (s-t) = 2s. The t-dependence cancels exactly."
+    },
+    {
+      "exerciseId": "MATH-01-ex5-skew-challenge",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly rewrites f = b^T skew(a)^T skew(a) b and substitutes the given identity to get f = ||a||^2||b||^2 - (a^T b)^2." },
+          { "points": 1, "description": "Correctly differentiates ||a||^2||b||^2 w.r.t. a using the product rule, getting 2||b||^2 a." },
+          { "points": 1, "description": "Correctly differentiates (a^T b)^2 w.r.t. a using the chain rule, getting 2(a^T b) b." },
+          { "points": 1, "description": "States the final gradients for both a and b, noting the symmetry argument for grad_b f." }
+        ],
+        "commonErrors": [
+          "Trying to differentiate the skew-matrix form directly component-by-component instead of using the given scalar identity, this works but is much more error-prone and not what's being asked.",
+          "Forgetting the factor of 2 from the chain rule on (a^T b)^2.",
+          "Sign errors from skew(a)^T = -skew(a) when deriving the identity (not required here since the identity is given, but common if attempted from scratch)."
+        ]
+      },
+      "fullSolution": "(a) f(a,b) = (a x b)^T(a x b) = (skew(a)b)^T(skew(a)b) = b^T skew(a)^T skew(a) b. Using the given identity skew(a)^T skew(a) = ||a||^2 I - a a^T:\nf = b^T(||a||^2 I - a a^T)b = ||a||^2 (b^T b) - b^T(a a^T)b = ||a||^2||b||^2 - (a^T b)(a^T b) = ||a||^2||b||^2 - (a^T b)^2.\n\n(b) grad_a f: differentiate each term w.r.t. a. grad_a[||a||^2||b||^2] = ||b||^2 * grad_a||a||^2 = ||b||^2 * 2a = 2||b||^2 a (product rule, ||b||^2 constant w.r.t. a). grad_a[(a^T b)^2] = 2(a^T b) * grad_a(a^T b) = 2(a^T b) b (chain rule, since grad_a(a^T b) = b). So grad_a f = 2||b||^2 a - 2(a^T b) b.\n\nBy the symmetry of f(a,b) in its two arguments (f(a,b) is symmetric under swapping a<->b, since ||a x b|| = ||b x a||), grad_b f = 2||a||^2 b - 2(a^T b) a."
     }
   ]
 }

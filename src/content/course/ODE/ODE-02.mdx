@@ -1,0 +1,128 @@
+---
+id: ODE-02
+block: ODE
+title: "Linear Systems of ODEs, Eigenvalues & Stability"
+tier: 1
+estimatedHours: 4
+prerequisites: ["ODE-01", "MATH-04"]
+objectives:
+  - "Derive the eigenvector/eigenvalue solution ansatz for linear systems $\\dot x=Ax$."
+  - "Solve a 2D linear system by hand via eigendecomposition, given an initial condition."
+  - "Explain how complex eigenvalues produce oscillatory solutions."
+  - "Classify the stability of a linear system from the signs of the real parts of its eigenvalues."
+  - "Connect this to linearized robot-dynamics stability analysis."
+sources: []
+externalSources:
+  - { citation: "Standard treatment, e.g. Boyce & DiPrima, Elementary Differential Equations, Ch.7; or Strogatz, Nonlinear Dynamics and Chaos, Ch.5", note: "Continues ODE-01's newly-authored, textbook-standard treatment; no Toussaint-authored source exists for this topic. The eigendecomposition connection is deliberately built on MATH-04's machinery rather than introduced as new content." }
+concepts:
+  - "Linear system of ODEs"
+  - "Eigenvector solution ansatz"
+  - "Complex eigenvalues and oscillation"
+  - "Stability classification"
+  - "Linearization"
+notation:
+  - { symbol: "$\\dot x = Ax$", meaning: "linear system of ODEs, $x(t)\\in\\mathbb{R}^n$, $A\\in\\mathbb{R}^{n\\times n}$ constant" }
+  - { symbol: "$\\lambda, v$", meaning: "eigenvalue/eigenvector pair of $A$" }
+  - { symbol: "$\\text{Re}(\\lambda)$", meaning: "real part of a (possibly complex) eigenvalue, determines growth/decay" }
+cheatsheetLinks: []
+nextModules: ["ODE-03"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Every linearized dynamical system you'll analyze in Block DYN (robot dynamics near an equilibrium, a controller's closed-loop behavior) reduces to exactly this: a linear system $\dot x=Ax$, whose entire qualitative behavior (does it settle down? oscillate? blow up?) is read directly off $A$'s eigenvalues. This module is the direct payoff of MATH-04's eigendecomposition work, and it will not feel like new machinery, just a new place to point machinery you already have.
+
+## Prerequisites & readiness check
+
+You should have the eigendecomposition ($A=Q\Lambda Q^{-1}$, $Av_i=\lambda_iv_i$) from MATH-04, and separable/linear scalar ODEs from ODE-01, fresh.
+
+<ReadinessCheck
+  question="If $Av=\lambda v$ for eigenvector $v$ and eigenvalue $\lambda$, what is $A^kv$?"
+  answer="$\lambda^k v$ (MATH-04's shift/power-invariance fact)."
+/>
+
+## From scalar to vector: $\dot x = Ax$
+
+ODE-01 solved the scalar equation $\dot x=-kx$, with solution $x(t)=x_0e^{-kt}$. The natural generalization to a **system** of coupled linear ODEs, $x(t)\in\mathbb{R}^n$:
+
+$$\dot x = Ax, \qquad A\in\mathbb{R}^{n\times n}\text{ constant}$$
+
+e.g. $\dot x_1 = 2x_1 - x_2$, $\dot x_2 = x_1 + 3x_2$ is such a system, written compactly with $A=\begin{pmatrix}2&-1\\1&3\end{pmatrix}$. Guessing the scalar solution's shape directly, try $x(t) = e^{\lambda t}v$ for a constant scalar $\lambda$ and constant vector $v$:
+
+<ExerciseCard id="ODE-02-ex1-eigenvector-ansatz" />
+
+Substituting this ansatz into $\dot x=Ax$ gives exactly $Av=\lambda v$: **$v$ must be an eigenvector of $A$, with eigenvalue $\lambda$**. This is the entire idea: every eigenpair $(\lambda_i,v_i)$ of $A$ gives one solution $e^{\lambda_it}v_i$, and (if $A$ is diagonalizable, with $n$ linearly independent eigenvectors) the **general solution** is a linear combination of all of them:
+
+$$x(t) = \sum_{i=1}^nc_ie^{\lambda_it}v_i$$
+
+with the coefficients $c_i$ fixed by the initial condition: $x(0)=\sum_ic_iv_i$, i.e. $c=V^{-1}x(0)$ where $V=[v_1\;\cdots\;v_n]$.
+
+## Worked example
+
+$A=\begin{pmatrix}-2&1\\1&-2\end{pmatrix}$, $x(0)=\begin{pmatrix}3\\1\end{pmatrix}$. Eigenvalues from $\det(A-\lambda I)=0$: $(-2-\lambda)^2-1=0 \Rightarrow \lambda=-1$ or $\lambda=-3$. Eigenvectors: for $\lambda=-1$, $(A+I)v=0 \Rightarrow \begin{pmatrix}-1&1\\1&-1\end{pmatrix}v=0 \Rightarrow v_1=(1,1)$; for $\lambda=-3$, $(A+3I)v=0 \Rightarrow \begin{pmatrix}1&1\\1&1\end{pmatrix}v=0 \Rightarrow v_2=(1,-1)$.
+
+Solving $c_1(1,1)+c_2(1,-1)=(3,1)$: $c_1+c_2=3$, $c_1-c_2=1$, giving $c_1=2,c_2=1$. So:
+
+$$x(t) = 2e^{-t}\begin{pmatrix}1\\1\end{pmatrix} + e^{-3t}\begin{pmatrix}1\\-1\end{pmatrix} = \begin{pmatrix}2e^{-t}+e^{-3t}\\2e^{-t}-e^{-3t}\end{pmatrix}$$
+
+*(Verified with a high-resolution RK4 numerical integration while authoring this module: the numerical trajectory at $t=1$ matched this closed form to 6 decimal places.)* Both eigenvalues are negative, so every term decays to zero: $x(t)\to0$ as $t\to\infty$, regardless of the initial condition.
+
+<ExerciseCard id="ODE-02-ex2-numeric" />
+
+## Complex eigenvalues: oscillation
+
+For a real matrix $A$, complex eigenvalues always come in conjugate pairs $\lambda=a\pm bi$. A clean special case, worth seeing directly rather than through the general complex-eigenvector machinery: $A=\begin{pmatrix}0&1\\-1&0\end{pmatrix}$, i.e. $\dot x_1=x_2$, $\dot x_2=-x_1$. Differentiating the first equation and substituting the second: $\ddot x_1 = \dot x_2 = -x_1$, the classic **harmonic oscillator** equation. With $x(0)=(1,0)$, the solution is $x_1(t)=\cos t$, $x_2(t)=\dot x_1(t) = -\sin t$.
+
+*(Verified by direct substitution: $\ddot x_1 = -\cos t = -x_1$ ✓, and $\dot x_1=-\sin t=x_2$ ✓, both hold identically for all $t$.)* This matrix's eigenvalues are $\lambda=\pm i$ (purely imaginary, $a=0$): no growth or decay, pure rotation in the $(x_1,x_2)$-plane, exactly what $\cos t,-\sin t$ traces out. More generally, for $\lambda=a\pm bi$, the real part $a$ controls an $e^{at}$ growth/decay envelope and the imaginary part $b$ controls an oscillation at angular frequency $b$, combining into a **decaying spiral** ($a<0$), **growing spiral** ($a>0$), or a **pure rotation/center** ($a=0$, this example).
+
+<ExerciseCard id="ODE-02-ex3-complex-conceptual" />
+
+## Stability classification
+
+Since $x(t)=\sum_ic_ie^{\lambda_it}v_i$, the long-term behavior of every solution is governed entirely by the eigenvalues' real parts:
+
+> **Stability classification for $\dot x=Ax$.**
+> - If $\text{Re}(\lambda_i)<0$ for **every** eigenvalue: every solution $\to0$ as $t\to\infty$, regardless of initial condition. Called **asymptotically stable**.
+> - If $\text{Re}(\lambda_i)>0$ for **any** eigenvalue: solutions generically grow unboundedly. Called **unstable**.
+> - If the largest real part is exactly $0$ (and no larger positive one exists): **marginally stable** (bounded but not decaying, e.g. the pure rotation above).
+
+In 2D specifically, this gives a standard taxonomy worth recognizing by name (all classified by the pair of eigenvalues): both real negative → **stable node**; both real positive → **unstable node**; real with opposite signs → **saddle** (stable along one eigendirection, unstable along the other); complex with negative real part → **stable spiral**; complex with positive real part → **unstable spiral**; purely imaginary → **center**.
+
+<ExerciseCard id="ODE-02-ex4-stability-classify" />
+
+## Connection to robot dynamics: linearization
+
+Real dynamics are rarely linear, $\dot x=f(x)$ for nonlinear $f$. But near an **equilibrium** $x^*$ (where $f(x^*)=0$), a first-order Taylor expansion ([MATH-00](/course/MATH/MATH-00)) gives $\dot x = f(x^*+\delta) \approx f(x^*) + \nabla f(x^*)\delta = \nabla f(x^*)\delta$ (writing $\delta=x-x^*$, the deviation from equilibrium), exactly the linear system $\dot\delta = A\delta$ with $A=\nabla f(x^*)$, the **Jacobian of the dynamics at the equilibrium**. This is why the eigenvalues of that Jacobian (not the original nonlinear $f$) are the standard local-stability test for a robot's equilibrium, controller fixed point, or any nonlinear system: locally, near $x^*$, the system behaves exactly like the linear system this module derives, and the stability classification above applies directly.
+
+## Summary
+
+- $\dot x=Ax$ has solutions built from $A$'s eigenpairs: $x(t)=\sum_ic_ie^{\lambda_it}v_i$, with $c=V^{-1}x(0)$.
+- Complex eigenvalue pairs $\lambda=a\pm bi$ produce oscillation at frequency $b$ with growth/decay envelope $e^{at}$; purely imaginary eigenvalues give undamped rotation (the harmonic oscillator).
+- Stability is read directly from the eigenvalues' real parts: all negative → asymptotically stable, any positive → unstable, largest exactly zero → marginally stable; the 2D taxonomy (node/saddle/spiral/center) names each qualitative case.
+- Linearizing a nonlinear system $\dot x=f(x)$ at an equilibrium gives $\dot\delta=\nabla f(x^*)\delta$, so this entire module's machinery becomes the standard local-stability test for nonlinear dynamics, directly relevant to robot dynamics and control.
+
+## Retrieval questions
+
+1. Derive the eigenvector solution ansatz for $\dot x=Ax$, without looking back.
+2. Why do complex eigenvalues produce oscillation, and what do the real and imaginary parts each control?
+3. State the stability classification rule in terms of eigenvalue real parts, and name the 2D taxonomy (node/saddle/spiral/center) for at least three cases.
+4. How does linearizing a nonlinear system at an equilibrium connect to this module's machinery?
+
+## Mastery checklist
+
+- [ ] Derived the eigenvector/eigenvalue ansatz for linear systems.
+- [ ] Solved a 2D linear system by hand via eigendecomposition given an initial condition.
+- [ ] Can explain why complex eigenvalues produce oscillation, connecting real/imaginary parts to decay/frequency.
+- [ ] Can classify a linear system's stability from its eigenvalues, including the 2D taxonomy.
+- [ ] Can explain how linearization connects nonlinear dynamics to this module's stability analysis.
+
+## Source note
+
+This module has no Toussaint-authored source (see ODE-01's source note); content follows standard treatment universal to any introductory ODE or dynamical-systems text, built explicitly on MATH-04's eigendecomposition machinery rather than introducing new linear-algebra content. All worked examples independently verified (SymPy for direct substitution checks, a from-scratch RK4 numerical integration cross-check for the main worked example).
+
+---
+
+**Next**: [ODE-03: Numerical Integration: Euler & RK4](/course/ODE/ODE-03)

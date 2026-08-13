@@ -1,0 +1,115 @@
+---
+id: RL-07
+block: RL
+title: "Decision Theory & Value Alignment"
+tier: 1
+estimatedHours: 2
+prerequisites: ["RL-04"]
+objectives:
+  - "State the basic decision-theoretic formalism and the principle of maximal expected utility."
+  - "Explain risk aversion/seeking as concavity/convexity of a utility function, with a worked example."
+  - "Explain decision networks, and how MDPs and supervised ML both instantiate the same formalism."
+  - "Describe, at a conceptual level, intrinsic-reward/curiosity objectives and the value-alignment problem."
+sources:
+  - { sourceId: "lecture-ai", pages: "p90-98 (§2.4)", role: "primary" }
+concepts:
+  - "Decision-theoretic formalism, principle of maximal expected utility"
+  - "Risk aversion/seeking"
+  - "Decision networks (influence diagrams)"
+  - "ML as (empirical) risk minimization"
+  - "Information gain, intrinsic motivation, value alignment"
+notation:
+  - { symbol: "$U(y)$", meaning: "utility function: a real-valued score over outcomes" }
+  - { symbol: "$\\operatorname*{argmax}_a\\mathbb{E}_{P(y\\mid a)}\\{U(y)\\}$", meaning: "principle of maximal expected utility" }
+cheatsheetLinks: []
+nextModules: []
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+This is a deliberately lighter, closing module for the RL block: decision theory is the general formalism underlying everything else you've built here, MDPs, supervised ML's loss functions, bandits, all instances of one idea, "define a utility, maximize its expectation." Seeing that unification explicitly, and a brief, honest look at where the "just define an objective and optimize" picture gets genuinely hard (value alignment), is worth more than another full derivation.
+
+## Prerequisites & readiness check
+
+You should have RL-04's expected-return objective $J(\theta)$ fresh.
+
+<ReadinessCheck
+  question="From RL-01, what does an MDP's objective maximize?"
+  answer="The expected discounted return, J^π = E{Σ_t γ^t r_t | π}."
+/>
+
+## The basic decision-theoretic formalism
+
+Decision theory combines *probabilities* and *utilities*: a **decision variable** $a\in\mathcal{A}$, a (possibly stochastic) **outcome** $y\sim P(y\mid a)$, and a **utility function** $U:y\mapsto U(y)\in\mathbb{R}$. The **principle of maximal expected utility**: a rational agent chooses
+
+$$a^* = \operatorname*{argmax}_a\ \mathbb{E}_{P(y\mid a)}\{U(y)\}$$
+
+This is exactly RL-01's MDP objective, specialized to a single decision: $a\to$ policy, $y\to$ trajectory, $U\to$ discounted return. The **von Neumann-Morgenstern theorem** (1944) gives this principle real teeth: if an agent's preferences over outcomes ($y\preceq y'$) satisfy a short list of consistency axioms (orderable, transitive, continuous, and a few more technical conditions), then a utility function $U$ *provably exists* such that $y\preceq y'\iff U(y)\leq U(y')$, and the utility of an uncertain outcome is exactly its expected utility, $\mathbb{E}\{U(y)\}=\sum_yP(y)U(y)$. (Multiple different $U$ can represent the same preferences; the theorem guarantees *some* $U$ exists, not a unique one.)
+
+**A common misconception worth naming directly**: "AI/economics assumes agents are rational, but humans aren't optimal, so the framework is limiting." This misreads what "optimal" means here: optimality principles aren't a claim about how any *particular* agent actually behaves, they're a **descriptive tool**, a formal way of characterizing a system's behavior (as physics describes motion via least-action principles, or economics describes markets via utility-maximizing agents), useful precisely because *any* consistent behavior can be cast as optimal under *some* utility function.
+
+## Risk aversion and risk seeking
+
+Utility need not be linear in outcome. For $y\in\mathbb{R}$ representing money, a **concave** $U(y)$ makes an agent **risk-averse** (prefers a certain amount over a gamble with the same expected value); a **convex** $U(y)$ makes it **risk-seeking**.
+
+<ExerciseCard id="RL-07-ex1-risk-aversion-numeric" />
+
+## Decision networks: MDPs and ML, unified
+
+A **Decision Network** (influence diagram) is a DAG with three node types: **decision** variables $a_i$ (set by a policy $\pi_i$: parents $\mapsto a_i$), **random** variables $x_i$ (drawn $\sim P(x_i\mid\text{parents})$), and **utility** nodes $u_i$ (computed $=U_i(\text{parents})$); the objective is to choose every $\pi_i$ to maximize $\mathbb{E}\{\sum_iu_i\}$.
+
+<ExerciseCard id="RL-07-ex2-mdp-as-decision-network-conceptual" />
+
+**Supervised ML is a decision network too**, with a genuinely illuminating structure: given data $D=\{(x_i,y_i)\}$ and a new query $x'$, decide a prediction $\hat y'$ to minimize the expected **loss** $l(\hat y',y')$:
+
+$$\hat y'^* = \operatorname*{argmin}_{\hat y'}\ \mathbb{E}_{p(y'\mid x')}\{l(\hat y',y')\}$$
+
+called **Risk Minimization** in Statistical Learning Theory (a *minimization*, the mirror image of maximal-expected-utility, with $U=-l$). Since $p(y'\mid x')$ is unknown, it's approximated by a Monte Carlo average over the training data itself, $\mathbb{E}_{p(x',y')}\{l(f_\theta(x'),y')\}\approx\frac1n\sum_il(f_\theta(x_i),y_i)$, called **Empirical Risk Minimization**, exactly ML-02's loss-minimization framing (ridge regression, logistic regression), now seen as one specific instance of decision theory's general expected-utility maximization, applied to a *single-step*, non-sequential decision (choosing $\theta$ once from $D$, unlike RL-01's sequential MDP decisions).
+
+<ExerciseCard id="RL-07-ex3-erm-connection-conceptual" />
+
+## Beyond fixed tasks: information gain and intrinsic motivation
+
+Not every objective is extrinsic reward. **Information gain**: choose the decision expected to most reduce uncertainty about something you don't yet know, $\operatorname*{argmax}_aH(p(\mu_a\mid D))-\mathbb{E}_{r\mid a}\{H(p(\mu_a\mid r,a,D))\}$ (entropy before minus expected entropy after, PROB-03's entropy), used in active learning (which point to label next) and next-best-view planning (which camera pose reveals the most about an unknown shape).
+
+**Curiosity/intrinsic rewards** reward an agent for *learning*, not just task completion, but naively rewarding "high prediction error" fails badly: an agent rewarded for being surprised gravitates toward genuinely unpredictable (not learnable) stimuli, the "permanently watching white noise TV" failure mode, since white noise is maximally surprising *forever*, no matter how much you watch. The fix: reward **predictor improvement** (how much your predictions got *better* recently), not raw prediction error; white noise offers zero learning progress despite maximal surprise, correctly extinguishing the reward for watching it.
+
+<ExerciseCard id="RL-07-ex4-curiosity-failure-conceptual" />
+
+## Value alignment
+
+If "optimality" is just a description of *some* objective, the hard question becomes: **which objective**? Stuart Russell's concern: as AI systems become more capable optimizers, badly-specified objectives become increasingly dangerous, not because optimization itself is wrong, but because **humans are bad at fully specifying what they actually want**, and a sufficiently powerful optimizer will find whatever technically satisfies a stated objective, including unintended, undesirable ways of doing so. Russell's proposed fix: rather than a system optimizing a *fixed*, human-specified objective, it should **infer** human preferences from behavior, maintaining substantial uncertainty about what those preferences really are (avoiding overconfident overfitting to limited, noisy behavioral evidence). This remains an open, actively-researched problem (game-theoretic formalizations like Cooperative Inverse RL are one of several attempts to make it rigorous), presented here at a conceptual level only, matching this module's own lighter scope.
+
+## Summary
+
+- Decision theory's core: a decision $a$, a stochastic outcome $y\sim P(y\mid a)$, a utility $U(y)$, and the principle of maximal expected utility; the von Neumann-Morgenstern theorem shows consistent preferences imply *some* utility function exists.
+- **Risk aversion/seeking** correspond to concave/convex utility functions over outcomes.
+- **Decision networks** generalize both MDPs (RL-01) and supervised ML (empirical risk minimization, ML-02) as instances of the identical formalism, differing in whether the decision process is sequential or single-step.
+- **Information gain** and **curiosity/intrinsic motivation** are task-independent objectives; naive prediction-error curiosity fails (white-noise trap), fixed by rewarding *predictor improvement* instead.
+- **Value alignment** is the open problem of specifying good objectives at all, given that humans are bad at fully specifying what they want; Russell's proposal is inferring preferences with appropriate uncertainty rather than fixing a hand-written objective.
+
+## Retrieval questions
+
+1. State the basic decision-theoretic formalism and the principle of maximal expected utility.
+2. Explain risk aversion/seeking in terms of utility function shape, with an example.
+3. Explain how both MDPs and supervised ML instantiate the decision-network formalism, and what differs between them.
+4. Why does naive prediction-error curiosity fail, and what fixes it?
+
+## Mastery checklist
+
+- [ ] Can state the decision-theoretic formalism and maximal-expected-utility principle.
+- [ ] Can explain risk aversion/seeking via utility concavity/convexity.
+- [ ] Can explain decision networks and how MDPs/ML both instantiate them.
+- [ ] Can explain the curiosity failure mode and its fix.
+- [ ] Can describe the value-alignment problem at a conceptual level.
+
+## Source note
+
+This module's exposition, the decision-theoretic formalism, the von Neumann-Morgenstern theorem, risk aversion/seeking, decision networks, the ML-as-risk-minimization framing, information gain, curiosity/intrinsic motivation (including the white-noise-TV failure mode and predictor-improvement fix, credited to Schmidhuber and to Lopes, Lang, Toussaint & Oudeyer, 2012), and value alignment (credited to Stuart Russell) are adapted from `lecture-ai`, §2.4 (pp. 90-98), covered at this module's own deliberately lighter, "light touch" depth per its curriculum-scoped role. All exercises are newly authored; the risk-aversion numeric example was independently verified with Python while authoring this module.
+
+---
+
+**Next**: Return to the [curriculum overview](/curriculum) — Block RL is complete.

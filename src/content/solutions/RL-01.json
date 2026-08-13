@@ -1,0 +1,34 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RL-01-ex1-markov-property-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains why position alone fails (residual dependence on velocity/history)." },
+          { "points": 2, "description": "Correctly explains why position+velocity succeeds." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Position alone doesn't determine future position: a car at a location moving at 60mph vs momentarily stopped there continues very differently, so 'future given position alone' still depends on unobserved velocity carried over from the past, violating the Markov property. Position and velocity together determine (under simple physics) exactly how the car evolves next with no residual dependence on history, satisfying the Markov property."
+    },
+    {
+      "exerciseId": "RL-01-ex2-recursive-value-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly splits off the r0 term as R(s,pi(s))." },
+          { "points": 2, "description": "Correctly conditions on s1 and identifies the inner expectation as V^pi(s')." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "V^pi(s) = E{r0|s0=s;pi} + gamma*E{r1+gamma*r2+...|s0=s;pi}. First term = R(s,pi(s)). Second term, conditioning on s1: sum_s' P(s'|s,pi(s)) * E{r1+gamma*r2+...|s1=s'} = sum_s' P(s'|s,pi(s)) * V^pi(s'). So V^pi(s) = R(s,pi(s)) + gamma*sum_s' P(s'|s,pi(s))*V^pi(s')."
+    },
+    {
+      "exerciseId": "RL-01-ex3-bellman-optimality-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 10, "tolerance": 0.01 },
+      "fullSolution": "V* = 1 + 0.9*V* => 0.1*V* = 1 => V* = 10. (Independently verified by summing the geometric series in Python.)"
+    }
+  ]
+}

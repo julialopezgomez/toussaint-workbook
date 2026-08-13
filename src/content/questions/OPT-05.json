@@ -34,6 +34,40 @@
       "reviewCardIds": []
     },
     {
+      "id": "OPT-05-ex2b-convergence-derivation",
+      "objective": "Derive the per-step expected-decrease inequality underlying the SGD convergence theorem.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-optimization", "page": 58, "originalNumber": "§3.1:7-8" },
+      "difficulty": "challenge",
+      "estimatedMinutes": 20,
+      "prerequisites": ["OPT-05-ex2-numeric"],
+      "answerType": "derivation",
+      "prompt": "Assuming $\\nabla f$ is $L$-Lipschitz-continuous, one can show $f(w)\\le f(\\bar w)+\\nabla f(\\bar w)^\\top(w-\\bar w)+\\tfrac12L\\|w-\\bar w\\|^2$ for any $w,\\bar w$ (a quadratic upper bound on $f$, derivable from Lipschitz continuity of $\\nabla f$ via a 2nd-order Taylor-style argument). Apply this with $w=w_{k+1}=w_k-\\alpha_k\\nabla f_i(w_k)$ and $\\bar w=w_k$ to derive $\\mathbb{E}\\{f(w_{k+1})\\} \\le f(w_k) - \\alpha_k\\|\\nabla f(w_k)\\|^2 + \\tfrac12\\alpha_k^2L\\,\\mathbb{E}\\{\\|\\nabla f_i(w_k)\\|^2\\}$.",
+      "hints": [
+        "Substitute $w-\\bar w = w_{k+1}-w_k = -\\alpha_k\\nabla f_i(w_k)$ into the quadratic upper bound: $f(w_{k+1}) \\le f(w_k) + \\nabla f(w_k)^\\top(-\\alpha_k\\nabla f_i(w_k)) + \\tfrac12L\\|-\\alpha_k\\nabla f_i(w_k)\\|^2 = f(w_k) - \\alpha_k\\nabla f(w_k)^\\top\\nabla f_i(w_k) + \\tfrac12\\alpha_k^2L\\|\\nabla f_i(w_k)\\|^2$.",
+        "Take expectations of both sides (over the random choice of $i$, with $w_k$ fixed/given). Use that $\\nabla f_i(w_k)$ is unbiased, $\\mathbb{E}\\{\\nabla f_i(w_k)\\}=\\nabla f(w_k)$, so $\\mathbb{E}\\{\\nabla f(w_k)^\\top\\nabla f_i(w_k)\\} = \\nabla f(w_k)^\\top\\mathbb{E}\\{\\nabla f_i(w_k)\\} = \\nabla f(w_k)^\\top\\nabla f(w_k) = \\|\\nabla f(w_k)\\|^2$ (since $\\nabla f(w_k)$ itself is a constant given $w_k$).",
+        "Substituting back: $\\mathbb{E}\\{f(w_{k+1})\\} \\le f(w_k) - \\alpha_k\\|\\nabla f(w_k)\\|^2 + \\tfrac12\\alpha_k^2L\\,\\mathbb{E}\\{\\|\\nabla f_i(w_k)\\|^2\\}$, exactly the claimed inequality. (From here, the full theorem follows by rearranging to isolate $\\|\\nabla f(w_k)\\|^2$, summing over $k=1..t$ so the $f(w_k)$ terms telescope, and using $\\mathbb{E}\\{f(w_t)\\}\\ge f^*$ to bound the result, the same 'bound then telescope' pattern used throughout convergence proofs.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-05-ex2c-adam-bias-correction",
+      "objective": "Verify Adam's bias correction is exact at the first iteration.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-optimization", "page": 63, "originalNumber": "§3.1:18" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["OPT-05-ex1-why-sgd"],
+      "answerType": "derivation",
+      "prompt": "Using Adam's update rules $m_t\\leftarrow\\beta_1m_{t-1}+(1-\\beta_1)g_t$ and $\\hat m_t\\leftarrow m_t/(1-\\beta_1^t)$, with $m_0=0$, show that at the very first iteration ($t=1$), $\\hat m_1=g_1$ exactly, for *any* value of $\\beta_1\\in[0,1)$ and *any* $g_1$ (i.e. the bias correction perfectly removes the initialization bias at $t=1$).",
+      "hints": [
+        "Compute $m_1$ first: $m_1 = \\beta_1m_0+(1-\\beta_1)g_1 = \\beta_1(0)+(1-\\beta_1)g_1 = (1-\\beta_1)g_1$.",
+        "Now compute $\\hat m_1 = m_1/(1-\\beta_1^1) = (1-\\beta_1)g_1/(1-\\beta_1)$.",
+        "The $(1-\\beta_1)$ factors cancel exactly (for $\\beta_1\\ne1$): $\\hat m_1=g_1$. Without the bias correction, $m_1=(1-\\beta_1)g_1$ would be a severe *underestimate* of the true gradient $g_1$ whenever $\\beta_1$ is close to 1 (its typical default, $0.9$, e.g. $m_1=0.1g_1$, a 10x underestimate); the correction exactly undoes this at $t=1$, and increasingly less aggressively as $t$ grows and $\\beta_1^t\\to0$."
+      ],
+      "reviewCardIds": []
+    },
+    {
       "id": "OPT-05-ex3-nfl-conceptual",
       "objective": "Explain the No Free Lunch theorem's practical implication.",
       "provenance": "newly-authored",

@@ -1,0 +1,73 @@
+{
+  "moduleId": "SYM-02",
+  "exercises": [
+    {
+      "id": "SYM-02-ex1-universal-instantiation",
+      "objective": "Apply universal instantiation to a quantified sentence with given constants.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 185, "originalNumber": "4.6:11" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Given $\\forall x:\\text{Student}(x)\\Rightarrow\\text{MustAttend}(x)$ and the constant $\\text{Priya}$, write the universally-instantiated ground sentence.",
+      "hints": [
+        "Universal instantiation replaces the quantified variable $v$ with a concrete ground term $g$, via $\\text{Subst}(\\{v/g\\},\\alpha)$.",
+        "Here $v=x$, $g=\\text{Priya}$, and $\\alpha=\\text{Student}(x)\\Rightarrow\\text{MustAttend}(x)$.",
+        "$\\text{Student}(\\text{Priya})\\Rightarrow\\text{MustAttend}(\\text{Priya})$: the same sentence with every occurrence of $x$ replaced by $\\text{Priya}$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "SYM-02-ex2-unification-derivation",
+      "objective": "Compute the unifying substitution for two atomic sentences.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 187, "originalNumber": "4.6:17" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Find a substitution $\\theta$ such that $\\text{Teaches}(\\text{Prof},x)\\theta=\\text{Teaches}(y,\\text{Robotics})\\theta$.",
+      "hints": [
+        "Match the sentences argument by argument: the first arguments are $\\text{Prof}$ and $y$; the second arguments are $x$ and $\\text{Robotics}$.",
+        "For the first arguments to become identical, $y$ must be substituted with $\\text{Prof}$. For the second arguments, $x$ must be substituted with $\\text{Robotics}$.",
+        "$\\theta=\\{x/\\text{Robotics},\\ y/\\text{Prof}\\}$. Check: $\\text{Teaches}(\\text{Prof},\\text{Robotics})=\\text{Teaches}(\\text{Prof},\\text{Robotics})$, identical, confirming $\\theta$ unifies the two sentences."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "SYM-02-ex3-gmp-derivation",
+      "objective": "Apply Generalized Modus Ponens to derive a ground conclusion from a general rule and specific facts.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 187, "originalNumber": "4.6:18" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["SYM-02-ex2-unification-derivation"],
+      "answerType": "derivation",
+      "prompt": "Given the rule $\\forall x:\\text{Student}(x)\\wedge\\text{Registered}(x,\\text{AI})\\Rightarrow\\text{MustSubmitHomework}(x)$ and facts $\\text{Student}(\\text{Priya})$, $\\text{Registered}(\\text{Priya},\\text{AI})$, apply Generalized Modus Ponens to derive a conclusion.",
+      "hints": [
+        "Identify $p_1'=\\text{Student}(\\text{Priya})$, $p_2'=\\text{Registered}(\\text{Priya},\\text{AI})$ (the known facts) and $p_1=\\text{Student}(x)$, $p_2=\\text{Registered}(x,\\text{AI})$ (the rule's premises).",
+        "Find $\\theta$ unifying both pairs simultaneously: $\\theta=\\{x/\\text{Priya}\\}$ works for both, since $\\text{Student}(x)\\theta=\\text{Student}(\\text{Priya})=p_1'$ and $\\text{Registered}(x,\\text{AI})\\theta=\\text{Registered}(\\text{Priya},\\text{AI})=p_2'$.",
+        "Apply GMP: conclude $q\\theta=\\text{MustSubmitHomework}(x)\\{x/\\text{Priya}\\}=\\text{MustSubmitHomework}(\\text{Priya})$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "SYM-02-ex4-chaining-tradeoff-conceptual",
+      "objective": "Explain the practical tradeoff between forward and backward chaining for FOL.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 176, "originalNumber": "4.5:28" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain why forward chaining is described as 'data-driven' and backward chaining as 'goal-driven,' and give one situation where each is the more natural choice.",
+      "hints": [
+        "Forward chaining starts from all currently-known facts and fires whatever rules apply, regardless of whether the results are relevant to any particular question, exactly like automatic/unconscious processing (e.g. recognizing an object without deliberately asking 'is this an object?').",
+        "Backward chaining starts from a specific query and only explores what's needed to answer *that* query, exactly like deliberate problem-solving (e.g. 'where are my keys?' only pursues leads relevant to finding keys, not everything you could possibly infer from your surroundings).",
+        "Forward chaining is natural when you want *all* consequences of new information (e.g. updating a knowledge base after new sensor data); backward chaining is natural when you have one specific question and want to avoid the wasted work of deriving lots of irrelevant facts along the way."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

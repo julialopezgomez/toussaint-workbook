@@ -1,0 +1,40 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RL-02-ex1-value-iteration-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.5, "tolerance": 0.01 },
+      "fullSolution": "V1(s1)=1, V1(s2)=0. V2(s2)=0+0.5*V1(s1)=0.5. (Independently verified with Python; V2(s1)=1 for reference.)"
+    },
+    {
+      "exerciseId": "RL-02-ex2-vq-relation-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly restates V* as the best achievable return maximized over first action and all decisions." },
+          { "points": 2, "description": "Correctly identifies Q*(s,a) as the same quantity with the first action fixed, so maxing over a recovers V*." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "V*(s) is the best achievable expected return, maximized over every possible first action (and all subsequent decisions). Q*(s,a) is by definition the best achievable return given the first action is fixed to a, with optimal behavior thereafter. Maximizing Q*(s,a) over a therefore recovers the same maximization V*(s) already performs over its first action: V*(s)=max_a Q*(s,a)."
+    },
+    {
+      "exerciseId": "RL-02-ex3-convergence-proof-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly substitutes the lower bound on Q_k into the Q-iteration update." },
+          { "points": 2, "description": "Correctly factors out the constant and identifies the Bellman equation for Q*, yielding the lower bound." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Q_{k+1}(s,a) = R(s,a)+gamma*sum_s' P(s'|s,a)*max_a' Q_k(s',a') >= R(s,a)+gamma*sum_s' P(s'|s,a)*max_a'[Q*(s',a')-Delta_k]. Since sum_s' P(s'|s,a)=1, -Delta_k factors out: = [R(s,a)+gamma*sum_s' P(s'|s,a)*max_a' Q*(s',a')] - gamma*Delta_k = Q*(s,a) - gamma*Delta_k."
+    },
+    {
+      "exerciseId": "RL-02-ex4-convergence-rate-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 44, "tolerance": 0 },
+      "fullSolution": "k > log(0.01)/log(0.9) ~= 43.7, so smallest integer k is 44. (Independently verified by direct iteration in Python.)"
+    }
+  ]
+}

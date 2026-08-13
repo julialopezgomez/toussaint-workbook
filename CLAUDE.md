@@ -1,6 +1,6 @@
 # CLAUDE.md — Toussaint Workbook
 
-Local-first learning workbook built from Marc Toussaint's TU Berlin course PDFs. The source code and authored content live in a **public** git repo (user's explicit decision, 2026-08-12, see `docs/decisions/0003-public-repo.md`), but the site itself is still local-only: no hosted/deployed version. Full context in `PROJECT_STATE.md` (resumable ledger) and `docs/decisions/` (decision records). Read those before making changes if resuming after a gap.
+Local-first learning workbook built from Marc Toussaint's TU Berlin course PDFs. The source code and authored content live in a **private** git repo (briefly made public, then reverted, see `docs/decisions/0003-public-repo.md`); the site itself is also local-only, no hosted/deployed version. Because the repo is private, actual figures from the source PDFs are embedded directly where they help (not just original redrawn diagrams) — this was an explicit tradeoff made contingent on staying private, so **do not make this repo public again without re-checking that decision with the user first**, since it would put copyrighted figures into public distribution. Full context in `PROJECT_STATE.md` (resumable ledger) and `docs/decisions/` (decision records). Read those before making changes if resuming after a gap.
 
 ## Non-negotiable rules
 

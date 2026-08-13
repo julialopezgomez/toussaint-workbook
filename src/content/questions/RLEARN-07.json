@@ -1,0 +1,90 @@
+{
+  "moduleId": "RLEARN-07",
+  "exercises": [
+    {
+      "id": "RLEARN-07-ex1-abstraction-levels-classification",
+      "objective": "Classify a robotics decision by its level of abstraction (force, motion, or task).",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 89, "originalNumber": "1.12:4-5" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Classify each of the following as force-level, motion-level, or task-level: (a) 'apply 12N along the gripper's closing axis,' (b) 'pick up the red cup,' (c) 'move the end-effector along this smooth 6D trajectory to the grasp pose.'",
+      "hints": [
+        "Force-level decisions specify raw physical quantities (torques, forces) directly.",
+        "Motion-level decisions specify kinematic targets or trajectories (positions, velocities, paths through configuration space), PLAN/DYN's territory.",
+        "Task-level decisions specify discrete, symbolic actions/skills (STRIPS/PDDL operators), abstracting away exactly how the motion or force gets realized."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-07-ex2-tamp-continuity-conceptual",
+      "objective": "Explain TAMP's continuity and entry-point constraints using a concrete pick-then-place example.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 90, "originalNumber": "1.12:7" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "For a two-step skeleton 'pick the cup, then place the cup,' explain concretely what the continuity constraint $\\tau_1(0)=\\tau_0(1)$ and the entry-point constraint $\\theta_1=\\tau_0(1)$ mean in terms of the actual pick and place motions.",
+      "hints": [
+        "$\\tau_0$ is the pick motion, ending at $\\tau_0(1)$ (the robot's configuration right after grasping the cup, cup now attached). $\\tau_1$ is the place motion.",
+        "Continuity ($\\tau_1(0)=\\tau_0(1)$) means the place motion must literally *start* from wherever the pick motion ended: no teleporting between segments, the robot's actual configuration is continuous across the mode switch.",
+        "The entry-point constraint ($\\theta_1=\\tau_0(1)$) means the *feasible space* $X_{s_1,\\theta_1}$ that the place motion operates within (e.g. which grasp was used, since that determines how the cup is now held and what placement motions are geometrically valid) is itself determined by exactly where the pick motion ended, not chosen independently: the specific grasp achieved by pick becomes a parameter of the place problem."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-07-ex3-lgp-constraints-derivation",
+      "objective": "Distinguish the LGP's within-mode and mode-transition constraints with concrete manipulation examples.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 90, "originalNumber": "1.12:8" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": ["RLEARN-07-ex2-tamp-continuity-conceptual"],
+      "answerType": "short-text",
+      "prompt": "For the LGP's two constraint types, $\\bar\\phi(\\bar x(t),s_{k(t)})\\leq0$ (enforced for all $t$ within a mode) and $\\hat\\phi(\\bar x(t_k),s_{k-1},s_k)\\leq0$ (enforced only at mode-switch times $t_k$), give one concrete manipulation example of each.",
+      "hints": [
+        "$\\bar\\phi$ holds continuously *throughout* a mode: an example is 'while grasped, the object's pose is rigidly fixed relative to the gripper,' a constraint that must hold at every instant during the grasped mode, not just at its boundaries.",
+        "$\\hat\\phi$ is only checked at the instant of switching modes: an example is 'at the moment of grasping, the gripper's fingers must actually be positioned at the object's surface, correctly aligned,' a constraint about the transition itself, not about anything before or after it.",
+        "The distinction matters computationally too: $\\bar\\phi$ constrains an entire continuous time interval (a genuine trajectory-optimization constraint, DYN-04's territory), while $\\hat\\phi$ constrains only a single time point per mode switch, a much smaller (though still often nonlinear) constraint."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-07-ex4-deep-visual-constraints-conceptual",
+      "objective": "Explain how Deep Visual Constraints' training pattern instantiates RLEARN-06's privileged-teacher idea.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 92, "originalNumber": "1.12:13" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["RLEARN-06-ex1-privileged-teacher-grasp-labels"],
+      "answerType": "short-text",
+      "prompt": "Explain what plays the role of privileged information in training Deep Visual Constraints' $\\phi_\\theta(x;I)$, and what the deployed network actually has access to.",
+      "hints": [
+        "Training labels for $\\phi_\\theta(x;I)=0$ (correct grasp/hanging) come from trial-and-error data collected in simulation, where the simulator has privileged access to exact object shapes, poses, and physics, exactly the same privileged source as RLEARN-06's ACRONYM.",
+        "At deployment, $\\phi_\\theta$ only ever sees camera images $I$, never exact shapes/poses directly.",
+        "So the pattern is identical to RLEARN-06's grasp-label case: a privileged simulator generates ground-truth success/failure labels, and the network's job is only to reproduce that judgment from realistic image input, now supplying an entire constraint function for the LGP rather than a single grasp score."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-07-ex5-plan-prediction-conceptual",
+      "objective": "Explain the language-model analogy underlying Deep Visual Reasoning's sequential policy.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-robotlearning", "page": 93, "originalNumber": "1.12:18" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain, term by term, what in $\\pi(a_k\\mid g,a_{1:k-1},S)$ corresponds to a language model's 'predict the next token given the previous tokens' setup.",
+      "hints": [
+        "A language model predicts the next token $x_{n+1}$ given the sequence of previous tokens $x_{1:n}$: the analogous quantity here is the next symbolic action $a_k$, predicted given the sequence of previous actions $a_{1:k-1}$.",
+        "The language model's implicit 'context' (whatever fixed prompt or document it's conditioned on) corresponds here to the scene $S$ and goal $g$, both held fixed throughout the whole predicted action sequence.",
+        "So $\\pi(a_k\\mid g,a_{1:k-1},S)$ is exactly 'predict the next token ($a_k$) given the previous tokens ($a_{1:k-1}$) and a fixed context (goal $g$, scene $S$),' the identical autoregressive structure as a language model, just with symbolic robot actions in place of words."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

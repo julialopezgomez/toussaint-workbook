@@ -1,0 +1,129 @@
+---
+id: RLEARN-00
+block: RLEARN
+title: "Robot Learning: Taxonomy & Landscape"
+tier: 1
+estimatedHours: 2
+prerequisites: ["DYN-04", "ML-04"]
+objectives:
+  - "State Toussaint's Robot Learning Mini Taxonomy (what is learned × how is data generated), and place every upcoming RLEARN module within it."
+  - "Explain robot learning as 'shortcutting' specific components of the classical model-based control stack, module by module."
+  - "State the two core challenges (environment interaction, state estimation) that motivate learning over purely model-based robotics."
+sources:
+  - { sourceId: "lecture-robotlearning", pages: "p8-10, p16-18 (§1.2, §1.3 closing)", role: "primary" }
+concepts:
+  - "Robot Learning Mini Taxonomy (what/how)"
+  - "Model-based control stack, and where learning shortcuts it"
+  - "Motivating challenges: environment interaction, state estimation"
+notation:
+  - { symbol: "$x_{t+1}=f(x_t,u_t)$", meaning: "the model-based control stack's dynamics model, the thing every robot-learning method in this block is ultimately a shortcut around or a component of" }
+cheatsheetLinks: []
+nextModules: ["RLEARN-01"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Block RLEARN is eight modules (dynamics learning, imitation learning, RL in robotics, offline RL/sim2real, inverse RL, grasp learning, TAMP, multi-robot learning) that can, from the outside, look like an unrelated list of techniques. They aren't: Toussaint's own **Mini Taxonomy** organizes the entire landscape along just two axes, and once you see the map, every later module is a labeled point on it rather than a new, disconnected topic. This module is that map, built before the block dives into individual techniques, exactly so you have orientation from the start rather than only in retrospect.
+
+## Prerequisites & readiness check
+
+You should have DYN-04's control stack (IK → path finding/trajectory optimization → PD/MPC) and ML-04's supervised/unsupervised ML distinction fresh.
+
+<ReadinessCheck
+  question="From DYN-04, what are the three stages of the standard robot control stack?"
+  answer="Inverse kinematics (find a target configuration), path finding/trajectory optimization (find a reference motion), and PD/MPC control (track the reference)."
+/>
+
+## The Mini Taxonomy: two questions that span the whole field
+
+Every robot learning approach answers two independent questions.
+
+**I. What is learned?** Which mapping, between state/observation, control, reward, value, or plan, is the learning target:
+
+| Learned mapping | Named as | Covered in |
+|---|---|---|
+| state, control $\mapsto$ next state | Dynamics learning, system identification | [RLEARN-01](/course/RLEARN/RLEARN-01) |
+| state $\mapsto$ control | Behavior cloning, RL policy | [RLEARN-02](/course/RLEARN/RLEARN-02), [RLEARN-03](/course/RLEARN/RLEARN-03) |
+| state, control $\mapsto$ reward | Model-based RL, inverse RL | [RLEARN-05](/course/RLEARN/RLEARN-05) |
+| observations $\mapsto$ control | Policy under partial observability (recurrent/transformer) | [RLEARN-02](/course/RLEARN/RLEARN-02), [RLEARN-04](/course/RLEARN/RLEARN-04) |
+| state $\mapsto$ plan | Plan prediction (e.g. with language models) | [RLEARN-07](/course/RLEARN/RLEARN-07) |
+| state/observations $\mapsto$ value | Q-learning, value-function shortcuts | [RL-03](/course/RL/RL-03) (already built) |
+| observations $\mapsto$ state | Perception: state estimation, grasp/pose prediction | [RLEARN-06](/course/RLEARN/RLEARN-06) |
+| state/observations $\mapsto$ constraints | Manipulation model: success/affordance/grasp constraints | [RLEARN-06](/course/RLEARN/RLEARN-06), [RLEARN-07](/course/RLEARN/RLEARN-07) |
+
+<ExerciseCard id="RLEARN-00-ex1-taxonomy-classification" />
+
+**II. How is the data generated?** Independent of *what* is learned, data can come from:
+
+- **Human demonstration**: imitation learning/behavior cloning, inverse RL/preference learning.
+- **Online, by the robot itself**: on-policy/off-policy learning, RL vs. offline RL.
+- **Simulation/domain transfer**: the sim2real gap, domain randomization, domain adaptation.
+- **"Optimally"** (e.g. maximizing information gain): active learning, intrinsic rewards, Bayesian RL/exploration (RL-05), frequency excitation in system identification, structured exploration noise.
+- **"Safely"** (e.g. subject to chance constraints): safe RL, safe exploration (out of this workbook's scope, flagged here for completeness).
+
+<ExerciseCard id="RLEARN-00-ex2-data-generation-classification" />
+
+These two axes are **independent**: any "what" can, in principle, be paired with any "how" (e.g. dynamics learning from either real flights or simulation; policy learning from either human demonstration or online RL). This is precisely why the field looks so large: it's the *product* of a short "what" list and a short "how" list, not an unstructured pile of unrelated methods.
+
+## Robot learning as shortcuts to the model-based control stack
+
+<ExerciseCard id="RLEARN-00-ex3-shortcut-mapping" />
+
+DYN-01 through DYN-04 and KIN-03 built a complete **model-based** control stack: forward/inverse kinematics, forward/inverse dynamics, IK, path finding/trajectory optimization, PD/Riccati/MPC control. That stack works *perfectly*, assuming you know the multibody structure, shapes, and inertias, and can write every goal as a differentiable cost/constraint. Robot learning's real job, in this light, is **replacing or shortcutting specific pieces of that stack** when those assumptions break down:
+
+| Classical component (already built) | Learning shortcut |
+|---|---|
+| Dynamics modeling (DYN-01's $M(q)\ddot q+F(q,\dot q)=u$) | System identification / dynamics learning (RLEARN-01) |
+| Optimal control (DYN-04's Riccati, MPC) | Learn a $V$- or $Q$-function directly (RL-02/RL-03) |
+| Inverse dynamics (needed for $V$-based control) | Learn a $Q$-function instead, skipping the inverse-dynamics step entirely |
+| Constraint solving / IK (KIN-03) | Learn a policy or sampler that directly satisfies the constraint |
+| State estimation (never built in this workbook, see below) | Learn sensor-based (not state-based) models directly |
+| The entire stack | End-to-end: learn images $\mapsto$ torques directly |
+
+This table is worth re-reading after finishing the block: every RLEARN module is, in this framing, a specific row.
+
+## Why learning is needed at all: two challenges
+
+If the model-based assumptions above always held, there'd be little reason to learn anything. Two challenges break them in practice:
+
+**Challenge 1: interacting with the environment.** Objects in the environment are part of the multibody system (DYN-01) but aren't articulated: if not grasped, their Jacobian is exactly zero, and contact introduces hard on/off switching (**hybrid dynamics**, MANIP-02's exact framing for legged locomotion, equally true for manipulation and now generalized as a core *motivation* for learning, not just a technical wrinkle in one sub-topic). Object dynamics (friction, stiction, slip, non-point contacts) can be far more complex than the robot's own, otherwise-clean, dynamics.
+
+**Challenge 2: state estimation.** Every model-based method assumes the current state $q_0$, environment object poses, shapes, and dynamics parameters are known. Powerful state-estimation methods exist, but needing them at all is, in Toussaint's own stated view, the main practical downside of model-based robotics, and a core motivation for learning methods that work directly from raw sensor observations instead.
+
+<ExerciseCard id="RLEARN-00-ex4-challenges-conceptual" />
+
+## What this block does *not* re-cover
+
+Two source sections deliberately have no dedicated module here: "Robotics Essentials" (kinematics, dynamics, the standard control stack, IK, MPC) is **DYN-01 through DYN-04 and KIN-01/KIN-03**, already built in full; "Machine Learning Essentials" (supervised/unsupervised ML, loss functions, parameterized models, autoencoders) is **ML-01 through ML-07**, likewise already built. Re-deriving either here would be pure duplication; this workbook's RLEARN block starts exactly where those leave off.
+
+## Summary
+
+- The **Mini Taxonomy** spans robot learning with two independent questions: **what** is learned (dynamics, policy, reward, value, plan, perception, constraints) and **how** is data generated (demonstration, online, simulation, optimally, safely).
+- Robot learning is best understood as **shortcutting specific components** of the model-based control stack (DYN/KIN blocks) when its assumptions (known model, differentiable goals) break down.
+- Two challenges motivate learning: **environment interaction** (hybrid, contact-driven dynamics) and **state estimation** (needing to know the state at all).
+- "Robotics Essentials" and "ML Essentials" primer content is intentionally not re-covered, fully redundant with the already-built DYN/KIN and ML blocks.
+
+## Retrieval questions
+
+1. State both axes of the Mini Taxonomy, with two examples of "what is learned" per axis.
+2. Pick any three rows of the shortcut table and explain what classical component each replaces.
+3. State the two challenges motivating robot learning, and connect the first to MANIP-02's hybrid dynamics.
+4. Why are "Robotics Essentials" and "ML Essentials" not covered as separate RLEARN modules?
+
+## Mastery checklist
+
+- [ ] Can state the Mini Taxonomy's two axes and classify a learning task within it.
+- [ ] Can explain robot learning as shortcutting the model-based control stack, with concrete examples.
+- [ ] Can state the two motivating challenges (environment interaction, state estimation).
+- [ ] Knows which existing blocks already cover the "Robotics/ML Essentials" primer content.
+
+## Source note
+
+This module's exposition, the Mini Taxonomy (both axes), the model-based-control-stack recap, the "shortcuts" framing, and the two motivating challenges are adapted from `lecture-robotlearning`, §1.2 (pp. 8-10) and the closing of §1.3 (pp. 16-18). The "Robotics Essentials" (§1.3, pp. 10-16) and "Machine Learning Essentials" (§1.4, pp. 19-23) primer sections themselves are deliberately not separately covered, being fully redundant with material already built in Blocks DYN/KIN and ML respectively; this module cites and cross-references that existing content rather than duplicating it. All exercises are newly authored.
+
+---
+
+**Next**: [RLEARN-01: Dynamics Learning](/course/RLEARN/RLEARN-01)

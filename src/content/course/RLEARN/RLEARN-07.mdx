@@ -1,0 +1,125 @@
+---
+id: RLEARN-07
+block: RLEARN
+title: "Task and Motion Planning & Logic-Geometric Programs"
+tier: 1
+estimatedHours: 4
+prerequisites: ["SYM-03", "PLAN-02", "OPT-04"]
+objectives:
+  - "State the three levels of manipulation abstraction (force, motion, task), and the TAMP path-finding formulation connecting them."
+  - "Derive the full Logic-Geometric Program (LGP) formulation from TAMP's path-finding view, and explain its skeleton/NLP decomposition."
+  - "Explain the two concrete opportunities for learning in TAMP (learned constraints, learned plan prediction), and survey language-grounded robotics."
+sources:
+  - { sourceId: "lecture-robotlearning", pages: "p89-99 (§1.12)", role: "primary" }
+concepts:
+  - "Abstraction levels: force, motion, task"
+  - "TAMP: task level, motion level, path-finding formulation"
+  - "Logic-Geometric Program (LGP)"
+  - "Learning in TAMP: visual constraints, plan prediction"
+  - "Language-grounded robotics (CLIP, SayCan, PaLM-E)"
+notation:
+  - { symbol: "$X_{s,\\theta}$", meaning: "the feasible configuration space given symbolic state $s$ and entry parameter $\\theta$ (a foliation of $X$)" }
+  - { symbol: "$s_{1:K}$", meaning: "a skeleton: a sequence of symbolic (task-level) states" }
+  - { symbol: "$\\bar\\phi,\\hat\\phi$", meaning: "LGP's continuous-mode and mode-transition constraints, respectively" }
+cheatsheetLinks: []
+nextModules: ["RLEARN-08"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+Every earlier block in this workbook feeds directly into this module. PLAN built continuous motion planning; SYM-03 built STRIPS/PDDL's discrete symbolic planning; DYN-04 built trajectory optimization. **Task and Motion Planning (TAMP)** is the genuine synthesis of all three, and the **Logic-Geometric Program (LGP)** formulation is Toussaint's own core research framework. This is, in a real sense, the module the rest of this curriculum was built to arrive at.
+
+## Prerequisites & readiness check
+
+You should have SYM-03's STRIPS/PDDL, PLAN-01's configuration space, and DYN-04's trajectory-optimization cost fresh.
+
+<ReadinessCheck
+  question="From SYM-03, what does a STRIPS symbolic action operator define?"
+  answer="A precondition (which grounded facts must hold) and an effect (which facts change), together implying the set of possible successor states succ(s_t)."
+/>
+
+## Three levels of abstraction
+
+What's the right level to reason about manipulation? **Force** (raw torques), **motion** (kinematic waypoints, PLAN/DYN's territory), or **actions/skills** (pick, place, push, throw, ...)? AI/RL researchers approach this via hierarchical MDPs, options, and hierarchical RL (abstraction learning is genuinely hard in both directions: given primitives, state abstractions are relatively clear; given state abstractions, action-primitive discovery is the hard direction, "skill discovery"). Roboticists instead distinguish **force level, motion level, task level** directly, with the task level given a genuinely symbolic, discrete representation: **STRIPS/PDDL** (SYM-03), a symbolic state as grounded literals, action operators as precondition/effect pairs, defining $\text{succ}(s_t)$.
+
+<ExerciseCard id="RLEARN-07-ex1-abstraction-levels-classification" />
+
+## TAMP: connecting task level and motion level
+
+- **Task level**: symbols (predicates), objects (constants), action operators; an initial state $s_0$, a goal sentence, and $\text{succ}(s_t)$ implied by the operators, exactly SYM-03/SYM-02's FOL machinery.
+- **Motion level**: a configuration space $X$ (PLAN-01), a goal set $X_\text{goal}\subseteq X$, and a **feasible space** $X_{s,\theta}\subseteq X$ depending on *both* the current symbolic state $s$ *and* an entry parameter $\theta$ (e.g. which grasp, which face of an object): different symbolic states carve out genuinely different feasible regions of the *same* underlying $X$ (called a **foliation**, motivating **multi-modal motion planning**).
+
+**TAMP as path-finding**: find a sequence of symbolic states and continuous paths, $(s_i,\tau_i)$, with $\tau_i:[0,1]\to X_{s_i,\theta_i}$, satisfying:
+
+$$\text{continuity: } \tau_i(0)=\tau_{i-1}(1), \qquad \text{entry points: } \theta_i=\tau_{i-1}(1), \qquad \text{goal: } s_K\models\text{goal},\ \tau_K(1)\in X_\text{goal}$$
+
+<ExerciseCard id="RLEARN-07-ex2-tamp-continuity-conceptual" />
+
+**Every path segment must end exactly where the next one begins** (continuity), and the parameter selecting *which* feasible region the next segment lives in is exactly the endpoint of the previous one (e.g. finishing a "pick" motion at a specific grasp *is* the entry parameter for the following "place" motion's feasible space): PLAN-02's continuous path finding, now happening once per symbolic state, chained together, with the symbolic sequence itself also needing to be searched.
+
+## The Logic-Geometric Program (LGP)
+
+TAMP's path-finding formulation becomes a genuine optimization problem, **the LGP**:
+
+$$\min_{\substack{s_{1:K}\\ x:[0,KT]\to X}}\ \int_0^{KT}c(\bar x(t))\,dt \quad\text{s.t.}\quad \bar x(0)=\bar x_0,\ s_K\models\text{goal}$$
+$$\forall t\in[0,T]:\ \bar\phi(\bar x(t),s_{k(t)})\leq0, \qquad \forall k\in\{1,..,K\}:\ \hat\phi(\bar x(t_k),s_{k-1},s_k)\leq0, \qquad \forall k:\ s_k\in\text{succ}(s_{k-1})$$
+
+<ExerciseCard id="RLEARN-07-ex3-lgp-constraints-derivation" />
+
+with $\bar x=(x,\dot x,\ddot x)$ (DYN-04's $k$-order cost-term notation) and inequalities subsuming equalities. **$\bar\phi$** enforces "correct physics *within* a mode" (e.g. an object stays rigidly attached to the gripper while grasped, an unheld object stays fixed); **$\hat\phi$** enforces "correct physics *at a mode switch*" (e.g. the gripper must actually be at the object's surface, aligned appropriately, for a grasp transition to be valid). The **skeleton** $s_{1:K}$ picks a schedule of physical modes; solving the LGP means *jointly* searching over skeletons and solving the resulting continuous NLP (OPT-04's constrained-optimization machinery) for each candidate skeleton.
+
+This decomposes cleanly: **PDDL/logic** search proposes *feasible skeletons* (which sequences of modes are even symbolically valid); for each, geometry/kinematics/physics determines *feasible geometry* within that skeleton; infeasible subgraphs (skeleton prefixes provably geometrically infeasible) prune away entire branches of the discrete search, with A\* heuristics (RL-06's tree-search machinery) derived directly from the NLP's own cost bounds, a genuinely tight coupling between the discrete and continuous search, not two independent stages bolted together.
+
+## Is model-based TAMP a dead end?
+
+The LGP as stated assumes a fully-known world model, an unrealistic assumption (state estimation from vision is ill-posed, PLAN/DYN's clean setting doesn't hold), and re-planning from scratch every time is computationally expensive. **But**: the LGP's actual mathematical requirement is only the *constraint functions* $\bar\phi,\hat\phi$, not an explicit world model at all, opening two concrete learning opportunities.
+
+**Learned constraints — Deep Visual Constraints** (Ha, Driess & Toussaint, 2022): learn $\phi_\theta(x;I)$ directly from camera images $I=\{(I_1,K_1),..,(I_V,K_V)\}$, such that $\phi(x;I)=0$ iff $x$ is a correct grasp (or hanging, or other interaction), replacing a hand-derived geometric constraint with an **image-conditioned** one. Architecture: first train a per-point implicit field $y(p;I)=\frac1V\sum_i\text{MLP}(\text{UNet}(I_i,K_i(x)),K_i(x))$ (pretrained for shape/SDF decoding), then query it at a finite set of interaction points $p_1(x),..,p_K(x)$ and combine, $\phi(x;I)=\text{MLP}(y(p_1(x);I),..,y(p_K(x);I))$, fine-tuned end-to-end for manipulation success via trial-and-error data in simulation, exactly RLEARN-06's grasp-label-generation pattern (a privileged simulator generates success/failure labels, the network transfers this to real image input), now supplying LGP's own constraint functions instead of a grasp score. Once trained, the LGP solves *directly* against $\phi_\theta$: no skeleton search, no reactive MPC, just an optimal path for a given, already-known sequence of constraints.
+
+<ExerciseCard id="RLEARN-07-ex4-deep-visual-constraints-conceptual" />
+
+**Learning to predict plans — Deep Visual Reasoning** (Driess, Ha & Toussaint, 2020): rather than searching the discrete skeleton space from scratch every time (expensive), train a **sequential policy**
+
+$$\pi(a_k\mid g,a_{1:k-1},S) = P\big(\exists K>K,\exists a_{k+1:K}: a_{1:K}\text{ feasible}\mid a_k,g,a_{1:k-1},S\big)$$
+
+<ExerciseCard id="RLEARN-07-ex5-plan-prediction-conceptual" />
+
+trained on data $\{(S^i,g^i,a^i_{1:K_i},F^i)\}$ (scene, goal, action sequence, feasibility label), randomly generated in simulation and labeled by an actual model-based TAMP solver, **exactly a language model's "predict the next token" objective, applied to predicting the next symbolic action** given the scene, goal, and actions so far. Often, the very first proposed action sequence is already feasible, dramatically cutting the effective search compared to solving the discrete skeleton problem from scratch each time.
+
+## Language in robotics
+
+A large, active research direction (surveyed but not derived in depth here, matching this module's own remaining scope): grounding natural language in physically-executable robot behavior. **CLIP** (Radford et al., 2021) pretrains joint image/text embeddings via contrastive learning (maximize similarity of matching image-caption pairs, minimize it for mismatches), the foundation under most later work. **CLIPort** (Shridhar, Manuelli & Fox, 2022) combines CLIP's semantic understanding ("what") with spatial precision ("where") for language-conditioned pick-and-place. **SayCan** (Brohan et al., 2023) multiplies an LLM's proposed-action likelihoods by a learned affordance/success probability, grounding language proposals in what's actually physically achievable. **PaLM-E** (Driess et al., 2023) and its successor **RT-2** interleave language, images, and robot-action tokens directly in one large multimodal model, trained partly on TAMP-solver-generated data, outputting action sequences (or, in RT-2, quasi-continuous actions) end-to-end. The throughline across all four: language is grounded not by translating it into STRIPS/PDDL symbols by hand, but by training directly against physically-executable, often TAMP-solver-generated, data.
+
+## Summary
+
+- Manipulation abstraction spans **force, motion, task** levels; TAMP's **task level** is SYM-03's STRIPS/PDDL, its **motion level** is PLAN-01's configuration space, foliated by the current symbolic state.
+- TAMP's **path-finding formulation** chains symbolic-state/continuous-path pairs $(s_i,\tau_i)$ with continuity and entry-point constraints; the **Logic-Geometric Program** turns this into a genuine joint optimization over skeletons $s_{1:K}$ and a continuous trajectory, with $\bar\phi$ (within-mode) and $\hat\phi$ (mode-transition) constraints.
+- Model-based TAMP's real requirement is only the constraint functions, not a full world model: **Deep Visual Constraints** learns $\phi_\theta(x;I)$ directly from images (a privileged-teacher pattern, RLEARN-06); **Deep Visual Reasoning** learns to predict feasible action sequences directly, a language-model-style next-action predictor trained on TAMP-solver-labeled data.
+- **Language-grounded robotics** (CLIP, CLIPort, SayCan, PaLM-E, RT-2) grounds natural language directly against physically-executable, often TAMP-generated, data rather than hand-built symbol translation.
+
+## Retrieval questions
+
+1. State the three abstraction levels, and how TAMP's task/motion levels map onto SYM-03 and PLAN-01.
+2. State the TAMP path-finding formulation's continuity and entry-point constraints.
+3. Write the full LGP formulation, and explain what $\bar\phi$ and $\hat\phi$ each enforce.
+4. Explain Deep Visual Constraints' training pattern and its connection to RLEARN-06's privileged-teacher idea.
+5. Explain Deep Visual Reasoning's "language model" analogy.
+
+## Mastery checklist
+
+- [ ] Can state the three abstraction levels and TAMP's task/motion-level formalization.
+- [ ] Can state the TAMP path-finding formulation.
+- [ ] Can write and explain the full LGP formulation, including both constraint types.
+- [ ] Can explain both learning-in-TAMP approaches (visual constraints, plan prediction).
+- [ ] Can name and briefly describe the major language-grounded robotics systems.
+
+## Source note
+
+This module's exposition, the abstraction-levels discussion, TAMP's task/motion-level formalization and path-finding formulation, the full Logic-Geometric Program (Toussaint, 2015; Toussaint, Allen, Smith & Tenenbaum, 2018), the "is model-based TAMP a dead end" discussion, Deep Visual Constraints (Ha, Driess & Toussaint, 2022), Deep Visual Reasoning (Driess, Ha & Toussaint, 2020), and the language-in-robotics survey (CLIP, CLIPort, SayCan, PaLM-E, RT-2) are adapted from `lecture-robotlearning`, §1.12 (pp. 89-99). This is, by the curriculum's own design, the module most directly aligned with the reader's own research area. All exercises are newly authored.
+
+---
+
+**Next**: [RLEARN-08: Multi-Robot Learning (light touch)](/course/RLEARN/RLEARN-08)

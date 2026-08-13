@@ -1,0 +1,101 @@
+---
+id: RL-02
+block: RL
+title: "Value Iteration, Q-Iteration & Convergence"
+tier: 1
+estimatedHours: 3
+prerequisites: ["RL-01"]
+objectives:
+  - "Derive the value iteration and Q-iteration algorithms directly from the Bellman optimality equation."
+  - "State the V*/Q* relations that convert between them."
+  - "Prove Q-iteration converges to Q*, using an infinity-norm contraction argument."
+sources:
+  - { sourceId: "lecture-ai", pages: "p71-72 (§2.2)", role: "primary" }
+concepts:
+  - "Value iteration"
+  - "Q-iteration"
+  - "Contraction mapping, convergence proof"
+notation:
+  - { symbol: "$V_k(s)$", meaning: "value iteration's estimate of $V^*(s)$ after $k$ iterations" }
+  - { symbol: "$\\Delta_k$", meaning: "$\\|Q^*-Q_k\\|_\\infty=\\max_{s,a}|Q^*(s,a)-Q_k(s,a)|$, the convergence proof's error measure" }
+cheatsheetLinks: []
+nextModules: ["RL-03"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+
+## Why this matters
+
+RL-01 gave you the Bellman optimality equation, a single equation $V^*$ must satisfy. This module turns that equation into an actual algorithm, assuming (for now) full knowledge of the MDP: $P(s'\mid s,a)$ and $R(s,a)$ known exactly. **Value iteration** and **Q-iteration** are the model-based backbone of RL, and their convergence proof (a clean, self-contained argument) is the template every later convergence result in this block reuses.
+
+## Prerequisites & readiness check
+
+You should have RL-01's Bellman optimality equation fresh.
+
+<ReadinessCheck
+  question="From RL-01, what equation must the optimal value function V* satisfy?"
+  answer="V*(s) = max_a[R(s,a) + γ Σ_s' P(s'|s,a) V*(s')]."
+/>
+
+## Value iteration
+
+$V^*$ is a **fixed point** of the Bellman optimality equation: plugging $V^*$ into the right-hand side reproduces $V^*$ itself. This directly suggests an algorithm, **value iteration**: initialize $V_0(s)=0$ for all $s$, then repeatedly apply the Bellman equation as an *update rule* rather than a fixed-point condition:
+
+$$V_{k+1}(s) = \max_a\Big[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\,V_k(s')\Big], \qquad \forall s$$
+
+iterating until $\max_s|V_{k+1}(s)-V_k(s)|\leq\epsilon$.
+
+<ExerciseCard id="RL-02-ex1-value-iteration-numeric" />
+
+## Q-iteration
+
+The identical idea applied to $Q^*(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\max_{a'}Q^*(s',a')$ (the Bellman optimality equation, in $Q$-form; note **the optimal policy reads off directly**, $\pi^*(s)=\operatorname*{argmax}_aQ^*(s,a)$, no separate maximization step needed once $Q^*$ is known):
+
+$$Q_{k+1}(s,a) = R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\max_{a'}Q_k(s',a'), \qquad \forall s,a$$
+
+<ExerciseCard id="RL-02-ex2-vq-relation-derivation" />
+
+## Convergence proof
+
+<ExerciseCard id="RL-02-ex3-convergence-proof-derivation" />
+
+**Theorem**: Q-iteration converges to $Q^*$. **Proof**: let $\Delta_k:=\|Q^*-Q_k\|_\infty=\max_{s,a}|Q^*(s,a)-Q_k(s,a)|$ (the worst-case error over every state-action pair). Then
+
+$$Q_{k+1}(s,a) = R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\max_{a'}Q_k(s',a') \leq R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\max_{a'}\big[Q^*(s',a')+\Delta_k\big]$$
+
+(using $Q_k(s',a')\leq Q^*(s',a')+\Delta_k$ for every $s',a'$, by definition of $\Delta_k$). Since $\sum_{s'}P(s'\mid s,a)=1$, the $\Delta_k$ term factors straight out:
+
+$$= \Big[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\max_{a'}Q^*(s',a')\Big]+\gamma\Delta_k = Q^*(s,a)+\gamma\Delta_k$$
+
+(the bracketed term is exactly $Q^*(s,a)$'s own Bellman equation). By an identical argument in the other direction, $Q_{k+1}(s,a)\geq Q^*(s,a)-\gamma\Delta_k$. So $\Delta_{k+1}\leq\gamma\Delta_k$: **the error shrinks by a factor of $\gamma<1$ every iteration**, hence $\Delta_k\to0$ geometrically, and $Q_k\to Q^*$. The identical argument applies to value iteration.
+
+<ExerciseCard id="RL-02-ex4-convergence-rate-numeric" />
+
+## Summary
+
+- **Value iteration** and **Q-iteration** turn the Bellman optimality equation from RL-01 into an iterative update rule, starting from $V_0=0$ (or $Q_0=0$) and converging to $V^*$ (or $Q^*$).
+- $V^*(s)=\max_aQ^*(s,a)$ converts between them; $Q^*$ additionally hands you the optimal policy directly, $\pi^*(s)=\operatorname*{argmax}_aQ^*(s,a)$, with no extra step.
+- **Convergence proof**: the worst-case error $\Delta_k=\|Q^*-Q_k\|_\infty$ shrinks by a factor of $\gamma$ every iteration, $\Delta_{k+1}\leq\gamma\Delta_k$, a **contraction mapping** argument, guaranteeing geometric convergence to $Q^*$.
+
+## Retrieval questions
+
+1. Derive the value iteration and Q-iteration update rules from the Bellman optimality equation.
+2. State the $V^*$/$Q^*$ relations, and explain why $Q^*$ is more directly useful for reading off a policy than $V^*$.
+3. Prove Q-iteration's convergence, without looking back.
+4. If $\Delta_0=100$ and $\gamma=0.9$, roughly how many iterations until $\Delta_k<1$?
+
+## Mastery checklist
+
+- [ ] Can derive value iteration and Q-iteration from the Bellman optimality equation.
+- [ ] Can state the $V^*$/$Q^*$ relations.
+- [ ] Proved Q-iteration's convergence via the contraction argument.
+- [ ] Can compute the number of iterations needed for a given error tolerance.
+
+## Source note
+
+This module's exposition, the value iteration and Q-iteration algorithms, the $V^*$/$Q^*$ relations, and the full convergence proof are adapted from `lecture-ai`, §2.2 (pp. 71-72). All exercises are newly authored; the hand-worked value iteration example was independently verified with Python while authoring this module.
+
+---
+
+**Next**: [RL-03: Model-Free RL: TD Learning & Q-Learning](/course/RL/RL-03)

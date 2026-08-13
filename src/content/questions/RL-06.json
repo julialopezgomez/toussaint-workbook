@@ -1,0 +1,73 @@
+{
+  "moduleId": "RL-06",
+  "exercises": [
+    {
+      "id": "RL-06-ex1-tree-search-complexity-numeric",
+      "objective": "Compute the total node count for breadth-first search at a given branching factor and depth.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 121, "originalNumber": "4.1:23" },
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For $b=10,\\ d=5$, breadth-first search's total node count (summed by depth level, with the last level fully expanded before finding the solution at the far-left leaf) is $10+100+1{,}000+10{,}000+100{,}000+999{,}990$. Compute this sum. Enter an integer.",
+      "hints": [
+        "Add the first five terms: $10+100+1{,}000+10{,}000+100{,}000=111{,}110$.",
+        "Add the last term: $111{,}110+999{,}990$.",
+        "$1{,}111{,}100$. Compare to iterative deepening's total for the same $b,d$: $50+400+3{,}000+20{,}000+100{,}000=123{,}450$, roughly 9 times fewer nodes, because BFS must exhaustively expand the entire last level before finding a far-left solution, while iterative deepening's repeated shallow re-exploration costs comparatively little."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-06-ex2-1step-ucb-conceptual",
+      "objective": "Explain how 1-step UCB is literally UCB1 applied to the choice of first simulated action.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 60, "originalNumber": "2.1:20" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain precisely what stands in for a 'bandit arm' in 1-step UCB, and why using UCB1 (instead of uniform random) to choose the simulated first action improves on flat Monte Carlo.",
+      "hints": [
+        "In OPT-06's bandit setting, each arm has an unknown mean reward, estimated from repeated pulls. In 1-step UCB, each candidate first action $a$ plays exactly the role of an arm: $Q_a$ is its running mean estimated return, $n_a$ its pull (simulation) count.",
+        "Flat Monte Carlo chooses the simulated first action uniformly at random every time, wasting simulation budget on actions already known to be mediocre.",
+        "1-step UCB instead selects the simulated first action via UCB1's $Q_a+\\beta\\sqrt{2\\ln n/n_a}$, directing more simulation budget toward actions that are either currently promising or still poorly-estimated, exactly UCB1's exploration-exploitation balance, now deciding where to spend rollouts rather than which bandit arm to pull."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-06-ex3-uct-selection-numeric",
+      "objective": "Compute UCT's UCB tree-policy value for a node and use it to select the child to explore.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 63, "originalNumber": "2.1:25" },
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "A parent node has been visited $n_v=100$ times. Child $A$: $Q_A=50,\\ n_A=10$. Child $B$: $Q_B=8,\\ n_B=2$. Using $\\beta=1$, compute child $B$'s UCT score, $Q_B/n_B+\\sqrt{2\\ln n_v/n_B}$. Enter a decimal (round to 3 decimal places).",
+      "hints": [
+        "$Q_B/n_B=8/2=4$.",
+        "$\\sqrt{2\\ln(100)/2}=\\sqrt{\\ln(100)}=\\sqrt{4.605}\\approx2.146$.",
+        "Score $\\approx4+2.146=6.146$. Compare to child $A$'s score $50/10+\\sqrt{2\\ln(100)/10}\\approx5+0.960=5.960$: despite $A$'s much higher average return, $B$'s far smaller visit count gives it a large enough exploration bonus to be selected instead, exactly UCB1's exploration-exploitation tradeoff in action. (Independently verified with Python while authoring this module.)"
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-06-ex4-negamax-conceptual",
+      "objective": "Explain why negamax flips the sign of the backed-up return at alternating tree levels.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 64, "originalNumber": "2.1:27-28" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "In a 2-player zero-sum game, the agent maximizes return $R$ and the opponent minimizes it. Explain why the standard MCTS backup (accumulate $R$ unchanged up every level) is wrong here, and why flipping the sign of $R$ at alternating levels (negamax) fixes it.",
+      "hints": [
+        "The standard backup assumes every node in the tree is trying to accumulate evidence toward the *same* objective (maximizing $R$ from the single decision-maker's perspective); but in a 2-player zero-sum game, alternating levels belong to agents with *opposite* objectives.",
+        "If the opponent's nodes accumulated $R$ unchanged, their $(Q_v,n_v)$ statistics would make an outcome good for the maximizing agent look like a 'high value' choice for the opponent too, exactly backwards from what the opponent is actually trying to achieve.",
+        "Flipping the sign of $R$ at every alternating level ensures each node's accumulated $Q_v$ always measures the return from *that level's own player's* perspective (positive is good for whoever is choosing at that node), so the same UCB tree-policy formula, unchanged, correctly guides both the maximizing and minimizing player's node selections."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

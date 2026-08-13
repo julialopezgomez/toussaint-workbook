@@ -48,6 +48,23 @@
         "$w(2) = 2.5$."
       ],
       "reviewCardIds": []
+    },
+    {
+      "id": "PROB-02-ex4-particle-weighted-expectation",
+      "objective": "Compute a weighted expectation from a particle approximation.",
+      "provenance": "source-adapted",
+      "sourceRef": { "sourceId": "lecture-ai", "page": 25, "originalNumber": "§1.2:37" },
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": ["PROB-02-ex1-why-sampling"],
+      "answerType": "numeric",
+      "prompt": "A particle approximation of $p(x)$ has three particles: locations $x=(1,3,5)$ with weights $w=(0.2,0.5,0.3)$ (summing to 1). Using $\\mathbb{E}_p\\{f(x)\\}\\approx\\sum_iw_if(x_i)$, estimate $\\mathbb{E}_p\\{x^2\\}$. Enter a decimal.",
+      "hints": [
+        "Compute $f(x_i)=x_i^2$ for each particle: $1^2=1$, $3^2=9$, $5^2=25$.",
+        "Weight each by its particle weight: $0.2(1)+0.5(9)+0.3(25)$.",
+        "$= 0.2+4.5+7.5 = 12.2$."
+      ],
+      "reviewCardIds": []
     }
   ]
 }
