@@ -2,26 +2,14 @@
 
 A personal, self-paced study workbook built from Marc Toussaint's TU Berlin course notes: sequenced, prioritized, and interleaved with exercises for one specific PhD research direction (long-horizon robotics planning). See `PROJECT_STATE.md` for project status and `CLAUDE.md` for the full technical picture.
 
-The site itself runs entirely locally (see setup below): this repository is public so the code and notes are backed up and shareable, but there's no hosted/deployed version.
-
-## Credit and source material
-
-The mathematical content, notation, structure, and several exercises in this workbook are derived from the publicly available lecture notes of:
-
 > **Marc Toussaint**, Professor, Learning & Intelligent Systems Lab, TU Berlin
 > Teaching materials: <https://www.user.tu-berlin.de/mtoussai/teaching/>
 
-This is an **independent, unofficial personal study project**, not an official course resource, and it is not affiliated with or endorsed by Prof. Toussaint or TU Berlin. Every piece of content in this workbook is tagged with its provenance, visible right on the page:
+The site itself runs entirely locally (see setup below): this repository is public so the code and notes are backed up and shareable, but there's no hosted/deployed version.
 
-- **Source-adapted**: exercises or explanations directly adapted from Toussaint's lecture notes, with his original section/exercise numbering preserved wherever possible (e.g. "adapted from `lecture-maths`, Exercise 5 / §2.8.1"). These are the closest to his original material, paraphrased/restructured rather than quoted at length.
-- **Newly authored**: exercises, worked examples, and explanations written for this workbook, not present in the source material.
-- **External-sourced**: content drawn from other cited references (e.g. Sutton & Barto, Lynch & Park), cited separately. The one capstone module (`CAP-01`) also cites the workbook owner's own PhD Year-1 report as an external source, since the capstone is explicitly a synthesis/application exercise connecting the taught material to the owner's own research, not new taught content from Toussaint's lectures.
+## Setup Instructions
 
-The original source PDFs themselves are **not included in this repository** (see `.gitignore`), nor is any full extracted transcription of them, precisely because they're Prof. Toussaint's copyrighted teaching material. Only paraphrased/adapted derivative content with clear attribution is published here.
-
-If you're a student encountering this: go read Prof. Toussaint's actual lecture notes at the link above first, this workbook is a personal supplement, not a substitute.
-
-## First-time setup (only needed once per machine)
+### First-time setup (only needed once per machine)
 
 1. Install [Node.js](https://nodejs.org) (v22+) and Python 3 if you don't already have them.
 2. Open a terminal in this `workbook/` folder and run:
@@ -36,7 +24,7 @@ If you're a student encountering this: go read Prof. Toussaint's actual lecture 
 
 That's it: steps 2 and 3 only need to be run again if you delete `node_modules/` or `.venv/`.
 
-## Every time you want to study
+### Every time you want to study
 
 Open a terminal in this `workbook/` folder and run:
 
@@ -115,6 +103,24 @@ print('missing cards:', qids - cards or 'none')
 print('orphan cards:', cards - qids or 'none')
 "
 ```
+
+## Credit and source material
+
+The mathematical content, notation, structure, and several exercises in this workbook are derived from the publicly available lecture notes of:
+
+> **Marc Toussaint**, Professor, Learning & Intelligent Systems Lab, TU Berlin
+> Teaching materials: <https://www.user.tu-berlin.de/mtoussai/teaching/>
+
+This is an **independent, unofficial personal study project**, not an official course resource, and it is not affiliated with or endorsed by Prof. Toussaint or TU Berlin. Every piece of content in this workbook is tagged with its provenance, visible right on the page:
+
+- **Source-adapted**: exercises or explanations directly adapted from Toussaint's lecture notes, with his original section/exercise numbering preserved wherever possible (e.g. "adapted from `lecture-maths`, Exercise 5 / §2.8.1"). These are the closest to his original material, paraphrased/restructured rather than quoted at length.
+- **Newly authored**: exercises, worked examples, and explanations written for this workbook, not present in the source material.
+- **External-sourced**: content drawn from other cited references (e.g. Sutton & Barto, Lynch & Park), cited separately. The one capstone module (`CAP-01`) also cites the workbook owner's own PhD Year-1 report as an external source, since the capstone is explicitly a synthesis/application exercise connecting the taught material to the owner's own research, not new taught content from Toussaint's lectures.
+
+The original source PDFs themselves are **not included in this repository** (see `.gitignore`), nor is any full extracted transcription of them, precisely because they're Prof. Toussaint's copyrighted teaching material. Only paraphrased/adapted derivative content with clear attribution is published here.
+
+If you're a student encountering this: go read Prof. Toussaint's actual lecture notes at the link above first, this workbook is a personal supplement, not a substitute.
+
 
 ## Troubleshooting
 
