@@ -60,6 +60,20 @@ Then open `/search` from that preview server. `/curriculum`'s own filter box (mo
 - `/print` — every module's lesson content concatenated in curriculum order, styled for printing (`Cmd/Ctrl+P` → Save as PDF). Exercises aren't included (interactive grading doesn't translate to print).
 - `/anki` — a downloadable `.tsv` flashcard deck (notation symbol→meaning pairs, plus a curated set of exercise recall cards), importable into Anki.
 
+## Development quality quick guide
+
+The full routine is in [`docs/agent/STAGE_RUNBOOK.md`](docs/agent/STAGE_RUNBOOK.md); current work and ownership are in [`docs/agent/CURRENT_HANDOFF.md`](docs/agent/CURRENT_HANDOFF.md).
+
+| Situation | What to do |
+|---|---|
+| New/resumed **Codex** session | Codex should load `AGENTS.md` automatically. Say: **“Follow the repository startup and resume protocol before continuing.”** |
+| New/resumed **Claude** session | Claude should load `CLAUDE.md`. Say the same line; for the current Phase 5 task, paste [`docs/prompts/CLAUDE_PHASE5_RECONCILE_GATE_B.md`](docs/prompts/CLAUDE_PHASE5_RECONCILE_GATE_B.md). |
+| After compression, rate limit, or model switch | Say: **“Rehydrate from repository evidence, run the context check, and restate scope before continuing.”** |
+| Before pausing or switching agents | Say: **“Stop at a clean boundary, update `CURRENT_HANDOFF.md`, and run the context check.”** |
+| Starting/finishing a review block | Run `python3 scripts/validate/agent_context.py` and `python3 scripts/validate/review_integrity.py`. |
+| Implementing content or code | Run the context check at batch start/end, plus relevant semantic/numerical tests, `npx astro check`, `npm run build`, and live visual/runtime checks where applicable. |
+| A checker fails or the agent seems confused | Stop substantive work; ask it to re-read `AGENTS.md`, the handoff, and the governing decision/plan, repair the continuity state, and rerun the check. |
+
 ## Your progress
 
 Your answers and check results are saved automatically in your browser's local storage (IndexedDB) as you use the site, not on disk and not sent anywhere (this site has no server or database). Use the "Export my progress" / "Import progress" buttons on the homepage to back up your progress or move it to another browser or machine.
