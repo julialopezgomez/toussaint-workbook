@@ -1,0 +1,4979 @@
+{
+  "$schema": "gate-a-concept-depth-inventory/1",
+  "generatedBy": "scripts/validate/gate_a_baseline.py",
+  "treePath": "/private/tmp/claude-501/-Users-julialg2002-PhD-Literature-Courses-Marc-Toussaint-s-Robot-and-ML-Stack/e086ed85-6199-4c4f-ad0a-738a8c493e4b/scratchpad/baseline-dd2e871",
+  "commit": "n/a (archive)",
+  "treeState": "clean tree",
+  "label": "committed-baseline-dd2e871",
+  "depthScale": {
+    "0": "absent",
+    "1": "mentioned",
+    "2": "explained conceptually",
+    "3": "mathematically derived",
+    "4": "practised by written exercise",
+    "5": "implemented in executable code",
+    "6": "used in simulation",
+    "7": "applied in an integrated robotics task"
+  },
+  "scopeAndLimits": {
+    "moduleDepth": "COMPLETE for all 69 modules. Mechanically derived from committed evidence (exercise counts/types, display math, code fences, presence of a labs/ tree). It is a CEILING, not a semantic judgment.",
+    "perConceptDepth": "DELIBERATELY NULL. Judging each of the 308 concepts individually requires reading the module against its source; that is the review protocol's job (Gate 6), not this reporter's. Nulls are placeholders the review fills in.",
+    "conceptSource": "Declared concepts[] frontmatter. Undeclared concepts a module teaches in passing are not captured."
+  },
+  "summary": {
+    "modules": 69,
+    "hours": 226.0,
+    "concepts": 308,
+    "moduleDepthHistogram": {
+      "4": 69
+    },
+    "exercisesByType": {
+      "short-text": 148,
+      "derivation": 92,
+      "numeric": 107,
+      "symbolic": 4,
+      "proof": 9,
+      "code": 1
+    }
+  },
+  "notationCollisions": {
+    "$L$": [
+      [
+        "Lipschitz constant of $\\\\nabla f$",
+        "OPT-05"
+      ],
+      [
+        "scalar loss, here $(f-y)^2$",
+        "ML-03"
+      ]
+    ],
+    "$\\\\alpha$": [
+      [
+        "learning rate",
+        "RL-03"
+      ],
+      [
+        "step size",
+        "OPT-01"
+      ]
+    ],
+    "$\\\\phi(x)$": [
+      [
+        "feature map: $x\\\\mapsto\\\\phi(x)\\\\in\\\\mathbb{R}^k$, with $f(x)=\\\\phi(x)^\\\\top\\\\be",
+        "ML-02"
+      ],
+      [
+        "feature/residual vector, $f(x)=\\\\phi(x)^\\\\top\\\\phi(x)$",
+        "OPT-02"
+      ]
+    ],
+    "$\\\\theta$": [
+      [
+        "a substitution, e.g. $\\\\{x/\\\\text{John}\\\\}$",
+        "SYM-02"
+      ],
+      [
+        "rotation angle, $\\\\theta = 2\\\\arccos(q_0)$",
+        "KIN-02"
+      ]
+    ],
+    "$c(s,a)$": [
+      [
+        "(reused from RL-05) a symbolic state $s$ as a conjunction of ground literals",
+        "SYM-03"
+      ],
+      [
+        "visit count for state-action pair $(s,a)$",
+        "RL-05"
+      ]
+    ],
+    "$k(x,x')$": [
+      [
+        "GP covariance function (kernel)",
+        "OPT-06"
+      ],
+      [
+        "kernel function: $\\\\phi(x)^\\\\top\\\\phi(x')$ for some (possibly infinite-dimension",
+        "ML-05"
+      ]
+    ]
+  },
+  "modules": {
+    "CAP-01": {
+      "block": "CAP",
+      "title": "Research Bridge: Convex-Decomposition Manipulation Planning",
+      "tier": 1,
+      "hours": 3.0,
+      "file": "src/content/course/CAP/CAP-01.mdx",
+      "prerequisites": [
+        "RLEARN-07",
+        "DYN-04",
+        "PLAN-01"
+      ],
+      "nextModules": [],
+      "objectives": [
+        "Translate your own report's CS/CG/CP notation into this workbook's $\\\\mathcal{X}$/$\\\\mathcal{X}_\\\\text{fea}$ (PLAN-01) notation, confirming they denote the same objects.",
+        "Walk through your planner's three-stage pipeline (convex decomposition, MIQP grasp-release sequencing, GCS trajectory generation) and explain what each stage buys you over a sampling-based baseline.",
+        "Map the MIQP's discrete/continuous split onto RLEARN-07's TAMP skeleton/trajectory split, identifying where the structural analogy holds and where it doesn't."
+      ],
+      "concepts": [
+        {
+          "name": "Composite configuration space for manipulation planning",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Grasp/placement spaces, transit/transfer paths",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Convex decomposition of $C_\\\\text{free}$, MIQP grasp-release sequencing, Graphs of Convex Sets",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "5 exercises with solutions; 3 display-math blocks; 0 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 5,
+        "exercisesByType": {
+          "short-text": 3,
+          "numeric": 2
+        },
+        "displayMathBlocks": 3,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 1,
+        "sourceIds": []
+      }
+    },
+    "DYN-01": {
+      "block": "DYN",
+      "title": "Deriving the Equations of Motion: Newton-Euler & Euler-Lagrange",
+      "tier": 1,
+      "hours": 4.0,
+      "file": "src/content/course/DYN/DYN-01.mdx",
+      "prerequisites": [
+        "KIN-03",
+        "ODE-02"
+      ],
+      "nextModules": [
+        "DYN-02"
+      ],
+      "objectives": [
+        "Derive the robot equations of motion $u=M(q)\\\\ddot q+F(q,\\\\dot q)$ via Newton-Euler and per-body Jacobians.",
+        "Derive the 'force kinematics' identity $u=J^\\\\top(f,\\\\tau)$ from conservation of power.",
+        "Derive the same equations of motion via the Euler-Lagrange equation, and show $M(q)$ agrees between both routes.",
+        "Apply both derivations to the simple pendulum, and connect its linearization to ODE-02's stability classification."
+      ],
+      "concepts": [
+        {
+          "name": "Mass matrix $M(q)$, bias forces $F(q,\\\\dot q)$",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Newton-Euler equation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Force kinematics (Jacobian transpose)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Euler-Lagrange equation, kinetic/potential energy",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Simple pendulum",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "3 exercises with solutions; 5 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 3,
+        "exercisesByType": {
+          "derivation": 1,
+          "numeric": 2
+        },
+        "displayMathBlocks": 5,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 4,
+        "sourceIds": [
+          "robotkin"
+        ]
+      }
+    },
+    "DYN-02": {
+      "block": "DYN",
+      "title": "PID & Point-Mass Control",
+      "tier": 1,
+      "hours": 3.5,
+      "file": "src/content/course/DYN/DYN-02.mdx",
+      "prerequisites": [
+        "ODE-02"
+      ],
+      "nextModules": [
+        "DYN-03"
+      ],
+      "objectives": [
+        "Derive the closed-loop ODE for P, PD, and PID control of a 1D point mass.",
+        "Classify the closed-loop response (oscillatory-damped, over-damped, critically-damped) directly from ODE-02's characteristic-equation machinery.",
+        "Convert between gain parameters $(K_p,K_d)$ and the time-scale/damping-ratio parameterization $(\\\\lambda,\\\\xi)$.",
+        "Explain why the integral term requires augmenting the state to keep the closed loop linear."
+      ],
+      "concepts": [
+        {
+          "name": "1D point-mass dynamics",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Proportional/derivative/integral feedback",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Closed-loop characteristic equation, damping regimes",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Time-scale/damping-ratio parameterization",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 5 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "derivation": 2,
+          "numeric": 2
+        },
+        "displayMathBlocks": 5,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 1,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-robotics"
+        ]
+      }
+    },
+    "DYN-03": {
+      "block": "DYN",
+      "title": "Inverse Dynamics & the Standard Control Stack",
+      "tier": 1,
+      "hours": 4.0,
+      "file": "src/content/course/DYN/DYN-03.mdx",
+      "prerequisites": [
+        "DYN-01",
+        "DYN-02"
+      ],
+      "nextModules": [
+        "DYN-04"
+      ],
+      "objectives": [
+        "State the general robot dynamics $M(q)\\\\ddot q+F(q,\\\\dot q)=u$ and its inverse/forward dynamics uses.",
+        "Derive joint-space reference-trajectory tracking, and explain why it makes every joint behave like DYN-02's 1D point mass.",
+        "Derive operational-space control as the dynamic analogue of KIN-03's inverse-kinematics closed form.",
+        "Explain the Newton-Euler recursion's role as an efficient inverse-dynamics algorithm."
+      ],
+      "concepts": [
+        {
+          "name": "General robot dynamics $M(q)\\\\ddot q+F(q,\\\\dot q)=u$",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Inverse/forward dynamics",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Reference-trajectory tracking, PD-like acceleration correction",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Operational space control",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Newton-Euler recursion",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "3 exercises with solutions; 4 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 3,
+        "exercisesByType": {
+          "short-text": 1,
+          "derivation": 2
+        },
+        "displayMathBlocks": 4,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 1,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-robotics"
+        ]
+      }
+    },
+    "DYN-04": {
+      "block": "DYN",
+      "title": "Optimal Control & Trajectory Optimization",
+      "tier": 1,
+      "hours": 6.0,
+      "file": "src/content/course/DYN/DYN-04.mdx",
+      "prerequisites": [
+        "DYN-03",
+        "OPT-04"
+      ],
+      "nextModules": [
+        "DYN-05"
+      ],
+      "objectives": [
+        "State the discrete- and continuous-time optimal control problem, and derive the Bellman/HJB equations from Bellman's principle.",
+        "Derive the Riccati differential equation for linear-quadratic (LQ) control.",
+        "Show that LQR reduces to PD control for the 1D point mass, and verify it numerically.",
+        "Recognize optimal control, inverse kinematics, operational space control, and trajectory optimization as instances of the same underlying mathematical structure."
+      ],
+      "concepts": [
+        {
+          "name": "Bellman principle, value function, Bellman equation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Hamilton-Jacobi-Bellman (HJB) equation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Linear-Quadratic (LQ) control, Riccati equation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "LQR as PD control",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Trajectory optimization, $k$-order cost terms",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 4 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "derivation": 2,
+          "numeric": 1,
+          "short-text": 1
+        },
+        "displayMathBlocks": 4,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 4,
+        "sourceIds": [
+          "lecture-robotics"
+        ]
+      }
+    },
+    "DYN-05": {
+      "block": "DYN",
+      "title": "Splines & Motion Primitives",
+      "tier": 1,
+      "hours": 3.5,
+      "file": "src/content/course/DYN/DYN-05.mdx",
+      "prerequisites": [
+        "DYN-04"
+      ],
+      "nextModules": [
+        "DYN-06"
+      ],
+      "objectives": [
+        "Derive the cubic spline coefficients from boundary conditions, and show the spline is the exact solution to a minimum-acceleration optimal control problem.",
+        "Explain why timing-optimal control (choosing $\\\\tau$) is preferable to plain PD control for macroscopic approach behavior.",
+        "State the continuity/degrees-of-freedom relationship for Hermite splines.",
+        "Explain B-splines as a control-point parameterization, and the degree/continuity relationship."
+      ],
+      "concepts": [
+        {
+          "name": "Cubic spline piece, boundary conditions",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Minimum-acceleration optimal control",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Timing-optimal control",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Hermite splines, continuity classes",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "B-splines, control points, blending functions",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 2 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "derivation": 1,
+          "numeric": 2,
+          "short-text": 1
+        },
+        "displayMathBlocks": 2,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "splines"
+        ]
+      }
+    },
+    "DYN-06": {
+      "block": "DYN",
+      "title": "Controllability & Stability",
+      "tier": 1,
+      "hours": 3.5,
+      "file": "src/content/course/DYN/DYN-06.mdx",
+      "prerequisites": [
+        "DYN-02",
+        "DYN-04",
+        "ODE-02"
+      ],
+      "nextModules": [
+        "DYN-07"
+      ],
+      "objectives": [
+        "Define the controllability matrix for a linear system and use its rank to determine controllability.",
+        "State the three definitions of stability (Lyapunov, asymptotic, exponential) for a general nonlinear system.",
+        "Classify a linear system's stability from the eigenvalues of its state matrix, connecting directly to ODE-02.",
+        "Apply eigenvalue-based stability analysis to a PD-controlled point mass, connecting directly to DYN-02's characteristic equation.",
+        "State the Lyapunov function method and apply it to both an energy-based example and the LQR value function."
+      ],
+      "concepts": [
+        {
+          "name": "Controllability matrix, rank condition",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Lyapunov stability, asymptotic stability, exponential stability",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Linear stability analysis via eigenvalues",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Lyapunov function method",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 7 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "derivation": 2,
+          "numeric": 2
+        },
+        "displayMathBlocks": 7,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 2,
+        "sourceIds": [
+          "lecture-robotics"
+        ]
+      }
+    },
+    "DYN-07": {
+      "block": "DYN",
+      "title": "Model Predictive Control (MPC)",
+      "tier": 1,
+      "hours": 2.5,
+      "file": "src/content/course/DYN/DYN-07.mdx",
+      "prerequisites": [
+        "DYN-04",
+        "DYN-06"
+      ],
+      "nextModules": [],
+      "objectives": [
+        "Explain why executing a single open-loop trajectory-optimization solution is fragile, and derive the receding-horizon principle that fixes it.",
+        "State the MPC algorithm as repeated re-solves of DYN-04's finite-horizon trajectory optimization problem.",
+        "Explain MPC as a closed-loop policy in DYN-06's sense, and why that gives robustness to model error and disturbances.",
+        "Explain the practical role of horizon length, terminal cost, and warm-starting."
+      ],
+      "concepts": [
+        {
+          "name": "Receding-horizon control",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "MPC as a closed-loop policy",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Terminal cost, horizon length",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Warm-starting",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 0 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "derivation": 1,
+          "short-text": 3
+        },
+        "displayMathBlocks": 0,
+        "codeFences": 1,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 2,
+        "sourceIds": [
+          "lecture-robotics"
+        ]
+      }
+    },
+    "KIN-01": {
+      "block": "KIN",
+      "title": "3D Rotations & Angular Velocity (revision)",
+      "tier": 1,
+      "hours": 2.0,
+      "file": "src/content/course/KIN/KIN-01.mdx",
+      "prerequisites": [
+        "MATH-03"
+      ],
+      "nextModules": [
+        "KIN-02"
+      ],
+      "objectives": [
+        "State the SO(3)/pose/homogeneous-transform definitions precisely.",
+        "Explain why Euler angles suffer gimbal lock, and how the rotation-vector representation avoids it.",
+        "Apply Rodrigues' formula and the skew-matrix exponential map.",
+        "Derive $\\\\dot R(t) = \\\\text{skew}(w)R(t)$ from the geometric meaning of angular velocity."
+      ],
+      "concepts": [
+        {
+          "name": "Pose, SO(3), homogeneous transformations",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Euler angles and gimbal lock",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Rotation vector, skew matrix, Rodrigues' formula",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Angular velocity and $\\\\dot R = \\\\text{skew}(w)R$",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 4 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "short-text": 1,
+          "numeric": 2,
+          "derivation": 1
+        },
+        "displayMathBlocks": 4,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 1,
+        "readinessChecks": 1,
+        "notationEntries": 4,
+        "sourceIds": [
+          "lecture-robotics",
+          "quaternions"
+        ]
+      }
+    },
+    "KIN-02": {
+      "block": "KIN",
+      "title": "Quaternions: Exponential/Log Maps, Interpolation & Jacobians",
+      "tier": 1,
+      "hours": 3.0,
+      "file": "src/content/course/KIN/KIN-02.mdx",
+      "prerequisites": [
+        "KIN-01"
+      ],
+      "nextModules": [
+        "KIN-03"
+      ],
+      "objectives": [
+        "Explain why rotations live on $S^3$ (via quaternions) rather than a minimal 3-parameter space.",
+        "Derive the quaternion exponential map and its relationship to angular velocity.",
+        "Compute SLERP interpolation between two quaternions by hand.",
+        "Derive the angular Jacobian of a quaternion parameterization, $w = J(q)\\\\dot q$."
+      ],
+      "concepts": [
+        {
+          "name": "SO(3) and its double cover S^3",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Quaternion exponential and log maps",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "SLERP (spherical linear interpolation)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Angular Jacobian w.r.t. quaternion parameters",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Rodrigues' formula",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "5 exercises with solutions; 3 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 5,
+        "exercisesByType": {
+          "short-text": 1,
+          "derivation": 1,
+          "symbolic": 1,
+          "numeric": 1,
+          "proof": 1
+        },
+        "displayMathBlocks": 3,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 7,
+        "sourceIds": [
+          "quaternions"
+        ]
+      }
+    },
+    "KIN-03": {
+      "block": "KIN",
+      "title": "Forward/Inverse Kinematics & Jacobians (revision)",
+      "tier": 1,
+      "hours": 3.0,
+      "file": "src/content/course/KIN/KIN-03.mdx",
+      "prerequisites": [
+        "KIN-01",
+        "OPT-03"
+      ],
+      "nextModules": [
+        "DYN-01"
+      ],
+      "objectives": [
+        "State the forward-kinematics chaining formula and compute it for a small kinematic chain.",
+        "Construct a position/angular Jacobian column geometrically from a joint's axis and location.",
+        "State inverse kinematics as a regularized NLP, and recognize its Gauss-Newton closed form as an instance of MATH-02B's robotics exercise.",
+        "Explain why a single IK/Newton step should not be mistaken for a motion-generation policy.",
+        "Explain Jacobian singularities and the role of regularization."
+      ],
+      "concepts": [
+        {
+          "name": "Kinematic chain, forward kinematics map $\\\\phi(q)$",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Position/angular Jacobian, geometric construction",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Inverse kinematics as regularized least-squares",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Singularity, regularized pseudo-inverse, nullspace motion",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 4 display-math blocks; 0 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "numeric": 3,
+          "short-text": 1
+        },
+        "displayMathBlocks": 4,
+        "codeFences": 1,
+        "pythonFences": 0,
+        "figures": 1,
+        "readinessChecks": 1,
+        "notationEntries": 4,
+        "sourceIds": [
+          "lecture-robotics",
+          "robotkin"
+        ]
+      }
+    },
+    "MANIP-01": {
+      "block": "MANIP",
+      "title": "Grasping Fundamentals: Contacts & Force Closure",
+      "tier": 2,
+      "hours": 2.5,
+      "file": "src/content/course/MANIP/MANIP-01.mdx",
+      "prerequisites": [
+        "DYN-01"
+      ],
+      "nextModules": [
+        "MANIP-02"
+      ],
+      "objectives": [
+        "Define a contact (signed distance, witness points, contact normal) and the friction cone.",
+        "State the force-closure condition and derive the total-wrench formula it depends on.",
+        "Explain why two frictionless point contacts can never achieve force closure in the plane.",
+        "Distinguish force closure, form closure, caging, and equilibrium."
+      ],
+      "concepts": [
+        {
+          "name": "Contact, witness points, signed distance",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Friction cone",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Force closure, form closure, caging, equilibrium",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Wrench (force-torque)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 3 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "numeric": 1,
+          "derivation": 1,
+          "short-text": 2
+        },
+        "displayMathBlocks": 3,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 2,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-robotics",
+          "lecture-robotlearning"
+        ]
+      }
+    },
+    "MANIP-02": {
+      "block": "MANIP",
+      "title": "Legged Locomotion Basics",
+      "tier": 2,
+      "hours": 3.0,
+      "file": "src/content/course/MANIP/MANIP-02.mdx",
+      "prerequisites": [
+        "DYN-01",
+        "PLAN-03"
+      ],
+      "nextModules": [],
+      "objectives": [
+        "State the statically-stable-walking condition (CoG within the support polygon) and apply it to a concrete foot configuration.",
+        "State the Zero Moment Point definition and explain why ZMP-stability lets a legged robot be controlled like a conventional fully-actuated arm.",
+        "Explain why passive dynamic walking's swing-phase equations are a direct, unactuated instance of DYN-01's general dynamics form.",
+        "Explain why legged locomotion is a hybrid dynamical system, connecting phase-switching to PLAN-03's differential-constraint framing."
+      ],
+      "concepts": [
+        {
+          "name": "Statically stable walking, support polygon",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Zero Moment Point (ZMP)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Passive dynamic walking, Compass Gait",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Hybrid dynamics, impact models",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 3 display-math blocks; 0 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "numeric": 1,
+          "short-text": 3
+        },
+        "displayMathBlocks": 3,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 1,
+        "readinessChecks": 1,
+        "notationEntries": 2,
+        "sourceIds": [
+          "lecture-robotics"
+        ]
+      }
+    },
+    "MATH-00": {
+      "block": "MATH",
+      "title": "Taylor Expansion From Scratch",
+      "tier": 1,
+      "hours": 2.0,
+      "file": "src/content/course/MATH/MATH-00.mdx",
+      "prerequisites": [],
+      "nextModules": [
+        "MATH-01"
+      ],
+      "objectives": [
+        "Derive the first-order (linear) Taylor approximation directly from the definition of the derivative.",
+        "Derive the second-order (quadratic) Taylor approximation by matching derivatives at the expansion point.",
+        "Compute Taylor approximations numerically and quantify their error.",
+        "Explain why each additional order captures more of a function's local behavior (slope, then curvature, ...)."
+      ],
+      "concepts": [
+        {
+          "name": "Taylor approximation / Taylor series",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Linear (tangent-line) approximation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Quadratic approximation and curvature",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Approximation error",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 3 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "short-text": 1,
+          "derivation": 1,
+          "numeric": 1,
+          "proof": 1
+        },
+        "displayMathBlocks": 3,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-maths"
+        ]
+      }
+    },
+    "MATH-01": {
+      "block": "MATH",
+      "title": "Functions, Derivatives & the Chain Rule",
+      "tier": 1,
+      "hours": 4.0,
+      "file": "src/content/course/MATH/MATH-01.mdx",
+      "prerequisites": [
+        "MATH-00"
+      ],
+      "nextModules": [
+        "MATH-02"
+      ],
+      "objectives": [
+        "Use the course's core notation conventions fluently (norms, Kronecker delta, diag, Hadamard product).",
+        "State the formal definitions of continuity, differentiability, and smoothness for a function.",
+        "Distinguish partial and total derivatives, and explain why they differ.",
+        "Define a computation graph (function network) formally, and state both the forward and backward chain rule as sum-over-paths identities.",
+        "Compute total derivatives via the chain rule, both symbolically and numerically."
+      ],
+      "concepts": [
+        {
+          "name": "Notation conventions (norms, Kronecker delta, diag, Hadamard product)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Continuity, differentiability, smoothness",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Basis functions (polynomials, RBFs, splines)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Partial derivative",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Total derivative",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Computation graph / function network",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Multivariable chain rule (forward and backward versions)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "5 exercises with solutions; 1 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 5,
+        "exercisesByType": {
+          "short-text": 1,
+          "derivation": 2,
+          "numeric": 1,
+          "symbolic": 1
+        },
+        "displayMathBlocks": 1,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 1,
+        "readinessChecks": 1,
+        "notationEntries": 7,
+        "sourceIds": [
+          "lecture-maths"
+        ]
+      }
+    },
+    "MATH-02": {
+      "block": "MATH",
+      "title": "Gradients, Jacobians, Hessians & Taylor Expansion",
+      "tier": 1,
+      "hours": 4.0,
+      "file": "src/content/course/MATH/MATH-02.mdx",
+      "prerequisites": [
+        "MATH-01"
+      ],
+      "nextModules": [
+        "MATH-02B"
+      ],
+      "objectives": [
+        "State the formal definitions of the Jacobian, gradient, directional derivative, and Hessian.",
+        "Compute gradients of scalar-valued functions and Jacobians of vector-valued functions from scratch.",
+        "Explain what the Hessian's eigenvalues/eigenvectors reveal about local curvature, convexity, and saddle points.",
+        "Compute Hessians and use them in a second-order Taylor expansion.",
+        "Derive the gradient of a quadratic form $x^\\\\top Ax$ from index notation.",
+        "Numerically verify a hand-derived gradient/Jacobian using finite differences, including implementing the check in code."
+      ],
+      "concepts": [
+        {
+          "name": "Jacobian",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Gradient",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Directional derivative",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Hessian",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Curvature, convexity, saddle points",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Taylor expansion",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Quadratic form",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Numerical gradient checking",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "6 exercises with solutions; 7 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 6,
+        "exercisesByType": {
+          "numeric": 3,
+          "short-text": 1,
+          "derivation": 1,
+          "symbolic": 1
+        },
+        "displayMathBlocks": 7,
+        "codeFences": 1,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 5,
+        "sourceIds": [
+          "lecture-maths"
+        ]
+      }
+    },
+    "MATH-02B": {
+      "block": "MATH",
+      "title": "Matrix Calculus: Identities, Warm-Ups & Applied Examples",
+      "tier": 1,
+      "hours": 5.0,
+      "file": "src/content/course/MATH/MATH-02B.mdx",
+      "prerequisites": [
+        "MATH-02"
+      ],
+      "nextModules": [
+        "MATH-03"
+      ],
+      "objectives": [
+        "Solve linear matrix equations for an unknown matrix/vector by careful transpose bookkeeping.",
+        "Derive the ridge-regression normal equations by setting a matrix derivative to zero.",
+        "Use the core matrix-derivative identities (Identities 2.3-2.5) to differentiate common bilinear/quadratic expressions.",
+        "Know why you should never differentiate directly w.r.t. a matrix, and what to do instead.",
+        "Derive the GP-regression log-likelihood gradient and the logistic-regression Hessian.",
+        "Derive a Gauss-Newton-style update for a nonlinear least-squares robotics objective by local linearization."
+      ],
+      "concepts": [
+        {
+          "name": "Matrix equation solving (transpose bookkeeping)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Ridge regression / Tikhonov regularization",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Matrix-derivative identities",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Derivative of a scalar w.r.t. a matrix",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "GP regression log-likelihood gradient",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Logistic regression gradient and Hessian",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Gauss-Newton linearization for nonlinear least squares",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "8 exercises with solutions; 14 display-math blocks; 7 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 8,
+        "exercisesByType": {
+          "derivation": 7,
+          "numeric": 1
+        },
+        "displayMathBlocks": 14,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-maths"
+        ]
+      }
+    },
+    "MATH-03": {
+      "block": "MATH",
+      "title": "Vector Spaces, Dual Spaces & Coordinate Transformations",
+      "tier": 1,
+      "hours": 5.0,
+      "file": "src/content/course/MATH/MATH-03.mdx",
+      "prerequisites": [
+        "MATH-01"
+      ],
+      "nextModules": [
+        "MATH-03B"
+      ],
+      "objectives": [
+        "State the formal vector space axioms (Definition 3.1), and explain why a vector is not fundamentally a tuple of numbers.",
+        "State the formal definitions of span, linear independence, dimension, basis, and coordinates.",
+        "Explain what a vector space and choice of basis buys you for describing systems in ML, RL, and robotics.",
+        "Recognize the taxonomy of linear functions (1-forms, 2-forms, dual vectors) and see why a gradient is naturally a 1-form.",
+        "Derive and apply the change-of-basis coordinate transformation.",
+        "Understand matrices as coordinate representations of linear maps in a chosen pair of bases."
+      ],
+      "concepts": [
+        {
+          "name": "Vector space (formal definition)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Span, linear independence, dimension",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Basis and coordinates",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Linear functions, 1-forms, dual vectors",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Tensors and the matrix convention",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Change of basis",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Matrix as coordinate representation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "5 exercises with solutions; 4 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 5,
+        "exercisesByType": {
+          "short-text": 2,
+          "derivation": 2,
+          "numeric": 1
+        },
+        "displayMathBlocks": 4,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 6,
+        "sourceIds": [
+          "lecture-maths"
+        ]
+      }
+    },
+    "MATH-03B": {
+      "block": "MATH",
+      "title": "Scalar Products, Metric Tensors & Orthonormal Bases",
+      "tier": 1,
+      "hours": 4.0,
+      "file": "src/content/course/MATH/MATH-03B.mdx",
+      "prerequisites": [
+        "MATH-03"
+      ],
+      "nextModules": [
+        "MATH-04"
+      ],
+      "objectives": [
+        "State the formal definition of a scalar product (Definition 3.10) as a symmetric positive-definite 2-form.",
+        "State the formal definition of a positive (semi-)definite matrix, and use Sylvester's criterion for quick checks.",
+        "State the metric tensor definition and compute $\\\\langle v,w\\\\rangle=v^\\\\top Gw$ for a general (non-orthonormal) basis.",
+        "Explain why the metric tensor is the identity for an orthonormal basis, and what that simplifies.",
+        "Derive and apply the orthogonal-projection formula onto the span of orthonormal vectors."
+      ],
+      "concepts": [
+        {
+          "name": "Scalar product / inner product",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Positive (semi-)definite matrix",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Metric tensor",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Orthonormal basis",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Orthogonal projection",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "3 exercises with solutions; 3 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 3,
+        "exercisesByType": {
+          "derivation": 2,
+          "numeric": 1
+        },
+        "displayMathBlocks": 3,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-maths"
+        ]
+      }
+    },
+    "MATH-04": {
+      "block": "MATH",
+      "title": "SVD, Eigendecomposition & the Power Method",
+      "tier": 1,
+      "hours": 7.0,
+      "file": "src/content/course/MATH/MATH-04.mdx",
+      "prerequisites": [
+        "MATH-03B"
+      ],
+      "nextModules": [
+        "MATH-05"
+      ],
+      "objectives": [
+        "Explain what the SVD $A=USV^\\\\top$ gives you that the raw matrix doesn't.",
+        "Derive the connection between the SVD and the eigendecomposition of $A^\\\\top A$ and of symmetric matrices.",
+        "Compute the singular values and pseudo-inverse of a small matrix by hand.",
+        "State the eigendecomposition definition, the characteristic polynomial, and when a matrix fails to be diagonalizable.",
+        "Prove basic eigenvalue facts: PSD-eigenvalue equivalence, eigenvector orthogonality, and shift/power invariances.",
+        "Derive and apply the power method (including the smallest-eigenvalue variant), and connect the SVD of a covariance matrix to PCA."
+      ],
+      "concepts": [
+        {
+          "name": "Singular Value Decomposition (SVD)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Rank, determinant, row/column space",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Pseudo-inverse",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Covariance matrix and PCA",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Eigendecomposition, characteristic polynomial, diagonalizability",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Power method (largest and smallest eigenvalue)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "10 exercises with solutions; 6 display-math blocks; 8 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 10,
+        "exercisesByType": {
+          "short-text": 1,
+          "derivation": 3,
+          "numeric": 1,
+          "proof": 5
+        },
+        "displayMathBlocks": 6,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 1,
+        "readinessChecks": 1,
+        "notationEntries": 5,
+        "sourceIds": [
+          "lecture-maths",
+          "svd"
+        ]
+      }
+    },
+    "MATH-05": {
+      "block": "MATH",
+      "title": "Covariant Gradient & Steepest Descent",
+      "tier": 1,
+      "hours": 1.5,
+      "file": "src/content/course/MATH/MATH-05.mdx",
+      "prerequisites": [
+        "MATH-04"
+      ],
+      "nextModules": [
+        "OPT-01"
+      ],
+      "objectives": [
+        "Explain why the plain gradient is only the steepest-descent direction under the Euclidean metric.",
+        "Derive the steepest-descent direction under a general metric $G$ via a Lagrange-multiplier argument.",
+        "Compute a steepest-descent direction under a non-Euclidean metric."
+      ],
+      "concepts": [
+        {
+          "name": "Metric",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Covariant gradient",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Steepest descent direction",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "3 exercises with solutions; 1 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 3,
+        "exercisesByType": {
+          "short-text": 1,
+          "derivation": 1,
+          "numeric": 1
+        },
+        "displayMathBlocks": 1,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-maths"
+        ]
+      }
+    },
+    "ML-01": {
+      "block": "ML",
+      "title": "Computation Graphs & Automatic Differentiation",
+      "tier": 1,
+      "hours": 3.0,
+      "file": "src/content/course/ML/ML-01.mdx",
+      "prerequisites": [
+        "MATH-02"
+      ],
+      "nextModules": [
+        "ML-02"
+      ],
+      "objectives": [
+        "Distinguish partial from total derivatives, and explain why this distinction matters in a computation graph.",
+        "Define a computation graph as a DAG, and state the forward-mode and backward-mode chain rules.",
+        "Derive why backward mode (backpropagation) is the efficient choice for training neural networks.",
+        "Explain what PyTorch's autograd actually does, in terms of this module's formalism."
+      ],
+      "concepts": [
+        {
+          "name": "Partial derivative vs. total derivative",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Computation graph (DAG)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Forward-mode and backward-mode chain rule",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Jacobian",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Reverse-mode automatic differentiation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 5 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "numeric": 2,
+          "derivation": 2
+        },
+        "displayMathBlocks": 5,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-ai"
+        ]
+      }
+    },
+    "ML-02": {
+      "block": "ML",
+      "title": "Regression & Classical Supervised ML",
+      "tier": 1,
+      "hours": 3.5,
+      "file": "src/content/course/ML/ML-02.mdx",
+      "prerequisites": [
+        "OPT-01",
+        "PROB-01"
+      ],
+      "nextModules": [
+        "ML-04"
+      ],
+      "objectives": [
+        "Explain 'linear in parameters, not inputs,' and construct non-linear feature maps (polynomial, piecewise, RBF).",
+        "State the estimator-variance/overfitting connection, and derive why cross-validation is needed to choose regularization strength.",
+        "Distinguish ridge (L2) and lasso (L1) regularization, and explain why only ridge has a closed form.",
+        "Derive logistic regression from the discriminative-function/softmax framing, including its gradient."
+      ],
+      "concepts": [
+        {
+          "name": "Linear regression, non-linear features",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Estimator variance, overfitting, cross-validation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Ridge vs. lasso regularization",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Discriminative function, softmax link",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Logistic regression",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "5 exercises with solutions; 6 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 5,
+        "exercisesByType": {
+          "numeric": 2,
+          "short-text": 2,
+          "derivation": 1
+        },
+        "displayMathBlocks": 6,
+        "codeFences": 1,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-machinelearning"
+        ]
+      }
+    },
+    "ML-03": {
+      "block": "ML",
+      "title": "Neural Networks: Manual Forward/Backward Pass ↔ PyTorch",
+      "tier": 1,
+      "hours": 3.5,
+      "file": "src/content/course/ML/ML-03.mdx",
+      "prerequisites": [
+        "ML-01",
+        "ML-02"
+      ],
+      "nextModules": [
+        "ML-04"
+      ],
+      "objectives": [
+        "Compute the full forward pass of a small multilayer perceptron (MLP) by hand, given concrete numbers.",
+        "Derive the backward pass (gradients w.r.t. every weight matrix) from the chain rule, entirely by hand.",
+        "Reproduce the identical computation in PyTorch using autograd, and map every manual step to the corresponding PyTorch operation.",
+        "Explain why reverse-mode automatic differentiation (backprop) is the efficient way to compute these gradients."
+      ],
+      "concepts": [
+        {
+          "name": "Multilayer perceptron (MLP)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Computation graph",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Forward pass",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Backward pass / backpropagation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Sigmoid activation and its derivative",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Reverse-mode automatic differentiation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "PyTorch autograd",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "6 exercises with solutions; 3 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 6,
+        "exercisesByType": {
+          "short-text": 1,
+          "derivation": 1,
+          "symbolic": 1,
+          "numeric": 1,
+          "code": 1,
+          "proof": 1
+        },
+        "displayMathBlocks": 3,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 8,
+        "sourceIds": [
+          "lecture-ai",
+          "lecture-maths"
+        ]
+      }
+    },
+    "ML-04": {
+      "block": "ML",
+      "title": "Neural Network Architecture Essentials",
+      "tier": 1,
+      "hours": 3.0,
+      "file": "src/content/course/ML/ML-04.mdx",
+      "prerequisites": [
+        "ML-03"
+      ],
+      "nextModules": [
+        "ML-05"
+      ],
+      "objectives": [
+        "Catalog the standard linear operators (fully-connected, convolution) and explain the parameter-efficiency argument for convolution.",
+        "Catalog the standard nonlinear operators (ReLU, sigmoid, softmax, pooling, layer-norm) and state which introduce parameters.",
+        "Explain, at a conceptual level, what problem each of CNN/LSTM/Transformer architectures is built to solve.",
+        "Explain why weight initialization scale matters, and how dropout acts as an implicit ensemble."
+      ],
+      "concepts": [
+        {
+          "name": "Linear operators: fully-connected, convolution",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Nonlinear operators: activations, pooling, softmax, layer-norm",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "CNN, LSTM/GRU, Transformer (conceptual survey)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Initialization",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Regularization: weight decay, dropout, data augmentation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "numeric": 1,
+          "short-text": 3
+        },
+        "displayMathBlocks": 0,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 2,
+        "sourceIds": [
+          "lecture-ai"
+        ]
+      }
+    },
+    "ML-05": {
+      "block": "ML",
+      "title": "Kernelization & Bayesian Learning",
+      "tier": 1,
+      "hours": 4.0,
+      "file": "src/content/course/ML/ML-05.mdx",
+      "prerequisites": [
+        "ML-02",
+        "PROB-05"
+      ],
+      "nextModules": [
+        "ML-06"
+      ],
+      "objectives": [
+        "Derive the kernel trick from ridge regression, and state the requirement a valid kernel function must satisfy.",
+        "State the representer theorem's content and why it justifies the kernel trick generally.",
+        "Derive ridge regression as Bayesian MAP/posterior inference, and connect its posterior mean to MATH-02B's closed form.",
+        "Explain, precisely, why 'Gaussian Process' and 'Bayesian kernel ridge regression' name the same object."
+      ],
+      "concepts": [
+        {
+          "name": "Kernel trick, kernel matrix",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Reproducing Kernel Hilbert Space (RKHS), representer theorem",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Bayesian linear regression",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Gaussian Processes as Bayesian kernel ridge regression",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Laplace approximation, GP classification",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 6 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "short-text": 2,
+          "numeric": 1,
+          "derivation": 1
+        },
+        "displayMathBlocks": 6,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-machinelearning"
+        ]
+      }
+    },
+    "ML-06": {
+      "block": "ML",
+      "title": "Unsupervised Learning: PCA, Embeddings & Clustering",
+      "tier": 1,
+      "hours": 3.5,
+      "file": "src/content/course/ML/ML-06.mdx",
+      "prerequisites": [
+        "MATH-04",
+        "ML-02"
+      ],
+      "nextModules": [
+        "ML-07"
+      ],
+      "objectives": [
+        "Derive PCA from projection-error minimization, and connect the optimal solution to MATH-04's eigendecomposition.",
+        "Explain the kernel-PCA idea as ML-05's kernel trick applied to PCA.",
+        "Derive the k-means algorithm from its objective, and explain GMM/EM as its soft-assignment generalization."
+      ],
+      "concepts": [
+        {
+          "name": "PCA via projection-error minimization",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Kernel PCA, spectral methods (survey)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "k-means clustering",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Gaussian Mixture Models, EM algorithm",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 1 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "derivation": 1,
+          "short-text": 2,
+          "numeric": 1
+        },
+        "displayMathBlocks": 1,
+        "codeFences": 1,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-machinelearning"
+        ]
+      }
+    },
+    "ML-07": {
+      "block": "ML",
+      "title": "Advanced Topics: Ensembles, Bayesian NNs & No Free Lunch",
+      "tier": 3,
+      "hours": 2.5,
+      "file": "src/content/course/ML/ML-07.mdx",
+      "prerequisites": [
+        "ML-04",
+        "ML-05"
+      ],
+      "nextModules": [],
+      "objectives": [
+        "Derive weighted local regression as a weighted instance of ML-02's ridge regression.",
+        "Explain bagging, boosting, and gradient boosting, including gradient boosting's functional-gradient-descent interpretation.",
+        "Explain dropout's status as an approximate Bayesian method, connecting ML-04 and ML-05.",
+        "State the No Free Lunch theorem's content and its ML-specific implication."
+      ],
+      "concepts": [
+        {
+          "name": "Local/lazy learning, kNN",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Bagging, boosting, gradient boosting",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Decision trees (CART)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Bayesian neural networks, dropout as approximate inference",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "No Free Lunch theorem",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 2 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "derivation": 1,
+          "numeric": 1,
+          "short-text": 2
+        },
+        "displayMathBlocks": 2,
+        "codeFences": 1,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 2,
+        "sourceIds": [
+          "lecture-machinelearning"
+        ]
+      }
+    },
+    "ODE-01": {
+      "block": "ODE",
+      "title": "First-Order ODEs: What They Are & How to Solve Them by Hand",
+      "tier": 1,
+      "hours": 4.0,
+      "file": "src/content/course/ODE/ODE-01.mdx",
+      "prerequisites": [
+        "MATH-02"
+      ],
+      "nextModules": [
+        "ODE-02"
+      ],
+      "objectives": [
+        "Explain what a differential equation is and what it means for a function to 'solve' one.",
+        "Verify a proposed solution to an ODE by direct substitution.",
+        "Solve separable first-order ODEs by hand.",
+        "Derive and apply the integrating-factor method for linear first-order ODEs.",
+        "State the existence/uniqueness intuition (Lipschitz condition) for an initial value problem."
+      ],
+      "concepts": [
+        {
+          "name": "Differential equation, order, solution",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Initial value problem (IVP)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Direction fields",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Separable equations",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Linear first-order ODEs, integrating factor",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Existence and uniqueness (Lipschitz condition)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "6 exercises with solutions; 4 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 6,
+        "exercisesByType": {
+          "short-text": 2,
+          "derivation": 2,
+          "numeric": 2
+        },
+        "displayMathBlocks": 4,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": []
+      }
+    },
+    "ODE-02": {
+      "block": "ODE",
+      "title": "Linear Systems of ODEs, Eigenvalues & Stability",
+      "tier": 1,
+      "hours": 4.0,
+      "file": "src/content/course/ODE/ODE-02.mdx",
+      "prerequisites": [
+        "ODE-01",
+        "MATH-04"
+      ],
+      "nextModules": [
+        "ODE-03"
+      ],
+      "objectives": [
+        "Derive the eigenvector/eigenvalue solution ansatz for linear systems $\\\\dot x=Ax$.",
+        "Solve a 2D linear system by hand via eigendecomposition, given an initial condition.",
+        "Explain how complex eigenvalues produce oscillatory solutions.",
+        "Classify the stability of a linear system from the signs of the real parts of its eigenvalues.",
+        "Connect this to linearized robot-dynamics stability analysis."
+      ],
+      "concepts": [
+        {
+          "name": "Linear system of ODEs",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Eigenvector solution ansatz",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Complex eigenvalues and oscillation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Stability classification",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Linearization",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 3 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "derivation": 1,
+          "numeric": 1,
+          "short-text": 2
+        },
+        "displayMathBlocks": 3,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": []
+      }
+    },
+    "ODE-03": {
+      "block": "ODE",
+      "title": "Numerical Integration: Euler & RK4",
+      "tier": 1,
+      "hours": 3.5,
+      "file": "src/content/course/ODE/ODE-03.mdx",
+      "prerequisites": [
+        "ODE-02"
+      ],
+      "nextModules": [
+        "DYN-01"
+      ],
+      "objectives": [
+        "Explain why most ODEs need numerical rather than closed-form solutions.",
+        "Derive the forward Euler method from a first-order Taylor expansion, and state its local/global error.",
+        "State the RK4 algorithm and explain why it achieves higher accuracy for a similar cost per step.",
+        "Compute Euler and RK4 steps by hand and compare their accuracy against a known closed-form solution."
+      ],
+      "concepts": [
+        {
+          "name": "Forward Euler method",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Local and global truncation error",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Runge-Kutta 4th order (RK4)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Numerical stability, stiffness (briefly)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 0 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "derivation": 1,
+          "numeric": 3
+        },
+        "displayMathBlocks": 0,
+        "codeFences": 2,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": []
+      }
+    },
+    "OPT-01": {
+      "block": "OPT",
+      "title": "Unconstrained Optimization: Line Search & Newton",
+      "tier": 1,
+      "hours": 5.0,
+      "file": "src/content/course/OPT/OPT-01.mdx",
+      "prerequisites": [
+        "MATH-02",
+        "MATH-05"
+      ],
+      "nextModules": [
+        "OPT-02"
+      ],
+      "objectives": [
+        "State the desiderata for a downhill optimization algorithm (monotone, convergent, rescaling-invariant).",
+        "Derive backtracking line search and both Wolfe conditions, and state the exponential-convergence theorem for gradient descent.",
+        "Derive the steepest-descent direction under a general metric via the Cholesky-substitution argument.",
+        "Derive Newton's method from root-finding first, then as the exact minimizer of the 2nd-order Taylor model, and explain its scale/coordinate invariance.",
+        "Explain the non-positive-definite Hessian failure mode and the gradient-fallback / Levenberg-Marquardt damping fix."
+      ],
+      "concepts": [
+        {
+          "name": "Downhill algorithm desiderata",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Gradient descent",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Backtracking line search / Wolfe conditions",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Steepest descent under a metric",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Newton's method",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Non-positive-definite fallback / damping / trust region",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "7 exercises with solutions; 7 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 7,
+        "exercisesByType": {
+          "short-text": 4,
+          "derivation": 2,
+          "numeric": 1
+        },
+        "displayMathBlocks": 7,
+        "codeFences": 2,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 4,
+        "sourceIds": [
+          "lecture-maths",
+          "lecture-optimization"
+        ]
+      }
+    },
+    "OPT-02": {
+      "block": "OPT",
+      "title": "Gauss-Newton, Quasi-Newton & Conjugate Gradient",
+      "tier": 1,
+      "hours": 4.5,
+      "file": "src/content/course/OPT/OPT-02.mdx",
+      "prerequisites": [
+        "OPT-01"
+      ],
+      "nextModules": [
+        "OPT-03"
+      ],
+      "objectives": [
+        "Explain why the exact Hessian is often impractical to compute for large problems.",
+        "Derive the Gauss-Newton Hessian approximation from the exact Hessian of a least-squares objective, and explain its PSD guarantee and Riemannian-metric interpretation.",
+        "Compute a Gauss-Newton step for a small least-squares problem, including a robotics path-optimization instance.",
+        "State the secant equation and the BFGS update rule; explain what L-BFGS trades off.",
+        "Derive the conjugate-gradient search-direction update and state its finite-convergence property."
+      ],
+      "concepts": [
+        {
+          "name": "Least-squares objective",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Gauss-Newton approximation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Secant equation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Quasi-Newton methods (BFGS, L-BFGS)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Conjugate gradient",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "6 exercises with solutions; 6 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 6,
+        "exercisesByType": {
+          "short-text": 2,
+          "derivation": 2,
+          "numeric": 2
+        },
+        "displayMathBlocks": 6,
+        "codeFences": 2,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 5,
+        "sourceIds": [
+          "lecture-optimization"
+        ]
+      }
+    },
+    "OPT-03": {
+      "block": "OPT",
+      "title": "Constrained Optimization: KKT & the Lagrangian",
+      "tier": 1,
+      "hours": 5.0,
+      "file": "src/content/course/OPT/OPT-03.mdx",
+      "prerequisites": [
+        "OPT-01"
+      ],
+      "nextModules": [
+        "OPT-04"
+      ],
+      "objectives": [
+        "State the general constrained mathematical program and explain the force-balance geometric picture at an optimum.",
+        "State the full KKT theorem (stationarity, primal feasibility, dual feasibility, complementarity) precisely.",
+        "Derive the KKT stationarity condition from the Lagrangian, and solve small constrained problems by hand.",
+        "State the primal and dual problems, weak duality, and Slater's strong-duality condition."
+      ],
+      "concepts": [
+        {
+          "name": "Constrained NLP formulation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "KKT conditions",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Lagrangian",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Complementary slackness",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Primal/dual problems, weak & strong duality",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "6 exercises with solutions; 8 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 6,
+        "exercisesByType": {
+          "short-text": 2,
+          "derivation": 2,
+          "numeric": 2
+        },
+        "displayMathBlocks": 8,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 5,
+        "sourceIds": [
+          "lecture-maths",
+          "lecture-optimization"
+        ]
+      }
+    },
+    "OPT-04": {
+      "block": "OPT",
+      "title": "Convex Problems, LP/QP, SQP & Log Barriers",
+      "tier": 1,
+      "hours": 5.5,
+      "file": "src/content/course/OPT/OPT-04.mdx",
+      "prerequisites": [
+        "OPT-03"
+      ],
+      "nextModules": [
+        "OPT-05"
+      ],
+      "objectives": [
+        "State the formal definitions of convex/quasiconvex/unimodal, and prove that a local minimum of a convex function is automatically global.",
+        "Derive the log-barrier method's gradient and algorithm, the central path, and its exact equivalence to a relaxed KKT system.",
+        "Derive the augmented Lagrangian's update rule and explain why it avoids the log-barrier/penalty methods' ill-conditioning.",
+        "Recognize and rewrite a problem in standard LP form (incl. slack variables), and set up a QP (e.g. the SVM dual).",
+        "Understand SQP's per-iteration QP subproblem and the Simplex algorithm at a conceptual level."
+      ],
+      "concepts": [
+        {
+          "name": "Convexity, quasiconvexity, unimodality",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Log-barrier method / central path",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Squared penalty method",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Augmented Lagrangian",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Linear program (LP) / Quadratic program (QP)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Sequential Quadratic Programming (SQP)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Simplex algorithm",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "5 exercises with solutions; 3 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 5,
+        "exercisesByType": {
+          "short-text": 2,
+          "derivation": 1,
+          "numeric": 2
+        },
+        "displayMathBlocks": 3,
+        "codeFences": 3,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 4,
+        "sourceIds": [
+          "lecture-optimization"
+        ]
+      }
+    },
+    "OPT-05": {
+      "block": "OPT",
+      "title": "Stochastic & Blackbox Optimization",
+      "tier": 1,
+      "hours": 4.5,
+      "file": "src/content/course/OPT/OPT-05.mdx",
+      "prerequisites": [
+        "OPT-02"
+      ],
+      "nextModules": [
+        "OPT-06"
+      ],
+      "objectives": [
+        "Explain the speed/accuracy tradeoff SGD makes relative to full-batch gradient descent, and state the SGD/episodic-SGD algorithms.",
+        "State the Lipschitz-continuity assumption and derive the SGD convergence bound from it.",
+        "Compute an SGD step using a mini-batch gradient estimate.",
+        "State the RMSprop/Adagrad/momentum/Adam update rules and explain what each one adapts.",
+        "State the No Free Lunch theorem formally and explain its actual practical implication."
+      ],
+      "concepts": [
+        {
+          "name": "Stochastic Gradient Descent (SGD)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Lipschitz continuity",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "SGD convergence bound",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "RMSprop / Adagrad / momentum / Adam",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "No Free Lunch (NFL) theorem",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "5 exercises with solutions; 3 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 5,
+        "exercisesByType": {
+          "short-text": 2,
+          "numeric": 1,
+          "derivation": 2
+        },
+        "displayMathBlocks": 3,
+        "codeFences": 3,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-optimization"
+        ]
+      }
+    },
+    "OPT-06": {
+      "block": "OPT",
+      "title": "Bayesian Optimization & Bandits",
+      "tier": 2,
+      "hours": 4.0,
+      "file": "src/content/course/OPT/OPT-06.mdx",
+      "prerequisites": [
+        "OPT-05",
+        "PROB-01",
+        "PROB-05"
+      ],
+      "nextModules": [
+        "PROB-01"
+      ],
+      "objectives": [
+        "Explain the exploration/exploitation tradeoff and the multi-armed bandit problem formulation.",
+        "State and apply the UCB1 policy and its regret bound.",
+        "State the Gaussian Process definition and its posterior mean/variance formulas.",
+        "State the standard acquisition functions (MPI, EI, UCB) and the Bayesian optimization algorithm."
+      ],
+      "concepts": [
+        {
+          "name": "Multi-armed bandits",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Exploration vs. exploitation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Upper Confidence Bound (UCB1)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Gaussian Process (GP)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Acquisition functions",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Bayesian optimization",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "5 exercises with solutions; 5 display-math blocks; 0 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 5,
+        "exercisesByType": {
+          "short-text": 3,
+          "numeric": 2
+        },
+        "displayMathBlocks": 5,
+        "codeFences": 2,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-ai",
+          "lecture-optimization"
+        ]
+      }
+    },
+    "PLAN-01": {
+      "block": "PLAN",
+      "title": "Configuration Space & Geometric Feasibility",
+      "tier": 1,
+      "hours": 3.0,
+      "file": "src/content/course/PLAN/PLAN-01.mdx",
+      "prerequisites": [
+        "KIN-03"
+      ],
+      "nextModules": [
+        "PLAN-02"
+      ],
+      "objectives": [
+        "Formally define configuration space and feasible configuration space, and connect them to $C_\\\\text{free}$/$C_\\\\text{obs}$ terminology from the wider planning literature.",
+        "State the degrees-of-freedom/minimal-coordinates relationship for a holonomically-constrained system.",
+        "Explain the feedback-control/trajectory-optimization/path-finding triad, and where each is strong and weak.",
+        "Explain potential-field path finding as gradient descent, connect it to DYN-02's P control, and explain the local-minimum problem it inherits.",
+        "Explain why grid-based search (wavefront/Dijkstra) doesn't scale to high-dimensional configuration spaces."
+      ],
+      "concepts": [
+        {
+          "name": "Configuration space, feasible configuration space",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Generalized/minimal coordinates, degrees of freedom",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Feedback control / trajectory optimization / path finding",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Potential fields, local minima",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Grid search (wavefront, Dijkstra), curse of dimensionality",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 0 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "numeric": 2,
+          "derivation": 1,
+          "short-text": 1
+        },
+        "displayMathBlocks": 0,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 4,
+        "sourceIds": [
+          "lecture-robotics",
+          "robotkin"
+        ]
+      }
+    },
+    "PLAN-02": {
+      "block": "PLAN",
+      "title": "Sample-Based Path Finding: PRM & RRT",
+      "tier": 1,
+      "hours": 3.5,
+      "file": "src/content/course/PLAN/PLAN-02.mdx",
+      "prerequisites": [
+        "PLAN-01"
+      ],
+      "nextModules": [
+        "PLAN-03"
+      ],
+      "objectives": [
+        "Derive the PRM construction algorithm and explain the role of the local planner and resolution parameter.",
+        "State and apply the PRM probabilistic-completeness bound, and explain why narrow passages break it.",
+        "Derive the simplest and goal-biased RRT algorithms, and explain why nearest-neighbor extension gives rapid, space-filling exploration.",
+        "Compare PRM and RRT on their single-query/multi-query and precomputation tradeoffs."
+      ],
+      "concepts": [
+        {
+          "name": "Probabilistic Roadmaps (PRM)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Rapidly-exploring Random Trees (RRT)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Local planner, resolution parameter",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Probabilistic completeness, narrow passages",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "short-text": 3,
+          "numeric": 1
+        },
+        "displayMathBlocks": 1,
+        "codeFences": 3,
+        "pythonFences": 0,
+        "figures": 2,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-robotics"
+        ]
+      }
+    },
+    "PLAN-03": {
+      "block": "PLAN",
+      "title": "Non-Holonomic Systems",
+      "tier": 1,
+      "hours": 3.5,
+      "file": "src/content/course/PLAN/PLAN-03.mdx",
+      "prerequisites": [
+        "PLAN-01",
+        "DYN-01"
+      ],
+      "nextModules": [
+        "PLAN-04"
+      ],
+      "objectives": [
+        "State the formal holonomic/non-holonomic constraint definitions and Toussaint's tangent-space definition, and show they agree.",
+        "Derive the car model's differential constraint and show it is genuinely non-holonomic.",
+        "Explain why PRM/RRT paths built while ignoring differential constraints are infeasible, and derive the control-based-sampling fix.",
+        "State the standard configuration-space metrics for orientations, and explain why an 'ideal' metric is generally intractable."
+      ],
+      "concepts": [
+        {
+          "name": "Holonomic vs. non-holonomic constraints",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Differential constraints, tangent space",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Car (bicycle) model",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Control-based sampling",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Configuration-space metrics",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 3 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "short-text": 2,
+          "derivation": 1,
+          "numeric": 1
+        },
+        "displayMathBlocks": 3,
+        "codeFences": 2,
+        "pythonFences": 0,
+        "figures": 2,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-robotics",
+          "robotkin"
+        ]
+      }
+    },
+    "PLAN-04": {
+      "block": "PLAN",
+      "title": "Path Optimization: From Sampled Paths to Smooth Trajectories",
+      "tier": 1,
+      "hours": 2.0,
+      "file": "src/content/course/PLAN/PLAN-04.mdx",
+      "prerequisites": [
+        "PLAN-02",
+        "DYN-04"
+      ],
+      "nextModules": [],
+      "objectives": [
+        "Explain why trajectory optimization alone (without a global path finder) can fail via local minima.",
+        "Explain the standard two-stage pipeline: sample-based path finding for global feasibility, then trajectory optimization for local refinement.",
+        "Trace how each PLAN/DYN module contributes to a complete path-to-motion pipeline."
+      ],
+      "concepts": [
+        {
+          "name": "Path finding as trajectory-optimization initialization",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Global feasibility vs. local optimality",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "3 exercises with solutions",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 3,
+        "exercisesByType": {
+          "short-text": 3
+        },
+        "displayMathBlocks": 1,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 0,
+        "sourceIds": [
+          "lecture-robotics"
+        ]
+      }
+    },
+    "PROB-01": {
+      "block": "PROB",
+      "title": "Probability Foundations",
+      "tier": 2,
+      "hours": 4.5,
+      "file": "src/content/course/PROB/PROB-01.mdx",
+      "prerequisites": [
+        "MATH-01"
+      ],
+      "nextModules": [
+        "PROB-02"
+      ],
+      "objectives": [
+        "State the formal definition of a probability measure and a random variable.",
+        "Distinguish joint, marginal, and conditional probability, from their formal definitions.",
+        "Derive Bayes' rule from the definition of conditional probability, and name each of its terms.",
+        "Apply Bayes' rule to compute a posterior probability, and recognize the base-rate effect.",
+        "Compute a marginal distribution from a joint distribution table."
+      ],
+      "concepts": [
+        {
+          "name": "Probability measure, sample space, random variable",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Joint, marginal, conditional probability",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Product rule, Bayes' rule",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Base rate",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Conditional independence, Bayesian networks (briefly)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "5 exercises with solutions; 5 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 5,
+        "exercisesByType": {
+          "derivation": 2,
+          "short-text": 1,
+          "numeric": 2
+        },
+        "displayMathBlocks": 5,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 5,
+        "sourceIds": [
+          "lecture-ai"
+        ]
+      }
+    },
+    "PROB-02": {
+      "block": "PROB",
+      "title": "Monte Carlo & Sampling Methods",
+      "tier": 2,
+      "hours": 3.0,
+      "file": "src/content/course/PROB/PROB-02.mdx",
+      "prerequisites": [
+        "PROB-01"
+      ],
+      "nextModules": [
+        "PROB-03"
+      ],
+      "objectives": [
+        "State the Monte Carlo estimator (plain and weighted) formally.",
+        "Explain when sampling methods are needed instead of exact integration.",
+        "Derive the importance sampling identity from the definition of expectation.",
+        "Compute importance weights and verify the identity on a discrete example.",
+        "Understand rejection sampling's acceptance-rate tradeoff.",
+        "State the particle-approximation representation and connect it to particle filters / sample-based planning."
+      ],
+      "concepts": [
+        {
+          "name": "Monte Carlo estimation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Rejection sampling",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Importance sampling",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Importance weight",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Particle approximation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 2 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "short-text": 1,
+          "derivation": 1,
+          "numeric": 2
+        },
+        "displayMathBlocks": 2,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-ai"
+        ]
+      }
+    },
+    "PROB-03": {
+      "block": "PROB",
+      "title": "Entropy, Cross-Entropy & KL Divergence",
+      "tier": 2,
+      "hours": 2.5,
+      "file": "src/content/course/PROB/PROB-03.mdx",
+      "prerequisites": [
+        "PROB-01"
+      ],
+      "nextModules": [
+        "PROB-04"
+      ],
+      "objectives": [
+        "Explain why $-\\\\log p(x)$ is a sensible measure of surprise.",
+        "Derive the relationship $D(p\\\\|q) = H(p,q) - H(p)$ between KL divergence, cross-entropy, and entropy.",
+        "Compute entropy, cross-entropy, and KL divergence for a discrete distribution.",
+        "Prove KL divergence is always non-negative, via Jensen's inequality."
+      ],
+      "concepts": [
+        {
+          "name": "Entropy (expected surprise)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Cross-entropy",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "KL divergence (relative entropy)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Minimal description length",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "5 exercises with solutions; 0 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 5,
+        "exercisesByType": {
+          "numeric": 2,
+          "short-text": 1,
+          "derivation": 1,
+          "proof": 1
+        },
+        "displayMathBlocks": 0,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "entropy",
+          "lecture-ai"
+        ]
+      }
+    },
+    "PROB-04": {
+      "block": "PROB",
+      "title": "Energy-Based Views & the Boltzmann Distribution",
+      "tier": 2,
+      "hours": 1.5,
+      "file": "src/content/course/PROB/PROB-04.mdx",
+      "prerequisites": [
+        "PROB-03"
+      ],
+      "nextModules": [
+        "PROB-05"
+      ],
+      "objectives": [
+        "Explain why the partition function is a fundamentally global (and hard) quantity, unlike the energy function itself.",
+        "Derive the equivalence between the energy-function and Boltzmann-distribution forms.",
+        "Compute Boltzmann probabilities for a simple discrete system."
+      ],
+      "concepts": [
+        {
+          "name": "Energy function",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Boltzmann distribution",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Partition function",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "3 exercises with solutions; 0 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 3,
+        "exercisesByType": {
+          "short-text": 1,
+          "derivation": 1,
+          "numeric": 1
+        },
+        "displayMathBlocks": 0,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "energy"
+        ]
+      }
+    },
+    "PROB-05": {
+      "block": "PROB",
+      "title": "Gaussians: Definition, Identities & Manipulation",
+      "tier": 2,
+      "hours": 4.0,
+      "file": "src/content/course/PROB/PROB-05.mdx",
+      "prerequisites": [
+        "PROB-01"
+      ],
+      "nextModules": [
+        "PROB-06"
+      ],
+      "objectives": [
+        "State the formal definition of the Gaussian density, in both 1D and n dimensions, moment and canonical form.",
+        "Explain why the Gaussian's closure under products/marginals/conditionals is practically valuable.",
+        "Derive the mean and variance of the product of two 1D Gaussians.",
+        "State and apply the marginal and conditional identities for a jointly-Gaussian distribution.",
+        "Know where to find the fuller set of Gaussian identities (convolution, expectations, entropy, KL) for later reference."
+      ],
+      "concepts": [
+        {
+          "name": "Gaussian distribution (moment and canonical form)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Product of Gaussians",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Marginal and conditional of a joint Gaussian",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Precision (inverse variance/covariance)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "5 exercises with solutions; 6 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 5,
+        "exercisesByType": {
+          "numeric": 3,
+          "short-text": 1,
+          "derivation": 1
+        },
+        "displayMathBlocks": 6,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "gaussians",
+          "lecture-ai"
+        ]
+      }
+    },
+    "PROB-06": {
+      "block": "PROB",
+      "title": "Laplace Approximation, Variational Inference & Fisher Information",
+      "tier": 2,
+      "hours": 2.5,
+      "file": "src/content/course/PROB/PROB-06.mdx",
+      "prerequisites": [
+        "PROB-05",
+        "MATH-00"
+      ],
+      "nextModules": [
+        "ODE-01"
+      ],
+      "objectives": [
+        "Explain why approximating a complicated distribution with a Gaussian at its mode is useful.",
+        "Derive the Laplace approximation as a second-order Taylor expansion of the log-density.",
+        "Compute a Laplace approximation's variance for a concrete unnormalized density.",
+        "Understand variational inference and Fisher information at a conceptual level."
+      ],
+      "concepts": [
+        {
+          "name": "Laplace approximation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Variational inference",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Fisher information",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "3 exercises with solutions; 0 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 3,
+        "exercisesByType": {
+          "short-text": 1,
+          "derivation": 1,
+          "numeric": 1
+        },
+        "displayMathBlocks": 0,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 2,
+        "sourceIds": [
+          "lecture-maths"
+        ]
+      }
+    },
+    "REV1-01": {
+      "block": "REV1",
+      "title": "Cumulative Review: The Foundations Stack",
+      "tier": 1,
+      "hours": 1.5,
+      "file": "src/content/course/REV1/REV1-01.mdx",
+      "prerequisites": [
+        "MATH-05",
+        "OPT-06",
+        "PROB-06",
+        "DYN-07",
+        "ML-07",
+        "RL-07",
+        "SYM-04"
+      ],
+      "nextModules": [
+        "RLEARN-00"
+      ],
+      "objectives": [
+        "State, in one line each, the core idea of every block from MATH through SYM.",
+        "Trace three recurring themes (local-vs-global methods, the known-model-to-model-free spectrum, and metric-awareness) across at least three blocks each.",
+        "Locate the cheat sheet and milestone exam for any block covered so far, as a self-service reference before diving into RLEARN."
+      ],
+      "concepts": [
+        {
+          "name": "Synthesis across MATH, OPT, PROB, ODE, KIN, DYN, PLAN, MANIP, ML, RL, SYM",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Recurring themes: local vs. global, known-model vs. model-free, metric-awareness",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "2 exercises with solutions",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 2,
+        "exercisesByType": {
+          "short-text": 2
+        },
+        "displayMathBlocks": 0,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 0,
+        "notationEntries": 0,
+        "sourceIds": []
+      }
+    },
+    "REV2-01": {
+      "block": "REV2",
+      "title": "Cumulative Review: Robot Learning",
+      "tier": 1,
+      "hours": 1.0,
+      "file": "src/content/course/REV2/REV2-01.mdx",
+      "prerequisites": [
+        "RLEARN-08"
+      ],
+      "nextModules": [
+        "CAP-01"
+      ],
+      "objectives": [
+        "State RLEARN's own throughline (robot learning as shortcuts to the model-based control stack) from memory.",
+        "Name the one recurring pattern (privileged-teacher) that ties together at least 4 different RLEARN modules.",
+        "Preview how CAP-01 will draw on both this block and the ones before it."
+      ],
+      "concepts": [
+        {
+          "name": "Synthesis across RLEARN-00 through RLEARN-08",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "The privileged-teacher pattern as a unifying thread",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "2 exercises with solutions",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 2,
+        "exercisesByType": {
+          "short-text": 2
+        },
+        "displayMathBlocks": 0,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 0,
+        "notationEntries": 0,
+        "sourceIds": []
+      }
+    },
+    "RL-01": {
+      "block": "RL",
+      "title": "MDPs, Value Functions & Bellman Equations",
+      "tier": 1,
+      "hours": 3.0,
+      "file": "src/content/course/RL/RL-01.mdx",
+      "prerequisites": [
+        "PROB-01",
+        "DYN-04"
+      ],
+      "nextModules": [
+        "RL-02"
+      ],
+      "objectives": [
+        "State the formal Markov Decision Process (MDP) definition and the Markov property.",
+        "Define the expected return, value function, and Q-function for a policy.",
+        "Derive the recursive property of the value function, and state the Bellman optimality equation.",
+        "Explain precisely how this generalizes DYN-04's deterministic Bellman equation to the stochastic, reward-maximizing case."
+      ],
+      "concepts": [
+        {
+          "name": "Markov Decision Process (MDP)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Markov property",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Expected return, value function, Q-function",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Bellman optimality equation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "3 exercises with solutions; 5 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 3,
+        "exercisesByType": {
+          "short-text": 1,
+          "derivation": 1,
+          "numeric": 1
+        },
+        "displayMathBlocks": 5,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 4,
+        "sourceIds": [
+          "lecture-ai"
+        ]
+      }
+    },
+    "RL-02": {
+      "block": "RL",
+      "title": "Value Iteration, Q-Iteration & Convergence",
+      "tier": 1,
+      "hours": 3.0,
+      "file": "src/content/course/RL/RL-02.mdx",
+      "prerequisites": [
+        "RL-01"
+      ],
+      "nextModules": [
+        "RL-03"
+      ],
+      "objectives": [
+        "Derive the value iteration and Q-iteration algorithms directly from the Bellman optimality equation.",
+        "State the V*/Q* relations that convert between them.",
+        "Prove Q-iteration converges to Q*, using an infinity-norm contraction argument."
+      ],
+      "concepts": [
+        {
+          "name": "Value iteration",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Q-iteration",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Contraction mapping, convergence proof",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 4 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "numeric": 2,
+          "derivation": 2
+        },
+        "displayMathBlocks": 4,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 2,
+        "sourceIds": [
+          "lecture-ai"
+        ]
+      }
+    },
+    "RL-03": {
+      "block": "RL",
+      "title": "Model-Free RL: TD Learning & Q-Learning",
+      "tier": 1,
+      "hours": 3.0,
+      "file": "src/content/course/RL/RL-03.mdx",
+      "prerequisites": [
+        "RL-02"
+      ],
+      "nextModules": [
+        "RL-04"
+      ],
+      "objectives": [
+        "Derive TD-learning's update rule from the recursive value-function property, without assuming a known model.",
+        "Derive Q-learning's update rule from the Bellman optimality equation.",
+        "Explain Q-learning's convergence as a stochastic approximation of Q-iteration."
+      ],
+      "concepts": [
+        {
+          "name": "Model-based vs. data-based (model-free) RL",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Temporal-difference (TD) learning",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Q-learning, ε-greedy action selection",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "TD error",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 2 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "short-text": 2,
+          "derivation": 1,
+          "numeric": 1
+        },
+        "displayMathBlocks": 2,
+        "codeFences": 2,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-ai"
+        ]
+      }
+    },
+    "RL-04": {
+      "block": "RL",
+      "title": "Policy Gradient & Deep RL",
+      "tier": 1,
+      "hours": 3.5,
+      "file": "src/content/course/RL/RL-04.mdx",
+      "prerequisites": [
+        "RL-03",
+        "ML-04"
+      ],
+      "nextModules": [
+        "RL-05"
+      ],
+      "objectives": [
+        "Explain how the Bellman residual loss generalizes Q-learning's TD update to a proper SGD-trainable loss.",
+        "Derive the policy gradient theorem via the log-derivative trick.",
+        "Explain, at a survey level, the standard deep-RL stabilization tricks and the model-based/model-free/policy-search taxonomy."
+      ],
+      "concepts": [
+        {
+          "name": "Replay buffer, Bellman residual loss",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Policy gradient theorem",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Deterministic policy gradient",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Deep RL stabilization tricks",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 4 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "short-text": 2,
+          "derivation": 2
+        },
+        "displayMathBlocks": 4,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-ai",
+          "lecture-robotlearning"
+        ]
+      }
+    },
+    "RL-05": {
+      "block": "RL",
+      "title": "Exploration Strategies",
+      "tier": 1,
+      "hours": 2.5,
+      "file": "src/content/course/RL/RL-05.mdx",
+      "prerequisites": [
+        "RL-03"
+      ],
+      "nextModules": [
+        "RL-06"
+      ],
+      "objectives": [
+        "State the model-based/model-free/policy-search taxonomy for what can be learned from RL data.",
+        "Explain optimistic initialization and UCB-style exploration, connecting directly to OPT-06's UCB1.",
+        "Explain R-max's strictly-optimistic mechanism and why it gives principled, provably-efficient exploration."
+      ],
+      "concepts": [
+        {
+          "name": "Model-based vs. model-free vs. policy-search RL",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Optimistic initialization, UCB exploration",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "R-max, KWIK-R-max",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Bayesian RL / belief planning",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 2 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "short-text": 2,
+          "numeric": 1,
+          "derivation": 1
+        },
+        "displayMathBlocks": 2,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-ai"
+        ]
+      }
+    },
+    "RL-06": {
+      "block": "RL",
+      "title": "Monte Carlo Tree Search & UCT",
+      "tier": 2,
+      "hours": 3.5,
+      "file": "src/content/course/RL/RL-06.mdx",
+      "prerequisites": [
+        "RL-02",
+        "OPT-06"
+      ],
+      "nextModules": [
+        "RL-07"
+      ],
+      "objectives": [
+        "State the basic tree-search algorithm and the complexity tradeoffs between BFS, DFS, and iterative deepening.",
+        "Derive the generic MCTS scheme from flat Monte Carlo estimation, via 1-step and then sequential UCB.",
+        "State UCT's tree policy, and explain precisely how it is OPT-06's UCB1 applied at every node of a growing tree."
+      ],
+      "concepts": [
+        {
+          "name": "Basic tree search (BFS, DFS, iterative deepening)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Decision trees for MDPs, POMDPs, and games",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Flat Monte Carlo, 1-step UCB",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Monte Carlo Tree Search (MCTS), UCT",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Minimax, negamax, evaluation functions",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "numeric": 2,
+          "short-text": 2
+        },
+        "displayMathBlocks": 1,
+        "codeFences": 3,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-ai"
+        ]
+      }
+    },
+    "RL-07": {
+      "block": "RL",
+      "title": "Decision Theory & Value Alignment",
+      "tier": 1,
+      "hours": 2.0,
+      "file": "src/content/course/RL/RL-07.mdx",
+      "prerequisites": [
+        "RL-04"
+      ],
+      "nextModules": [],
+      "objectives": [
+        "State the basic decision-theoretic formalism and the principle of maximal expected utility.",
+        "Explain risk aversion/seeking as concavity/convexity of a utility function, with a worked example.",
+        "Explain decision networks, and how MDPs and supervised ML both instantiate the same formalism.",
+        "Describe, at a conceptual level, intrinsic-reward/curiosity objectives and the value-alignment problem."
+      ],
+      "concepts": [
+        {
+          "name": "Decision-theoretic formalism, principle of maximal expected utility",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Risk aversion/seeking",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Decision networks (influence diagrams)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "ML as (empirical) risk minimization",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Information gain, intrinsic motivation, value alignment",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "numeric": 1,
+          "short-text": 3
+        },
+        "displayMathBlocks": 2,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 2,
+        "sourceIds": [
+          "lecture-ai"
+        ]
+      }
+    },
+    "RLEARN-00": {
+      "block": "RLEARN",
+      "title": "Robot Learning: Taxonomy & Landscape",
+      "tier": 1,
+      "hours": 2.0,
+      "file": "src/content/course/RLEARN/RLEARN-00.mdx",
+      "prerequisites": [
+        "DYN-04",
+        "ML-04"
+      ],
+      "nextModules": [
+        "RLEARN-01"
+      ],
+      "objectives": [
+        "State Toussaint's Robot Learning Mini Taxonomy (what is learned × how is data generated), and place every upcoming RLEARN module within it.",
+        "Explain robot learning as 'shortcutting' specific components of the classical model-based control stack, module by module.",
+        "State the two core challenges (environment interaction, state estimation) that motivate learning over purely model-based robotics."
+      ],
+      "concepts": [
+        {
+          "name": "Robot Learning Mini Taxonomy (what/how)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Model-based control stack, and where learning shortcuts it",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Motivating challenges: environment interaction, state estimation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "short-text": 4
+        },
+        "displayMathBlocks": 0,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 1,
+        "sourceIds": [
+          "lecture-robotlearning"
+        ]
+      }
+    },
+    "RLEARN-01": {
+      "block": "RLEARN",
+      "title": "Dynamics Learning",
+      "tier": 1,
+      "hours": 3.0,
+      "file": "src/content/course/RLEARN/RLEARN-01.mdx",
+      "prerequisites": [
+        "DYN-01",
+        "ML-04",
+        "RLEARN-00"
+      ],
+      "nextModules": [
+        "RLEARN-02"
+      ],
+      "objectives": [
+        "Distinguish parameter estimation, full regression, and residual dynamics learning, with their loss functions.",
+        "Distinguish autoregression, recurrent, and state-space approaches to observation-based dynamics learning.",
+        "Explain what makes training data 'good' for dynamics learning, connecting explicitly to ML-02's estimator-variance formula and frequency-domain excitation."
+      ],
+      "concepts": [
+        {
+          "name": "State-based dynamics learning: parameter estimation, regression, residual",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Observation-based dynamics learning: NARX, recurrent, state-space",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Estimator variance, frequency excitation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 3 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "short-text": 2,
+          "derivation": 1,
+          "numeric": 1
+        },
+        "displayMathBlocks": 3,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-robotlearning"
+        ]
+      }
+    },
+    "RLEARN-02": {
+      "block": "RLEARN",
+      "title": "Imitation Learning",
+      "tier": 1,
+      "hours": 4.0,
+      "file": "src/content/course/RLEARN/RLEARN-02.mdx",
+      "prerequisites": [
+        "ML-04",
+        "RL-04",
+        "RLEARN-01"
+      ],
+      "nextModules": [
+        "RLEARN-03"
+      ],
+      "objectives": [
+        "State behavior cloning's formulation, and derive why it is not, despite its supervised-ML formula, actually a supervised learning problem.",
+        "Derive the theoretical magnitude of behavior cloning's compound error, and explain how DAgger addresses it.",
+        "State GAN, VAE, and Diffusion Model formulations, and their imitation-learning instantiations (GAIL, conditional-VAE policies, diffusion policies)."
+      ],
+      "concepts": [
+        {
+          "name": "Behavior cloning, trajectory distribution learning",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Distributional shift, compound error, DAgger",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Data collection: teleoperation, kinesthetic teaching, privileged teacher",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Generative models for imitation: GAN, VAE, Diffusion",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "5 exercises with solutions; 1 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 5,
+        "exercisesByType": {
+          "short-text": 4,
+          "derivation": 1
+        },
+        "displayMathBlocks": 1,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-robotlearning"
+        ]
+      }
+    },
+    "RLEARN-03": {
+      "block": "RLEARN",
+      "title": "RL in Robotics: Reward Engineering & Deep RL Tricks",
+      "tier": 1,
+      "hours": 2.0,
+      "file": "src/content/course/RLEARN/RLEARN-03.mdx",
+      "prerequisites": [
+        "RL-04"
+      ],
+      "nextModules": [
+        "RLEARN-04"
+      ],
+      "objectives": [
+        "Derive potential-based reward shaping's policy-invariance property.",
+        "Explain the robotics-specific data-collection challenge in on-policy deep RL, and the structured-exploration-noise fix.",
+        "Recognize genuine RL applications in robotics at a level sufficient to read the underlying papers."
+      ],
+      "concepts": [
+        {
+          "name": "Potential-based reward shaping",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "On-policy data collection, structured exploration noise",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "3 exercises with solutions; 1 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 3,
+        "exercisesByType": {
+          "derivation": 1,
+          "short-text": 2
+        },
+        "displayMathBlocks": 1,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 2,
+        "sourceIds": [
+          "lecture-robotlearning"
+        ]
+      }
+    },
+    "RLEARN-04": {
+      "block": "RLEARN",
+      "title": "Offline RL & Sim2Real",
+      "tier": 1,
+      "hours": 3.0,
+      "file": "src/content/course/RLEARN/RLEARN-04.mdx",
+      "prerequisites": [
+        "RLEARN-03"
+      ],
+      "nextModules": [
+        "RLEARN-05"
+      ],
+      "objectives": [
+        "Distinguish on-policy, off-policy, and offline RL, and explain why offline RL suffers a distributional-shift problem analogous to RLEARN-02's imitation learning.",
+        "State the naive offline RL objective and explain why it fails without an explicit penalty for leaving the data distribution.",
+        "Explain domain randomization and the privileged-teacher/sensor-based-student pattern as sim2real solutions."
+      ],
+      "concepts": [
+        {
+          "name": "On-policy vs. off-policy vs. offline RL",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Offline RL distribution shift, TD3+BC",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Domain randomization, privileged teacher & sensor-based student",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Domain adaptation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "short-text": 4
+        },
+        "displayMathBlocks": 1,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 2,
+        "sourceIds": [
+          "lecture-robotlearning"
+        ]
+      }
+    },
+    "RLEARN-05": {
+      "block": "RLEARN",
+      "title": "Inverse RL",
+      "tier": 1,
+      "hours": 3.0,
+      "file": "src/content/course/RLEARN/RLEARN-05.mdx",
+      "prerequisites": [
+        "RL-04",
+        "RLEARN-02"
+      ],
+      "nextModules": [
+        "RLEARN-06"
+      ],
+      "objectives": [
+        "Derive the linear-in-features IRL objective, and state the Max Margin (Apprenticeship Learning) algorithm.",
+        "State the Max Entropy IRL formulation.",
+        "Derive Adversarial IRL's discriminator decomposition, and connect it explicitly to RLEARN-03's reward shaping.",
+        "State the Bradley-Terry preference model used in preference-based RL."
+      ],
+      "concepts": [
+        {
+          "name": "Inverse RL general approach",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Max Margin IRL (Apprenticeship Learning)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Max Entropy IRL",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Adversarial IRL",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Preference-based RL, Bradley-Terry model",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 4 display-math blocks; 2 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "derivation": 2,
+          "short-text": 1,
+          "numeric": 1
+        },
+        "displayMathBlocks": 4,
+        "codeFences": 1,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 2,
+        "sourceIds": [
+          "lecture-robotlearning"
+        ]
+      }
+    },
+    "RLEARN-06": {
+      "block": "RLEARN",
+      "title": "Manipulation & Grasp Learning",
+      "tier": 1,
+      "hours": 2.5,
+      "file": "src/content/course/RLEARN/RLEARN-06.mdx",
+      "prerequisites": [
+        "MANIP-01",
+        "RLEARN-01"
+      ],
+      "nextModules": [
+        "RLEARN-07"
+      ],
+      "objectives": [
+        "Explain model-based and simulation-based grasp-label generation as two instances of RLEARN-02's privileged-teacher pattern.",
+        "State what GraspNet/DexNet-style architectures actually predict from an RGB-D scene.",
+        "Explain why general-purpose manipulation learning is often described as 'beyond the MDP/RL framework.'"
+      ],
+      "concepts": [
+        {
+          "name": "Model-based vs. simulation-based grasp labels",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Grasp-prediction architectures",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Manipulation beyond pick-and-place",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "short-text": 3,
+          "numeric": 1
+        },
+        "displayMathBlocks": 0,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 0,
+        "sourceIds": [
+          "lecture-robotlearning"
+        ]
+      }
+    },
+    "RLEARN-07": {
+      "block": "RLEARN",
+      "title": "Task and Motion Planning & Logic-Geometric Programs",
+      "tier": 1,
+      "hours": 4.0,
+      "file": "src/content/course/RLEARN/RLEARN-07.mdx",
+      "prerequisites": [
+        "SYM-03",
+        "PLAN-02",
+        "OPT-04"
+      ],
+      "nextModules": [
+        "RLEARN-08"
+      ],
+      "objectives": [
+        "State the three levels of manipulation abstraction (force, motion, task), and the TAMP path-finding formulation connecting them.",
+        "Derive the full Logic-Geometric Program (LGP) formulation from TAMP's path-finding view, and explain its skeleton/NLP decomposition.",
+        "Explain the two concrete opportunities for learning in TAMP (learned constraints, learned plan prediction), and survey language-grounded robotics."
+      ],
+      "concepts": [
+        {
+          "name": "Abstraction levels: force, motion, task",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "TAMP: task level, motion level, path-finding formulation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Logic-Geometric Program (LGP)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Learning in TAMP: visual constraints, plan prediction",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Language-grounded robotics (CLIP, SayCan, PaLM-E)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "5 exercises with solutions; 4 display-math blocks; 0 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 5,
+        "exercisesByType": {
+          "short-text": 5
+        },
+        "displayMathBlocks": 4,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-robotlearning"
+        ]
+      }
+    },
+    "RLEARN-08": {
+      "block": "RLEARN",
+      "title": "Multi-Robot Learning (light touch)",
+      "tier": 3,
+      "hours": 2.0,
+      "file": "src/content/course/RLEARN/RLEARN-08.mdx",
+      "prerequisites": [
+        "RLEARN-04"
+      ],
+      "nextModules": [],
+      "objectives": [
+        "State the Deep Sets and Graph Neural Network formulas, and explain why permutation invariance matters for multi-robot learning.",
+        "Define a Markov game as the multi-robot generalization of RL-01's MDP, and state MARL's core challenges."
+      ],
+      "concepts": [
+        {
+          "name": "Permutation-invariant architectures: Deep Sets, GNNs",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Markov games, Multi-Agent RL (MARL)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Non-stationarity, scalability",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "numeric": 1,
+          "short-text": 3
+        },
+        "displayMathBlocks": 1,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 0,
+        "sourceIds": [
+          "lecture-robotlearning"
+        ]
+      }
+    },
+    "SYM-01": {
+      "block": "SYM",
+      "title": "Propositional Logic Essentials",
+      "tier": 2,
+      "hours": 1.5,
+      "file": "src/content/course/SYM/SYM-01.mdx",
+      "prerequisites": [],
+      "nextModules": [
+        "SYM-02"
+      ],
+      "objectives": [
+        "State propositional logic's syntax and semantics, and evaluate a sentence's truth under a model.",
+        "Define entailment, equivalence, validity, and satisfiability, and distinguish soundness from completeness.",
+        "State Modus Ponens for Horn-form knowledge bases, and derive one step of forward chaining."
+      ],
+      "concepts": [
+        {
+          "name": "Propositional syntax and semantics",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Entailment, equivalence, validity, satisfiability",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Horn clauses, Modus Ponens",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Soundness and completeness",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "3 exercises with solutions; 1 display-math blocks; 1 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 3,
+        "exercisesByType": {
+          "short-text": 2,
+          "derivation": 1
+        },
+        "displayMathBlocks": 1,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 2,
+        "sourceIds": [
+          "lecture-ai"
+        ]
+      }
+    },
+    "SYM-02": {
+      "block": "SYM",
+      "title": "First-Order Logic & Inference",
+      "tier": 1,
+      "hours": 3.0,
+      "file": "src/content/course/SYM/SYM-02.mdx",
+      "prerequisites": [
+        "SYM-01"
+      ],
+      "nextModules": [
+        "SYM-03"
+      ],
+      "objectives": [
+        "State FOL's syntax and semantics, including quantifiers and their properties.",
+        "Apply universal instantiation and compute unifying substitutions (the matching problem).",
+        "Derive Generalized Modus Ponens, and explain forward/backward chaining for FOL."
+      ],
+      "concepts": [
+        {
+          "name": "First-order logic syntax and semantics",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Quantifiers, universal/existential instantiation",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Unification (the matching problem)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Generalized Modus Ponens, forward/backward chaining",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions; 1 display-math blocks; 3 derivation/proof",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "derivation": 3,
+          "short-text": 1
+        },
+        "displayMathBlocks": 1,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 3,
+        "sourceIds": [
+          "lecture-ai"
+        ]
+      }
+    },
+    "SYM-03": {
+      "block": "SYM",
+      "title": "STRIPS, PDDL & Relational MDPs",
+      "tier": 1,
+      "hours": 2.5,
+      "file": "src/content/course/SYM/SYM-03.mdx",
+      "prerequisites": [
+        "SYM-02",
+        "RL-01"
+      ],
+      "nextModules": [
+        "SYM-04"
+      ],
+      "objectives": [
+        "Represent an MDP state as a conjunction of grounded FOL literals, connecting to RL-01's MDP formalism.",
+        "Define STRIPS operators (precondition, effect, frame assumption) and explain forward-search planning with them.",
+        "Explain why deterministic STRIPS rules can't be learned from limited data, and how probabilistic relational rules fix this."
+      ],
+      "concepts": [
+        {
+          "name": "Grounded literals, relational MDP state",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "STRIPS operators, PDDL, frame assumption",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Forward-search planning",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Noisy relational planning rules",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "short-text": 2,
+          "numeric": 2
+        },
+        "displayMathBlocks": 2,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 2,
+        "sourceIds": [
+          "lecture-ai"
+        ]
+      }
+    },
+    "SYM-04": {
+      "block": "SYM",
+      "title": "Probabilistic Relational Models & Markov Logic Networks",
+      "tier": 2,
+      "hours": 1.5,
+      "file": "src/content/course/SYM/SYM-04.mdx",
+      "prerequisites": [
+        "SYM-03",
+        "PROB-01"
+      ],
+      "nextModules": [],
+      "objectives": [
+        "Explain Probabilistic Relational Models as a relational-database view of a grounded graphical model.",
+        "Define Markov Logic Networks and compute a grounded factor graph's structure for a small domain.",
+        "Explain MLNs' generality: what standard models they collapse to, and what the infinite-weight limit recovers."
+      ],
+      "concepts": [
+        {
+          "name": "Probabilistic Relational Models (PRMs)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Markov Logic Networks (MLNs)",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        },
+        {
+          "name": "Factor graph templates, grounding",
+          "moduleDepth": 4,
+          "perConceptDepth": null,
+          "perConceptDepthReason": "requires semantic module review (review protocol Gate 6); not mechanically derivable"
+        }
+      ],
+      "moduleDepth": {
+        "value": 4,
+        "label": "practised by written exercise",
+        "basis": "4 exercises with solutions",
+        "ceilingNote": "Mechanically-derived CEILING for the module as a whole. Individual concepts inside it may sit lower; none can sit higher."
+      },
+      "evidence": {
+        "exercises": 4,
+        "exercisesByType": {
+          "numeric": 2,
+          "short-text": 2
+        },
+        "displayMathBlocks": 1,
+        "codeFences": 0,
+        "pythonFences": 0,
+        "figures": 0,
+        "readinessChecks": 1,
+        "notationEntries": 2,
+        "sourceIds": [
+          "lecture-ai"
+        ]
+      }
+    }
+  }
+}
