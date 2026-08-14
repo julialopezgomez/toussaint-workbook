@@ -67,7 +67,7 @@ The full routine is in [`docs/agent/STAGE_RUNBOOK.md`](docs/agent/STAGE_RUNBOOK.
 | Situation | What to do |
 |---|---|
 | New/resumed **Codex** session | Codex should load `AGENTS.md` automatically. Say: **“Follow the repository startup and resume protocol before continuing.”** |
-| New/resumed **Claude** session | Claude should load `CLAUDE.md`. Say the same line; for the current Phase 5 task, paste [`docs/prompts/CLAUDE_PHASE5_RECONCILE_GATE_B.md`](docs/prompts/CLAUDE_PHASE5_RECONCILE_GATE_B.md). |
+| New/resumed **Claude** session | Claude should load `CLAUDE.md`. Say the same line, then use any task-specific prompt named in `CURRENT_HANDOFF.md`; if none is named, continue from the recorded next safe action. |
 | After compression, rate limit, or model switch | Say: **“Rehydrate from repository evidence, run the context check, and restate scope before continuing.”** |
 | Before pausing or switching agents | Say: **“Stop at a clean boundary, update `CURRENT_HANDOFF.md`, and run the context check.”** |
 | Starting/finishing a review block | Run `python3 scripts/validate/agent_context.py` and `python3 scripts/validate/review_integrity.py`. |
