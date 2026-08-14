@@ -1,0 +1,40 @@
+---
+id: PROB-EXAM
+block: PROB
+title: "Probability Exam"
+coversModules: ["PROB-01", "PROB-02", "PROB-03", "PROB-04", "PROB-05", "PROB-06"]
+masteryThreshold: 0.8
+remediationMap:
+  - { exerciseId: "PROB-EXAM-ex1-laplace-energy-conceptual", moduleIds: ["PROB-04", "PROB-06"] }
+  - { exerciseId: "PROB-EXAM-ex1-retake", moduleIds: ["PROB-03", "PROB-06"] }
+  - { exerciseId: "PROB-EXAM-ex2-gaussian-kl-derivation", moduleIds: ["PROB-03", "PROB-05"] }
+  - { exerciseId: "PROB-EXAM-ex2-retake", moduleIds: ["PROB-03", "PROB-05"] }
+  - { exerciseId: "PROB-EXAM-ex3-gaussian-fusion-numeric", moduleIds: ["PROB-01", "PROB-05"] }
+  - { exerciseId: "PROB-EXAM-ex3-retake", moduleIds: ["PROB-01", "PROB-05"] }
+  - { exerciseId: "PROB-EXAM-ex4-laplace-transfer", moduleIds: ["PROB-06"] }
+  - { exerciseId: "PROB-EXAM-ex4-retake", moduleIds: ["PROB-06"] }
+---
+
+import ExerciseCard from '../../components/exercise/ExerciseCard.astro';
+
+Cumulative, like the other milestone exams: every question combines at least two PROB modules, or extends a taught formula to a case not directly worked out in the modules themselves.
+
+## Part 1 — The energy view and variational inference
+
+<ExerciseCard id="PROB-EXAM-ex1-laplace-energy-conceptual" />
+<ExerciseCard id="PROB-EXAM-ex1-retake" />
+
+## Part 2 — Transfer: KL divergence between two Gaussians
+
+<ExerciseCard id="PROB-EXAM-ex2-gaussian-kl-derivation" />
+<ExerciseCard id="PROB-EXAM-ex2-retake" />
+
+## Part 3 — Bayes' rule meets the Gaussian product identity
+
+<ExerciseCard id="PROB-EXAM-ex3-gaussian-fusion-numeric" />
+<ExerciseCard id="PROB-EXAM-ex3-retake" />
+
+## Part 4 — Laplace approximation on a new energy function
+
+<ExerciseCard id="PROB-EXAM-ex4-laplace-transfer" />
+<ExerciseCard id="PROB-EXAM-ex4-retake" />

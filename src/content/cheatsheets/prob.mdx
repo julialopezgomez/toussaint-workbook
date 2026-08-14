@@ -1,0 +1,56 @@
+---
+id: prob
+title: "Probability & Information Theory"
+relatedModules: ["PROB-01", "PROB-02", "PROB-03", "PROB-04", "PROB-05", "PROB-06"]
+---
+
+## Definitions
+
+- **Bayes' rule** (PROB-01): converts a likelihood (how well a hypothesis predicts data) into a posterior (how likely the hypothesis is, given data), weighted by a prior.
+- **Monte Carlo / importance sampling** (PROB-02): approximate an expectation by averaging samples; importance sampling corrects for sampling from a convenient $q$ instead of the true $p$ by reweighting with $p(x)/q(x)$.
+- **Entropy / cross-entropy / KL divergence** (PROB-03): entropy is $p$'s own average surprise; cross-entropy is your average surprise when you *think* the distribution is $q$ but it's actually $p$; KL divergence is the gap between them, always $\ge0$.
+- **Energy-based view / Boltzmann distribution** (PROB-04): any density can be written $p(x)=\tfrac1Z\exp(-E(x))$ for an energy function $E(x)=-\log p(x)+c$ — turns multiplicative probability into additive energy.
+- **Gaussians** (PROB-05): closed under conditioning, marginalization, and multiplication; the two-Gaussian-product identity is the computational core of Kalman filtering and Gaussian Process regression.
+- **Laplace approximation / variational inference** (PROB-06): Laplace approximates a distribution as a Gaussian matched to its mode and local curvature (2nd-order Taylor of the energy); variational inference instead directly optimizes a parametric family to minimize $D(q\|p)$.
+
+## Core equations
+
+| Quantity | Formula | Module |
+|---|---|---|
+| Bayes' rule | $p(X\mid Y)=\dfrac{p(Y\mid X)\,p(X)}{p(Y)}$ | PROB-01 |
+| Monte Carlo estimator | $\mathbb E_p\{f(x)\}\approx\dfrac1N\sum_if(x_i)$, $x_i\sim p$ | PROB-02 |
+| Importance weight | $w(x)=p(x)/q(x)$ | PROB-02 |
+| Entropy | $H(p)=\mathbb E_{p(x)}\{-\log p(x)\}$ | PROB-03 |
+| Cross-entropy | $H(p,q)=\mathbb E_{p(x)}\{-\log q(x)\}$ | PROB-03 |
+| KL divergence | $D(p\|q)=H(p,q)-H(p)\ge0$ | PROB-03 |
+| Boltzmann distribution | $p(x)=\tfrac1Z\exp(-E(x))$, $Z=\int_x\exp(-E(x))\,dx$ | PROB-04 |
+| Gaussian (moment form) | $N(x\mid a,A)=\dfrac{1}{\lvert2\pi A\rvert^{1/2}}\exp\{-\tfrac12(x-a)^\top A^{-1}(x-a)\}$ | PROB-05 |
+| Product of two Gaussians | $N(x\mid a,A)N(x\mid b,B)=N[x\mid\ldots]\cdot N(a\mid b,A+B)$ | PROB-05 |
+| Laplace approximation | $p(x)\approx N(x\mid x^*,\sigma^2)$, $\sigma^2=(-\log p''(x^*))^{-1}$ | PROB-06 |
+| Variational inference | $q^*=\operatorname*{argmin}_qD(q\|p)$ | PROB-06 |
+
+## Assumptions & applicability
+
+- Bayes' rule needs an actual prior $p(X)$: a poorly-chosen prior can dominate a small amount of data (see PROB-01's disease-test example, where the low base rate matters as much as the test's accuracy).
+- Monte Carlo's $1/\sqrt N$ error rate is dimension-*independent*, its main advantage over grid-based quadrature in high dimensions — but importance sampling's variance blows up badly if $q$ is a poor match to $p$ (heavy-tailed weights).
+- $D(p\|q)\ge0$ always, but $D(p\|q)\ne D(q\|p)$ in general: KL divergence is not a true distance metric (not symmetric, doesn't satisfy the triangle inequality).
+- The energy-function/Boltzmann framing is a *reparametrization*, not new modeling power: any density has some energy function, the value is in additive rather than multiplicative reasoning (e.g. combining independent energy terms by summing, not multiplying probabilities).
+- The Gaussian product/conditioning identities require both Gaussians be over the same (or a linearly related) variable; the closed-form results are exact only in the linear-Gaussian case (the reason Kalman filters are exact for linear systems but need linearization, e.g. EKF, otherwise).
+- Laplace approximation is a **local** approximation around a single mode: for a genuinely multimodal distribution, it silently ignores every mode but the one you expanded around.
+
+## Common mistakes
+
+- Swapping $p$ and $q$ in $D(p\|q)$ — since it's asymmetric, this changes the answer (and the interpretation: "$q$'s cost of approximating $p$" vs. the reverse).
+- Forgetting the normalizing partition function $Z$ when converting between an energy function and an actual probability (unnormalized $\exp(-E(x))$ isn't a valid density on its own).
+- Using the Laplace approximation's Hessian without checking it's positive definite at the mode (i.e. that you're actually at a max of $\log p$, not a saddle or min) — the resulting "variance" $\sigma^2=(-\log p''(x^*))^{-1}$ would come out negative or undefined.
+- Treating importance-sampling weights as already normalized: in practice they're normalized post hoc ($w_i/\sum_jw_j$) unless $p$ itself is already known to be a normalized density.
+
+## Decision rule
+
+- Need to update a belief given new evidence? Bayes' rule (PROB-01). Need an expectation you can't compute in closed form? Monte Carlo, and importance sampling specifically if you can only sample from a related distribution $q$ (PROB-02).
+- Comparing two distributions, or building a loss from a probabilistic model? Cross-entropy for training (differentiable, matches maximum likelihood), KL divergence for comparing/reporting distance between distributions (PROB-03).
+- Need a cheap, closed-form approximate posterior around a mode you can already find by optimization (e.g. via Newton's method)? Laplace approximation (PROB-06) — free covariance estimate from the Hessian you already computed. Need a better (non-local) approximation and are willing to optimize a parametric family? Variational inference.
+
+## Full lesson
+
+[PROB-01 — Probability Foundations](/course/PROB/PROB-01) · [PROB-02 — Monte Carlo & Sampling Methods](/course/PROB/PROB-02) · [PROB-03 — Entropy, Cross-Entropy & KL Divergence](/course/PROB/PROB-03) · [PROB-04 — Energy-Based Views & the Boltzmann Distribution](/course/PROB/PROB-04) · [PROB-05 — Gaussians: Definition, Identities & Manipulation](/course/PROB/PROB-05) · [PROB-06 — Laplace Approximation, Variational Inference & Fisher Information](/course/PROB/PROB-06) · [Milestone exam](/exam/PROB)

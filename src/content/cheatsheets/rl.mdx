@@ -1,0 +1,50 @@
+---
+id: rl
+title: "Reinforcement Learning Foundations"
+relatedModules: ["RL-01", "RL-02", "RL-03", "RL-04", "RL-05", "RL-06", "RL-07"]
+---
+
+## Definitions
+
+- **MDPs & Bellman equations** (RL-01): a Markov Decision Process $(S,A,P,R,\gamma)$; the value function $V^\pi$ satisfies a recursive (Bellman) self-consistency equation, the RL generalization of DYN-04's deterministic Bellman equation.
+- **Value/Q-iteration** (RL-02): iterate the Bellman *optimality* equation as an update rule; a contraction mapping (in $\|\cdot\|_\infty$), guaranteeing convergence to $V^*/Q^*$.
+- **TD learning / Q-learning** (RL-03): a stochastic-approximation version of value iteration, learning directly from sampled transitions without knowing $P$ or $R$ (model-free).
+- **Policy gradient** (RL-04): directly optimize policy parameters $\theta$ via $\nabla_\theta J(\theta)$, using the log-derivative trick to turn an expectation-of-a-gradient into a gradient-of-a-log-probability, estimable from samples.
+- **Exploration** (RL-05): the fundamental explore/exploit trade-off; R-max/KWIK-R-max treat under-visited states optimistically, Bayesian RL maintains a belief over the true MDP.
+- **MCTS / UCT** (RL-06): grow a search tree guided by UCB1 (OPT-06's bandit rule) at every node, balancing exploring under-visited actions against exploiting known-good ones.
+- **Decision theory** (RL-07): maximal expected utility as the normative decision rule; connects MDPs' reward-maximization to ML's expected-loss minimization as two instances of the same structure.
+
+## Core equations
+
+| Quantity | Formula | Module |
+|---|---|---|
+| Bellman equation | $V^\pi(s)=R(s,\pi(s))+\gamma\sum_{s'}P(s'\mid s,\pi(s))V^\pi(s')$ | RL-01 |
+| Value iteration | $V_{k+1}(s)=\max_a[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V_k(s')]$ | RL-02 |
+| Q-learning update | $Q\leftarrow Q(s,a)+\alpha\big[r+\gamma\max_{a'}Q(s',a')-Q(s,a)\big]$ | RL-03 |
+| Policy gradient | $\dfrac{\partial}{\partial\theta}J(\theta)=\mathbb E_{\xi\sim P_\theta}\Big\{\sum_t\gamma^t\dfrac{\partial}{\partial\theta}\log\pi_\theta(a_t\mid s_t)\,Q^{\pi_\theta}(s_t,a_t)\Big\}$ | RL-04 |
+| UCB1 / UCT tree policy | $\operatorname*{argmax}_{v'}\dfrac{Q_{v'}}{n_{v'}}+\beta\sqrt{\dfrac{2\ln n_v}{n_{v'}}}$ | RL-06 |
+| Maximal expected utility | $a^*=\operatorname*{argmax}_a\mathbb E_{P(y\mid a)}\{U(y)\}$ | RL-07 |
+
+## Assumptions & applicability
+
+- The Bellman equation and value/Q-iteration assume the Markov property: the current state fully determines future transition/reward distributions — violated by partial observability (needs belief-state MDPs, RL-05) or non-stationary dynamics.
+- Q-learning's convergence guarantee (as stochastic approximation of value iteration) requires every state-action pair to be visited infinitely often and a Robbins-Monro-style decreasing step size, mirroring OPT-05's SGD convergence conditions.
+- The policy-gradient log-derivative trick needs $\pi_\theta$ to be differentiable in $\theta$ and (in practice) needs variance reduction (baselines, advantage estimation) to be usable — the raw REINFORCE estimator is often too noisy on its own.
+- UCT's exploration bonus $\beta\sqrt{2\ln n_v/n_{v'}}$ assumes rewards are bounded in $[0,1]$ (the standard UCB1 derivation); rescale rewards accordingly before applying it directly.
+
+## Common mistakes
+
+- Confusing $V^\pi$ (value under a *fixed* policy $\pi$) with $V^*$ (the *optimal* value function) — value iteration computes the latter directly; policy evaluation computes the former for a given $\pi$.
+- Forgetting the discount factor $\gamma^t$ inside the policy-gradient expectation, which weights later-timestep contributions differently from an undiscounted return.
+- Treating UCT's tree search as guaranteed-optimal after a fixed budget — it's an anytime algorithm with an unbounded worst case; more simulations improve the estimate but don't guarantee finding the true optimal action in finite time.
+- Applying maximal-expected-utility decision-making without checking the utility function itself is well-calibrated — a mis-specified $U$ makes even a "correct" argmax computation produce bad decisions (RL-07's value-alignment theme).
+
+## Decision rule
+
+- Know $P$ and $R$ exactly (a model of the environment)? Value/Q-iteration (RL-02) directly. Only have sampled experience, no model? TD/Q-learning (RL-03), model-free.
+- Continuous or very large action space, or need a stochastic policy? Policy gradient (RL-04) rather than value-based methods. Sparse rewards or need principled exploration beyond $\epsilon$-greedy? R-max/Bayesian RL (RL-05).
+- Have a generative model/simulator and need to plan online rather than train a policy in advance? MCTS/UCT (RL-06) — the AlphaGo-style approach, most useful when simulation is cheap relative to real experience.
+
+## Full lesson
+
+[RL-01 — MDPs, Value Functions & Bellman Equations](/course/RL/RL-01) · [RL-02 — Value Iteration, Q-Iteration & Convergence](/course/RL/RL-02) · [RL-03 — Model-Free RL: TD Learning & Q-Learning](/course/RL/RL-03) · [RL-04 — Policy Gradient & Deep RL](/course/RL/RL-04) · [RL-05 — Exploration Strategies](/course/RL/RL-05) · [RL-06 — Monte Carlo Tree Search & UCT](/course/RL/RL-06) · [RL-07 — Decision Theory & Value Alignment](/course/RL/RL-07) · [Milestone exam](/exam/RL)

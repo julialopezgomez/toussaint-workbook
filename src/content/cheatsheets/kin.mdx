@@ -1,0 +1,47 @@
+---
+id: kin
+title: "Rigid-Body Rotations & Kinematics"
+relatedModules: ["KIN-01", "KIN-02", "KIN-03"]
+---
+
+## Definitions
+
+- **Rotation matrices / Rodrigues' formula** (KIN-01): $R\in SO(3)$ rotates vectors; a rotation vector $w$ (axis $\times$ angle) exponentiates via Rodrigues' formula into the corresponding $R$; homogeneous transforms $T$ bundle rotation + translation into one matrix multiplication.
+- **Quaternions** (KIN-02): a 4-vector $q=(q_0,\bar q)$ representation of $SO(3)$, avoiding rotation matrices' redundant 9 numbers and rotation vectors' singularities; exp/log maps convert between quaternions and rotation vectors; SLERP interpolates smoothly between two orientations.
+- **Forward/inverse kinematics** (KIN-03): the kinematic map $\phi(q)$ gives end-effector pose from joint angles (forward); IK inverts this via the Jacobian, iteratively, since $\phi$ is nonlinear.
+
+## Core equations
+
+| Quantity | Formula | Module |
+|---|---|---|
+| Rodrigues' rotation formula | $R(w)=\cos\theta\,I+\sin\theta\,\widehat{\text{skew}}(w)+(1-\cos\theta)\,\hat w\hat w^\top$ | KIN-01 |
+| Angular-velocity ODE | $\dot R(t)=\text{skew}(w)\,R(t)$ | KIN-01 |
+| Homogeneous transform | $T=\begin{pmatrix}R&t\\0&1\end{pmatrix}$, composes by matrix multiplication | KIN-01 |
+| Quaternion log map | $\theta=2\arccos(q_0)$, $\ \hat w=\bar q/\sin(\theta/2)$, $\ w=\log(q)=\theta\hat w$ | KIN-02 |
+| Quaternion exp map | $q=\exp(w)=(\cos(\theta/2),\ \sin(\theta/2)\hat w)$ | KIN-02 |
+| SLERP | $q(t)=q_A\circ\exp(t\log(q_A^{-1}\circ q_B))$, $t\in[0,1]$ | KIN-02 |
+| Forward kinematics chain | $T_{W\to\text{eff}}(q)=T_{W\to A}\,T_{A\to A'}(q)\,T_{A'\to B}\,T_{B\to B'}(q)\cdots$ | KIN-03 |
+| IK Gauss-Newton step | $q^*=q_0+J^\sharp(y^*-\phi(q_0))$, $\ J^\sharp=(J^\top CJ+W)^{-1}J^\top C$ | KIN-03 |
+
+## Assumptions & applicability
+
+- Rotation *vectors* (3 numbers) have a coordinate singularity at $\theta=\pi$ (multiple representations collide); quaternions avoid this by living on $S^3$ (4 numbers, one constraint) — the standard reason to prefer them for interpolation/optimization over rotations.
+- $SLERP$ assumes unit quaternions throughout; a non-unit quaternion doesn't represent a valid rotation and needs renormalizing before use.
+- The IK Gauss-Newton step is a *local* linearization: valid for small displacements from $q_0$, iterated for large ones; it inherits Gauss-Newton's general convergence caveats from OPT-02 (needs a reasonable initial guess, can converge to the wrong local solution for redundant/singular configurations).
+- $J^\sharp$'s regularization weight $W$ trades off tracking accuracy against staying near $q_0$ (avoiding large, unintuitive joint motions) — a modeling choice, not derived from the kinematics alone.
+
+## Common mistakes
+
+- Composing homogeneous transforms in the wrong order — $T_{A\to C}=T_{A\to B}T_{B\to C}$ is *not* generally equal to $T_{B\to C}T_{A\to B}$ (matrix multiplication doesn't commute); always compose in the direction that matches the physical chain.
+- Adding two quaternions component-wise to "combine" rotations instead of using the Hamilton product $\circ$ — quaternion addition isn't rotation composition.
+- Forgetting that $\dot R=\text{skew}(w)R$ has $w$ expressed in the *world* (space) frame; the body-frame version has $R$ on the other side, $\dot R=R\,\text{skew}(w_\text{body})$ — mixing the two silently gives the wrong angular velocity.
+- Expecting a single Gauss-Newton IK step to reach the target exactly for a genuinely nonlinear kinematic chain — it's a linearization, iterate until convergence.
+
+## Decision rule
+
+- Storing/composing many rotations, need to avoid gimbal-lock singularities, or interpolating smoothly between orientations? Quaternions (KIN-02). Need an intuitive angle-axis description for a one-off computation, or symbolic/pedagogical clarity? Rotation matrices or rotation vectors (KIN-01) are fine.
+- Given a target end-effector pose and need the joint angles? IK via the Gauss-Newton/regularized-pseudo-inverse step (KIN-03), iterated from a reasonable initial guess.
+
+## Full lesson
+
+[KIN-01 — 3D Rotations & Angular Velocity](/course/KIN/KIN-01) · [KIN-02 — Quaternions](/course/KIN/KIN-02) · [KIN-03 — Forward/Inverse Kinematics & Jacobians](/course/KIN/KIN-03)

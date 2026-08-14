@@ -1,0 +1,88 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "OPT-EXAM-ex1-newton-sqp-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies plain Newton's local model has no constraint-handling mechanism." },
+          { "points": 2, "description": "Correctly explains SQP linearizes constraints and solves a constrained QP subproblem at each step." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Newton's local model minimizes a quadratic approximation of f over an unconstrained step delta. Plain Newton has no way to keep x+delta feasible: nothing in its model references g or h. SQP keeps the same quadratic objective model but additionally linearizes the constraints (g(x)+grad g^T delta <= 0, h(x)+grad h^T delta = 0) and solves the resulting constrained QP subproblem at each iteration, giving a step that respects the constraints locally."
+    },
+    {
+      "exerciseId": "OPT-EXAM-ex1-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies the dropped curvature-of-residuals term." },
+          { "points": 2, "description": "Correctly explains when it's large and when full Newton is preferable." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Exact Hessian = 2J^T J + 2 sum_i phi_i(x) grad^2 phi_i(x); Gauss-Newton drops the second term. It's large when residuals phi_i(x) are large or highly curved -- far from a good fit. If the exact Hessian is affordable and residuals are large, full Newton captures this term and can converge better; Gauss-Newton's advantage (cheap, always PSD) is most worth keeping specifically in the small-residual regime."
+    },
+    {
+      "exerciseId": "OPT-EXAM-ex2-kkt-qp-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies the constraint is active and sets up stationarity." },
+          { "points": 2, "description": "Correctly solves for x*=(1,1), lambda*=2, f(x*)=2." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "g(x)=2-x1-x2<=0; unconstrained min (0,0) is infeasible, so g(x*)=0. Stationarity: (2x1,2x2)+lambda(-1,-1)=0 => x1=x2=lambda/2. With x1+x2=2: lambda=2, x1=x2=1. f(x*)=2. lambda=2>=0 confirms dual feasibility. Independently verified via grid search along the constraint boundary."
+    },
+    {
+      "exerciseId": "OPT-EXAM-ex2-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly sets up stationarity with the new constraint gradient." },
+          { "points": 2, "description": "Correctly solves for x*=(0.6,1.2), lambda*=1.2, f(x*)=1.8." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "g(x)=3-x1-2x2<=0, active at optimum. Stationarity: (2x1,2x2)+lambda(-1,-2)=0 => x1=lambda/2, x2=lambda. With x1+2x2=3: lambda/2+2lambda=3 => lambda=1.2. x*=(0.6,1.2), f(x*)=1.8. Independently verified via grid search."
+    },
+    {
+      "exerciseId": "OPT-EXAM-ex3-sgd-bound-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 1.4, "tolerance": 0.01 },
+      "fullSolution": "sum(alpha_k)=100*0.1=10, sum(alpha_k^2)=100*0.01=1. Bound = 10/10 + (1/10)*(2*4/2) = 1 + 0.4 = 1.4."
+    },
+    {
+      "exerciseId": "OPT-EXAM-ex3-retake",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.55, "tolerance": 0.01 },
+      "fullSolution": "sum(alpha_k)=200*0.05=10, sum(alpha_k^2)=200*0.0025=0.5. Bound = 5/10 + (0.5/10)*(1*2/2) = 0.5 + 0.05 = 0.55."
+    },
+    {
+      "exerciseId": "OPT-EXAM-ex4-constrained-nls-transfer",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly derives the general stationarity condition combining OPT-02's gradient formula with the Lagrangian." },
+          { "points": 2, "description": "Correctly solves the concrete case: x*=(1.5,2.5), kappa*=-1, f(x*)=0.5." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "L(x,kappa)=phi(x)^T phi(x)+kappa h(x). Stationarity: 2J(x)^T phi(x)+kappa grad h(x)=0, plus h(x)=0. For phi=(x1-1,x2-2), J=I: 2(x1-1,x2-2)+kappa(1,1)=0 => x1=1-kappa/2, x2=2-kappa/2. With h=x1+x2-4=0: 3-kappa=4 => kappa=-1, x*=(1.5,2.5), f(x*)=0.5. Independently verified via grid search."
+    },
+    {
+      "exerciseId": "OPT-EXAM-ex4-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly sets up stationarity for the new phi/h." },
+          { "points": 2, "description": "Correctly solves: x*=(3.5,-1.5), kappa*=-1, f(x*)=0.5." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "J=I again. 2(x1-3,x2+1)+kappa(1,-1)=0 => x1=3-kappa/2, x2=-1+kappa/2. With h=x1-x2-5=0: 4-kappa=5 => kappa=-1, x*=(3.5,-1.5), f(x*)=0.5. Independently verified via grid search."
+    }
+  ]
+}

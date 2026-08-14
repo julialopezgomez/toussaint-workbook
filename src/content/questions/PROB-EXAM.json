@@ -1,0 +1,145 @@
+{
+  "moduleId": "PROB-EXAM",
+  "exercises": [
+    {
+      "id": "PROB-EXAM-ex1-laplace-energy-conceptual",
+      "objective": "Explain why the Laplace approximation is literally MATH-00's Taylor expansion applied to the energy function.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain precisely why the Laplace approximation (PROB-06) can be described as 'MATH-00's second-order Taylor expansion applied to the energy function $E(x)=-\\log p(x)$ (PROB-04), evaluated at the mode.' In particular, explain why the linear (first-order) Taylor term vanishes, and why the result is automatically Gaussian.",
+      "hints": [
+        "PROB-04 defines the energy $E(x)=-\\log p(x)+c$; the Laplace approximation Taylor-expands exactly this function to second order around $x^*=\\operatorname*{argmin}_xE(x)$ (equivalently the mode of $p$).",
+        "The linear term $\\nabla E(x^*)\\cdot(x-x^*)$ vanishes specifically because $x^*$ is a minimum of $E$ (equivalently a maximum of $\\log p$), where the gradient is exactly zero by definition of a critical point.",
+        "With the linear term gone, $\\tilde E(x)$ is purely quadratic in $(x-x^*)$; exponentiating a quadratic (via $\\tilde q(x)=\\exp\\{-\\tilde E(x)\\}$, PROB-04's Boltzmann-form recipe) always produces a Gaussian, since $\\exp(-\\tfrac12(x-x^*)^\\top H(x-x^*))$ is exactly a Gaussian's exponent form."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "PROB-EXAM-ex1-retake",
+      "objective": "Explain how KL divergence's non-negativity guarantees variational inference is well-posed.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [
+        "PROB-EXAM-ex1-laplace-energy-conceptual"
+      ],
+      "answerType": "short-text",
+      "prompt": "Variational inference (PROB-06) is defined as $q^*=\\operatorname*{argmin}_qD(q\\|p)$ over a parametric family. Explain what PROB-03's $D(q\\|p)\\ge0$ property guarantees about this optimization, and what it would mean (in the best case) if $q^*$ achieved $D(q^*\\|p)=0$ exactly.",
+      "hints": [
+        "$D(q\\|p)\\ge0$ means the objective being minimized has a known lower bound (zero), so the optimization is well-posed: it's searching for the best achievable value in a bounded range, not something that could run away to $-\\infty$.",
+        "If the parametric family $\\{q(x\\mid\\beta)\\}$ happens to contain $p$ itself, the minimum possible value $D(q\\|p)=0$ is achievable exactly when $q=p$ (KL divergence is zero if and only if the two distributions are identical).",
+        "In practice the family usually doesn't contain the true $p$ (that's the whole reason for approximating), so $D(q^*\\|p)>0$ at the optimum; the guarantee is only that the search is well-posed and the result is the *closest* member of the family to $p$ in the KL sense, not that it recovers $p$ exactly."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "PROB-EXAM-ex1-laplace-energy-conceptual"
+    },
+    {
+      "id": "PROB-EXAM-ex2-gaussian-kl-derivation",
+      "objective": "Derive the closed-form KL divergence between two univariate Gaussians, combining PROB-03's KL definition with PROB-05's Gaussian pdf.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Using PROB-03's definition $D(p\\|q)=\\mathbb E_{p(x)}\\{\\log(p(x)/q(x))\\}$ and PROB-05's Gaussian pdf, derive the closed-form KL divergence $D(N(x\\mid\\mu_1,\\sigma_1^2)\\,\\|\\,N(x\\mid\\mu_2,\\sigma_2^2))$. This closed form isn't worked out in either module. Evaluate it numerically for $\\mu_1=0,\\sigma_1=1,\\mu_2=1,\\sigma_2=2$.",
+      "hints": [
+        "Write $\\log(p(x)/q(x))=\\log p(x)-\\log q(x)$, substitute both Gaussian log-densities, and expand: $\\log p(x)-\\log q(x)=\\log(\\sigma_2/\\sigma_1)-\\tfrac{(x-\\mu_1)^2}{2\\sigma_1^2}+\\tfrac{(x-\\mu_2)^2}{2\\sigma_2^2}$.",
+        "Take the expectation under $p=N(\\mu_1,\\sigma_1^2)$ term by term: $\\mathbb E_p\\{(x-\\mu_1)^2\\}=\\sigma_1^2$ (the variance itself), and $\\mathbb E_p\\{(x-\\mu_2)^2\\}=\\mathbb E_p\\{(x-\\mu_1)^2\\}+(\\mu_1-\\mu_2)^2=\\sigma_1^2+(\\mu_1-\\mu_2)^2$ (expand the square and use $\\mathbb E_p\\{x-\\mu_1\\}=0$).",
+        "Combining: $D(p\\|q)=\\log(\\sigma_2/\\sigma_1)-\\tfrac12+\\tfrac{\\sigma_1^2+(\\mu_1-\\mu_2)^2}{2\\sigma_2^2}$. Plugging in $\\mu_1=0,\\sigma_1=1,\\mu_2=1,\\sigma_2=2$: $\\log2-\\tfrac12+\\tfrac{1+1}{8}=\\log2-0.5+0.25\\approx0.443$. Independently verified by Monte Carlo estimation of the expectation."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "PROB-EXAM-ex2-retake",
+      "objective": "Apply the Gaussian-KL closed form to a different pair of Gaussians.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 12,
+      "prerequisites": [
+        "PROB-EXAM-ex2-gaussian-kl-derivation"
+      ],
+      "answerType": "numeric",
+      "prompt": "Using the closed form $D(N(\\mu_1,\\sigma_1^2)\\|N(\\mu_2,\\sigma_2^2))=\\log(\\sigma_2/\\sigma_1)+\\dfrac{\\sigma_1^2+(\\mu_1-\\mu_2)^2}{2\\sigma_2^2}-\\dfrac12$, compute $D(N(2,1.5^2)\\|N(0,1^2))$. Enter a number.",
+      "hints": [
+        "Here $\\mu_1=2,\\sigma_1=1.5,\\mu_2=0,\\sigma_2=1$.",
+        "$\\log(\\sigma_2/\\sigma_1)=\\log(1/1.5)=-\\log1.5\\approx-0.405$; $\\sigma_1^2+(\\mu_1-\\mu_2)^2=2.25+4=6.25$; divided by $2\\sigma_2^2=2$: $3.125$.",
+        "$-0.405+3.125-0.5\\approx2.220$. Independently verified by Monte Carlo estimation."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "PROB-EXAM-ex2-gaussian-kl-derivation"
+    },
+    {
+      "id": "PROB-EXAM-ex3-gaussian-fusion-numeric",
+      "objective": "Combine Bayes' rule with the Gaussian product identity for a 1D Bayesian measurement update.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "A prior belief about $x$ is $N(x\\mid5,4)$ (mean 5, variance 4). A measurement $y=8$ arrives with measurement noise variance $1$ (i.e. likelihood $N(y\\mid x,1)$, treated via PROB-05's product-of-Gaussians identity as $N(x\\mid8,1)$). Using $\\sigma_c^2=(1/A+1/B)^{-1}$, $\\mu_c=\\sigma_c^2(a/A+b/B)$, compute the posterior mean $\\mu_c$. Enter a number.",
+      "hints": [
+        "Here $a=5,A=4$ (prior) and $b=8,B=1$ (measurement, using the likelihood's symmetry $N(y\\mid x,B)=N(x\\mid y,B)$).",
+        "$\\sigma_c^2=(1/4+1/1)^{-1}=(1.25)^{-1}=0.8$.",
+        "$\\mu_c=0.8\\times(5/4+8/1)=0.8\\times9.25=7.4$. Note the posterior mean is pulled toward the (more confident, lower-variance) measurement rather than sitting at the midpoint of prior and measurement."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "PROB-EXAM-ex3-retake",
+      "objective": "Repeat the Bayesian Gaussian fusion with different prior/measurement parameters.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [
+        "PROB-EXAM-ex3-gaussian-fusion-numeric"
+      ],
+      "answerType": "numeric",
+      "prompt": "A prior is $N(x\\mid0,9)$; a measurement $y=6$ arrives with measurement noise variance $4$. Compute the posterior mean $\\mu_c$. Enter a number.",
+      "hints": [
+        "$a=0,A=9$; $b=6,B=4$.",
+        "$\\sigma_c^2=(1/9+1/4)^{-1}\\approx2.769$.",
+        "$\\mu_c\\approx2.769\\times(0/9+6/4)=2.769\\times1.5\\approx4.154$."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "PROB-EXAM-ex3-gaussian-fusion-numeric"
+    },
+    {
+      "id": "PROB-EXAM-ex4-laplace-transfer",
+      "objective": "Apply the Laplace approximation to an energy function not worked out in PROB-06 itself.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For $\\log\\tilde p(x)=-\\tfrac12x^4+x^2$ (a different energy function from the one worked out in PROB-06 itself), find the Laplace-approximation variance $\\sigma^2$ at the mode $x^*=1$. Enter a number.",
+      "hints": [
+        "$\\dfrac{d}{dx}\\log\\tilde p=-2x^3+2x$; setting to zero gives $x=0,\\pm1$. At $x=1$, check it's a mode (not a min) via the second derivative.",
+        "$\\dfrac{d^2}{dx^2}\\log\\tilde p=-6x^2+2$; at $x=1$: $-6+2=-4<0$, confirming $x=1$ is a local maximum of $\\log\\tilde p$ (a mode).",
+        "$\\sigma^2=(-\\log\\tilde p''(x^*))^{-1}=(-(-4))^{-1}=1/4=0.25$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "PROB-EXAM-ex4-retake",
+      "objective": "Repeat the Laplace-approximation computation for a different energy function.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [
+        "PROB-EXAM-ex4-laplace-transfer"
+      ],
+      "answerType": "numeric",
+      "prompt": "For $\\log\\tilde p(x)=-\\tfrac12x^4+2x^2$, find the Laplace-approximation variance $\\sigma^2$ at the mode $x^*=\\sqrt2$. Enter a number.",
+      "hints": [
+        "$\\dfrac{d}{dx}\\log\\tilde p=-2x^3+4x$; critical points at $x=0,\\pm\\sqrt2$.",
+        "$\\dfrac{d^2}{dx^2}\\log\\tilde p=-6x^2+4$; at $x=\\sqrt2$: $-6(2)+4=-8<0$, confirming a mode.",
+        "$\\sigma^2=(-(-8))^{-1}=1/8=0.125$."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "PROB-EXAM-ex4-laplace-transfer"
+    }
+  ]
+}

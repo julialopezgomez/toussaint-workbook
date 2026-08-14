@@ -1,0 +1,126 @@
+{
+  "moduleId": "RLEARN-EXAM",
+  "exercises": [
+    {
+      "id": "RLEARN-EXAM-ex1-dagger-vs-offline-conceptual",
+      "objective": "Explain why offline RL can't just 'do DAgger' to fix its own distributional-shift problem.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "RLEARN-02's DAgger and RLEARN-04's offline RL both face a distributional-shift problem: the trained policy visits states the training data doesn't cover well. Explain precisely why DAgger's fix (query the expert on the learner's own visited states) isn't available to offline RL, and why offline RL needs a structurally different fix instead.",
+      "hints": [
+        "DAgger's fix works because a live expert (a human, or a privileged controller) is available *during* training to label whatever new states the learner wanders into.",
+        "Offline RL's entire premise (RLEARN-04) is a *fixed* dataset $\\mathcal D=\\{(s_i,a_i,r_i,s_{i+1})\\}$ with no further environment interaction and no expert to query: there's no way to get a new label for a state the policy might visit but the dataset doesn't cover.",
+        "So instead of correcting the distribution mismatch by collecting more targeted data (DAgger's approach), offline RL methods (e.g. TD3+BC) have to prevent the policy from exploiting the mismatch in the first place, by staying conservatively close to the actions actually present in the dataset, a fundamentally different strategy (restrict the policy) rather than DAgger's (expand the data)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-EXAM-ex1-retake",
+      "objective": "Compare residual dynamics learning and domain randomization as two different responses to model uncertainty.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 12,
+      "prerequisites": [
+        "RLEARN-EXAM-ex1-dagger-vs-offline-conceptual"
+      ],
+      "answerType": "short-text",
+      "prompt": "Residual dynamics learning (RLEARN-01) and domain randomization (RLEARN-04) are both responses to an inaccurate dynamics model, but solve the problem in structurally different ways. Explain the difference.",
+      "hints": [
+        "Residual learning ($f_M+f_\\theta$) starts from a specific nominal model and *corrects* it using data collected from one specific real system, converging toward an accurate model of that one system.",
+        "Domain randomization instead trains a policy across many different simulated dynamics parameters $\\Theta\\sim p(\\Theta)$, never fitting to any one specific real system directly, betting that a policy robust across the randomized range will also work on whatever the real (unknown) parameters turn out to be.",
+        "So residual learning trades real-system data for an accurate model of that one system; domain randomization trades simulated diversity for a policy that's merely robust, not accurate, to any single system, useful precisely when real-system data is expensive or unavailable up front."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "RLEARN-EXAM-ex1-dagger-vs-offline-conceptual"
+    },
+    {
+      "id": "RLEARN-EXAM-ex2-airl-advantage-numeric",
+      "objective": "Verify AIRL's discriminator-to-advantage-function convergence claim on a concrete small MDP.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "RLEARN-05 claims $f_{\\theta,\\phi}(s,a,s')=g_\\theta(s,a)+\\gamma h_\\phi(s')-h_\\phi(s)\\to A(s,a)$ (the advantage function) when $g_\\theta\\to R$ and $h_\\phi\\to V^*$. Verify this for a 2-state MDP: states $\\{0,1\\}$, actions $\\{a,b\\}$, $R(0,a)=1,R(0,b)=0,R(1,a)=0,R(1,b)=2$, deterministic transitions $P(0,a){=}0,P(0,b){=}1,P(1,a){=}0,P(1,b){=}1$, $\\gamma=0.9$. Compute $f(s{=}1,a{=}a,s'{=}0)=R(1,a)+\\gamma V^*(0)-V^*(1)$ using the true $V^*$. Enter a number.",
+      "hints": [
+        "First compute $V^*$ via value iteration on this MDP (or recognize action $b$ dominates at both states, since it always leads toward the higher-value state 1): $V^*(0)=18$, $V^*(1)=20$.",
+        "$f(1,a,0)=R(1,a)+\\gamma V^*(0)-V^*(1)=0+0.9\\times18-20$.",
+        "$=16.2-20=-3.8$. This matches $A(1,a)=Q^*(1,a)-V^*(1)$ exactly (both equal $-3.8$), confirming the claimed identity. Independently verified via value iteration in Python."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-EXAM-ex2-retake",
+      "objective": "Repeat the AIRL-advantage verification on a different MDP.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [
+        "RLEARN-EXAM-ex2-airl-advantage-numeric"
+      ],
+      "answerType": "numeric",
+      "prompt": "Using a different 2-state MDP: $R(0,a)=3,R(0,b)=1,R(1,a)=0,R(1,b)=4$, $P(0,a){=}1,P(0,b){=}0,P(1,a){=}1,P(1,b){=}0$, $\\gamma=0.8$. Compute $f(s{=}0,a{=}b,s'{=}0)=R(0,b)+\\gamma V^*(0)-V^*(0)$. Enter a number.",
+      "hints": [
+        "Value iteration gives $V^*(0)\\approx17.22$, $V^*(1)\\approx17.78$.",
+        "$f(0,b,0)=R(0,b)+\\gamma V^*(0)-V^*(0)=1+0.8\\times17.22-17.22$.",
+        "$\\approx1+13.78-17.22\\approx-2.44$. Independently verified via value iteration."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "RLEARN-EXAM-ex2-airl-advantage-numeric"
+    },
+    {
+      "id": "RLEARN-EXAM-ex3-reward-shaping-numeric",
+      "objective": "Verify potential-based reward shaping preserves the optimal policy and compute the shaped value function.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "Using the same 2-state MDP as the first AIRL exercise ($R,P,\\gamma=0.9$ as given there, with $V^*(0)=18,V^*(1)=20$), apply potential-based reward shaping (RLEARN-03) with $\\Phi(0)=2,\\Phi(1)=5$. Per $V'(s)=V^*(s)-\\Phi(s)$, compute the shaped value function's value at state $1$. Enter a number.",
+      "hints": [
+        "The claimed identity is $V'(s)=V^*(s)-\\Phi(s)$, where $V'$ is the optimal value function of the *shaped* MDP.",
+        "$V'(1)=V^*(1)-\\Phi(1)=20-5$.",
+        "$=15$. Independently verified by running value iteration directly on the shaped reward $R'(s,a,s')=R(s,a,s')+\\gamma\\Phi(s')-\\Phi(s)$ and confirming both the value and the optimal policy match."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-EXAM-ex4-taxonomy-classification-transfer",
+      "objective": "Apply RLEARN-00's Mini Taxonomy to a robot-learning scenario not covered in the workbook.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "A system observes a stack of blocks via camera and predicts which block to remove next to safely disassemble the stack (a symbolic action choice), trained entirely from recorded human teleoperation sessions. Classify this system on both of RLEARN-00's Mini Taxonomy axes ('what is learned' and 'how is data generated'), and name the RLEARN module each classification points to.",
+      "hints": [
+        "'What is learned': the output is a symbolic action/plan step given a visual scene, i.e. state/observations $\\mapsto$ plan — RLEARN-00's table maps this to RLEARN-07 (plan prediction).",
+        "'How is data generated': recorded human teleoperation is exactly RLEARN-00's 'human demonstration' category — mapped to imitation learning, RLEARN-02.",
+        "So this system sits at the intersection of RLEARN-07's territory (what) and RLEARN-02's territory (how): a plan-prediction policy trained via imitation learning, exactly the kind of system the taxonomy's two independent axes are designed to let you locate immediately, without treating it as an unfamiliar new category."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RLEARN-EXAM-ex4-retake",
+      "objective": "Apply the Mini Taxonomy to a different new scenario.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [
+        "RLEARN-EXAM-ex4-taxonomy-classification-transfer"
+      ],
+      "answerType": "short-text",
+      "prompt": "A quadrotor policy that maps sensor observations directly to motor commands, trained entirely by trial-and-error real flights, using a potential-based shaped reward to encourage obstacle avoidance. Classify this on both taxonomy axes, and name the relevant RLEARN modules.",
+      "hints": [
+        "'What is learned': observations $\\mapsto$ control, a policy — RLEARN-00's table maps this to RLEARN-02/RLEARN-03.",
+        "'How is data generated': trial-and-error on the real robot is RLEARN-00's 'online, by the robot itself' category — RLEARN-03's territory specifically (reward shaping, on-policy data collection on physical hardware).",
+        "So this sits at RLEARN-03 for both axes here (a robotics-specific RL policy, trained online, using reward shaping), consistent with RLEARN-03 being exactly the module scoped around 'RL in robotics: reward engineering and data collection'."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "RLEARN-EXAM-ex4-taxonomy-classification-transfer"
+    }
+  ]
+}

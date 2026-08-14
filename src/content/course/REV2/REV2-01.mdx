@@ -1,0 +1,55 @@
+---
+id: REV2-01
+block: REV2
+title: "Cumulative Review: Robot Learning"
+tier: 1
+estimatedHours: 1
+prerequisites: ["RLEARN-08"]
+objectives:
+  - "State RLEARN's own throughline (robot learning as shortcuts to the model-based control stack) from memory."
+  - "Name the one recurring pattern (privileged-teacher) that ties together at least 4 different RLEARN modules."
+  - "Preview how CAP-01 will draw on both this block and the ones before it."
+sources: []
+concepts:
+  - "Synthesis across RLEARN-00 through RLEARN-08"
+  - "The privileged-teacher pattern as a unifying thread"
+notation: []
+cheatsheetLinks: []
+nextModules: ["CAP-01"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+
+## Why this matters
+
+RLEARN is the single densest block in this workbook, 9 modules covering dynamics learning through TAMP. Unlike REV1 (which had to compress 11 blocks), RLEARN already did a lot of its own internal synthesis: RLEARN-00 opened with a taxonomy, and later modules constantly cross-referenced earlier ones. This review is shorter for exactly that reason: it's a final consolidation pass, not a rescue mission for content that never got tied together.
+
+## RLEARN's own throughline
+
+RLEARN-00 framed the entire block as **shortcuts to specific pieces of the model-based control stack** (DYN-01 through DYN-04, KIN-03) that break down when you can't write an accurate model, can't solve constraints in closed form, or don't have direct state access. Every module since is, in that framing, one row of RLEARN-00's own table: dynamics learning replaces system identification, policy learning replaces optimal control, grasp/plan prediction replaces constraint-solving and state estimation.
+
+<ExerciseCard id="REV2-01-ex1-throughline-recall" />
+
+## One pattern, four modules
+
+The **privileged-teacher pattern** (train with information unavailable at deployment, generate labels, then train a deployment-time model on only what's actually available) shows up explicitly in at least four places: RLEARN-02's DAgger (a privileged/queryable expert), RLEARN-04's sim2real (a privileged simulator with exact dynamics parameters), RLEARN-06's grasp labels (a privileged force-closure computation or physics simulator), and RLEARN-07's Deep Visual Constraints (privileged simulation trial-and-error data). It's not four separate tricks, it's one idea, reused because it's genuinely the right tool whenever ground truth is available at training time but not at deployment.
+
+<ExerciseCard id="REV2-01-ex2-pattern-recognition" />
+
+## Where CAP-01 is headed
+
+CAP-01 is explicitly framed as connecting the whole curriculum to your own implemented research, not new taught content. It draws most directly on PLAN-01 (notation), DYN-04 (cost-functional flavor), and RLEARN-07 (the TAMP/LGP structural parallel), but the habit this review is really reinforcing, checking a new problem against the full stack rather than just the most recent block, is exactly what CAP-01 asks you to do explicitly with your own work.
+
+## Retrieval questions
+
+1. State RLEARN-00's "shortcuts to the control stack" framing in one sentence.
+2. Name the privileged-teacher pattern and at least three RLEARN modules that instantiate it.
+
+## Mastery checklist
+
+- [ ] Can state RLEARN's own throughline from memory.
+- [ ] Can name the privileged-teacher pattern and at least 3 modules that use it.
+
+## Source note
+
+This module is 100% newly-authored synthesis, no new Toussaint source material: every claim is already cited and verified in the RLEARN modules it summarizes. Per `CURRICULUM.md`'s Assessment Schedule ("again before CAP"), kept deliberately short since RLEARN-00 already did much of this orientation work at the block's own start. Both exercises are newly authored, lightweight synthesis checks.

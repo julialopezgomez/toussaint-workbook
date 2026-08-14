@@ -1,0 +1,145 @@
+{
+  "moduleId": "OPT-EXAM",
+  "exercises": [
+    {
+      "id": "OPT-EXAM-ex1-newton-sqp-conceptual",
+      "objective": "Explain how SQP extends Newton's method to handle constraints, and why plain Newton can't.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Newton's method (OPT-01) minimizes a local quadratic model of $f$ at each step. SQP (OPT-04) does something structurally similar but handles constraints. Explain exactly what SQP adds to Newton's local quadratic model to make this possible, and why applying plain Newton directly to a constrained problem doesn't work.",
+      "hints": [
+        "Newton's method's local model is $f(x)+\\nabla f(x)^\\top\\delta+\\tfrac12\\delta^\\top\\nabla^2f(x)\\delta$, minimized over $\\delta$ with no constraints on $\\delta$ at all.",
+        "Plain Newton has no mechanism to keep $x+\\delta$ feasible: it will happily step outside $g(x)\\le0$ or off $h(x)=0$, since its local model says nothing about constraints.",
+        "SQP keeps the exact same quadratic *objective* model, but additionally *linearizes* the constraints around the current point ($g(x)+\\nabla g(x)^\\top\\delta\\le0$, $h(x)+\\nabla h(x)^\\top\\delta=0$) and solves the resulting constrained QP subproblem at each step, giving a $\\delta$ that respects the constraints locally."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-EXAM-ex1-retake",
+      "objective": "Explain when Gauss-Newton's Hessian approximation is poor, and when full Newton is preferable.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [
+        "OPT-EXAM-ex1-newton-sqp-conceptual"
+      ],
+      "answerType": "short-text",
+      "prompt": "Gauss-Newton approximates $\\nabla^2f(x)\\approx2J^\\top J$ for a least-squares objective $f=\\phi^\\top\\phi$. Explain precisely what term this approximation drops, when that dropped term is large, and why you'd prefer full Newton over Gauss-Newton in that regime if the exact Hessian is affordable to compute.",
+      "hints": [
+        "The exact Hessian is $\\nabla^2f(x)=2J^\\top J+2\\sum_i\\phi_i(x)\\nabla^2\\phi_i(x)$; Gauss-Newton drops the second (curvature-of-the-residuals) term entirely.",
+        "That dropped term is large exactly when the residuals $\\phi_i(x)$ are large (far from a good fit) or the residual functions themselves are highly curved (large $\\nabla^2\\phi_i$) — small-residual problems near a good fit are exactly where Gauss-Newton is a good approximation.",
+        "If residuals are large and the exact Hessian is affordable, full Newton (OPT-01) captures the dropped curvature term and can converge faster/more reliably; Gauss-Newton's appeal is specifically that $J^\\top J$ is cheap and always PSD, a real advantage that's only worth trading away for full Newton's extra accuracy when residuals are genuinely large."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "OPT-EXAM-ex1-newton-sqp-conceptual"
+    },
+    {
+      "id": "OPT-EXAM-ex2-kkt-qp-derivation",
+      "objective": "Solve a small QP via KKT conditions and verify the result numerically.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Solve $\\min_x x_1^2+x_2^2$ subject to $x_1+x_2\\ge2$ using the KKT conditions (OPT-03). Since $f$ is convex and the constraint is affine, note that any KKT point is automatically globally optimal (OPT-04's convexity theme). Report $x^*$, $\\lambda^*$, and $f(x^*)$.",
+      "hints": [
+        "Write the constraint as $g(x)=2-x_1-x_2\\le0$. The unconstrained minimum $(0,0)$ violates $g\\le0$ (since $g(0,0)=2>0$), so the constraint must be active at the optimum: $g(x^*)=0$.",
+        "Stationarity: $\\nabla f(x)+\\lambda\\nabla g(x)=0$, i.e. $(2x_1,2x_2)+\\lambda(-1,-1)=0$, giving $x_1=x_2=\\lambda/2$. Combined with the active constraint $x_1+x_2=2$: $\\lambda=2$, so $x_1=x_2=1$.",
+        "$x^*=(1,1)$, $\\lambda^*=2\\ge0$ (dual feasible, confirming this is a valid KKT point), $f(x^*)=1^2+1^2=2$. Independently verified by a direct grid search along the constraint boundary."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-EXAM-ex2-retake",
+      "objective": "Solve a QP with a different linear constraint via KKT.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [
+        "OPT-EXAM-ex2-kkt-qp-derivation"
+      ],
+      "answerType": "derivation",
+      "prompt": "Solve $\\min_x x_1^2+x_2^2$ subject to $x_1+2x_2\\ge3$ using the KKT conditions. Report $x^*$, $\\lambda^*$, and $f(x^*)$.",
+      "hints": [
+        "$g(x)=3-x_1-2x_2\\le0$; the unconstrained minimum $(0,0)$ violates it, so the constraint is active.",
+        "Stationarity: $(2x_1,2x_2)+\\lambda(-1,-2)=0$, giving $x_1=\\lambda/2$, $x_2=\\lambda$. Substitute into the active constraint $x_1+2x_2=3$: $\\lambda/2+2\\lambda=3\\Rightarrow\\lambda=6/5=1.2$.",
+        "$x^*=(0.6,1.2)$, $\\lambda^*=1.2\\ge0$, $f(x^*)=0.36+1.44=1.8$. Independently verified by grid search."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "OPT-EXAM-ex2-kkt-qp-derivation"
+    },
+    {
+      "id": "OPT-EXAM-ex3-sgd-bound-numeric",
+      "objective": "Compute the SGD convergence bound for given problem constants.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "Using OPT-05's SGD convergence bound $\\min_k\\mathbb E\\{\\|\\nabla f(w_k)\\|^2\\}\\le\\dfrac{f(w_0)-f^*}{\\sum\\alpha_k}+\\dfrac{\\sum\\alpha_k^2}{\\sum\\alpha_k}\\cdot\\dfrac{L\\sigma^2}{2}$, compute the bound for $f(w_0)-f^*=10$, $L=2$, $\\sigma^2=4$, a constant step size $\\alpha_k=0.1$ for $t=100$ steps. Enter a number.",
+      "hints": [
+        "With a constant step size, $\\sum_{k=0}^{t-1}\\alpha_k=t\\alpha=100\\times0.1=10$ and $\\sum_{k=0}^{t-1}\\alpha_k^2=t\\alpha^2=100\\times0.01=1$.",
+        "Plug in: $\\dfrac{10}{10}+\\dfrac{1}{10}\\times\\dfrac{2\\times4}{2}=1+0.1\\times4$.",
+        "$=1+0.4=1.4$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-EXAM-ex3-retake",
+      "objective": "Compute the SGD convergence bound for different problem constants.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [
+        "OPT-EXAM-ex3-sgd-bound-numeric"
+      ],
+      "answerType": "numeric",
+      "prompt": "Using the same SGD bound formula, compute it for $f(w_0)-f^*=5$, $L=1$, $\\sigma^2=2$, a constant step size $\\alpha_k=0.05$ for $t=200$ steps. Enter a number.",
+      "hints": [
+        "$\\sum\\alpha_k=200\\times0.05=10$, $\\sum\\alpha_k^2=200\\times0.0025=0.5$.",
+        "$\\dfrac{5}{10}+\\dfrac{0.5}{10}\\times\\dfrac{1\\times2}{2}=0.5+0.05\\times1$.",
+        "$=0.5+0.05=0.55$."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "OPT-EXAM-ex3-sgd-bound-numeric"
+    },
+    {
+      "id": "OPT-EXAM-ex4-constrained-nls-transfer",
+      "objective": "Combine Gauss-Newton's gradient formula with the KKT stationarity condition for a constrained least-squares problem.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Derive the KKT stationarity condition for the constrained nonlinear-least-squares problem $\\min_x\\phi(x)^\\top\\phi(x)$ subject to $h(x)=0$, using OPT-02's gradient formula $\\nabla f(x)=2J^\\top\\phi(x)$ for the objective term. Then verify your general condition on the concrete case $\\phi(x)=(x_1-1,\\,x_2-2)$, $h(x)=x_1+x_2-4$: find $x^*$ and $\\kappa^*$.",
+      "hints": [
+        "The Lagrangian is $L(x,\\kappa)=\\phi(x)^\\top\\phi(x)+\\kappa\\,h(x)$. Stationarity is $\\nabla_xL=0$: substitute OPT-02's $\\nabla f(x)=2J^\\top\\phi(x)$ for the first term, giving $2J(x)^\\top\\phi(x)+\\kappa\\nabla h(x)=0$, together with $h(x)=0$.",
+        "For the concrete case, $\\phi(x)=(x_1-1,x_2-2)$ has $J=I$ (identity), so stationarity is $2(x_1-1,x_2-2)+\\kappa(1,1)=0$, giving $x_1=1-\\kappa/2$, $x_2=2-\\kappa/2$.",
+        "Substituting into $h(x)=x_1+x_2-4=0$: $(1-\\kappa/2)+(2-\\kappa/2)=4\\Rightarrow3-\\kappa=4\\Rightarrow\\kappa^*=-1$. So $x^*=(1.5,2.5)$, and $f(x^*)=0.5^2+0.5^2=0.5$. Independently verified by grid search along the constraint line."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "OPT-EXAM-ex4-retake",
+      "objective": "Apply the same constrained-least-squares KKT derivation to a different objective/constraint.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [
+        "OPT-EXAM-ex4-constrained-nls-transfer"
+      ],
+      "answerType": "derivation",
+      "prompt": "Using the same general KKT condition, solve $\\min_x\\phi(x)^\\top\\phi(x)$ for $\\phi(x)=(x_1-3,\\,x_2+1)$ subject to $h(x)=x_1-x_2-5=0$. Find $x^*$ and $\\kappa^*$.",
+      "hints": [
+        "$J=I$ again, so stationarity is $2(x_1-3,x_2+1)+\\kappa(1,-1)=0$, giving $x_1=3-\\kappa/2$, $x_2=-1+\\kappa/2$.",
+        "Substitute into $h(x)=x_1-x_2-5=0$: $(3-\\kappa/2)-(-1+\\kappa/2)=5\\Rightarrow4-\\kappa=5\\Rightarrow\\kappa^*=-1$.",
+        "$x^*=(3.5,-1.5)$, $f(x^*)=0.5^2+(-0.5)^2=0.5$. Independently verified by grid search."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "OPT-EXAM-ex4-constrained-nls-transfer"
+    }
+  ]
+}

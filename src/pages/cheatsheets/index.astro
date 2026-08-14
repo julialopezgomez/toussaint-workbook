@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { BLOCK_ORDER } from '../../lib/curriculum/blocks';
+
+const sheets = await getCollection('cheatsheets');
+const sorted = [...sheets].sort((a, b) => {
+  const ai = BLOCK_ORDER.indexOf(a.data.id.toUpperCase());
+  const bi = BLOCK_ORDER.indexOf(b.data.id.toUpperCase());
+  if (ai !== -1 && bi !== -1) return ai - bi;
+  if (ai !== -1) return -1;
+  if (bi !== -1) return 1;
+  return a.data.title.localeCompare(b.data.title);
+});
+---
+<BaseLayout title="Cheat Sheets">
+  <nav class="no-print breadcrumb"><a href="/">Start</a> / <a href="/curriculum">Curriculum</a> / Cheat sheets</nav>
+  <h1>Cheat sheets</h1>
+  <p>
+    {sheets.length} cheat sheets, one per block: definitions, core equations, common mistakes, and a decision
+    rule, condensed from that block's modules. Meant as a cram sheet for review, not a substitute for the
+    modules themselves.
+  </p>
+  <ul class="sheet-list">
+    {sorted.map((s) => (
+      <li>
+        <a href={`/cheatsheets/${s.data.id}`}><strong>{s.data.title}</strong></a>
+        {s.data.relatedModules.length > 0 && (
+          <span class="related"> — {s.data.relatedModules.join(', ')}</span>
+        )}
+      </li>
+    ))}
+  </ul>
+  <style>
+    .breadcrumb { font-size: 0.85rem; opacity: 0.7; margin-bottom: 1rem; }
+    .breadcrumb a { color: inherit; }
+    .sheet-list { list-style: none; padding: 0; }
+    .sheet-list li { padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+    .related { font-size: 0.8rem; opacity: 0.65; }
+  </style>
+</BaseLayout>

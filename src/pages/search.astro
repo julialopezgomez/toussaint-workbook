@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Search">
+  <nav class="no-print breadcrumb"><a href="/">Start</a> / <a href="/curriculum">Curriculum</a> / Search</nav>
+  <h1>Search</h1>
+  <p>
+    Full-text search across every module, cheat sheet, and exam, powered by
+    <a href="https://pagefind.app" target="_blank" rel="noopener">Pagefind</a> (a static, local search index generated at
+    build time — no server, no external service, nothing leaves your machine).
+  </p>
+
+  <p id="search-unavailable" class="warning" style="display:none">
+    <strong>Search index not found.</strong> Pagefind's index is generated at production build time, not by the
+    dev server, so it isn't available under <code>npm run dev</code>. To use search: run
+    <code>npm run build</code> (this now runs Pagefind automatically), then <code>npm run preview</code>, and
+    open this page from that preview server instead. The <a href="/curriculum">curriculum page's filter box</a>
+    works in dev mode and covers module-title/concept search without needing a build.
+  </p>
+
+  <div id="search"></div>
+
+  <script>
+    // Pagefind's UI bundle is generated at production build time (`pagefind --site dist`)
+    // and doesn't exist under the dev server. Loaded via a plain <script src> (Pagefind's
+    // own documented pattern, exposing window.PagefindUI globally) rather than a static
+    // `import()`, since Vite's dev-time import analysis resolves import() paths eagerly
+    // and 500s the whole module if the file is missing, even inside a try/catch.
+    function showUnavailable() {
+      const el = document.getElementById('search-unavailable');
+      if (el) el.style.display = '';
+    }
+    const script = document.createElement('script');
+    script.src = '/pagefind/pagefind-ui.js';
+    script.onload = () => {
+      const w = window as typeof window & { PagefindUI?: new (opts: { element: string; showSubResults: boolean }) => unknown };
+      if (!w.PagefindUI) { showUnavailable(); return; }
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = '/pagefind/pagefind-ui.css';
+      document.head.appendChild(link);
+      new w.PagefindUI({ element: '#search', showSubResults: true });
+    };
+    script.onerror = showUnavailable;
+    document.head.appendChild(script);
+  </script>
+
+  <style>
+    .breadcrumb { font-size: 0.85rem; opacity: 0.7; margin-bottom: 1rem; }
+    .breadcrumb a { color: inherit; }
+    .warning {
+      background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent);
+      border-radius: 0.4rem; padding: 0.8rem 1rem; font-size: 0.92rem;
+    }
+    #search :global(.pagefind-ui) { --pagefind-ui-primary: var(--accent); --pagefind-ui-text: var(--fg); --pagefind-ui-background: var(--bg); --pagefind-ui-border: var(--border); }
+  </style>
+</BaseLayout>

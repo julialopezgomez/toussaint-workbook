@@ -1,0 +1,145 @@
+{
+  "moduleId": "DYN-EXAM",
+  "exercises": [
+    {
+      "id": "DYN-EXAM-ex1-lqr-lyapunov-conceptual",
+      "objective": "Explain why the LQR value function is itself a Lyapunov function for the closed-loop system.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "DYN-04 gives the LQR value function $V(x,t)=x^\\top P(t)x$. DYN-06 defines a Lyapunov function as any $V(x)$ proving stability. Explain why, for the steady-state (infinite-horizon) LQR case where $P$ is constant, $V(x)=x^\\top Px$ is automatically a valid Lyapunov function for the closed-loop system $\\dot x=(A-BK)x$.",
+      "hints": [
+        "A Lyapunov function needs $V(x)>0$ for $x\\ne0$ and $\\dot V(x)<0$ along closed-loop trajectories. $V(x)=x^\\top Px$ is positive definite whenever $P$ is (which it is, being a value function: cost-to-go can't be negative).",
+        "Since $P$ solves the algebraic Riccati equation, differentiating $V$ along the closed-loop dynamics gives $\\dot V=x^\\top(A-BK)^\\top Px+x^\\top P(A-BK)x$, which the Riccati equation's structure guarantees simplifies to $-x^\\top(Q+K^\\top RK)x$.",
+        "Since $Q$ and $R$ are the cost weighting matrices, chosen positive (semi)definite, $-x^\\top(Q+K^\\top RK)x\\le0$: exactly the Lyapunov decrease condition. So the same $P$ that makes LQR optimal also directly certifies the closed loop's stability, no separate Lyapunov function needs to be found."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-EXAM-ex1-retake",
+      "objective": "Explain why controllability is necessary for a stabilizing LQR solution to exist.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 12,
+      "prerequisites": [
+        "DYN-EXAM-ex1-lqr-lyapunov-conceptual"
+      ],
+      "answerType": "short-text",
+      "prompt": "Explain why $(A,B)$ being controllable (DYN-06's rank condition on the controllability matrix $C$) is necessary for the LQR gain $K$ to actually be able to stabilize the system, regardless of how the cost weights $Q,R$ are chosen.",
+      "hints": [
+        "If $(A,B)$ is uncontrollable, some mode of the system (some eigenvalue direction) can't be influenced by the input $u$ at all, by definition of controllability.",
+        "If that uncontrollable mode happens to already be unstable (positive real-part eigenvalue) in the open-loop system, no choice of feedback gain $K=R^{-1}B^\\top P$ can move it, since $u=-Kx$ can only act through directions $B$ reaches.",
+        "So controllability is necessary (though the weaker condition 'stabilizability', uncontrollable modes are all already stable, is technically sufficient) for LQR to find a stabilizing $K$ at all; no amount of tuning $Q,R$ fixes an uncontrollable unstable mode."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "DYN-EXAM-ex1-lqr-lyapunov-conceptual"
+    },
+    {
+      "id": "DYN-EXAM-ex2-pendulum-pd-stability",
+      "objective": "Derive and numerically check the closed-loop stability of a linearized pendulum under PD control.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "DYN-01 derives the pendulum's equation of motion $mL^2\\ddot\\theta+mgL\\sin\\theta=u$. Linearize around $\\theta=0$, apply a PD control law $u=-K_p\\theta-K_d\\dot\\theta$ (DYN-02), and derive the closed-loop state matrix $A$ (DYN-06). For $m=1,L=1,g=10,K_p=5,K_d=2$, compute the eigenvalues and classify stability.",
+      "hints": [
+        "Linearizing $\\sin\\theta\\approx\\theta$ near $0$: $mL^2\\ddot\\theta\\approx-mgL\\theta+u$. Substituting $u=-K_p\\theta-K_d\\dot\\theta$: $\\ddot\\theta=-\\dfrac{mgL+K_p}{mL^2}\\theta-\\dfrac{K_d}{mL^2}\\dot\\theta$.",
+        "In state form $x=(\\theta,\\dot\\theta)$: $A=\\begin{pmatrix}0&1\\\\-(mgL+K_p)/(mL^2)&-K_d/(mL^2)\\end{pmatrix}$. With the given numbers, $A=\\begin{pmatrix}0&1\\\\-15&-2\\end{pmatrix}$.",
+        "Eigenvalues: $\\lambda^2+2\\lambda+15=0\\Rightarrow\\lambda=-1\\pm i\\sqrt{14}$. Real part $-1<0$: asymptotically stable (oscillatory-damped, per DYN-06's classification, since the eigenvalues are complex with negative real part). Independently verified numerically."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-EXAM-ex2-retake",
+      "objective": "Repeat the stability analysis with a sign-flipped derivative gain, showing instability.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [
+        "DYN-EXAM-ex2-pendulum-pd-stability"
+      ],
+      "answerType": "derivation",
+      "prompt": "Using the same linearized pendulum and $A$ matrix formula, now with $m=1,L=1,g=10,K_p=5,K_d=-1$ (a sign error on the derivative gain, a real and common implementation bug). Compute the eigenvalues and classify stability.",
+      "hints": [
+        "$A=\\begin{pmatrix}0&1\\\\-15&1\\end{pmatrix}$ (note the $+1$ in the bottom-right, from $-K_d/(mL^2)=-(-1)/1=1$).",
+        "Eigenvalues: $\\lambda^2-\\lambda+15=0\\Rightarrow\\lambda=0.5\\pm i\\sqrt{14.75}$.",
+        "Real part $+0.5>0$: unstable (growing oscillation). This is exactly why a sign error on the derivative gain is a dangerous, easy-to-make bug: the system doesn't fail to converge, it actively diverges. Independently verified numerically."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "DYN-EXAM-ex2-pendulum-pd-stability"
+    },
+    {
+      "id": "DYN-EXAM-ex3-controllability-numeric",
+      "objective": "Compute a controllability matrix and its rank.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For $A=\\begin{pmatrix}0&1\\\\-2&-3\\end{pmatrix}$, $B=\\begin{pmatrix}0\\\\1\\end{pmatrix}$, compute the controllability matrix $C=[B\\ \\ AB]$ and its rank. Enter the rank as a number.",
+      "hints": [
+        "$AB=\\begin{pmatrix}0&1\\\\-2&-3\\end{pmatrix}\\begin{pmatrix}0\\\\1\\end{pmatrix}=\\begin{pmatrix}1\\\\-3\\end{pmatrix}$.",
+        "$C=\\begin{pmatrix}0&1\\\\1&-3\\end{pmatrix}$.",
+        "$\\det(C)=0\\times(-3)-1\\times1=-1\\ne0$, so rank$(C)=2=n$: the system is controllable."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-EXAM-ex3-retake",
+      "objective": "Compute controllability for a system where it fails.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [
+        "DYN-EXAM-ex3-controllability-numeric"
+      ],
+      "answerType": "numeric",
+      "prompt": "For $A=\\begin{pmatrix}1&0\\\\0&2\\end{pmatrix}$, $B=\\begin{pmatrix}1\\\\0\\end{pmatrix}$ (the input only directly affects the first state), compute the controllability matrix's rank. Enter a number.",
+      "hints": [
+        "$AB=\\begin{pmatrix}1&0\\\\0&2\\end{pmatrix}\\begin{pmatrix}1\\\\0\\end{pmatrix}=\\begin{pmatrix}1\\\\0\\end{pmatrix}$.",
+        "$C=\\begin{pmatrix}1&1\\\\0&0\\end{pmatrix}$: the second row is entirely zero.",
+        "rank$(C)=1<2=n$: NOT controllable. The second state ($x_2$, decoupled from $x_1$ with its own eigenvalue $2$) can never be influenced by $u$ at all, exactly what the zero second row of $C$ shows directly."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "DYN-EXAM-ex3-controllability-numeric"
+    },
+    {
+      "id": "DYN-EXAM-ex4-feedback-linearization-transfer",
+      "objective": "Derive the error dynamics of inverse-dynamics tracking control and check their stability.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "DYN-03's inverse-dynamics tracking law sets $\\ddot q^*=\\ddot q^\\text{ref}+K_p(q^\\text{ref}-q)+K_d(\\dot q^\\text{ref}-\\dot q)$, then $u=M(q)\\ddot q^*+F(q,\\dot q)$. Assuming a perfect model (so the true $\\ddot q=\\ddot q^*$), derive the closed-loop dynamics of the tracking error $e:=q-q^\\text{ref}$, and show they take exactly DYN-02's point-mass PD form, for ANY nonlinear robot. For a single joint with $K_p=9,K_d=6$, compute the error dynamics' eigenvalues and classify.",
+      "hints": [
+        "Since $\\ddot q=\\ddot q^*=\\ddot q^\\text{ref}+K_p(q^\\text{ref}-q)+K_d(\\dot q^\\text{ref}-\\dot q)$, subtract $\\ddot q^\\text{ref}$ from both sides: $\\ddot q-\\ddot q^\\text{ref}=-K_p(q-q^\\text{ref})-K_d(\\dot q-\\dot q^\\text{ref})$, i.e. $\\ddot e=-K_pe-K_d\\dot e$.",
+        "This is exactly DYN-02's point-mass PD closed-loop equation ($m\\ddot q=-K_p(q-q^*)-K_d\\dot q$, with $m=1$ here since inverse dynamics has already cancelled out $M(q)$ entirely) — the whole point of feedback linearization: however nonlinear the true robot dynamics $M(q),F(q,\\dot q)$ are, the tracking error always obeys this same simple linear ODE.",
+        "In state form $\\xi=(e,\\dot e)$: $A=\\begin{pmatrix}0&1\\\\-K_p&-K_d\\end{pmatrix}=\\begin{pmatrix}0&1\\\\-9&-6\\end{pmatrix}$. Eigenvalues: $\\lambda^2+6\\lambda+9=(\\lambda+3)^2=0\\Rightarrow\\lambda=-3$ (double root): critically damped, matching DYN-02's own condition $K_d^2=4K_p$ ($36=36$). Independently verified numerically."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "DYN-EXAM-ex4-retake",
+      "objective": "Repeat the error-dynamics stability check with underdamped gains.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [
+        "DYN-EXAM-ex4-feedback-linearization-transfer"
+      ],
+      "answerType": "derivation",
+      "prompt": "Using the same error-dynamics state matrix, now with $K_p=25,K_d=4$. Compute the eigenvalues and classify.",
+      "hints": [
+        "$A=\\begin{pmatrix}0&1\\\\-25&-4\\end{pmatrix}$.",
+        "Eigenvalues: $\\lambda^2+4\\lambda+25=0\\Rightarrow\\lambda=-2\\pm i\\sqrt{21}$.",
+        "Real part $-2<0$: asymptotically stable, but oscillatory-damped this time (complex eigenvalues), since $K_d^2=16<4K_p=100$: underdamped, per DYN-02's classification. Independently verified numerically."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "DYN-EXAM-ex4-feedback-linearization-transfer"
+    }
+  ]
+}

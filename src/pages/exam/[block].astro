@@ -1,0 +1,18 @@
+---
+import { getCollection, render } from 'astro:content';
+import MilestoneLayout from '../../layouts/MilestoneLayout.astro';
+
+export async function getStaticPaths() {
+  const milestones = await getCollection('milestones');
+  return milestones.map((m) => ({
+    params: { block: m.data.block },
+    props: { entry: m },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<MilestoneLayout {...entry.data}>
+  <Content />
+</MilestoneLayout>

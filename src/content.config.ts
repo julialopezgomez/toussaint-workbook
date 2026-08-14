@@ -90,6 +90,7 @@ const questions = defineCollection({
     options: z.array(z.string()).optional(),
     hints: z.tuple([z.string(), z.string(), z.string()]),
     reviewCardIds: z.array(z.string()).optional(),
+    retakeVariantOf: z.string().optional(),
   }),
 });
 
@@ -125,4 +126,16 @@ const cheatsheets = defineCollection({
   }),
 });
 
-export const collections = { course, questions, solutions, cheatsheets };
+const milestones = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/milestones' }),
+  schema: z.object({
+    id: z.string(),               // e.g. "MATH-EXAM" — also the moduleId its questions/solutions are filed under
+    block: z.string(),            // "MATH"
+    title: z.string(),
+    coversModules: z.array(z.string()),
+    masteryThreshold: z.number(), // e.g. 0.8 — a self-assessment target, not an enforced gate (no server to enforce it)
+    remediationMap: z.array(z.object({ exerciseId: z.string(), moduleIds: z.array(z.string()) })),
+  }),
+});
+
+export const collections = { course, questions, solutions, cheatsheets, milestones };

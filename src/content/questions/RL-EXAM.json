@@ -1,0 +1,145 @@
+{
+  "moduleId": "RL-EXAM",
+  "exercises": [
+    {
+      "id": "RL-EXAM-ex1-td-convergence-conceptual",
+      "objective": "Explain what makes proving Q-learning's convergence harder than value iteration's.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "RL-02 proves value/Q-iteration converges via a contraction-mapping argument on the exact Bellman update. RL-03 describes Q-learning's convergence as 'a stochastic-approximation version' of that same proof. Explain precisely what's different about the two settings that makes the stochastic-approximation argument necessary.",
+      "hints": [
+        "Value/Q-iteration applies the *exact* Bellman update $Q_{k+1}(s,a)=R(s,a)+\\gamma\\sum_{s'}P(s'\\mid s,a)\\max_{a'}Q_k(s',a')$ at every state-action pair, every iteration, using the true (known) model $P,R$.",
+        "Q-learning only ever sees a single sampled transition $(s,a,r,s')$ at a time, and only updates $Q(s,a)$ for whichever pair was just visited, using $r+\\gamma\\max_{a'}Q(s',a')$ as a noisy, one-sample estimate of the true Bellman target rather than the exact expectation.",
+        "So Q-learning's convergence proof needs to additionally handle sampling noise (via a Robbins-Monro-style decreasing step size) and incomplete coverage (needing every state-action pair visited infinitely often), on top of the same underlying contraction argument RL-02 uses for the noise-free, fully-covered case."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-EXAM-ex1-retake",
+      "objective": "Compare R-max's and UCT's forms of optimism under uncertainty.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 12,
+      "prerequisites": [
+        "RL-EXAM-ex1-td-convergence-conceptual"
+      ],
+      "answerType": "short-text",
+      "prompt": "Both R-max (RL-05) and UCT (RL-06) implement 'optimism under uncertainty' for exploration, but in structurally different ways. Explain the difference between R-max's approach and UCT's UCB1-based exploration bonus.",
+      "hints": [
+        "R-max is a hard threshold: any state-action pair visited fewer than $m$ times is simply *assigned* the maximum possible reward, a binary known-vs-unknown switch with no graduated notion of 'how confident' the estimate is.",
+        "UCT's UCB1 bonus $\\beta\\sqrt{2\\ln n_v/n_{v'}}$ is continuous and graduated: it adds an explicit, shrinking bonus to the estimated value, proportional to how *little* a node has been visited relative to its parent, rather than a fixed all-or-nothing override.",
+        "Both encode the same underlying principle (try under-visited things preferentially), but R-max's binary switch is simpler to implement and analyze (suited to R-max's formal sample-complexity guarantees), while UCT's continuous bonus degrades more gracefully and is what makes it practical for the huge state spaces MCTS is typically applied to."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "RL-EXAM-ex1-td-convergence-conceptual"
+    },
+    {
+      "id": "RL-EXAM-ex2-policy-gradient-numeric",
+      "objective": "Derive the one-step softmax policy gradient and verify it numerically against finite differences.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For a one-step decision with 2 actions, softmax policy $\\pi_\\theta(a)=e^{\\theta_a}/\\sum_{a'}e^{\\theta_{a'}}$, and rewards $r(0)=1,r(1)=3$, RL-04's policy gradient formula gives $\\dfrac{\\partial J}{\\partial\\theta_i}=\\pi(i)(r(i)-J(\\theta))$ where $J(\\theta)=\\sum_a\\pi(a)r(a)$ (derive this from RL-04's general formula, using the softmax log-derivative $\\partial\\log\\pi(a)/\\partial\\theta_i=[a=i]-\\pi(i)$). For $\\theta=(0,1)$, compute $\\partial J/\\partial\\theta_0$. Enter a number.",
+      "hints": [
+        "RL-04's general formula (one-step case, no discounting needed) is $\\partial J/\\partial\\theta_i=\\sum_a\\pi(a)\\big([a=i]-\\pi(i)\\big)r(a)=\\pi(i)r(i)-\\pi(i)\\sum_a\\pi(a)r(a)=\\pi(i)(r(i)-J)$.",
+        "For $\\theta=(0,1)$: $\\pi(0)=1/(1+e)\\approx0.2689$, $\\pi(1)=e/(1+e)\\approx0.7311$. $J=0.2689\\times1+0.7311\\times3\\approx2.4621$.",
+        "$\\partial J/\\partial\\theta_0=\\pi(0)(r(0)-J)=0.2689\\times(1-2.4621)\\approx-0.3932$. Independently verified against a finite-difference approximation of $J(\\theta)$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-EXAM-ex2-retake",
+      "objective": "Repeat the policy-gradient computation for different rewards and parameters.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [
+        "RL-EXAM-ex2-policy-gradient-numeric"
+      ],
+      "answerType": "numeric",
+      "prompt": "Using the same formula, for $\\theta=(1,0)$ and $r(0)=2,r(1)=5$, compute $\\partial J/\\partial\\theta_0$. Enter a number.",
+      "hints": [
+        "$\\pi(0)=e/(1+e)\\approx0.7311$, $\\pi(1)=1/(1+e)\\approx0.2689$.",
+        "$J=0.7311\\times2+0.2689\\times5\\approx2.8068$.",
+        "$\\partial J/\\partial\\theta_0=\\pi(0)(r(0)-J)=0.7311\\times(2-2.8068)\\approx-0.5898$. Independently verified against a finite-difference approximation."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "RL-EXAM-ex2-policy-gradient-numeric"
+    },
+    {
+      "id": "RL-EXAM-ex3-ucb1-tree-numeric",
+      "objective": "Compute UCB1 tree-policy scores and identify UCT's node choice.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "A tree node $v$ (visited $n_v=8$ times) has three children: $v_1$ ($Q=8,n=5$), $v_2$ ($Q=3,n=2$), $v_3$ ($Q=6,n=1$). Using RL-06's tree policy $\\operatorname*{argmax}_{v'}\\dfrac{Q_{v'}}{n_{v'}}+\\beta\\sqrt{\\dfrac{2\\ln n_v}{n_{v'}}}$ with $\\beta=2$, compute $v_3$'s UCB1 score. Enter a number.",
+      "hints": [
+        "$Q_{v_3}/n_{v_3}=6/1=6$.",
+        "$\\beta\\sqrt{2\\ln n_v/n_{v_3}}=2\\sqrt{2\\ln8/1}=2\\sqrt{4.159}\\approx4.079$.",
+        "$6+4.079\\approx10.079$. This is the highest of the three children's scores (compute $v_1\\approx3.424$, $v_2\\approx4.384$ to check), so UCT selects $v_3$ next, despite its lower raw average return than $v_1$, precisely because it's been visited far less."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-EXAM-ex3-retake",
+      "objective": "Repeat the UCB1 tree-policy computation with different visit counts and values.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [
+        "RL-EXAM-ex3-ucb1-tree-numeric"
+      ],
+      "answerType": "numeric",
+      "prompt": "A node $v$ (visited $n_v=12$ times) has children $v_1$ ($Q=10,n=6$), $v_2$ ($Q=4,n=3$), $v_3$ ($Q=9,n=2$). Compute $v_3$'s UCB1 score with $\\beta=2$. Enter a number.",
+      "hints": [
+        "$Q_{v_3}/n_{v_3}=9/2=4.5$.",
+        "$2\\sqrt{2\\ln12/2}=2\\sqrt{2.485}\\approx3.153$.",
+        "$4.5+3.153\\approx7.653$."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "RL-EXAM-ex3-ucb1-tree-numeric"
+    },
+    {
+      "id": "RL-EXAM-ex4-risk-sensitive-conceptual",
+      "objective": "Explain why nonlinear (risk-sensitive) utility breaks the standard Bellman recursion.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "RL-01's Bellman equation implicitly assumes utility $U(\\text{return})=\\text{return}$ (risk-neutral), a special case of RL-07's expected-utility framework. Explain why replacing $U$ with a nonlinear (risk-averse) utility function breaks the simple additive recursion $V(s)=R(s,a)+\\gamma\\sum_{s'}P(s'\\mid s,a)V(s')$ that value iteration relies on.",
+      "hints": [
+        "The Bellman recursion's validity relies on linearity: $\\mathbb E\\{r_0+\\gamma(r_1+\\gamma r_2+\\cdots)\\}=\\mathbb E\\{r_0\\}+\\gamma\\mathbb E\\{r_1+\\gamma r_2+\\cdots\\}$, i.e. expectation distributes over the sum.",
+        "If $U$ is a nonlinear function, $\\mathbb E\\{U(r_0+\\gamma(r_1+\\cdots))\\}\\ne U(r_0)+\\gamma\\mathbb E\\{U(r_1+\\cdots)\\}$ in general (a Jensen's-inequality-style failure of linearity), so you can't compute expected utility of the *whole* trajectory by simply recursing on expected utility of the *tail*.",
+        "This means a value function that only tracks a single scalar (expected utility so far) is no longer a sufficient statistic for future decision-making under nonlinear $U$; risk-sensitive RL methods need to track more of the return distribution (or specific risk measures like variance or CVaR) explicitly, exactly why risk-sensitive RL is a genuinely harder, still-active research problem rather than a trivial extension."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "RL-EXAM-ex4-retake",
+      "objective": "Apply the risk-sensitivity insight to a concrete two-policy comparison.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [
+        "RL-EXAM-ex4-risk-sensitive-conceptual"
+      ],
+      "answerType": "short-text",
+      "prompt": "Policy A gives a guaranteed reward of $10$. Policy B gives $+100$ or $-80$ with equal probability. Explain why standard (risk-neutral) Q-learning treats these as equally good, and why a risk-averse decision-maker (RL-07's framework, with a concave $U$) would prefer Policy A even though both have the same expected value.",
+      "hints": [
+        "Policy B's expected value is $0.5\\times100+0.5\\times(-80)=10$, identical to Policy A's guaranteed $10$.",
+        "Standard Q-learning's value $Q(s,a)$ is exactly the expected return; since both policies have the same expected return, risk-neutral RL sees them as exactly equally good, with no way to express a preference between them.",
+        "A concave (risk-averse) $U$ satisfies $U(\\mathbb E\\{X\\})>\\mathbb E\\{U(X)\\}$ for a genuinely random $X$ (Jensen's inequality again): the guaranteed $10$'s utility beats the *average utility* of the risky bet, even though the raw expected reward is identical, exactly the distinction risk-neutral value functions are structurally unable to express."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "RL-EXAM-ex4-risk-sensitive-conceptual"
+    }
+  ]
+}

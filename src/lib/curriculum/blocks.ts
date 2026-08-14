@@ -19,7 +19,9 @@ export const BLOCKS: BlockMeta[] = [
   { id: 'ML', title: 'ML & Autodiff Bridge', rationale: 'Manual MLP-by-hand alongside PyTorch, directly answering your Phase 0 ask.' },
   { id: 'RL', title: 'Reinforcement Learning Foundations', rationale: 'Rigorous treatment with convergence proofs, cross-checked against Sutton & Barto.' },
   { id: 'SYM', title: 'Symbolic Foundations for TAMP', rationale: "Feeds TAMP/Logic-Geometric Programs directly, matching your report's task/motion-level split." },
+  { id: 'REV1', title: 'Cumulative Review I: Foundations Through Symbolic Reasoning', rationale: 'A short synthesis checkpoint before RLEARN, which draws on all 8 preceding blocks at once.' },
   { id: 'RLEARN', title: 'Robot Learning (capstone-adjacent)', rationale: 'The payoff block: advanced/applied content most directly aligned with your own research.' },
+  { id: 'REV2', title: 'Cumulative Review II: Robot Learning', rationale: 'A short synthesis checkpoint before the capstone, tying RLEARN back into the full stack.' },
   { id: 'CAP', title: 'Capstone: Research Bridge', rationale: 'Connects the whole curriculum to your own CDT-D2AIR project, as a synthesis exercise.' },
 ];
 

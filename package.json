@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
     "grading-server": ".venv/bin/python scripts/grading/sympy_server.py",
@@ -27,6 +27,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@types/node": "^26.2.0",
+    "pagefind": "^1.5.2",
     "typescript": "^6.0.3"
   }
 }

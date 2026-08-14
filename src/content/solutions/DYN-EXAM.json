@@ -1,0 +1,88 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "DYN-EXAM-ex1-lqr-lyapunov-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies V=x^T P x is positive definite since P is a value function." },
+          { "points": 2, "description": "Correctly connects the Riccati equation to dV/dt = -x^T(Q+K^T R K)x <= 0." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "V(x)=x^T P x is positive definite since P is a cost-to-go, non-negative. Differentiating along the closed loop and using the Riccati equation's structure gives dV/dt = -x^T(Q+K^T R K)x, which is <=0 since Q,R are positive (semi)definite -- exactly the Lyapunov decrease condition. The same P that makes LQR optimal certifies closed-loop stability."
+    },
+    {
+      "exerciseId": "DYN-EXAM-ex1-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains an uncontrollable mode can't be influenced by u." },
+          { "points": 2, "description": "Correctly explains no choice of Q,R fixes an uncontrollable unstable mode." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "If (A,B) is uncontrollable, some eigenvalue direction can't be reached by u at all. If that mode is already unstable, no feedback gain K=R^-1 B^T P can move it, since u=-Kx only acts through directions B reaches. So controllability (or at least stabilizability) is necessary for LQR to find any stabilizing K, regardless of Q,R tuning."
+    },
+    {
+      "exerciseId": "DYN-EXAM-ex2-pendulum-pd-stability",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly linearizes and derives the closed-loop A matrix." },
+          { "points": 2, "description": "Correctly computes eigenvalues -1+-i*sqrt(14) and classifies as stable/oscillatory-damped." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Linearized: theta_ddot = -(mgL+Kp)/(mL^2) theta - Kd/(mL^2) theta_dot. A=[[0,1],[-15,-2]]. Eigenvalues from lambda^2+2lambda+15=0: lambda=-1+-i*sqrt(14). Real part -1<0: asymptotically stable, oscillatory-damped. Independently verified numerically."
+    },
+    {
+      "exerciseId": "DYN-EXAM-ex2-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly derives A=[[0,1],[-15,1]] with the sign-flipped Kd." },
+          { "points": 2, "description": "Correctly computes eigenvalues 0.5+-i*sqrt(14.75) and classifies as unstable." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "A=[[0,1],[-15,1]]. lambda^2-lambda+15=0: lambda=0.5+-i*sqrt(14.75). Real part +0.5>0: unstable, growing oscillation. A sign error on Kd flips the system from stable to actively diverging. Independently verified numerically."
+    },
+    {
+      "exerciseId": "DYN-EXAM-ex3-controllability-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 2, "tolerance": 0 },
+      "fullSolution": "C=[[0,1],[1,-3]], det=-1 !=0, rank=2: controllable."
+    },
+    {
+      "exerciseId": "DYN-EXAM-ex3-retake",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 1, "tolerance": 0 },
+      "fullSolution": "C=[[1,1],[0,0]], second row zero, rank=1: not controllable."
+    },
+    {
+      "exerciseId": "DYN-EXAM-ex4-feedback-linearization-transfer",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly derives e_ddot = -Kp*e - Kd*e_dot from the tracking law." },
+          { "points": 2, "description": "Correctly computes eigenvalues -3 (double) and classifies as critically damped." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Subtracting q_ddot_ref: e_ddot = -Kp*e - Kd*e_dot, exactly DYN-02's PD point-mass form with m=1 (inverse dynamics cancels M(q) entirely). A=[[0,1],[-9,-6]]. lambda^2+6lambda+9=(lambda+3)^2=0: lambda=-3 double root, critically damped, matching Kd^2=4Kp (36=36). Independently verified numerically."
+    },
+    {
+      "exerciseId": "DYN-EXAM-ex4-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly sets up A=[[0,1],[-25,-4]]." },
+          { "points": 2, "description": "Correctly computes eigenvalues -2+-i*sqrt(21) and classifies as underdamped." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "A=[[0,1],[-25,-4]]. lambda^2+4lambda+25=0: lambda=-2+-i*sqrt(21). Real part -2<0: stable, oscillatory (underdamped since Kd^2=16<4Kp=100). Independently verified numerically."
+    }
+  ]
+}

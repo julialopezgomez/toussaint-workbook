@@ -1,0 +1,40 @@
+---
+id: OPT-EXAM
+block: OPT
+title: "Optimization Exam"
+coversModules: ["OPT-01", "OPT-02", "OPT-03", "OPT-04", "OPT-05", "OPT-06"]
+masteryThreshold: 0.8
+remediationMap:
+  - { exerciseId: "OPT-EXAM-ex1-newton-sqp-conceptual", moduleIds: ["OPT-01", "OPT-04"] }
+  - { exerciseId: "OPT-EXAM-ex1-retake", moduleIds: ["OPT-01", "OPT-02"] }
+  - { exerciseId: "OPT-EXAM-ex2-kkt-qp-derivation", moduleIds: ["OPT-03", "OPT-04"] }
+  - { exerciseId: "OPT-EXAM-ex2-retake", moduleIds: ["OPT-03", "OPT-04"] }
+  - { exerciseId: "OPT-EXAM-ex3-sgd-bound-numeric", moduleIds: ["OPT-05"] }
+  - { exerciseId: "OPT-EXAM-ex3-retake", moduleIds: ["OPT-05"] }
+  - { exerciseId: "OPT-EXAM-ex4-constrained-nls-transfer", moduleIds: ["OPT-02", "OPT-03"] }
+  - { exerciseId: "OPT-EXAM-ex4-retake", moduleIds: ["OPT-02", "OPT-03"] }
+---
+
+import ExerciseCard from '../../components/exercise/ExerciseCard.astro';
+
+Cumulative, like MATH-EXAM: every question combines at least two OPT modules, or extends a taught formula to a case not directly worked out in the modules themselves.
+
+## Part 1 — Newton's method, SQP, and Gauss-Newton's approximation
+
+<ExerciseCard id="OPT-EXAM-ex1-newton-sqp-conceptual" />
+<ExerciseCard id="OPT-EXAM-ex1-retake" />
+
+## Part 2 — KKT conditions for a small QP
+
+<ExerciseCard id="OPT-EXAM-ex2-kkt-qp-derivation" />
+<ExerciseCard id="OPT-EXAM-ex2-retake" />
+
+## Part 3 — Stochastic optimization: the SGD convergence bound
+
+<ExerciseCard id="OPT-EXAM-ex3-sgd-bound-numeric" />
+<ExerciseCard id="OPT-EXAM-ex3-retake" />
+
+## Part 4 — Transfer: constrained nonlinear least squares
+
+<ExerciseCard id="OPT-EXAM-ex4-constrained-nls-transfer" />
+<ExerciseCard id="OPT-EXAM-ex4-retake" />

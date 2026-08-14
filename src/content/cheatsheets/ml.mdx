@@ -1,0 +1,52 @@
+---
+id: ml
+title: "ML & Autodiff Bridge"
+relatedModules: ["ML-01", "ML-02", "ML-03", "ML-04", "ML-05", "ML-06", "ML-07"]
+---
+
+## Definitions
+
+- **Computation graphs / autodiff** (ML-01): any composite function is a DAG of elementary operations; the chain rule applied systematically forward (accumulate $\partial f/\partial g \cdot dg/dx$) or backward gives forward-mode / reverse-mode automatic differentiation.
+- **Regression & classical supervised ML** (ML-02): ridge regression regularizes least squares; logistic regression uses the softmax/sigmoid link to turn a discriminative function into class probabilities.
+- **Neural networks** (ML-03/04): alternating linear maps and nonlinearities; backprop is reverse-mode autodiff applied to this specific graph structure.
+- **Kernelization & Bayesian learning** (ML-05): the kernel trick replaces an explicit (possibly infinite-dimensional) feature map $\phi(x)$ with a kernel function $k(x,x')=\phi(x)^\top\phi(x')$, computable without ever forming $\phi(x)$ explicitly; ridge regression's MAP estimate is exactly a Gaussian-prior Bayesian posterior.
+- **Unsupervised learning** (ML-06): PCA finds the low-dimensional linear subspace minimizing reconstruction error; clustering (k-means) partitions data by proximity to learned centroids.
+- **Ensembles & no-free-lunch** (ML-07): combining many weak/local models (boosting, local regression) often outperforms one strong global model; no single learning algorithm is best across every possible problem.
+
+## Core equations
+
+| Quantity | Formula | Module |
+|---|---|---|
+| Chain rule (reverse-mode) | $\dfrac{df}{dx}=\displaystyle\sum_{g:x\in[g]}\dfrac{df}{dg}\dfrac{\partial g}{\partial x}$ | ML-01 |
+| Ridge regression estimator variance | $\text{Var}\{\hat\beta\}=(X^\top X+\lambda I)^{-1}\sigma^2$ | ML-02 |
+| Softmax link | $p(y\mid x)=\dfrac{e^{f(x,y)}}{\sum_{y'}e^{f(x,y')}}$ | ML-02 |
+| MLP forward pass | $f(x_0)=W_2\,\sigma(W_1\,\sigma(W_0x_0))$ | ML-03 |
+| Kernel ridge regression | $f(x)=\kappa(x)^\top(K+\lambda I)^{-1}y$, $\ K_{ij}=k(x_i,x_j)$ | ML-05 |
+| Ridge = MAP with Gaussian prior | $-\log P(\beta\mid D)\propto\sum_i(y_i-x_i^\top\beta)^2+\lambda\|\beta\|^2$ | ML-05 |
+| PCA objective | $\min_{V_p,\mu,z}\sum_i\|x_i-(V_pz_i+\mu)\|^2$ | ML-06 |
+| Locally weighted regression | $L_\text{local}(\beta,x^*)=\sum_iK(x^*,x_i)(y_i-f(x_i))^2+\lambda\|\beta\|^2$ | ML-07 |
+
+## Assumptions & applicability
+
+- Reverse-mode autodiff (backprop) is efficient when there are few outputs and many inputs (the usual neural-net case: scalar loss, many parameters); forward-mode is efficient in the opposite regime — pick based on which dimension is smaller.
+- The kernel trick only helps when the *learning algorithm* itself can be written purely in terms of inner products $\phi(x)^\top\phi(x')$ (true for ridge regression, SVMs, GPs); it doesn't apply to architectures (like deep nets) that need $\phi(x)$'s actual coordinates.
+- Ridge regression's Bayesian interpretation ($\lambda\leftrightarrow$ Gaussian prior precision) only holds exactly for a Gaussian likelihood and Gaussian prior — Lasso's $\ell_1$ penalty corresponds to a Laplace prior instead, and doesn't have as clean a closed form.
+- PCA finds the best **linear** subspace; genuinely nonlinear low-dimensional structure (e.g. a curved manifold) needs a nonlinear method (autoencoders, kernel PCA, or the manifold-learning family) to capture well.
+- No-Free-Lunch (ML-07) is a formal statement about averaging over *all possible* problems uniformly — it doesn't mean "no algorithm is ever better than another" for the actual, structured problems that show up in practice.
+
+## Common mistakes
+
+- Applying `requires_grad=True` to data tensors instead of parameters in PyTorch (see the [Neural Networks & Backpropagation](/cheatsheets/neural-networks-backprop) cheat sheet).
+- Forgetting that ridge regression's closed form needs $X^\top X+\lambda I$ to be invertible — true even when $X^\top X$ alone is singular (more features than data points), the entire point of the $\lambda I$ term.
+- Using PCA on unstandardized features with wildly different scales — the leading components will just reflect whichever feature has the largest raw variance, not the most meaningful structure.
+- Treating a kernel matrix $K$ as automatically valid — it must be positive semi-definite (Mercer's condition) to correspond to a real inner product in some feature space.
+
+## Decision rule
+
+- Need gradients of a complicated composite function? Don't derive by hand beyond a few layers — build the computation graph and apply reverse-mode autodiff (ML-01), exactly what PyTorch does under the hood.
+- Linear-in-features model with a small-to-medium feature count? Ridge/logistic regression (ML-02) directly. Feature space is huge or implicit (e.g. defined only via similarity)? Kernelize (ML-05) instead of building $\phi(x)$ explicitly.
+- Need to reduce dimensionality or find structure with no labels? PCA for linear structure, k-means for a fixed number of clusters (ML-06). Need a robust, hard-to-beat baseline with minimal tuning? Ensemble methods (ML-07, e.g. boosting) are a strong default.
+
+## Full lesson
+
+[ML-01 — Computation Graphs & Automatic Differentiation](/course/ML/ML-01) · [ML-02 — Regression & Classical Supervised ML](/course/ML/ML-02) · [ML-03 — Neural Networks: Manual Forward/Backward Pass ↔ PyTorch](/course/ML/ML-03) · [ML-04 — Neural Network Architecture Essentials](/course/ML/ML-04) · [ML-05 — Kernelization & Bayesian Learning](/course/ML/ML-05) · [ML-06 — Unsupervised Learning: PCA, Embeddings & Clustering](/course/ML/ML-06) · [ML-07 — Advanced Topics: Ensembles, Bayesian NNs & No Free Lunch](/course/ML/ML-07) · [Milestone exam](/exam/ML)

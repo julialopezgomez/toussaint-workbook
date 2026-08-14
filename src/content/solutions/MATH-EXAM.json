@@ -1,0 +1,88 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "MATH-EXAM-ex1-covariant-gradient-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies grad f as a covector and the descent direction as needing to be a vector, requiring the inverse metric to convert." },
+          { "points": 2, "description": "Correctly explains G=I collapses the distinction, which is why plain gradient descent works without needing to think about it." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "grad f(x) is a covector (dual-space object): it maps a displacement vector to a scalar rate-of-change, grad f(x) . dx. A descent direction must be an actual vector added to x. Converting the covector into a vector under metric G requires the inverse metric: G^-1 grad f(x), exactly MATH-05's derivation (minimizing grad f(x)^T d s.t. d^T G d = 1 gives d proportional to -G^-1 grad f(x)). When G=I this distinction is numerically invisible since G^-1=I, which is why plain gradient descent works without needing to think about vectors vs covectors."
+    },
+    {
+      "exerciseId": "MATH-EXAM-ex1-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies the hidden G=I assumption in the claim." },
+          { "points": 2, "description": "Correctly explains why -grad f isn't actually steepest under general G, and states the correct formula -G^-1 grad f." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "The claim implicitly assumes G=I is the natural metric, but the metric is a modeling choice. Under a general metric G != I, using -grad f(x) directly gives a direction that isn't actually steepest under G at all. MATH-05's derivation shows the true steepest direction under G is -G^-1 grad f(x); 'fastest local descent direction' is only well-defined once G is fixed, and plain gradient descent silently assumes G=I."
+    },
+    {
+      "exerciseId": "MATH-EXAM-ex2-taylor-hessian-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 3, "description": "Correctly generalizes the 1D Taylor series via g(t)=f(x0+td), deriving g'(0) and g''(0) in terms of the gradient and Hessian." },
+          { "points": 3, "description": "Correctly shows H = Jacobian of grad f via mixed partials, and correctly computes grad f(x0) and H(x0) for the numeric check." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "g(t)=f(x0+td); 1D Taylor gives g(t) ~= g(0)+g'(0)t+0.5g''(0)t^2. g'(0)=grad f(x0).d, g''(0)=d^T H(x0) d. Since grad f: R^n -> R^n is itself vector-valued, its Jacobian has entries d(grad f)_i/dx_j = d^2f/dxi dxj = H_ij (mixed partials commute), so H = J_{grad f}. Setting t=1, h=d: f(x0+h) ~= f(x0) + grad f(x0)^T h + 0.5 h^T H(x0) h. Numeric check at (1.5,-0.7) for f=x^2y+y^3: grad f=(2xy, x^2+3y^2)=(-2.1, 3.72); H=[[2y,2x],[2x,6y]]=[[-1.4,3],[3,-4.2]]. Independently verified via finite differences: the finite-difference Jacobian of grad f matches this Hessian exactly."
+    },
+    {
+      "exerciseId": "MATH-EXAM-ex2-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly derives the vector-valued first-order Taylor expansion by stacking per-component scalar expansions." },
+          { "points": 2, "description": "Correctly identifies each row of the linear term as a row of the Jacobian, and correctly computes the numeric check." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Apply scalar first-order Taylor to each component: f_i(x0+h) ~= f_i(x0) + grad f_i(x0).h. Stacking all m components, row i of the resulting linear map is grad f_i(x0)^T, which is row i of the Jacobian J(x0). So f(x0+h) ~= f(x0) + J(x0)h. Numeric check: J(1.3,-2.1)=[[2.6,1],[-2.1,1.3]]; f(x0)=(-0.41,-2.73); J(x0)dx=(0.006,-0.047); Taylor approx=(-0.404,-2.777), matching the true value (-0.4039,-2.7772) to 3 decimals. Independently verified via finite differences."
+    },
+    {
+      "exerciseId": "MATH-EXAM-ex3-rank-deficient-svd",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0, "tolerance": 0.001 },
+      "fullSolution": "tr(A)=5, det(A)=0, so lambda^2-5lambda=0 gives lambda=0,5. The dropped (smaller) eigenvalue is 0, so the best rank-1 approximation is A itself exactly: approximation error = 0. A was already rank 1."
+    },
+    {
+      "exerciseId": "MATH-EXAM-ex3-retake",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 1, "tolerance": 0.001 },
+      "fullSolution": "tr(A)=10, det(A)=9, so lambda^2-10lambda+9=0 gives lambda=9,1 (both positive, full rank). The dropped eigenvalue is 1, so the approximation error (Frobenius norm of the dropped rank-1 term) is 1 -- lossy this time, unlike the previous exercise."
+    },
+    {
+      "exerciseId": "MATH-EXAM-ex4-weighted-least-squares-transfer",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly expands L(w) and applies the matrix-calculus identities to differentiate each term." },
+          { "points": 2, "description": "Correctly arrives at w* = (X^T W X)^-1 X^T W y and notes W=I recovers ordinary least squares." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "L(w) = y^T W y - 2w^T X^T W y + w^T X^T W X w. grad_w L = -2X^T W y + 2 X^T W X w (X^T W X symmetric since W is). Setting grad_w L=0: X^T W X w = X^T W y, so w* = (X^T W X)^-1 X^T W y, the weighted-least-squares normal equations. W=I recovers MATH-02B's ordinary least squares exactly. Independently verified numerically: the analytic gradient at w* evaluates to ~0 (1e-15 scale, floating-point zero)."
+    },
+    {
+      "exerciseId": "MATH-EXAM-ex4-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly differentiates L(w) with the general M term." },
+          { "points": 2, "description": "Correctly arrives at w* = (X^T X + M)^-1 X^T y and states M=lambda I recovers ridge regression." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "grad_w L = -2X^T(y-Xw) + 2Mw. Setting grad_w L=0: (X^T X + M)w = X^T y, so w* = (X^T X + M)^-1 X^T y. M=lambda I recovers MATH-02B's ridge-regression normal equations w* = (X^T X + lambda I)^-1 X^T y exactly. Independently verified numerically: the analytic gradient at w* evaluates to ~0."
+    }
+  ]
+}

@@ -12,6 +12,12 @@ for (const m of modules) {
 }
 for (const list of byBlock.values()) list.sort((a, b) => a.data.id.localeCompare(b.data.id));
 
+const milestones = await getCollection('milestones');
+const milestoneByBlock = new Map(milestones.map((m) => [m.data.block, m]));
+
+const cheatsheets = await getCollection('cheatsheets');
+const cheatsheetByBlock = new Map(cheatsheets.map((c) => [c.data.id.toUpperCase(), c]));
+
 const tierLabel: Record<number, string> = {
   1: 'Core',
   2: 'Main route',
@@ -50,6 +56,16 @@ const builtBlocks = BLOCKS.filter((b) => (byBlock.get(b.id) ?? []).length > 0);
       <section class="block-section" id={block.id}>
         <h2>{block.id} — {block.title}</h2>
         <p class="rationale">{block.rationale} <span class="hours-total">(~{blockHours} hrs, {mods.length} modules)</span></p>
+        {(milestoneByBlock.has(block.id) || cheatsheetByBlock.has(block.id)) && (
+          <p class="block-links no-print">
+            {milestoneByBlock.has(block.id) && (
+              <a href={`/exam/${block.id}`}>📝 Milestone exam</a>
+            )}
+            {cheatsheetByBlock.has(block.id) && (
+              <a href={`/cheatsheets/${cheatsheetByBlock.get(block.id)!.data.id}`}>📄 Cheat sheet</a>
+            )}
+          </p>
+        )}
         <ul class="module-list">
           {mods.map((m) => (
             <li
@@ -84,6 +100,8 @@ const builtBlocks = BLOCKS.filter((b) => (byBlock.get(b.id) ?? []).length > 0);
     <h2>Indexes</h2>
     <p>
       <a href="/concepts">Concept index</a> · <a href="/notation">Notation index</a> · <a href="/sources">Source index</a>
+      · <a href="/cheatsheets">Cheat sheets</a> · <a href="/anki">Anki export</a> · <a href="/print">Print / PDF export</a>
+      · <a href="/search">Full-text search</a> (needs a production build, see the page for why)
     </p>
   </section>
 
@@ -103,6 +121,7 @@ const builtBlocks = BLOCKS.filter((b) => (byBlock.get(b.id) ?? []).length > 0);
     .block-jump a:hover { background: var(--surface-2); }
     .block-section { margin-top: 2.5rem; scroll-margin-top: 1rem; }
     .rationale { opacity: 0.8; font-size: 0.92rem; }
+    .block-links { display: flex; gap: 1rem; font-size: 0.85rem; margin: 0.4rem 0 0.8rem; }
     .hours-total { opacity: 0.65; }
     .module-list { list-style: none; padding: 0; margin: 0.75rem 0; }
     .module-row {

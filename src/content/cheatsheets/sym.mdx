@@ -1,0 +1,43 @@
+---
+id: sym
+title: "Symbolic Foundations for TAMP"
+relatedModules: ["SYM-01", "SYM-02", "SYM-03", "SYM-04"]
+---
+
+## Definitions
+
+- **Propositional logic** (SYM-01): entailment ($\alpha\models\beta$), soundness/completeness, and Modus Ponens for Horn clauses — the minimal machinery needed before FOL.
+- **First-order logic & unification** (SYM-02): quantifiers, unification (finding a substitution $\theta$ making two expressions syntactically identical), and Generalized Modus Ponens, the resolution-style inference rule that drives forward/backward chaining.
+- **STRIPS / PDDL / relational MDPs** (SYM-03): represent MDP states as grounded FOL literals; deterministic action rules can't be learned reliably in high dimensions, motivating probabilistic relational rules with a small number of possible outcomes per action.
+- **PRMs & MLNs** (SYM-04): Probabilistic Relational Models and Markov Logic Networks attach weights to first-order formulas, defining a grounded factor graph; recovers standard graphical models (zero-arity predicates) and classical hard FOL (infinite weights) as limiting cases.
+
+## Core equations
+
+| Quantity | Formula | Module |
+|---|---|---|
+| Horn-clause Modus Ponens | $\dfrac{\alpha_1,\ldots,\alpha_n,\ \ \alpha_1\wedge\cdots\wedge\alpha_n\Rightarrow\beta}{\beta}$ | SYM-01 |
+| Generalized Modus Ponens | $\dfrac{p_1',\ldots,p_n',\ \ (p_1\wedge\cdots\wedge p_n\Rightarrow q)}{q\theta}$, $\theta$ unifies each $p_i',p_i$ | SYM-02 |
+| Probabilistic relational rule | one action → a small distribution over discrete outcomes (each a conjunction of literal changes) | SYM-03 |
+| MLN grounded distribution | $F(X;D)\propto\exp\big\{\sum_i\sum_{\text{true groundings of }F_i}w_i\big\}$ | SYM-04 |
+
+## Assumptions & applicability
+
+- Propositional logic (SYM-01) can't express "for all objects" statements compactly — this is exactly why FOL (SYM-02) is needed for any domain with more than a handful of fixed objects.
+- Deterministic STRIPS rules are only learnable when the world genuinely behaves deterministically given the rule's preconditions; real robot actions (e.g. grasping) rarely do, hence SYM-03's move to probabilistic relational rules — "uncertainty enables learning" (fewer possible outcomes to fit than a deterministic rule would need to be exactly right about).
+- MLN weights are typically learned from data, not hand-specified; as weights $\to\infty$, an MLN degenerates to classical hard-constraint FOL (a formula is either satisfied or the world has probability 0) — useful as a sanity check on a fitted MLN's behavior in the high-confidence limit.
+- Unification (SYM-02) is purely syntactic: it finds *a* substitution making two expressions identical, not necessarily a semantically meaningful one; picking the *most general* unifier is what avoids over-committing to unnecessary specificity.
+
+## Common mistakes
+
+- Trying to unify two expressions with a variable that would need to bind to two different terms simultaneously (an "occurs check" failure) — no valid substitution exists in that case.
+- Applying propositional-logic-only reasoning (SYM-01) to a domain that actually needs quantification over objects, then being surprised the encoding blows up combinatorially with the number of objects.
+- Forgetting that grounded relational rules/MLNs scale with the number of object *groundings*, not just the number of first-order rules — a compact rule set can still imply an enormous grounded factor graph.
+
+## Decision rule
+
+- Domain has a fixed, small number of objects and no need for quantification? Propositional logic suffices (SYM-01). Domain generalizes across a variable number of objects (almost all real robotics domains)? FOL/STRIPS/PDDL (SYM-02/03).
+- Need hard, guaranteed-correct symbolic planning and have accurate deterministic action models? Classical STRIPS/PDDL planning. Action outcomes are genuinely uncertain, or you're learning the model from data? Probabilistic relational rules or MLNs (SYM-03/04).
+
+## Full lesson
+
+[SYM-01 — Propositional Logic Essentials](/course/SYM/SYM-01) · [SYM-02 — First-Order Logic & Inference](/course/SYM/SYM-02) · [SYM-03 — STRIPS, PDDL & Relational MDPs](/course/SYM/SYM-03) · [SYM-04 — Probabilistic Relational Models & Markov Logic Networks](/course/SYM/SYM-04)

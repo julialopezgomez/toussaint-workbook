@@ -1,0 +1,145 @@
+{
+  "moduleId": "ML-EXAM",
+  "exercises": [
+    {
+      "id": "ML-EXAM-ex1-backprop-autodiff-conceptual",
+      "objective": "Explain why backpropagation is reverse-mode autodiff applied to the MLP computation graph, not a separate algorithm.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "ML-01 derives reverse-mode automatic differentiation for a general computation graph. ML-03's backprop $\\delta$-recursion looks like a specific, different algorithm. Explain precisely why backprop is nothing more than ML-01's reverse-mode autodiff, applied to the specific graph structure of a layered MLP.",
+      "hints": [
+        "ML-01's reverse-mode rule is $\\dfrac{df}{dx}=\\sum_{g:x\\in[g]}\\dfrac{df}{dg}\\dfrac{\\partial g}{\\partial x}$: propagate the gradient backward from the output, accumulating contributions through every path.",
+        "An MLP's computation graph is a simple chain: $x_0\\to z_1\\to x_1\\to z_2\\to\\cdots\\to f$. Applying the reverse-mode rule at each node, working backward from $f$, and simplifying using the elementwise structure of $\\sigma$, gives exactly the $\\delta$-recursion $\\delta_l=(W_l^\\top\\delta_{l+1})\\odot\\sigma'(z_l)$.",
+        "So backprop isn't a separate algorithm invented for neural nets specifically: it's reverse-mode autodiff specialized to a graph that happens to be a simple chain of matrix-multiply-then-elementwise-nonlinearity steps, which is exactly why the same reverse-mode machinery (as implemented generically in PyTorch) handles arbitrary architectures, not just plain MLPs."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-EXAM-ex1-retake",
+      "objective": "Explain why the kernel trick lets ridge regression use an infinite-dimensional feature space.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [
+        "ML-EXAM-ex1-backprop-autodiff-conceptual"
+      ],
+      "answerType": "short-text",
+      "prompt": "Ordinary ridge regression (ML-02) needs to explicitly form the feature vector $\\phi(x)$. Kernelized ridge regression (ML-05) can use a feature map $\\phi$ that's infinite-dimensional. Explain precisely what makes this possible.",
+      "hints": [
+        "Ordinary ridge regression's closed form $\\hat\\beta=(X^\\top X+\\lambda I)^{-1}X^\\top y$ needs $\\phi(x)$'s actual coordinates to build the $X$ matrix and multiply by $\\beta\\in\\mathbb R^k$: if $k=\\infty$, this is literally impossible to compute directly.",
+        "Kernel ridge regression's dual form $f(x)=\\kappa(x)^\\top(K+\\lambda I)^{-1}y$ only ever needs inner products $k(x_i,x_j)=\\phi(x_i)^\\top\\phi(x_j)$, never $\\phi(x)$'s coordinates themselves.",
+        "As long as the kernel function $k(x,x')$ itself is cheap to evaluate directly (without ever constructing $\\phi$), the dual form is computable regardless of how high- or infinite-dimensional the implicit feature space is — the entire reason the kernel trick works."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "ML-EXAM-ex1-backprop-autodiff-conceptual"
+    },
+    {
+      "id": "ML-EXAM-ex2-push-through-identity",
+      "objective": "Derive and numerically verify the push-through identity connecting primal and dual (kernel) ridge regression.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "ML-02's primal ridge estimator is $\\hat\\beta=(X^\\top X+\\lambda I)^{-1}X^\\top y$. ML-05's dual (kernel) form predicts $f(x)=\\kappa(x)^\\top(K+\\lambda I)^{-1}y$ where $K=XX^\\top$. These are supposed to give identical predictions. State the matrix identity that makes them equal (you don't need to prove it from scratch, just state it correctly and explain what it says), then verify it numerically for a random $5\\times3$ matrix $X$ and $\\lambda=2$.",
+      "hints": [
+        "The needed identity is $(X^\\top X+\\lambda I)^{-1}X^\\top=X^\\top(XX^\\top+\\lambda I)^{-1}$ (the 'push-through identity'): it lets you move $X^\\top$ from outside the inverse (primal, inverting a $d\\times d$ matrix) to inside a differently-sized inverse (dual, inverting an $n\\times n$ matrix).",
+        "This is exactly why the primal prediction $x_*^\\top\\hat\\beta=x_*^\\top(X^\\top X+\\lambda I)^{-1}X^\\top y$ and the dual prediction $\\kappa(x_*)^\\top(K+\\lambda I)^{-1}y$ (with $\\kappa(x_*)=X x_*$, $K=XX^\\top$) are the same number: substitute the identity into the primal form and it becomes exactly the dual form.",
+        "Numerically: for random $X\\in\\mathbb R^{5\\times3}$, $\\lambda=2$, both sides of the identity should match to machine precision (max absolute difference on the order of $10^{-16}$), and a prediction computed both ways should agree. Independently verified."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-EXAM-ex2-retake",
+      "objective": "Verify the push-through identity for a different matrix.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 12,
+      "prerequisites": [
+        "ML-EXAM-ex2-push-through-identity"
+      ],
+      "answerType": "short-text",
+      "prompt": "Verify the same push-through identity $(X^\\top X+\\lambda I)^{-1}X^\\top=X^\\top(XX^\\top+\\lambda I)^{-1}$ for a random $4\\times2$ matrix $X$ and $\\lambda=1$. State what you observe about the size of the two matrix inverses being computed on each side.",
+      "hints": [
+        "The identity holds regardless of $X$'s specific values, so it verifies to machine precision the same way as the previous exercise.",
+        "The key observation: the left side inverts a $2\\times2$ matrix ($d=2$ features), the right side inverts a $4\\times4$ matrix ($n=4$ samples).",
+        "This is exactly why the dual/kernel form is preferred when $d\\gg n$ (or $d=\\infty$): the $n\\times n$ inverse is the tractable one, even though the two sides are mathematically identical."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "ML-EXAM-ex2-push-through-identity"
+    },
+    {
+      "id": "ML-EXAM-ex3-pca-eigendecomposition-numeric",
+      "objective": "Compute PCA's principal components via eigendecomposition and the variance explained.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "PCA's solution (ML-06) is given by the eigendecomposition of the data covariance matrix (MATH-04's territory, ML-06 doesn't re-derive it). For $C=\\begin{pmatrix}4&2\\\\2&3\\end{pmatrix}$, compute the fraction of total variance explained by the top principal component. Enter a number between 0 and 1.",
+      "hints": [
+        "Find the eigenvalues via the characteristic polynomial: $\\text{tr}(C)=7$, $\\det(C)=12-4=8$, so $\\lambda^2-7\\lambda+8=0$.",
+        "$\\lambda=\\dfrac{7\\pm\\sqrt{49-32}}{2}=\\dfrac{7\\pm\\sqrt{17}}{2}$, giving $\\lambda_1\\approx5.56$, $\\lambda_2\\approx1.44$.",
+        "Fraction explained by the top component: $\\lambda_1/(\\lambda_1+\\lambda_2)=5.56/7\\approx0.795$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-EXAM-ex3-retake",
+      "objective": "Repeat the PCA variance-explained computation for a different covariance matrix.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [
+        "ML-EXAM-ex3-pca-eigendecomposition-numeric"
+      ],
+      "answerType": "numeric",
+      "prompt": "For $C=\\begin{pmatrix}9&1\\\\1&1\\end{pmatrix}$, compute the fraction of total variance explained by the top principal component. Enter a number between 0 and 1.",
+      "hints": [
+        "$\\text{tr}(C)=10$, $\\det(C)=9-1=8$, so $\\lambda^2-10\\lambda+8=0$.",
+        "$\\lambda=\\dfrac{10\\pm\\sqrt{100-32}}{2}=\\dfrac{10\\pm\\sqrt{68}}{2}$, giving $\\lambda_1\\approx9.12$, $\\lambda_2\\approx0.88$.",
+        "Fraction explained: $9.12/10\\approx0.912$. This data is much more concentrated along one direction than the previous exercise's."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "ML-EXAM-ex3-pca-eigendecomposition-numeric"
+    },
+    {
+      "id": "ML-EXAM-ex4-ensemble-variance-transfer",
+      "objective": "Derive and verify the variance-reduction benefit of averaging independent estimators, connecting to ensembles.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "For $M$ independent, identically-distributed unbiased estimators each with variance $\\sigma^2$, their average has variance $\\sigma^2/M$, a basic statistics fact underlying why ensembles (ML-07) reduce variance. For $\\sigma^2=4$ and $M=10$ independent models, compute the ensemble average's variance. Enter a number.",
+      "hints": [
+        "$\\text{Var}\\{\\bar e\\}=\\text{Var}\\{\\tfrac1M\\sum_ie_i\\}=\\tfrac1{M^2}\\sum_i\\text{Var}\\{e_i\\}=\\tfrac1{M^2}\\cdot M\\sigma^2$ (using independence, so covariance terms vanish).",
+        "$=\\sigma^2/M$.",
+        "$4/10=0.4$. Independently verified via Monte Carlo simulation."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "ML-EXAM-ex4-retake",
+      "objective": "Repeat the variance-reduction calculation for correlated ensemble members.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [
+        "ML-EXAM-ex4-ensemble-variance-transfer"
+      ],
+      "answerType": "numeric",
+      "prompt": "Now suppose the $M=10$ estimators are correlated with pairwise correlation $\\rho=0.3$ (still $\\sigma^2=4$ each). The ensemble average's variance is $\\text{Var}\\{\\bar e\\}=\\dfrac{\\sigma^2}{M}+\\dfrac{M-1}{M}\\rho\\sigma^2$. Compute it. Enter a number.",
+      "hints": [
+        "$\\dfrac{\\sigma^2}{M}=4/10=0.4$ (same as before).",
+        "$\\dfrac{M-1}{M}\\rho\\sigma^2=\\dfrac{9}{10}\\times0.3\\times4=1.08$.",
+        "$0.4+1.08=1.48$, much larger than the independent case's $0.4$: correlated ensemble members don't reduce variance nearly as effectively, since as $M\\to\\infty$ this expression approaches $\\rho\\sigma^2=1.2$, not $0$. This is exactly why ensemble diversity matters, not just ensemble size. Independently verified via Monte Carlo simulation."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "ML-EXAM-ex4-ensemble-variance-transfer"
+    }
+  ]
+}

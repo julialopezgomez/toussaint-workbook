@@ -1,0 +1,28 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "REV2-01-ex1-throughline-recall",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly states the shortcuts-to-the-control-stack framing." },
+          { "points": 2, "description": "Gives a valid concrete example pairing." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Robot learning methods replace or shortcut specific pieces of the model-based stack when its assumptions break down. Example: dynamics modeling (DYN-01) shortcut by system identification/dynamics learning (RLEARN-01); or optimal control (DYN-04) shortcut by learning a value/Q-function (RL-02/RL-03); or IK (KIN-03) shortcut by a policy/sampler satisfying the constraint directly."
+    },
+    {
+      "exerciseId": "REV2-01-ex2-pattern-recognition",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly names the privileged-teacher pattern." },
+          { "points": 2, "description": "Correctly explains it in one sentence and identifies the three (or a valid fourth) modules." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "The privileged-teacher pattern: train with information unavailable at deployment (a privileged expert, simulator, or exact-pose computation), generate labels/data from it, then train a deployment-time model on only what's actually available. Instances: RLEARN-02's DAgger, RLEARN-04's sim2real, RLEARN-06's grasp labels, and RLEARN-07's Deep Visual Constraints."
+    }
+  ]
+}

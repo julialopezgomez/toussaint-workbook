@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+import { BLOCKS, BLOCK_ORDER } from '../lib/curriculum/blocks';
+
+const modules = await getCollection('course');
+const sorted = [...modules].sort((a, b) => {
+  const bi = BLOCK_ORDER.indexOf(a.data.block) - BLOCK_ORDER.indexOf(b.data.block);
+  return bi !== 0 ? bi : a.data.id.localeCompare(b.data.id);
+});
+
+// Astro needs render() called per-entry; do them all up front so the template can just map.
+const rendered = await Promise.all(
+  sorted.map(async (m) => ({ entry: m, Content: (await render(m)).Content }))
+);
+
+const blockTitle = Object.fromEntries(BLOCKS.map((b) => [b.id, b.title]));
+const totalHours = modules.reduce((sum, m) => sum + m.data.estimatedHours, 0);
+---
+<BaseLayout title="Full Course (Print)">
+  <div class="no-print">
+    <nav class="breadcrumb"><a href="/">Start</a> / <a href="/curriculum">Curriculum</a> / Print</nav>
+    <h1>Full course — print / PDF export</h1>
+    <p>
+      Every module's lesson prose, concatenated in curriculum order, one page break per module. This is a
+      static rendering: <strong>exercises aren't included</strong> (grading is interactive JavaScript, which
+      doesn't translate to print/PDF); use the site itself, or the <a href="/anki">Anki export</a>, for
+      exercise practice. To save as a PDF: open your browser's print dialog (<kbd>Cmd/Ctrl+P</kbd>) and choose
+      "Save as PDF." This page can be long to render ({modules.length} modules, ~{totalHours} estimated study
+      hours) — give it a moment.
+    </p>
+  </div>
+
+  <section class="cover-page">
+    <h1>Toussaint Workbook</h1>
+    <p>Full course, {modules.length} modules, ~{totalHours} estimated study hours.</p>
+    <h2>Contents</h2>
+    <ol class="toc">
+      {BLOCKS.map((block) => {
+        const blockMods = sorted.filter((m) => m.data.block === block.id);
+        if (blockMods.length === 0) return null;
+        return (
+          <li>
+            {block.id} — {block.title}
+            <ol type="a">
+              {blockMods.map((m) => <li>{m.data.id}: {m.data.title}</li>)}
+            </ol>
+          </li>
+        );
+      })}
+    </ol>
+  </section>
+
+  {rendered.map(({ entry, Content }) => (
+    <article class="printed-module">
+      <header>
+        <p class="module-meta">{entry.data.block} — {blockTitle[entry.data.block]}</p>
+        <h1>{entry.data.id}: {entry.data.title}</h1>
+      </header>
+      <Content />
+    </article>
+  ))}
+
+  <style>
+    .breadcrumb { font-size: 0.85rem; opacity: 0.7; margin-bottom: 1rem; }
+    .breadcrumb a { color: inherit; }
+    .cover-page { margin-bottom: 3rem; }
+    .toc { font-size: 0.92rem; }
+    .toc ol { margin: 0.2rem 0 0.6rem; }
+    .printed-module { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+    .module-meta { font-size: 0.8rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.03em; margin: 0; }
+    @media print {
+      .printed-module { break-before: page; border-top: none; padding-top: 0; }
+      .cover-page { break-after: page; }
+    }
+  </style>
+</BaseLayout>

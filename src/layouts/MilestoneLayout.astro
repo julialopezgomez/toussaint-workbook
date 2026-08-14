@@ -1,0 +1,85 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface RemediationEntry { exerciseId: string; moduleIds: string[]; }
+interface Props {
+  id: string;
+  block: string;
+  title: string;
+  coversModules: string[];
+  masteryThreshold: number;
+  remediationMap: RemediationEntry[];
+}
+const { block, title, coversModules, masteryThreshold, remediationMap } = Astro.props as Props;
+---
+<BaseLayout title={`${title} — Milestone Exam`}>
+  <nav class="no-print breadcrumb"><a href="/">Start</a> / <a href={`/curriculum#${block}`}>{block}</a> / Milestone exam</nav>
+
+  <header>
+    <p class="exam-id">MILESTONE EXAM</p>
+    <h1>{title}</h1>
+    <div class="badges">
+      <span class="badge">Covers: {coversModules.join(', ')}</span>
+      <span class="badge">Target: {Math.round(masteryThreshold * 100)}%</span>
+    </div>
+  </header>
+
+  <section class="meta-box">
+    <h3>How this works</h3>
+    <p>
+      Every exercise here is self-graded, exactly like the ones inside each module: there's no server scoring
+      you. The {Math.round(masteryThreshold * 100)}% target above is a <strong>guide, not an enforced gate</strong>
+      — score yourself honestly against each rubric (or the deterministic/symbolic checker where available), and
+      treat anything you miss as a signal to revisit the specific module listed in the remediation map at the
+      bottom, not as a failure. Each primary exercise is followed by a <strong>retake variant</strong>: different
+      numbers or framing testing the same skill, for when you want a second attempt without having just seen the
+      answer.
+    </p>
+  </section>
+
+  <article><slot /></article>
+
+  {remediationMap.length > 0 && (
+    <section class="meta-box remediation">
+      <h3>Remediation map</h3>
+      <p>If you missed a question, go back to the module(s) listed for it, not just the general block.</p>
+      <table>
+        <thead><tr><th>Exercise</th><th>Revisit</th></tr></thead>
+        <tbody>
+          {remediationMap.map((r: RemediationEntry) => (
+            <tr>
+              <td><code>{r.exerciseId}</code></td>
+              <td>
+                {r.moduleIds.map((m: string, i: number) => (
+                  <>
+                    {i > 0 && ', '}
+                    <a href={`/course/${m.split('-')[0]}/${m}`}>{m}</a>
+                  </>
+                ))}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  )}
+
+  <style>
+    .breadcrumb { font-size: 0.85rem; opacity: 0.7; margin-bottom: 1rem; }
+    .breadcrumb a { color: inherit; }
+    .exam-id { font-family: ui-monospace, monospace; color: var(--accent); font-weight: 600; margin: 0; letter-spacing: 0.05em; font-size: 0.85rem; }
+    h1 { margin-top: 0.2rem; }
+    .badges { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .badge {
+      background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px;
+      padding: 0.2rem 0.75rem; font-size: 0.8rem;
+    }
+    .meta-box {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 0.6rem;
+      padding: 0.9rem 1.2rem; margin: 1rem 0;
+    }
+    .meta-box h3 { margin-top: 0; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.03em; opacity: 0.75; }
+    .remediation { margin-top: 3rem; }
+    .remediation table { font-size: 0.88rem; }
+  </style>
+</BaseLayout>

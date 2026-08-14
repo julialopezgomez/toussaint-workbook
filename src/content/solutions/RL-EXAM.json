@@ -1,0 +1,76 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RL-EXAM-ex1-td-convergence-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies value iteration uses the exact model, Q-learning a single noisy sample." },
+          { "points": 2, "description": "Correctly explains the additional requirements (decreasing step size, infinite visitation) needed for stochastic convergence." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Value iteration applies the exact Bellman update using the true model P,R at every state-action pair. Q-learning sees a single sampled transition and uses a noisy one-sample target. Its convergence proof needs a Robbins-Monro decreasing step size and every state-action pair visited infinitely often, on top of the same contraction argument."
+    },
+    {
+      "exerciseId": "RL-EXAM-ex1-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly describes R-max's binary threshold." },
+          { "points": 2, "description": "Correctly describes UCT's continuous, graduated bonus and why it's preferred for large state spaces." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "R-max: a binary switch, any pair visited fewer than m times gets the max possible reward assigned outright. UCT: a continuous, shrinking bonus proportional to relative under-visitation. Both encode optimism under uncertainty, but UCT's graduated form degrades more gracefully, suited to the huge state spaces MCTS is applied to."
+    },
+    {
+      "exerciseId": "RL-EXAM-ex2-policy-gradient-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": -0.3932, "tolerance": 0.005 },
+      "fullSolution": "pi(0)=1/(1+e)~=0.2689, pi(1)=e/(1+e)~=0.7311. J~=2.4621. dJ/dtheta0 = pi(0)*(r(0)-J) = 0.2689*(1-2.4621) ~= -0.3932. Verified against finite differences."
+    },
+    {
+      "exerciseId": "RL-EXAM-ex2-retake",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": -0.5898, "tolerance": 0.005 },
+      "fullSolution": "pi(0)=e/(1+e)~=0.7311, pi(1)~=0.2689. J~=2.8068. dJ/dtheta0 = 0.7311*(2-2.8068) ~= -0.5898. Verified against finite differences."
+    },
+    {
+      "exerciseId": "RL-EXAM-ex3-ucb1-tree-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 10.079, "tolerance": 0.05 },
+      "fullSolution": "Q/n=6. beta*sqrt(2*ln(8)/1)=2*sqrt(4.159)~=4.079. Total ~=10.079."
+    },
+    {
+      "exerciseId": "RL-EXAM-ex3-retake",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 7.653, "tolerance": 0.05 },
+      "fullSolution": "Q/n=4.5. beta*sqrt(2*ln(12)/2)=2*sqrt(2.485)~=3.153. Total ~=7.653."
+    },
+    {
+      "exerciseId": "RL-EXAM-ex4-risk-sensitive-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies the linearity-of-expectation requirement for the Bellman recursion." },
+          { "points": 2, "description": "Correctly explains nonlinear U breaks this, requiring more than a scalar value function." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "The Bellman recursion relies on expectation distributing over the sum of rewards. Nonlinear U breaks this (E{U(sum)} != U(head)+gamma*E{U(tail)} in general), so a scalar expected-utility value function is no longer sufficient for future decisions; risk-sensitive RL needs to track more of the return distribution."
+    },
+    {
+      "exerciseId": "RL-EXAM-ex4-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly computes both policies have equal expected value (10)." },
+          { "points": 2, "description": "Correctly explains why a concave U prefers the guaranteed option via Jensen's inequality." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Policy B's expected value: 0.5*100+0.5*(-80)=10, equal to Policy A. Risk-neutral Q-learning tracks only expected return, so sees them as identical. A concave U satisfies U(E{X}) > E{U(X)} for random X (Jensen's inequality), so the guaranteed outcome's utility beats the risky bet's average utility, a distinction risk-neutral value functions can't express."
+    }
+  ]
+}

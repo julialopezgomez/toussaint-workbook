@@ -1,0 +1,69 @@
+---
+id: REV1-01
+block: REV1
+title: "Cumulative Review: The Foundations Stack"
+tier: 1
+estimatedHours: 1.5
+prerequisites: ["MATH-05", "OPT-06", "PROB-06", "DYN-07", "ML-07", "RL-07", "SYM-04"]
+objectives:
+  - "State, in one line each, the core idea of every block from MATH through SYM."
+  - "Trace three recurring themes (local-vs-global methods, the known-model-to-model-free spectrum, and metric-awareness) across at least three blocks each."
+  - "Locate the cheat sheet and milestone exam for any block covered so far, as a self-service reference before diving into RLEARN."
+sources: []
+concepts:
+  - "Synthesis across MATH, OPT, PROB, ODE, KIN, DYN, PLAN, MANIP, ML, RL, SYM"
+  - "Recurring themes: local vs. global, known-model vs. model-free, metric-awareness"
+notation: []
+cheatsheetLinks: []
+nextModules: ["RLEARN-00"]
+---
+
+import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
+
+## Why this matters
+
+RLEARN draws on nearly every block built so far, sometimes several at once in a single sentence (see RLEARN-00's "shortcuts to the model-based control stack" table). This module is deliberately not new teaching: it's a compressed map of what's already been covered, so the next block's cross-references land as recognition rather than lookup. If a line below feels unfamiliar, that's a cue to revisit that block's cheat sheet before continuing, not a sign you need to re-read the whole module.
+
+## The 8 blocks in one page
+
+| Block | One-line core idea | Cheat sheet | Exam |
+|---|---|---|---|
+| MATH | Taylor expansion, gradients/Jacobians/Hessians, matrix calculus, dual spaces, metrics, SVD/eigendecomposition, and the covariant gradient. | [math](/cheatsheets/math) | [exam](/exam/MATH) |
+| OPT | Newton/Gauss-Newton/BFGS, KKT/Lagrangians, convexity, SGD, Bayesian optimization/bandits. | [opt](/cheatsheets/opt) | [exam](/exam/OPT) |
+| PROB | Bayes' rule, Monte Carlo, entropy/KL, the energy view, Gaussians, Laplace approximation/variational inference. | [prob](/cheatsheets/prob) | [exam](/exam/PROB) |
+| ODE | Solving ODEs by hand, linear-system eigenvalue stability, Euler/RK4. | [ode](/cheatsheets/ode) | *(folded into DYN)* |
+| KIN | Rotation matrices/Rodrigues, quaternions, forward/inverse kinematics. | [kin](/cheatsheets/kin) | *(folded into DYN)* |
+| DYN | Equations of motion, PID, inverse dynamics, LQR/Bellman, splines, controllability/Lyapunov stability, MPC. | [dyn](/cheatsheets/dyn) | [exam](/exam/DYN) |
+| PLAN | Configuration space, PRM/RRT, non-holonomic constraints, path optimization. | [plan](/cheatsheets/plan) | *(folded into DYN)* |
+| MANIP | Force closure, ZMP/static stability, the compass gait. | [manip](/cheatsheets/manip) | *(folded into RLEARN)* |
+| ML | Autodiff, ridge/logistic regression, neural networks, kernelization, PCA, ensembles. | [ml](/cheatsheets/ml) | [exam](/exam/ML) |
+| RL | MDPs/Bellman, value/Q-iteration, TD learning, policy gradient, exploration, MCTS/UCT, decision theory. | [rl](/cheatsheets/rl) | [exam](/exam/RL) |
+| SYM | Propositional/first-order logic, unification, STRIPS/PDDL, probabilistic relational rules, MLNs. | [sym](/cheatsheets/sym) | *(folded into RLEARN)* |
+
+<ExerciseCard id="REV1-01-ex1-block-matching" />
+
+## Three threads that run through all of it
+
+**Local vs. global methods.** Newton's method (OPT-01) and Laplace approximation (PROB-06) both commit to a single local quadratic model; PRM/RRT (PLAN-02) commit to whatever narrow-passage coverage they happen to sample. Every one of these trades completeness for tractability, and every one of them can silently fail exactly where the local approximation breaks down (far from the expansion point, near an obstacle-adjacent narrow passage). This isn't three separate limitations, it's one recurring tradeoff showing up in optimization, probability, and planning alike.
+
+**The known-model-to-model-free spectrum.** LQR (DYN-04) assumes the full dynamics model and cost are known and solves in closed form; RL-02's value iteration assumes the model is known but doesn't require it to be linear/quadratic; RL-03's Q-learning and RLEARN-01's dynamics learning assume nothing is known and estimate everything from data. Moving along this spectrum trades exactness and sample efficiency for applicability to systems you can't write a model for.
+
+<ExerciseCard id="REV1-01-ex2-spectrum-application" />
+
+**Metric-awareness.** MATH-03B/MATH-05 establish that $\nabla f(x)$ is a covector, not a vector, and that steepest descent under a non-Euclidean metric $G$ needs the covariant gradient $-G^{-1}\nabla f(x)$. This isn't just an abstract linear-algebra point: it's exactly why potential-field control (PLAN-01) can behave badly for a robot with mixed units, and it's the same mathematical object (a positive-definite matrix certifying a quadratic form) that reappears as DYN-06's Lyapunov function and DYN-04's LQR value function $P$.
+
+## Retrieval questions
+
+1. Name one block whose milestone exam is folded into another block's, and explain why.
+2. State the known-model-to-model-free spectrum in one sentence, naming one method at each end.
+3. Explain, in your own words, why $\nabla f(x)$ being a covector matters for control on a robot with mixed units.
+
+## Mastery checklist
+
+- [ ] Can state the one-line core idea of every block from MATH through SYM without looking.
+- [ ] Can trace the local-vs-global, known-model-to-model-free, and metric-awareness themes across at least three blocks each.
+- [ ] Know where to find the cheat sheet and exam for any block covered so far.
+
+## Source note
+
+This module is 100% newly-authored synthesis, not derived from any new Toussaint source material: every claim it makes is already cited, verified, and cross-referenced in the modules it summarizes. It exists purely to compress the preceding 8 blocks into one orientation pass before RLEARN, per `CURRICULUM.md`'s Assessment Schedule ("a short cumulative-review module inserted before RLEARN"). All 3 exercises are newly authored and lightweight by design (synthesis checks, not new derivations); the numeric/derivation content they reference was independently verified when originally authored in each source module.

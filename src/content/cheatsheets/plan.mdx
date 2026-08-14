@@ -1,0 +1,45 @@
+---
+id: plan
+title: "Path & Motion Planning"
+relatedModules: ["PLAN-01", "PLAN-02", "PLAN-03", "PLAN-04"]
+---
+
+## Definitions
+
+- **Configuration space** (PLAN-01): $\mathcal X$ is the embedding space for a system's pose; $\mathcal X_\text{fea}$ (= $C_\text{free}$) is the feasible subset respecting joint limits and non-penetration; feedback control follows the negative gradient of an attractive+repulsive potential field toward the goal.
+- **Sample-based path finding** (PLAN-02): PRM builds a roadmap by randomly sampling $Q_\text{free}$ and locally connecting nearby samples; RRT grows a single tree outward from the start, biased toward unexplored space.
+- **Non-holonomic systems** (PLAN-03): a constraint on *velocity* ($h(q,\dot q,t)=0$) that can't be integrated back into a constraint on configuration alone — restricts feasible motions without restricting the feasible configuration space itself.
+- **Path optimization** (PLAN-04): refine a sampled, topologically-correct-but-jagged path into a smooth, locally-optimal trajectory via DYN-04-style optimization.
+
+## Core equations
+
+| Quantity | Formula | Module |
+|---|---|---|
+| Feasible configuration space | $\mathcal X_\text{fea}=C_\text{free}\subseteq\mathcal X$ | PLAN-01 |
+| Potential-field control | $F(q)=-\nabla U(q)$, $\ U=U_\text{att}+U_\text{rep}$ | PLAN-01 |
+| PRM probabilistic completeness | $P(\text{success}\mid n)\ge1-\dfrac{2\vert\gamma\vert}{\varrho}e^{-\sigma\varrho^dn}$ | PLAN-02 |
+| Non-holonomic constraint | $h(q,\dot q,t)=0$ (restricts velocities, not configurations) | PLAN-03 |
+| Car (unicycle) model | $\dot x=v\cos\theta,\ \dot y=v\sin\theta,\ \dot\theta=\tfrac vL\tan\phi$ | PLAN-03 |
+| Path-smoothing objective | $f(q_{0:T})=\sum_t\|q_{t-1}-q_t\|_W^2+\sum_t\|\Phi_t(q_t)\|^2$ | PLAN-04 |
+
+## Assumptions & applicability
+
+- PRM's probabilistic-completeness bound goes vacuous (probability bound $<0$, i.e. no guarantee at all) for narrow passages: as the passage clearance $\varrho\to0$, the required sample count $n$ blows up — the formal reason PRM/RRT struggle with narrow corridors.
+- The wavefront/Dijkstra grid-search alternative to potential fields (PLAN-01) avoids local minima but suffers the curse of dimensionality ($O(k^n)$ cells); sampling-based methods (PLAN-02) exist precisely to sidestep this.
+- Non-holonomic constraints don't shrink $C_\text{free}$ itself, only the *paths* through it that are actually drivable — a car can reach any $C_\text{free}$ configuration eventually (if the constraint is controllable, PLAN-03), just not along an arbitrary straight-line path.
+- Path optimization (PLAN-04) is a *local* refinement: it needs an already topologically-correct initial path (from PLAN-02) as a starting point, and doesn't fix a fundamentally wrong homotopy class.
+
+## Common mistakes
+
+- Confusing $\mathcal X_\text{fea}$/$C_\text{free}$ (PLAN-01's static geometric feasibility) with the *reachable* set under dynamics/non-holonomic constraints (PLAN-03) — a configuration can be geometrically feasible but practically unreachable along any drivable path.
+- Applying gradient-descent-style potential-field control and being surprised it gets stuck: local minima (a configuration with zero net force but not at the goal) are a fundamental limitation, not a bug, of the additive-potential approach.
+- Treating RRT/PRM's output path as smooth or locally optimal — it's only topologically valid; always follow with path optimization (PLAN-04) before executing on a real robot.
+
+## Decision rule
+
+- Static feasibility question ("can the robot even be at this configuration")? Configuration-space definitions (PLAN-01). Need an actual path through a high-dimensional, possibly cluttered space? Sample-based planning (PLAN-02), PRM if you'll query many start/goal pairs against the same environment, RRT if you have one start/goal and want a fast single answer.
+- Wheeled or otherwise constrained robot? Check non-holonomic feasibility (PLAN-03) before trusting a purely geometric plan. Path looks jagged/inefficient after sampling? Smooth it via path optimization (PLAN-04) before execution.
+
+## Full lesson
+
+[PLAN-01 — Configuration Space & Geometric Feasibility](/course/PLAN/PLAN-01) · [PLAN-02 — Sample-Based Path Finding: PRM & RRT](/course/PLAN/PLAN-02) · [PLAN-03 — Non-Holonomic Systems](/course/PLAN/PLAN-03) · [PLAN-04 — Path Optimization](/course/PLAN/PLAN-04)

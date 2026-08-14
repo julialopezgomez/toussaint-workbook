@@ -1,0 +1,54 @@
+---
+id: dyn
+title: "Robot Dynamics & Control"
+relatedModules: ["DYN-01", "DYN-02", "DYN-03", "DYN-04", "DYN-05", "DYN-06", "DYN-07"]
+---
+
+## Definitions
+
+- **Equations of motion** (DYN-01): Newton-Euler (sum forces/torques per body, project through the Jacobian) and Euler-Lagrange ($u=\frac{d}{dt}\partial L/\partial\dot q-\partial L/\partial q$) both derive $M(q)\ddot q+F(q,\dot q)=u$, the standard robot dynamics form.
+- **PID control** (DYN-02): proportional-derivative-integral feedback; $K_d^2$ vs. $4mK_p$ determines over/under/critically-damped behavior.
+- **Inverse dynamics / operational-space control** (DYN-03): given a desired acceleration, solve for the torque that produces it ($u=M\ddot q^*+F$); operational-space control does the same in task space via $T=JM^{-1}$.
+- **Optimal control / trajectory optimization** (DYN-04): Bellman's principle turns a multi-step cost-minimization into a recursive value function; LQR is the closed-form solution for linear-quadratic problems via the Riccati equation.
+- **Splines** (DYN-05): piecewise polynomial trajectories through waypoints, chosen to minimize a smoothness cost (e.g. integrated squared acceleration).
+- **Controllability & stability** (DYN-06): controllability asks whether any state is reachable from any other; stability (via eigenvalues, or a Lyapunov function for nonlinear systems) asks whether a system returns to equilibrium.
+- **Model Predictive Control** (DYN-07): re-solve DYN-04's finite-horizon optimal control problem at every timestep, execute only the first control, discard the rest — trades optimality for robustness to model error.
+
+## Core equations
+
+| Quantity | Formula | Module |
+|---|---|---|
+| Robot dynamics (standard form) | $M(q)\ddot q+F(q,\dot q)=u$ | DYN-01 |
+| Euler-Lagrange | $u=\dfrac{d}{dt}\dfrac{\partial L}{\partial\dot q}-\dfrac{\partial L}{\partial q}$, $\ L=T-U$ | DYN-01 |
+| PD control | $u=K_p(q^*-q)+K_d(\dot q^*-\dot q)$ | DYN-02 |
+| Critical damping | $K_d^2=4mK_p$ | DYN-02 |
+| Inverse dynamics | $u=M(q)\ddot q^*+F(q,\dot q)$ | DYN-03 |
+| Operational-space control | $u^*=T^\sharp(\ddot y^*-\dot J\dot q+TF)$, $\ T=JM^{-1}$ | DYN-03 |
+| Bellman equation | $V_t(x)=\min_u[c(x,u)+V_{t+1}(f(x,u))]$ | DYN-04 |
+| Riccati equation (LQR) | $-\dot P=A^\top P+PA-PBR^{-1}B^\top P+Q$, $\ u^*=-R^{-1}B^\top Px$ | DYN-04 |
+| Controllability matrix | $C=[B\ \ AB\ \ A^2B\ \cdots\ A^{n-1}B]$, controllable $\iff\text{rank}(C)=n$ | DYN-06 |
+| Asymptotic stability | $\forall i:\operatorname{Re}(\lambda_i)<0$ | DYN-06 |
+
+## Assumptions & applicability
+
+- Inverse dynamics ($u=M\ddot q^*+F$) requires an accurate dynamics model; model error directly becomes tracking error — this is exactly the gap MPC (DYN-07) and RLEARN's dynamics learning (RLEARN-01) exist to close.
+- LQR's Riccati-equation solution is exact only for **linear** dynamics and **quadratic** cost; for nonlinear systems, LQR is applied around a linearization (valid locally), or via iterative LQR that re-linearizes at each step.
+- Controllability (DYN-06) is a binary yes/no property of the linearized system; it says nothing about *how much control effort* is needed, only whether it's possible in principle.
+- MPC's robustness advantage over one-shot trajectory optimization comes precisely from re-planning every step with fresh state feedback; a longer horizon $H$ generally improves plan quality but at higher per-step computational cost.
+
+## Common mistakes
+
+- Confusing the *inverse dynamics* direction ($\ddot q^*\to u$, useful for control) with *forward dynamics* ($u\to\ddot q$, useful for simulation) — they use the same $M$, $F$ but solve for different unknowns.
+- Picking PD gains without checking the damping ratio, then being surprised by oscillation (underdamped, $K_d^2<4mK_p$) or sluggish response (overdamped, $K_d^2>4mK_p$).
+- Treating the Riccati equation's $P$ as a Lyapunov function without checking it's actually positive definite — for a stabilizing LQR solution it is, but this needs $(A,B)$ controllable and $(A,Q^{1/2})$ observable.
+- Forgetting that MPC only executes the *first* control of each re-solved horizon — implementing "solve once, execute the whole horizon" isn't MPC, it's just one-shot trajectory optimization with extra steps.
+
+## Decision rule
+
+- Have an accurate dynamics model and a known target trajectory? Inverse dynamics / operational-space control (DYN-03) for direct tracking. Need to find the trajectory itself (not just track a given one)? Trajectory optimization / LQR (DYN-04).
+- Model error or disturbances expected during execution? MPC (DYN-07) re-plans every step, trading compute for robustness — the practical default whenever the model can't be fully trusted.
+- Need to check a design is even feasible before optimizing gains? Check controllability (DYN-06) first — no controller can fix an uncontrollable system.
+
+## Full lesson
+
+[DYN-01 — Deriving the Equations of Motion](/course/DYN/DYN-01) · [DYN-02 — PID & Point-Mass Control](/course/DYN/DYN-02) · [DYN-03 — Inverse Dynamics & the Standard Control Stack](/course/DYN/DYN-03) · [DYN-04 — Optimal Control & Trajectory Optimization](/course/DYN/DYN-04) · [DYN-05 — Splines & Motion Primitives](/course/DYN/DYN-05) · [DYN-06 — Controllability & Stability](/course/DYN/DYN-06) · [DYN-07 — Model Predictive Control](/course/DYN/DYN-07) · [Milestone exam](/exam/DYN)

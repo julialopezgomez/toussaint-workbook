@@ -1,0 +1,70 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "PROB-EXAM-ex1-laplace-energy-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies the Laplace approximation as a Taylor expansion of the energy function at the mode." },
+          { "points": 2, "description": "Correctly explains why the linear term vanishes and why the result is Gaussian." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "The energy E(x)=-log p(x)+c is Taylor-expanded to second order around its minimum x* (the mode of p). The linear term vanishes because x* is a critical point of E, gradient exactly zero. What remains is purely quadratic in (x-x*); exponentiating a quadratic gives a Gaussian's exponent form exactly."
+    },
+    {
+      "exerciseId": "PROB-EXAM-ex1-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains D(q||p)>=0 makes the optimization well-posed (bounded below)." },
+          { "points": 2, "description": "Correctly explains D(q*||p)=0 would mean q*=p exactly." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "D(q||p)>=0 guarantees the objective has a known lower bound (zero), so the search is well-posed, not able to run to -infinity. If the family contains p itself, D=0 is achievable exactly when q=p (KL is zero iff the distributions are identical). In practice the family usually doesn't contain p, so D(q*||p)>0 at the optimum; the guarantee is only that the result is the closest achievable member of the family."
+    },
+    {
+      "exerciseId": "PROB-EXAM-ex2-gaussian-kl-derivation",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly expands log p(x)-log q(x) and takes the expectation under p term by term." },
+          { "points": 2, "description": "Correctly arrives at the closed form and evaluates it numerically (~0.443)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "log p(x)-log q(x) = log(sigma2/sigma1) - (x-mu1)^2/(2 sigma1^2) + (x-mu2)^2/(2 sigma2^2). Taking E_p: E_p{(x-mu1)^2}=sigma1^2, E_p{(x-mu2)^2}=sigma1^2+(mu1-mu2)^2. Result: D(p||q) = log(sigma2/sigma1) - 1/2 + (sigma1^2+(mu1-mu2)^2)/(2 sigma2^2). For mu1=0,s1=1,mu2=1,s2=2: log2 - 0.5 + 2/8 = log2-0.5+0.25 ~= 0.443. Independently verified via Monte Carlo estimation of the expectation."
+    },
+    {
+      "exerciseId": "PROB-EXAM-ex2-retake",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 2.2195, "tolerance": 0.01 },
+      "fullSolution": "log(1/1.5) + (2.25+4)/2 - 0.5 = -0.4055 + 3.125 - 0.5 = 2.2195. Independently verified via Monte Carlo estimation."
+    },
+    {
+      "exerciseId": "PROB-EXAM-ex3-gaussian-fusion-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 7.4, "tolerance": 0.01 },
+      "fullSolution": "sigma_c^2=(1/4+1/1)^-1=0.8. mu_c=0.8*(5/4+8/1)=0.8*9.25=7.4."
+    },
+    {
+      "exerciseId": "PROB-EXAM-ex3-retake",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 4.1538, "tolerance": 0.01 },
+      "fullSolution": "sigma_c^2=(1/9+1/4)^-1~=2.769. mu_c~=2.769*(0/9+6/4)=2.769*1.5~=4.154."
+    },
+    {
+      "exerciseId": "PROB-EXAM-ex4-laplace-transfer",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.25, "tolerance": 0.001 },
+      "fullSolution": "d/dx log p = -2x^3+2x, critical points 0,+-1. d2/dx2 = -6x^2+2; at x=1: -4<0 (mode). sigma^2 = (-(-4))^-1 = 0.25."
+    },
+    {
+      "exerciseId": "PROB-EXAM-ex4-retake",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.125, "tolerance": 0.001 },
+      "fullSolution": "d/dx log p = -2x^3+4x, critical points 0,+-sqrt(2). d2/dx2 = -6x^2+4; at x=sqrt(2): -8<0 (mode). sigma^2 = (-(-8))^-1 = 0.125."
+    }
+  ]
+}

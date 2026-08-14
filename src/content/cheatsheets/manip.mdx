@@ -1,0 +1,44 @@
+---
+id: manip
+title: "Manipulation & Legged Locomotion Foundations"
+relatedModules: ["MANIP-01", "MANIP-02"]
+---
+
+## Definitions
+
+- **Force closure** (MANIP-01): a grasp can resist arbitrary external wrenches if and only if the positive linear span of the contacts' friction cones covers all of $\mathbb R^6$ — the formal definition of "a secure grasp."
+- **Friction cone** (MANIP-01): the set of forces a single contact can physically exert, given the friction coefficient $\mu$ (Coulomb friction: tangential force can't exceed $\mu$ times normal force, or the contact slips).
+- **ZMP / static stability** (MANIP-02): the Zero Moment Point is the ground point where the net inertial+gravity moment has no horizontal component; static stability additionally requires the center of gravity's ground projection to lie within the support polygon.
+
+## Core equations
+
+| Quantity | Formula | Module |
+|---|---|---|
+| Net wrench from contacts | $f_\text{total}=\sum_if_i$, $\ \tau_\text{total}=\sum_i[\tau_i+f_i\times(p_i-c)]$ | MANIP-01 |
+| Coulomb friction cone | $\|f_i^\parallel\|\le\mu\|f_i^\perp\|$ | MANIP-01 |
+| Force closure condition | positive span of $\mathcal F_1,\ldots,\mathcal F_C$ covers $\mathbb R^6$ | MANIP-01 |
+| Static stability | CoG ground-projection $\in$ support polygon | MANIP-02 |
+| ZMP condition | $\sum_ir_i\times f_i+I_i\dot w_i+w_i\times I_iw_i\overset{!}{=}(0,0,*)^\top$ | MANIP-02 |
+| Compass gait dynamics | $M(q)\ddot q+C(q,\dot q)\dot q+G(q)=0$ | MANIP-02 |
+
+## Assumptions & applicability
+
+- Force closure is a **binary, quasi-static** condition: it says a grasp *can* resist any wrench, not that it can do so *quickly* or under dynamic loading — real grasps also need to account for contact-breaking under fast motion.
+- Coulomb friction's linear cone is itself an approximation (real friction is more complex, e.g. velocity-dependent); it's standard because it makes force-closure checking a tractable geometric/linear-algebra problem.
+- Static stability (CoG-over-support-polygon) is sufficient but not necessary for a legged robot to avoid falling — dynamically stable gaits (like running, or the compass gait itself between footfalls) can be stable *without* the CoG ever being over the support polygon.
+- The compass-gait model is deliberately minimal (2-DOF, point feet, no ankle torque) to make limit-cycle walking analyzable in closed form; real bipedal robots need ZMP-based or model-predictive extensions on top of this intuition.
+
+## Common mistakes
+
+- Checking force closure using only the contact normal directions and forgetting the friction cone's tangential extent — a grasp with only normal forces (frictionless) essentially never achieves force closure with a small number of contacts.
+- Confusing static stability (CoG over support polygon, a stronger, more conservative condition) with the ZMP condition (weaker, allows dynamic walking) — a walking gait can be ZMP-stable while never being statically stable at any instant.
+- Assuming force closure implies the grasp is *optimal* — it's a feasibility condition, not an optimality one; many force-closure grasps can differ enormously in robustness/margin.
+
+## Decision rule
+
+- Designing or evaluating a grasp? Check force closure via the friction-cone span condition (MANIP-01) before worrying about grasp *quality* metrics on top of it.
+- Analyzing a legged robot's gait? Static walking (slow, conservative) → check CoG-over-support-polygon; dynamic walking (faster, more natural) → use the ZMP condition instead, and expect to need a full dynamic model (MANIP-02) rather than the simpler static check.
+
+## Full lesson
+
+[MANIP-01 — Grasping Fundamentals: Contacts & Force Closure](/course/MANIP/MANIP-01) · [MANIP-02 — Legged Locomotion Basics](/course/MANIP/MANIP-02)

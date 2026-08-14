@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const modules = await getCollection('course');
+const questions = await getCollection('questions');
+
+const notationCount = modules.reduce((sum, m) => sum + m.data.notation.length, 0);
+const exerciseCardCount = questions.filter((q) => q.data.reviewCardIds && q.data.reviewCardIds.length > 0).length;
+const totalCards = notationCount + exerciseCardCount;
+---
+<BaseLayout title="Anki Export">
+  <nav class="no-print breadcrumb"><a href="/">Start</a> / <a href="/curriculum">Curriculum</a> / Anki export</nav>
+  <h1>Anki export</h1>
+  <p>
+    A downloadable snapshot, not a live sync: generated fresh from the site's own content every time you download
+    it, but nothing here talks to Anki automatically and there's no account or server involved.
+  </p>
+
+  <h2>What's in it</h2>
+  <p>
+    <strong>{totalCards} cards</strong> total:
+  </p>
+  <ul>
+    <li><strong>{notationCount} notation cards</strong> — every module's symbol → meaning pairs (front: symbol, back: meaning + module ID), covering all {modules.length} modules. This is the bulk of the deck and needs no curation: it's pulled directly from each module's own notation box.</li>
+    <li><strong>{exerciseCardCount} exercise recall cards</strong> — front: the exercise prompt, back: the full worked solution, for exercises specifically flagged as recall-worthy (via each exercise's <code>reviewCardIds</code> field). This is a smaller, curated subset, not every exercise: most exercises' full derivations are too long to make a good flashcard back, so only ones explicitly marked get a card.</li>
+  </ul>
+  <p>
+    Deliberately <strong>not</strong> included: a card per Retrieval Question. Those are meant to be self-tested
+    from memory with no answer supplied in the source content, so auto-generating a "back" for them would mean
+    either leaving it blank (not useful as a real flashcard) or fabricating an answer that was never actually
+    written and verified — neither is worth doing. Use the module page itself for retrieval-question practice.
+  </p>
+
+  <h2>Download</h2>
+  <p>
+    <a href="/anki-export.tsv" download><strong>⬇ Download Anki TSV</strong></a>
+  </p>
+
+  <h2>Importing into Anki</h2>
+  <ol>
+    <li>Download the file above.</li>
+    <li>In Anki: <strong>File → Import</strong>, select the downloaded <code>.tsv</code> file.</li>
+    <li>Anki should auto-detect tab as the field separator and 3 fields (Front, Back, Tags); if not, set those manually in the import dialog.</li>
+    <li>Map the "Tags" column to Anki's Tags field so cards are organized by block/module (e.g. <code>notation::MATH</code>, <code>exercise::OPT-03</code>) — useful for filtering study sessions to one block at a time.</li>
+    <li>Math renders via Anki's own LaTeX support (already wrapped in <code>[$]...[/$]</code>/<code>[$$]...[/$$]</code> tags in the export) — no extra setup needed on a standard Anki install.</li>
+  </ol>
+
+  <h2>Keeping it current</h2>
+  <p>
+    The file at <code>/anki-export.tsv</code> is regenerated at build time from whatever content currently
+    exists, so as more modules/exercises are added, re-downloading later will pick them up automatically —
+    re-import into Anki whenever you want an updated deck (Anki will add new cards and leave your existing
+    review history on already-imported ones untouched, as long as note content hasn't changed).
+  </p>
+</BaseLayout>
+
+<style>
+  .breadcrumb { font-size: 0.85rem; opacity: 0.7; margin-bottom: 1rem; }
+  .breadcrumb a { color: inherit; }
+</style>

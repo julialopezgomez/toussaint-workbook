@@ -1,0 +1,28 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "REV1-01-ex1-block-matching",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly recalls MATH and DYN's core ideas." },
+          { "points": 2, "description": "Correctly recalls SYM's core idea." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "MATH: Taylor expansion, gradients/Jacobians/Hessians, matrix calculus, dual spaces/metrics, SVD/eigendecomposition, and the covariant gradient. DYN: equations of motion, PID, inverse dynamics, LQR/Bellman, splines, controllability/Lyapunov stability, MPC. SYM: propositional/first-order logic, unification, STRIPS/PDDL, probabilistic relational rules, MLNs."
+    },
+    {
+      "exerciseId": "REV1-01-ex2-spectrum-application",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly places (a) at the known-model end and (b) toward model-free." },
+          { "points": 2, "description": "Correctly identifies (a) needs less real data but risks the sim-to-real gap." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "(a) sits at the fully-known-model end (LQR), zero real-world data needed but limited by simulator accuracy. (b) sits toward model-free, using real data to correct simulator error, closer to RLEARN-01/RL-03. (a) needs less real data by construction but risks poor real-world performance from the sim-to-real gap; (b) needs more data but directly corrects for it -- exactly why hybrid approaches like RLEARN-01's residual learning and RLEARN-04's domain randomization exist."
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "ML-EXAM-ex1-backprop-autodiff-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly applies ML-01's reverse-mode rule to the MLP chain structure." },
+          { "points": 2, "description": "Correctly connects this to the delta-recursion and explains why the same machinery generalizes." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "ML-01's reverse-mode rule applied to the MLP's chain graph (x0->z1->x1->...->f), working backward, gives exactly the delta-recursion delta_l=(W_l^T delta_{l+1}) elementwise-times sigma'(z_l). Backprop is reverse-mode autodiff specialized to this particular chain-shaped graph, which is why the same generic machinery (PyTorch) handles arbitrary architectures, not a separate neural-net-specific algorithm."
+    },
+    {
+      "exerciseId": "ML-EXAM-ex1-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains ordinary ridge needs phi(x)'s coordinates explicitly." },
+          { "points": 2, "description": "Correctly explains the dual form only needs inner products, computable via the kernel function directly." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Ordinary ridge's closed form needs phi(x)'s actual coordinates to build X and multiply by beta; infinite k makes this impossible directly. The dual form only needs inner products k(xi,xj), never phi(x)'s coordinates -- as long as k is cheap to evaluate directly, dimensionality of the implicit feature space doesn't matter."
+    },
+    {
+      "exerciseId": "ML-EXAM-ex2-push-through-identity",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly states the push-through identity." },
+          { "points": 2, "description": "Correctly verifies it numerically and explains the differing inverse sizes." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "(X^T X + lam I)^-1 X^T = X^T(XX^T + lam I)^-1. Verified numerically for random 5x3 X, lambda=2: max abs diff ~1e-16 (machine precision); predictions computed both ways agree. Left side inverts a 3x3 matrix, right side a 5x5 matrix."
+    },
+    {
+      "exerciseId": "ML-EXAM-ex2-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly verifies the identity numerically for the new matrix." },
+          { "points": 2, "description": "Correctly identifies the 2x2 vs 4x4 inverse sizes and why the dual form is preferred when d>>n." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Verified to machine precision for random 4x2 X, lambda=1. Left side inverts a 2x2 matrix (d=2 features), right side a 4x4 matrix (n=4 samples). The dual form is preferred when d is much larger than n (or infinite), since the tractable n x n inverse is the one actually computed."
+    },
+    {
+      "exerciseId": "ML-EXAM-ex3-pca-eigendecomposition-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.7945, "tolerance": 0.01 },
+      "fullSolution": "tr(C)=7, det(C)=8. lambda^2-7lambda+8=0 gives lambda=(7+-sqrt(17))/2 ~= 5.56, 1.44. Fraction explained = 5.56/7 ~= 0.7945."
+    },
+    {
+      "exerciseId": "ML-EXAM-ex3-retake",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.9123, "tolerance": 0.01 },
+      "fullSolution": "tr(C)=10, det(C)=8. lambda^2-10lambda+8=0 gives lambda=(10+-sqrt(68))/2 ~= 9.12, 0.88. Fraction explained = 9.12/10 ~= 0.9123."
+    },
+    {
+      "exerciseId": "ML-EXAM-ex4-ensemble-variance-transfer",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 0.4, "tolerance": 0.01 },
+      "fullSolution": "Var{avg} = sigma^2/M = 4/10 = 0.4. Independently verified via Monte Carlo simulation."
+    },
+    {
+      "exerciseId": "ML-EXAM-ex4-retake",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 1.48, "tolerance": 0.01 },
+      "fullSolution": "Var{avg} = sigma^2/M + (M-1)/M * rho * sigma^2 = 0.4 + 0.9*0.3*4 = 0.4+1.08 = 1.48. Independently verified via Monte Carlo simulation."
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+---
+id: RLEARN-EXAM
+block: RLEARN
+title: "Robot Learning Exam"
+coversModules: ["RLEARN-00", "RLEARN-01", "RLEARN-02", "RLEARN-03", "RLEARN-04", "RLEARN-05", "RLEARN-06", "RLEARN-07", "RLEARN-08"]
+masteryThreshold: 0.8
+remediationMap:
+  - { exerciseId: "RLEARN-EXAM-ex1-dagger-vs-offline-conceptual", moduleIds: ["RLEARN-02", "RLEARN-04"] }
+  - { exerciseId: "RLEARN-EXAM-ex1-retake", moduleIds: ["RLEARN-01", "RLEARN-04"] }
+  - { exerciseId: "RLEARN-EXAM-ex2-airl-advantage-numeric", moduleIds: ["RLEARN-05"] }
+  - { exerciseId: "RLEARN-EXAM-ex2-retake", moduleIds: ["RLEARN-05"] }
+  - { exerciseId: "RLEARN-EXAM-ex3-reward-shaping-numeric", moduleIds: ["RLEARN-03"] }
+  - { exerciseId: "RLEARN-EXAM-ex4-taxonomy-classification-transfer", moduleIds: ["RLEARN-00", "RLEARN-07"] }
+  - { exerciseId: "RLEARN-EXAM-ex4-retake", moduleIds: ["RLEARN-00", "RLEARN-03"] }
+---
+
+import ExerciseCard from '../../components/exercise/ExerciseCard.astro';
+
+The last milestone exam before the capstone. Cumulative, like the others: every question combines at least two RLEARN modules, or extends a taught formula/identity to a case not directly worked out in the modules themselves.
+
+## Part 1 — Two responses to a mismatch problem, twice over
+
+<ExerciseCard id="RLEARN-EXAM-ex1-dagger-vs-offline-conceptual" />
+<ExerciseCard id="RLEARN-EXAM-ex1-retake" />
+
+## Part 2 — Verifying the AIRL/advantage-function identity
+
+<ExerciseCard id="RLEARN-EXAM-ex2-airl-advantage-numeric" />
+<ExerciseCard id="RLEARN-EXAM-ex2-retake" />
+
+## Part 3 — Reward shaping on a new MDP
+
+<ExerciseCard id="RLEARN-EXAM-ex3-reward-shaping-numeric" />
+
+## Part 4 — Transfer: classifying an unfamiliar system with the Mini Taxonomy
+
+<ExerciseCard id="RLEARN-EXAM-ex4-taxonomy-classification-transfer" />
+<ExerciseCard id="RLEARN-EXAM-ex4-retake" />

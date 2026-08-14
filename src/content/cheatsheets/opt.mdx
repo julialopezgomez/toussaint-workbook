@@ -1,0 +1,56 @@
+---
+id: opt
+title: "Optimization"
+relatedModules: ["OPT-01", "OPT-02", "OPT-03", "OPT-04", "OPT-05", "OPT-06"]
+---
+
+## Definitions
+
+- **Newton's method** (OPT-01): use the local quadratic (2nd-order Taylor) model of $f$ to jump straight to its minimum; needs the Hessian, converges fast near a minimum but can diverge or head uphill far from one, hence line search.
+- **Gauss-Newton / quasi-Newton** (OPT-02): for least-squares objectives $f=\phi^\top\phi$, approximate the Hessian as $J^\top J$ (cheap, always PSD); BFGS instead *builds up* a Hessian approximation from observed gradient differences, no second derivatives needed at all.
+- **KKT conditions** (OPT-03): the four conditions (stationarity, primal feasibility, dual feasibility, complementary slackness) that characterize a constrained local optimum, generalizing "$\nabla f=0$" to the constrained case.
+- **Convexity / interior-point methods** (OPT-04): a convex $f$ has no bad local minima (every local min is global); log-barrier/augmented-Lagrangian methods handle inequality constraints by making the objective blow up near the infeasible boundary, turning a constrained problem into a sequence of unconstrained ones.
+- **Stochastic optimization** (OPT-05): use a cheap, noisy gradient estimate (one data point/mini-batch) instead of the full gradient; convergence needs a *decreasing* step size schedule to average out the noise.
+- **Bayesian optimization / bandits** (OPT-06): model the unknown objective with a Gaussian Process (or a bandit's per-arm estimate), then use an acquisition function to decide where to query next, balancing exploring uncertain regions against exploiting known-good ones.
+
+## Core equations
+
+| Quantity | Formula | Module |
+|---|---|---|
+| Newton step | $x\leftarrow x-\nabla^2f(x)^{-1}\nabla f(x)$ | OPT-01 |
+| Armijo sufficient decrease | $f(x+\alpha\delta)\le f(x)+\varrho_\text{ls}\nabla f(x)^\top(\alpha\delta)$ | OPT-01 |
+| Gauss-Newton Hessian approx. | $\nabla^2f(x)\approx2J^\top J$ | OPT-02 |
+| BFGS secant equation | $\hat H\delta=y$ | OPT-02 |
+| Lagrangian | $L(x,\lambda,\kappa)=f(x)+\lambda^\top g(x)+\kappa^\top h(x)$ | OPT-03 |
+| KKT stationarity | $\nabla f(x)+\sum_i\lambda_i\nabla g_i(x)+\sum_j\kappa_j\nabla h_j(x)=0$ | OPT-03 |
+| Complementary slackness | $\lambda_ig_i(x)=0$ for all $i$ | OPT-03 |
+| Log-barrier objective | $B(x,\mu)=f(x)-\mu\sum_i\log(-g_i(x))$ | OPT-04 |
+| SQP subproblem | $\min_\delta f(x)+\nabla f(x)^\top\delta+\tfrac12\delta^\top\nabla^2f(x)\delta$ s.t. linearized constraints | OPT-04 |
+| SGD convergence bound | $\min_k\mathbb E\{\|\nabla f(w_k)\|^2\}\le\dfrac{f(w_0)-f^*}{\sum\alpha_k}+\dfrac{\sum\alpha_k^2}{\sum\alpha_k}\cdot\dfrac{L\sigma^2}{2}$ | OPT-05 |
+| GP posterior mean/variance | $\mu(x\mid D)=\kappa(x)^\top(K+\sigma_0^2I)^{-1}y$, $\ \sigma^2(x\mid D)=k(x,x)-\kappa(x)^\top(K+\sigma_0^2I)^{-1}\kappa(x)$ | OPT-06 |
+| Expected Improvement | $\alpha_\text{EI}(x;D)=\displaystyle\int_{-\infty}^{y^*}\mathcal N(y\mid\mu_D(x),\sigma_D^2(x))(y^*-y)\,dy$ | OPT-06 |
+
+## Assumptions & applicability
+
+- Newton's method needs $\nabla^2 f(x)$ to be positive definite to guarantee a *descent* direction; if it isn't (e.g. near a saddle), the raw Newton step can go uphill — line search / Levenberg-Marquardt damping ($\lambda$) is what keeps it safe.
+- Gauss-Newton's $J^\top J\approx\nabla^2f$ approximation is only good when the residuals $\phi_i(x)$ are individually small or the problem is close to linear; it drops the $\sum_i\phi_i(x)\nabla^2\phi_i(x)$ term entirely.
+- KKT conditions are only *sufficient* for optimality (not just necessary) when the problem is convex; for non-convex problems they characterize a stationary point, not necessarily a global (or even local) minimum.
+- SGD's convergence bound requires a **decreasing** step-size schedule ($\sum\alpha_k\to\infty$, $\sum\alpha_k^2<\infty$); a constant step size converges to a noise floor, not to $\nabla f=0$.
+- GP-based Bayesian optimization scales poorly with data size (the $(K+\sigma_0^2I)^{-1}$ inversion is $O(n^3)$) — fine for the few-hundred-query regime BayesOpt is usually used for, not for large datasets.
+
+## Common mistakes
+
+- Using plain Newton's method without a line search or damping far from the optimum — can diverge or oscillate.
+- Forgetting the $\ge0$ sign constraint on $\lambda_i$ (dual feasibility) — only inequality-constraint multipliers are sign-constrained, equality-constraint multipliers $\kappa_j$ are free.
+- Confusing the log-barrier's $\mu\to0$ limit (approaches the true constrained problem) with $\mu\to\infty$ — a larger $\mu$ makes the barrier *stronger*, pushing the solution further from the boundary, the opposite of what you want asymptotically.
+- Treating BayesOpt's acquisition function as the objective itself — $\alpha(x;D)$ says where to *query next*, not what the optimum value is; the actual best point found so far is a separate running quantity.
+
+## Decision rule
+
+- Smooth, unconstrained, cheap-to-evaluate Hessian available? Newton's method (OPT-01). Least-squares-shaped objective, Hessian expensive? Gauss-Newton or BFGS (OPT-02).
+- Constrained problem? Check convexity first: convex → interior-point/log-barrier (OPT-04) is reliable; non-convex → SQP or augmented Lagrangian, and don't expect a global-optimality guarantee.
+- Can't compute an exact gradient (noisy, stochastic, or black-box objective)? Cheap per-sample gradient available → SGD/Adam-family (OPT-05); no gradient at all → CMA-ES or Bayesian optimization (OPT-06), the latter especially when each evaluation is expensive (real experiments, hyperparameter search).
+
+## Full lesson
+
+[OPT-01 — Unconstrained Optimization: Line Search & Newton](/course/OPT/OPT-01) · [OPT-02 — Gauss-Newton, Quasi-Newton & Conjugate Gradient](/course/OPT/OPT-02) · [OPT-03 — Constrained Optimization: KKT & the Lagrangian](/course/OPT/OPT-03) · [OPT-04 — Convex Problems, LP/QP, SQP & Log Barriers](/course/OPT/OPT-04) · [OPT-05 — Stochastic & Blackbox Optimization](/course/OPT/OPT-05) · [OPT-06 — Bayesian Optimization & Bandits](/course/OPT/OPT-06) · [Milestone exam](/exam/OPT)

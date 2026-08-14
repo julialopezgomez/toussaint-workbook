@@ -1,0 +1,70 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "RLEARN-EXAM-ex1-dagger-vs-offline-conceptual",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains DAgger needs a live expert, unavailable in offline RL." },
+          { "points": 2, "description": "Correctly explains offline RL restricts the policy instead of expanding the data." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "DAgger's fix needs a live expert available during training. Offline RL has only a fixed dataset, no expert to query for new labels. So offline RL methods prevent the policy from exploiting the mismatch by staying conservatively close to dataset actions, restricting the policy rather than expanding the data."
+    },
+    {
+      "exerciseId": "RLEARN-EXAM-ex1-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains residual learning corrects a model using real-system data." },
+          { "points": 2, "description": "Correctly explains domain randomization trains across simulated variation for robustness instead." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Residual learning corrects a nominal model using data from one specific real system, converging to an accurate model of that system. Domain randomization trains across many simulated parameter variations without real data, betting on robustness rather than accuracy to any single system."
+    },
+    {
+      "exerciseId": "RLEARN-EXAM-ex2-airl-advantage-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": -3.8, "tolerance": 0.01 },
+      "fullSolution": "V*(0)=18, V*(1)=20 (via value iteration). f(1,a,0) = 0 + 0.9*18 - 20 = 16.2-20 = -3.8, matching A(1,a)=Q*(1,a)-V*(1)=-3.8 exactly."
+    },
+    {
+      "exerciseId": "RLEARN-EXAM-ex2-retake",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": -2.444, "tolerance": 0.02 },
+      "fullSolution": "V*(0)~=17.222 (via value iteration). f(0,b,0) = 1 + 0.8*17.222 - 17.222 ~= -2.444."
+    },
+    {
+      "exerciseId": "RLEARN-EXAM-ex3-reward-shaping-numeric",
+      "checkMode": "deterministic",
+      "deterministic": { "expected": 15, "tolerance": 0.01 },
+      "fullSolution": "V'(1) = V*(1) - Phi(1) = 20 - 5 = 15. Verified by running value iteration directly on the shaped reward; both value and optimal policy match."
+    },
+    {
+      "exerciseId": "RLEARN-EXAM-ex4-taxonomy-classification-transfer",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly classifies 'what' as state/observations -> plan (RLEARN-07)." },
+          { "points": 2, "description": "Correctly classifies 'how' as human demonstration (RLEARN-02)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "What: state/observations -> plan, RLEARN-07's territory (plan prediction). How: human demonstration, RLEARN-02's territory (imitation learning). This system sits at the intersection: a plan-prediction policy trained via imitation learning."
+    },
+    {
+      "exerciseId": "RLEARN-EXAM-ex4-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly classifies 'what' as state/observations -> control." },
+          { "points": 2, "description": "Correctly classifies 'how' as online/by-the-robot-itself, RLEARN-03's territory." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "What: observations -> control, a policy (RLEARN-02/03's territory). How: trial-and-error on the real robot, RLEARN-03's 'online, by the robot itself' category specifically. This sits at RLEARN-03 for both axes: a robotics RL policy trained online with reward shaping."
+    }
+  ]
+}

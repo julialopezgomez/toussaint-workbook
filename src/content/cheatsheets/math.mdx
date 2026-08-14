@@ -1,0 +1,57 @@
+---
+id: math
+title: "Math Foundations"
+relatedModules: ["MATH-00", "MATH-01", "MATH-02", "MATH-02B", "MATH-03", "MATH-03B", "MATH-04", "MATH-05"]
+---
+
+## Definitions
+
+- **Taylor expansion** (MATH-00): approximate $f$ near $x$ by matching derivatives with a polynomial; truncating after the linear term gives the tangent-line approximation, after the quadratic term the local bowl/saddle shape.
+- **Partial vs. total derivative** (MATH-01): $\partial f/\partial x$ holds other variables fixed; $df/dt$ accounts for every variable's own dependence on $t$ via the chain rule.
+- **Jacobian / gradient / Hessian** (MATH-02): the Jacobian is the first-derivative matrix of a vector-valued function; the gradient is the Jacobian of a scalar-valued function, transposed into a column vector; the Hessian is the second-derivative matrix, and equals the Jacobian of the gradient.
+- **Vector space / dual space** (MATH-03): a vector $v$ is basis-independent; its coordinates $[v]_B$ depend on the chosen basis $B$. The dual space $V^*$ is the space of linear functionals on $V$; $\nabla f(x)$ naturally lives there, not in $V$ itself.
+- **Metric tensor** (MATH-03B): $G$ (or $g_{ij}$) defines the inner product $\langle v,w\rangle = v^\top Gw$ in a given basis; $G=I$ is the Euclidean special case.
+- **SVD / eigendecomposition** (MATH-04): every matrix decomposes into $k=\text{rank}(A)$ rank-1 "project–scale–unproject" pieces; for symmetric matrices, the SVD and eigendecomposition coincide.
+- **Covariant gradient** (MATH-05): the metric-corrected steepest-descent direction, needed because $\nabla f(x)$ is a covector (dual-space object) but a descent direction must be an actual vector.
+
+## Core equations
+
+| Quantity | Formula | Module |
+|---|---|---|
+| 2nd-order Taylor (1D) | $f(x+\delta)\approx f(x)+f'(x)\delta+\tfrac12f''(x)\delta^2$ | MATH-00 |
+| Multivariate chain rule | $\dfrac{df}{dt}=\sum_i\dfrac{\partial f}{\partial x_i}\dfrac{dx_i}{dt}$ | MATH-01 |
+| Gradient / Jacobian relation | $\nabla f(x) = \left(\dfrac{\partial f}{\partial x}\right)^\top$ | MATH-02 |
+| 2nd-order Taylor (vector) | $f(x_0+h)\approx f(x_0)+\nabla f(x_0)^\top h+\tfrac12h^\top H(x_0)h$ | MATH-02 |
+| Quadratic-form gradient | $\nabla_w(w^\top Aw) = (A+A^\top)w$ (=$2Aw$ if $A$ symmetric) | MATH-02B |
+| Ridge-regression normal equations | $\beta^*=(X^\top X+\lambda I)^{-1}X^\top y$ | MATH-02B |
+| Coordinate change | $[v]_{B'} = P_{B\to B'}[v]_B$ (change-of-basis matrix) | MATH-03 |
+| Dual-basis pairing | $\hat e_i(e_j) = [i=j]$ | MATH-03 |
+| Inner product under a metric | $\langle v,w\rangle = v^\top Gw$ | MATH-03B |
+| SVD | $A = U S V^\top$, $\sigma_i\ge0$ | MATH-04 |
+| Symmetric-matrix SVD/eigen link | $A=V\Lambda V^\top$ (singular values = $\lvert$eigenvalues$\rvert$) | MATH-04 |
+| Covariant gradient | $d^* = -G^{-1}\nabla f(x)$ | MATH-05 |
+
+## Assumptions & applicability
+
+- Taylor expansions are only valid **locally**: the approximation error grows with $\|\delta\|$ and with how non-polynomial $f$ actually is: don't trust a 2nd-order Taylor expansion far from the expansion point.
+- The Hessian $H=J_{\nabla f}$ identity relies on **mixed partials commuting** ($\partial^2f/\partial x_i\partial x_j=\partial^2f/\partial x_j\partial x_i$), which holds for any twice-continuously-differentiable $f$ — true for essentially everything in this course, but not a universal law.
+- $\nabla f(x)$ is a **covector**: treating it as an ordinary vector (i.e. using $G=I$ implicitly) is only correct under the Euclidean metric. Under any other metric, use the covariant gradient $-G^{-1}\nabla f(x)$ (MATH-05).
+- Eigendecomposition and SVD **coincide only for symmetric matrices**; for a general (non-symmetric) matrix, always use the SVD, not the eigendecomposition, since eigenvectors of a non-symmetric matrix aren't generally orthogonal and eigenvalues can be complex.
+
+## Common mistakes
+
+- Writing $\nabla f(x)$ as a row vector out of habit from the Jacobian definition: by this course's convention, the gradient is a **column** vector, the transpose of the (row-vector) Jacobian of a scalar function.
+- Forgetting the factor of $\tfrac12$ in the quadratic Taylor term, or in $\nabla_w(w^\top Aw)=(A+A^\top)w$ when $A$ isn't symmetric (the $A^\top$ term is easy to drop).
+- Confusing a vector's **coordinates** (basis-dependent, a tuple of numbers) with the vector **itself** (basis-independent, MATH-03) — this is exactly why $\nabla f(x)$'s covector-vs-vector status matters at all.
+- Assuming a matrix's eigenvalues are automatically its singular values: only true when the matrix is symmetric (or more generally normal); otherwise compute the SVD directly.
+- Using plain gradient descent ($x\leftarrow x-\alpha\nabla f(x)$) under a non-Euclidean metric without correcting via $G^{-1}$ — silently uses the wrong descent direction (see MATH-EXAM's Part 1).
+
+## Decision rule
+
+- Need the fastest local decrease in $f$? Check whether your problem has a natural non-Euclidean metric (e.g. via a reparametrization or physical unit mismatch across coordinates); if so, use $-G^{-1}\nabla f(x)$, not $-\nabla f(x)$.
+- Need to solve a least-squares-shaped objective (with or without a quadratic regularizer)? Expand it, apply $\nabla_w(a^\top w)=a$ and $\nabla_w(w^\top Aw)=(A+A^\top)w$ term by term, set the gradient to zero, solve the resulting linear system — don't re-derive from scratch each time.
+- Given a matrix and unsure whether to eigendecompose or SVD it? If it's symmetric, either works (they coincide); otherwise, always SVD.
+
+## Full lesson
+
+[MATH-00 — Taylor Expansion From Scratch](/course/MATH/MATH-00) · [MATH-01 — Functions, Derivatives & the Chain Rule](/course/MATH/MATH-01) · [MATH-02 — Gradients, Jacobians, Hessians & Taylor Expansion](/course/MATH/MATH-02) · [MATH-02B — Matrix Calculus](/course/MATH/MATH-02B) · [MATH-03 — Vector Spaces, Dual Spaces & Coordinate Transformations](/course/MATH/MATH-03) · [MATH-03B — Scalar Products, Metric Tensors & Orthonormal Bases](/course/MATH/MATH-03B) · [MATH-04 — SVD, Eigendecomposition & the Power Method](/course/MATH/MATH-04) · [MATH-05 — Covariant Gradient & Steepest Descent](/course/MATH/MATH-05) · [Milestone exam](/exam/MATH)

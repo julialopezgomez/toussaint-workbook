@@ -1,0 +1,100 @@
+{
+  "solutions": [
+    {
+      "exerciseId": "CUMULATIVE-FINAL-ex1-model-knowledge-spectrum",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly orders LQR > value iteration > model-free by decreasing prior knowledge." },
+          { "points": 2, "description": "Correctly explains what's gained/lost at each step (applicability vs. sample efficiency/exactness)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "LQR: full model (A,B,Q,R) known, solved in closed form, zero data needed. Value iteration: P,R known exactly but not necessarily linear/quadratic, iterates but still needs no real-world interaction. Model-free: nothing assumed known, estimated from data. Gained moving down the spectrum: applicability to unknown/complex systems. Lost: sample efficiency and exactness guarantees."
+    },
+    {
+      "exerciseId": "CUMULATIVE-FINAL-ex1-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies the mismatched-metric problem from mixed units." },
+          { "points": 2, "description": "Correctly states the covariant-gradient fix." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Mixed units mean G=I (implicit in plain gradient descent) doesn't reflect the system's true geometry; the gradient moves disproportionately toward whichever coordinate has larger numeric magnitude, not the physically best direction. Fix: the covariant gradient -G^-1 grad U(q), with G chosen to reflect actual physical cost per coordinate."
+    },
+    {
+      "exerciseId": "CUMULATIVE-FINAL-ex2-combinatorial-vs-convex",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies SYM-03's blowup as discrete/combinatorial enumeration." },
+          { "points": 2, "description": "Correctly identifies CAP-01's convex decomposition as a fundamentally different (continuous, non-enumerative) approach." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "SYM-03's blowup comes from enumerating discrete ground-literal combinations, exponential in object count. CAP-01's convex decomposition represents the continuous space directly as a union of regions, not via discrete state enumeration; region count depends on geometric complexity, not combinatorially on object count. Two genuinely different fixes for compact representation."
+    },
+    {
+      "exerciseId": "CUMULATIVE-FINAL-ex2-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly explains convexity applies only within a fixed discrete choice." },
+          { "points": 2, "description": "Correctly explains the discrete search itself isn't covered by convexity." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "OPT-04's guarantee covers the continuous QP subproblem for a FIXED binary-variable choice. The discrete search over z_ij/grasp count is not covered by convexity at all. The MIQP is easy per discrete choice, hard across discrete choices, needing branch-and-bound on top of convex subproblem solving."
+    },
+    {
+      "exerciseId": "CUMULATIVE-FINAL-ex3-cap-dependencies-reflection",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies at least 3 blocks with specific reused concepts." },
+          { "points": 2, "description": "Correctly identifies a 4th block/concept." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "PLAN: CS/CS_free = X/X_fea notation. DYN: MIQP objective's quadratic path-length cost, same flavor as DYN-04's trajectory optimization. RLEARN: structural parallel table connecting the MIQP to RLEARN-07's TAMP/LGP skeleton/trajectory split. OPT: the MIQP formulation itself (constrained optimization, convex subproblems). SYM: the discrete/symbolic-vs-continuous framing in the combinatorial-explosion comparison."
+    },
+    {
+      "exerciseId": "CUMULATIVE-FINAL-ex3-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly traces the theme through at least 2 earlier modules (PLAN-02, SYM-03)." },
+          { "points": 2, "description": "Correctly connects to CAP-01's own coverage-quality bottleneck." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "PLAN-02: PRM's probabilistic-completeness bound goes vacuous for narrow passages. SYM-03: deterministic symbolic rules fail to represent noisy real action outcomes. CAP-01: coverage of CS_free, not dimensionality, is the binding constraint; low coverage can mean no plan at all even when a true solution exists. Same underlying theme (finite representation missing the truth), different mechanisms."
+    },
+    {
+      "exerciseId": "CUMULATIVE-FINAL-ex4-utility-of-shortest-path",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies squared path length as a convenience-driven, not task-derived, utility." },
+          { "points": 2, "description": "Gives a concrete plausible gap (energy, torque limits, collision margin, robustness)." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "Squared path length keeps the QP convex (OPT-04) but isn't obviously what a real manipulation task cares about. Concrete gap: it says nothing about energy consumption, joint-torque limits, collision margin, or robustness to model error. 'Easy to optimize' and 'reflects what you actually want' are different claims, easy to conflate."
+    },
+    {
+      "exerciseId": "CUMULATIVE-FINAL-ex4-retake",
+      "checkMode": "rubric",
+      "rubric": {
+        "criteria": [
+          { "points": 2, "description": "Correctly identifies CAP-01's pipeline commits early to one grasp-count/sequence." },
+          { "points": 2, "description": "Correctly draws the structural parallel to Laplace approximation's single-mode limitation." }
+        ],
+        "commonErrors": []
+      },
+      "fullSolution": "CAP-01 takes the first feasible grasp count and its shortest sequence, without exploring whether more grasps might yield a better overall trajectory -- structurally the same as Laplace approximation committing to one mode. Both are efficient because they commit early, and that same commitment is what makes them miss globally better alternatives -- a recurring tradeoff across this whole curriculum, not a coincidence."
+    }
+  ]
+}

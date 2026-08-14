@@ -1,0 +1,40 @@
+---
+id: RL-EXAM
+block: RL
+title: "RL Foundations Exam"
+coversModules: ["RL-01", "RL-02", "RL-03", "RL-04", "RL-05", "RL-06", "RL-07"]
+masteryThreshold: 0.8
+remediationMap:
+  - { exerciseId: "RL-EXAM-ex1-td-convergence-conceptual", moduleIds: ["RL-02", "RL-03"] }
+  - { exerciseId: "RL-EXAM-ex1-retake", moduleIds: ["RL-05", "RL-06"] }
+  - { exerciseId: "RL-EXAM-ex2-policy-gradient-numeric", moduleIds: ["RL-04"] }
+  - { exerciseId: "RL-EXAM-ex2-retake", moduleIds: ["RL-04"] }
+  - { exerciseId: "RL-EXAM-ex3-ucb1-tree-numeric", moduleIds: ["RL-06"] }
+  - { exerciseId: "RL-EXAM-ex3-retake", moduleIds: ["RL-06"] }
+  - { exerciseId: "RL-EXAM-ex4-risk-sensitive-conceptual", moduleIds: ["RL-01", "RL-07"] }
+  - { exerciseId: "RL-EXAM-ex4-retake", moduleIds: ["RL-01", "RL-07"] }
+---
+
+import ExerciseCard from '../../components/exercise/ExerciseCard.astro';
+
+Cumulative, like the other exams: every question combines at least two RL modules, or extends a taught formula to a case not directly worked out in the modules themselves.
+
+## Part 1 — Convergence proofs and exploration strategies
+
+<ExerciseCard id="RL-EXAM-ex1-td-convergence-conceptual" />
+<ExerciseCard id="RL-EXAM-ex1-retake" />
+
+## Part 2 — Policy gradient, worked from scratch
+
+<ExerciseCard id="RL-EXAM-ex2-policy-gradient-numeric" />
+<ExerciseCard id="RL-EXAM-ex2-retake" />
+
+## Part 3 — UCT's tree policy
+
+<ExerciseCard id="RL-EXAM-ex3-ucb1-tree-numeric" />
+<ExerciseCard id="RL-EXAM-ex3-retake" />
+
+## Part 4 — Transfer: risk-sensitive decision-making
+
+<ExerciseCard id="RL-EXAM-ex4-risk-sensitive-conceptual" />
+<ExerciseCard id="RL-EXAM-ex4-retake" />

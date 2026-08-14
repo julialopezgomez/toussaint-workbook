@@ -1,0 +1,40 @@
+---
+id: DYN-EXAM
+block: DYN
+title: "Dynamics & Control Exam"
+coversModules: ["ODE-01", "ODE-02", "ODE-03", "KIN-01", "KIN-02", "KIN-03", "DYN-01", "DYN-02", "DYN-03", "DYN-04", "DYN-05", "DYN-06", "DYN-07"]
+masteryThreshold: 0.8
+remediationMap:
+  - { exerciseId: "DYN-EXAM-ex1-lqr-lyapunov-conceptual", moduleIds: ["DYN-04", "DYN-06"] }
+  - { exerciseId: "DYN-EXAM-ex1-retake", moduleIds: ["DYN-04", "DYN-06"] }
+  - { exerciseId: "DYN-EXAM-ex2-pendulum-pd-stability", moduleIds: ["DYN-01", "DYN-02", "DYN-06"] }
+  - { exerciseId: "DYN-EXAM-ex2-retake", moduleIds: ["DYN-01", "DYN-02", "DYN-06"] }
+  - { exerciseId: "DYN-EXAM-ex3-controllability-numeric", moduleIds: ["DYN-06"] }
+  - { exerciseId: "DYN-EXAM-ex3-retake", moduleIds: ["DYN-06"] }
+  - { exerciseId: "DYN-EXAM-ex4-feedback-linearization-transfer", moduleIds: ["DYN-02", "DYN-03", "DYN-06"] }
+  - { exerciseId: "DYN-EXAM-ex4-retake", moduleIds: ["DYN-02", "DYN-03", "DYN-06"] }
+---
+
+import ExerciseCard from '../../components/exercise/ExerciseCard.astro';
+
+Covers ODE, KIN, and DYN together, per the curriculum's own milestone grouping (both shorter blocks feed directly into DYN). Cumulative, like the other exams: every question combines at least two modules, or extends a taught formula to a case not directly worked out in any single module.
+
+## Part 1 — LQR and Lyapunov stability
+
+<ExerciseCard id="DYN-EXAM-ex1-lqr-lyapunov-conceptual" />
+<ExerciseCard id="DYN-EXAM-ex1-retake" />
+
+## Part 2 — A nonlinear system under PD control
+
+<ExerciseCard id="DYN-EXAM-ex2-pendulum-pd-stability" />
+<ExerciseCard id="DYN-EXAM-ex2-retake" />
+
+## Part 3 — Controllability
+
+<ExerciseCard id="DYN-EXAM-ex3-controllability-numeric" />
+<ExerciseCard id="DYN-EXAM-ex3-retake" />
+
+## Part 4 — Transfer: feedback linearization's error dynamics
+
+<ExerciseCard id="DYN-EXAM-ex4-feedback-linearization-transfer" />
+<ExerciseCard id="DYN-EXAM-ex4-retake" />

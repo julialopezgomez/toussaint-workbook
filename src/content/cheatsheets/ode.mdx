@@ -1,0 +1,45 @@
+---
+id: ode
+title: "ODEs & Dynamical Systems Primer"
+relatedModules: ["ODE-01", "ODE-02", "ODE-03"]
+---
+
+## Definitions
+
+- **First-order ODE / separation of variables** (ODE-01): $\dot x=f(t,x)$ describes a rate of change; when $f$ factors as $f(t,x)=f(t)g(x)$, the equation separates into two ordinary integrals.
+- **Linear systems of ODEs** (ODE-02): $\dot x=Ax$'s solution is a sum of modes $c_ie^{\lambda_it}v_i$, one per eigenpair of $A$; the sign of $\text{Re}(\lambda_i)$ determines whether each mode grows, decays, or oscillates.
+- **Numerical integration** (ODE-03): when $\dot x=f(t,x)$ has no closed form, step forward in small increments $h$; Euler uses one slope estimate per step, RK4 averages four for far better accuracy at the same step size.
+
+## Core equations
+
+| Quantity | Formula | Module |
+|---|---|---|
+| Separable-ODE solution | $\dfrac{dx}{g(x)}=f(t)\,dt\ \Rightarrow\ \displaystyle\int\dfrac{dx}{g(x)}=\int f(t)\,dt$ | ODE-01 |
+| Exponential decay | $\dot x=-kx\ \Rightarrow\ x(t)=x_0e^{-kt}$ | ODE-01 |
+| Linear-system general solution | $\dot x=Ax\ \Rightarrow\ x(t)=\sum_ic_ie^{\lambda_it}v_i$ | ODE-02 |
+| Stability condition | asymptotically stable $\iff\forall i:\operatorname{Re}(\lambda_i)<0$ | ODE-02 |
+| Euler step | $x_{k+1}=x_k+h\,f(t_k,x_k)$ | ODE-03 |
+| RK4 step | $x_{k+1}=x_k+\tfrac h6(k_1+2k_2+2k_3+k_4)$ | ODE-03 |
+
+## Assumptions & applicability
+
+- Separation of variables only works when $f(t,x)$ actually *factors* into a function of $t$ times a function of $x$; most ODEs don't have this structure, and need numerical methods (ODE-03) or other special-case techniques (integrating factors for linear 1st-order ODEs).
+- The $\dot x=Ax$ closed form only holds for **linear, time-invariant** systems; nonlinear dynamics (the vast majority of real robot dynamics) don't have this closed form, but *linearizing* around an equilibrium gives a local $\dot x\approx A(x-x^*)$ approximation whose stability this machinery still applies to (this is exactly DYN-06's territory).
+- Euler's method has $O(h)$ local error per step (accumulating to $O(h)$ global error); RK4 has $O(h^5)$ local error ($O(h^4)$ global) at 4x the per-step cost, almost always worth it unless $f$ is extremely cheap to evaluate.
+- Both Euler and RK4 can go numerically unstable for **stiff** systems (widely separated time scales) if $h$ isn't small enough relative to the fastest mode, even though the true solution itself is stable.
+
+## Common mistakes
+
+- Forgetting the constant of integration when solving a separable ODE by hand, then failing to use the initial condition to pin it down.
+- Reading off stability from the eigenvalues' *magnitude* instead of their *real part* — a large negative real part decays fast, a large *positive* imaginary part with negative real part still decays, just while oscillating.
+- Using Euler's method with too large a step size and mistaking the resulting numerical blow-up for the system itself being unstable.
+
+## Decision rule
+
+- Can you separate variables, or is it a linear-with-constant-coefficients system? Solve in closed form (ODE-01/02) — exact, and gives direct insight into growth/decay/oscillation via eigenvalues.
+- Nonlinear or no closed form? Numerically integrate: Euler if you just need a rough trajectory and per-step cost matters a lot, RK4 by default otherwise (the practical standard for this course's needs).
+- Need to check whether an equilibrium is stable? Linearize around it, then check the Jacobian's eigenvalues' real parts (ODE-02 → DYN-06's Lyapunov/controllability treatment for the nonlinear/control-theoretic generalization).
+
+## Full lesson
+
+[ODE-01 — First-Order ODEs](/course/ODE/ODE-01) · [ODE-02 — Linear Systems of ODEs, Eigenvalues & Stability](/course/ODE/ODE-02) · [ODE-03 — Numerical Integration: Euler & RK4](/course/ODE/ODE-03)

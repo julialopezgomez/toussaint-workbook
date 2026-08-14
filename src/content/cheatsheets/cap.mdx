@@ -1,0 +1,43 @@
+---
+id: cap
+title: "Capstone: Research Bridge"
+relatedModules: ["CAP-01"]
+---
+
+## Definitions
+
+- **Composite configuration space**: $CS=C_\text{rob}\times C_\text{obj}$, the manipulation-planning specialization of PLAN-01's generic $\mathcal X$; $CS_\text{free}$ is its collision-free subset (= PLAN-01's $\mathcal X_\text{fea}$/$C_\text{free}$).
+- **Transit / transfer paths**: transit moves the robot alone (object at rest, a fixed placement); transfer moves the robot and grasped object together, rigidly.
+- **Grasp / placement spaces**: $CG$ (object grasped) and $CP$ (object placed); their intersection $CG\cap CP$ is where the planner can switch between transit and transfer.
+- **Big-M constraint**: a standard MIQP trick for "either this linear inequality holds, or ignore it," used to encode convex-region membership with a binary indicator.
+
+## Core equations
+
+| Quantity | Formula |
+|---|---|
+| Composite configuration space | $CS=C_\text{rob}\times C_\text{obj}$ |
+| Convex decomposition | $CS_\text{free}\approx\bigcup_{j=1}^JP_j$ |
+| Feasible grasp/placement regions | $CG_\text{free}=\bigcup_j(CG\cap P_j)$, $\ CP_\text{free}=\bigcup_j(CP\cap P_j)$ |
+| Big-M region-membership | $A_j\mathbf x_i\le\mathbf b_j+M(1-z_{ij})$ |
+| MIQP objective | $\min\sum_i\|\mathbf x_{i+1}-\mathbf x_i\|_2^2$ |
+| Weighted least squares (transfer target) | $\mathbf w^*=(X^\top WX)^{-1}X^\top W\mathbf y$ |
+
+## Assumptions & applicability
+
+- The MIQP/GCS pipeline is only as reliable as the convex decomposition's *coverage* of $CS_\text{free}$: small gaps near grasp/placement boundaries can silently remove the regions a valid solution needs, even when the true feasible space contains one — the pipeline's main practical limitation.
+- The MIQP-vs-LGP structural parallel (discrete skeleton ↔ grasp-release sequence, $\bar\phi/\hat\phi$ ↔ manipulation/connectivity constraints) is real but not exact: the MIQP searches a much larger, more geometrically explicit discrete space than RLEARN-07's typical hand-defined symbolic skeleton.
+- The big-M constraint needs $M$ large enough that the "switched off" case ($z=0$) is genuinely vacuous across the entire feasible domain — too small an $M$ silently reintroduces the constraint even when it shouldn't apply.
+
+## Common mistakes
+
+- Treating this module's report-derived notation ($CS$, $CG$, $CP$) as unrelated to PLAN-01's ($\mathcal X$, $\mathcal X_\text{fea}$) instead of recognizing they denote the same objects, just specialized to a composite robot+object system.
+- Assuming higher requested coverage always costs proportionally more compute — the experiments show trajectory-generation time depends on the *number, size, and shape* of the resulting regions, not just the coverage target or dimensionality alone.
+
+## Decision rule
+
+- Need a manipulation plan with explicit optimality/certification guarantees, and can afford a convex decomposition of the workspace? This pipeline (MIQP + GCS) over sampling-based planning.
+- Reading your own report's notation cold? Translate $CS/CG/CP$ into PLAN-01's $\mathcal X/\mathcal X_\text{fea}$ first — same objects, different names.
+
+## Full lesson
+
+[CAP-01 — Research Bridge: Convex-Decomposition Manipulation Planning](/course/CAP/CAP-01)

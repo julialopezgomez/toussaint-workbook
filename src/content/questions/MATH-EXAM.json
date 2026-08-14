@@ -1,0 +1,145 @@
+{
+  "moduleId": "MATH-EXAM",
+  "exercises": [
+    {
+      "id": "MATH-EXAM-ex1-covariant-gradient-conceptual",
+      "objective": "Explain why the covariant gradient, not the plain gradient, is the correct steepest-descent direction under a general metric.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Explain why $-G^{-1}\\nabla f(x)$ (not $-\\nabla f(x)$ directly) is the correct steepest-descent direction under a metric $G\\neq I$. In your answer, state which of $\\nabla f(x)$ and the descent direction is a vector and which is a covector (MATH-03B), and why that distinction matters here.",
+      "hints": [
+        "MATH-03B established that $\\nabla f(x)$ is naturally a covector (a dual-space object): it eats a displacement vector and returns a scalar rate of change, $\\nabla f(x)\\cdot dx$.",
+        "A descent *direction*, on the other hand, must be an actual vector you can add to $x$ to move it, living in the primal space, not the dual space. Converting the covector $\\nabla f(x)$ into a vector under a non-Euclidean metric $G$ requires 'raising the index' with the inverse metric.",
+        "This is exactly MATH-05's derivation: minimizing $\\nabla f(x)^\\top d$ subject to $d^\\top Gd=1$ gives $d\\propto-G^{-1}\\nabla f(x)$. When $G=I$, the vector/covector distinction collapses numerically, which is why plain gradient descent 'just works' in the Euclidean case without anyone needing to think about it."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-EXAM-ex1-retake",
+      "objective": "Correct a misconception about gradient descent being metric-free.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [
+        "MATH-EXAM-ex1-covariant-gradient-conceptual"
+      ],
+      "answerType": "short-text",
+      "prompt": "A colleague claims: 'Gradient descent ($x\\leftarrow x-\\alpha\\nabla f(x)$) is metric-free, so it's always the fastest local descent direction, no matter how you parametrize the problem.' Identify what's wrong with this claim, using the vector/covector distinction from MATH-03B and MATH-05's covariant gradient.",
+      "hints": [
+        "The claim implicitly assumes $G=I$ (the Euclidean metric) is the 'natural' choice, but the metric is a modeling choice, not a mathematical necessity; different parametrizations correspond to different $G$.",
+        "Under a general metric $G\\neq I$, using $-\\nabla f(x)$ directly doesn't just use a 'different' descent direction, it uses one that isn't actually steepest under $G$ at all.",
+        "MATH-05's derivation shows the true steepest direction under $G$ is $-G^{-1}\\nabla f(x)$. So 'fastest local descent direction' is only well-defined once you fix a metric; plain gradient descent silently assumes $G=I$, and stops being fastest under any other metric unless corrected via the covariant gradient."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "MATH-EXAM-ex1-covariant-gradient-conceptual"
+    },
+    {
+      "id": "MATH-EXAM-ex2-taylor-hessian-derivation",
+      "objective": "Derive the second-order multivariate Taylor expansion and show the Hessian is the Jacobian of the gradient.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Starting from the 1D Taylor series (MATH-00) and the directional derivative (MATH-01), derive the second-order multivariate Taylor expansion of $f(\\mathbf x)$ around $\\mathbf x_0$ in vector/matrix form, and show explicitly that the Hessian $H$ equals the Jacobian of $\\nabla f$. Verify your general formula against $f(x,y)=x^2y+y^3$ at $\\mathbf x_0=(1.5,-0.7)$: compute $\\nabla f(\\mathbf x_0)$ and $H(\\mathbf x_0)$.",
+      "hints": [
+        "Define $g(t)=f(\\mathbf x_0+t\\mathbf d)$ for a fixed direction $\\mathbf d$, and apply the 1D Taylor series to $g$ around $t=0$: $g(t)\\approx g(0)+g'(0)t+\\tfrac12g''(0)t^2$.",
+        "$g'(0)=\\nabla f(\\mathbf x_0)\\cdot\\mathbf d$ (the directional derivative). For $g''(0)$: since $\\nabla f:\\mathbb R^n\\to\\mathbb R^n$ is itself a vector-valued function, its Jacobian has entries $\\partial(\\nabla f)_i/\\partial x_j=\\partial^2f/\\partial x_i\\partial x_j$, which is exactly the Hessian's $(i,j)$ entry (mixed partials commute for smooth $f$) — so $H=J_{\\nabla f}$, and $g''(0)=\\mathbf d^\\top H(\\mathbf x_0)\\mathbf d$.",
+        "Setting $t=1$, $\\mathbf h=\\mathbf d$: $f(\\mathbf x_0+\\mathbf h)\\approx f(\\mathbf x_0)+\\nabla f(\\mathbf x_0)^\\top\\mathbf h+\\tfrac12\\mathbf h^\\top H(\\mathbf x_0)\\mathbf h$. For the numeric check: $\\nabla f=(2xy,\\,x^2+3y^2)$, $H=\\begin{pmatrix}2y&2x\\\\2x&6y\\end{pmatrix}$; at $(1.5,-0.7)$, $\\nabla f=(-2.1,3.72)$, $H=\\begin{pmatrix}-1.4&3\\\\3&-4.2\\end{pmatrix}$."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-EXAM-ex2-retake",
+      "objective": "Derive the first-order Taylor expansion of a vector-valued function and identify the Jacobian as the linear term.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": [
+        "MATH-EXAM-ex2-taylor-hessian-derivation"
+      ],
+      "answerType": "derivation",
+      "prompt": "Derive the first-order Taylor expansion of a vector-valued function $\\mathbf f:\\mathbb R^n\\to\\mathbb R^m$ around $\\mathbf x_0$, and show the linear term is exactly the Jacobian $J$ times the displacement. Verify for $\\mathbf f(x,y)=(x^2+y,\\,xy)$ at $\\mathbf x_0=(1.3,-2.1)$: compute $J(\\mathbf x_0)$ and check $\\mathbf f(\\mathbf x_0+d\\mathbf x)\\approx\\mathbf f(\\mathbf x_0)+J(\\mathbf x_0)d\\mathbf x$ for $d\\mathbf x=(0.01,-0.02)$.",
+      "hints": [
+        "Apply the scalar first-order Taylor expansion to each component separately: $f_i(\\mathbf x_0+\\mathbf h)\\approx f_i(\\mathbf x_0)+\\nabla f_i(\\mathbf x_0)\\cdot\\mathbf h$.",
+        "Stack all $m$ components into a vector equation: row $i$ of the resulting linear map is exactly $\\nabla f_i(\\mathbf x_0)^\\top$, which is by definition row $i$ of the Jacobian $J(\\mathbf x_0)$.",
+        "So $\\mathbf f(\\mathbf x_0+\\mathbf h)\\approx\\mathbf f(\\mathbf x_0)+J(\\mathbf x_0)\\mathbf h$. For the numeric check: $J(x,y)=\\begin{pmatrix}2x&1\\\\y&x\\end{pmatrix}$, so $J(1.3,-2.1)=\\begin{pmatrix}2.6&1\\\\-2.1&1.3\\end{pmatrix}$; $\\mathbf f(\\mathbf x_0)=(-0.41,-2.73)$, and $J(\\mathbf x_0)\\,d\\mathbf x=(0.006,-0.047)$, giving the Taylor approximation $(-0.404,-2.777)$, matching the true value $(-0.4039,-2.7772)$ to 3 decimal places."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "MATH-EXAM-ex2-taylor-hessian-derivation"
+    },
+    {
+      "id": "MATH-EXAM-ex3-rank-deficient-svd",
+      "objective": "Compute an eigendecomposition and use it to find the Frobenius-norm error of the best rank-1 approximation.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "numeric",
+      "prompt": "Given the symmetric matrix $A=\\begin{pmatrix}4&2\\\\2&1\\end{pmatrix}$, compute its eigenvalues, and use them to find the Frobenius-norm approximation error of $A$'s best rank-1 approximation (i.e. how much is lost by dropping the smaller-magnitude eigenvalue's rank-1 term). Enter a number.",
+      "hints": [
+        "For a symmetric matrix, eigendecomposition and SVD coincide up to sign (MATH-04). Find eigenvalues from $\\text{tr}(A)=5$, $\\det(A)=4\\cdot1-2\\cdot2=0$: the characteristic equation is $\\lambda^2-5\\lambda=0$.",
+        "This gives $\\lambda=0$ and $\\lambda=5$. Since one eigenvalue is exactly $0$, $A$ is rank-deficient (rank 1, not 2).",
+        "The best rank-1 approximation keeps only the largest-magnitude eigenvalue's term; the dropped term has eigenvalue $0$, so the approximation error is $0$ — $A$ was already rank 1, the rank-1 approximation is lossless."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-EXAM-ex3-retake",
+      "objective": "Repeat the rank-1-approximation-error computation for a full-rank matrix.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": [
+        "MATH-EXAM-ex3-rank-deficient-svd"
+      ],
+      "answerType": "numeric",
+      "prompt": "Given the symmetric matrix $A=\\begin{pmatrix}5&4\\\\4&5\\end{pmatrix}$, compute its eigenvalues, and find the Frobenius-norm approximation error of $A$'s best rank-1 approximation. Enter a number.",
+      "hints": [
+        "$\\text{tr}(A)=10$, $\\det(A)=25-16=9$: characteristic equation $\\lambda^2-10\\lambda+9=0$.",
+        "Solving: $\\lambda=\\frac{10\\pm\\sqrt{100-36}}{2}=\\frac{10\\pm8}{2}$, giving $\\lambda=9$ and $\\lambda=1$. Both positive, so $A$ is full rank (rank 2) this time, unlike the previous exercise.",
+        "The dropped term (from the smaller eigenvalue) has magnitude $1$; for a rank-1 term $\\sigma vv^\\top$ the Frobenius norm is exactly $\\sigma$, so the approximation error is $1$ — this time the rank-1 approximation is lossy, contrasting with the previous exercise's lossless case."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "MATH-EXAM-ex3-rank-deficient-svd"
+    },
+    {
+      "id": "MATH-EXAM-ex4-weighted-least-squares-transfer",
+      "objective": "Apply MATH-02B's matrix-calculus identities to a weighted least-squares objective not covered in the module itself.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 18,
+      "prerequisites": [],
+      "answerType": "derivation",
+      "prompt": "Derive the closed-form minimizer of the weighted least-squares objective $L(\\mathbf w)=(\\mathbf y-X\\mathbf w)^\\top W(\\mathbf y-X\\mathbf w)$ for a symmetric positive-definite weight matrix $W$, by setting $\\nabla_w L=0$. This is a genuinely new target, not the plain/ridge least-squares case from MATH-02B itself: apply the same identities to the extra $W$ term.",
+      "hints": [
+        "Expand $L(\\mathbf w)=\\mathbf y^\\top W\\mathbf y-2\\mathbf w^\\top X^\\top W\\mathbf y+\\mathbf w^\\top X^\\top WX\\mathbf w$ (using $W$ symmetric to combine the cross terms), then apply MATH-02B's identities: $\\nabla_w(\\mathbf a^\\top\\mathbf w)=\\mathbf a$, and $\\nabla_w(\\mathbf w^\\top A\\mathbf w)=(A+A^\\top)\\mathbf w=2A\\mathbf w$ for symmetric $A$.",
+        "Differentiating term by term: $\\nabla_wL=-2X^\\top W\\mathbf y+2X^\\top WX\\mathbf w$ (since $X^\\top WX$ is symmetric whenever $W$ is symmetric).",
+        "Setting $\\nabla_wL=0$: $X^\\top WX\\mathbf w=X^\\top W\\mathbf y$, so $\\mathbf w^*=(X^\\top WX)^{-1}X^\\top W\\mathbf y$, generalizing MATH-02B's ordinary least squares (recovered exactly when $W=I$)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "MATH-EXAM-ex4-retake",
+      "objective": "Generalize MATH-02B's ridge regression to an arbitrary PSD regularizer.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [
+        "MATH-EXAM-ex4-weighted-least-squares-transfer"
+      ],
+      "answerType": "derivation",
+      "prompt": "Derive the closed-form minimizer of $L(\\mathbf w)=\\|\\mathbf y-X\\mathbf w\\|^2+\\mathbf w^\\top M\\mathbf w$ for a general symmetric positive-semidefinite matrix $M$ (not just $\\lambda I$ as in MATH-02B's ridge-regression derivation). What does $M=\\lambda I$ recover?",
+      "hints": [
+        "Expand and differentiate exactly as in MATH-02B's ridge derivation, but keep $M$ general instead of substituting $\\lambda I$: $\\nabla_wL=-2X^\\top(\\mathbf y-X\\mathbf w)+2M\\mathbf w$.",
+        "Setting $\\nabla_wL=0$: $(X^\\top X+M)\\mathbf w=X^\\top\\mathbf y$.",
+        "So $\\mathbf w^*=(X^\\top X+M)^{-1}X^\\top\\mathbf y$. Setting $M=\\lambda I$ recovers exactly MATH-02B's ridge-regression normal equations $\\mathbf w^*=(X^\\top X+\\lambda I)^{-1}X^\\top\\mathbf y$."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "MATH-EXAM-ex4-weighted-least-squares-transfer"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+---
+id: ML-EXAM
+block: ML
+title: "ML Foundations Exam"
+coversModules: ["ML-01", "ML-02", "ML-03", "ML-04", "ML-05", "ML-06", "ML-07"]
+masteryThreshold: 0.8
+remediationMap:
+  - { exerciseId: "ML-EXAM-ex1-backprop-autodiff-conceptual", moduleIds: ["ML-01", "ML-03"] }
+  - { exerciseId: "ML-EXAM-ex1-retake", moduleIds: ["ML-02", "ML-05"] }
+  - { exerciseId: "ML-EXAM-ex2-push-through-identity", moduleIds: ["ML-02", "ML-05"] }
+  - { exerciseId: "ML-EXAM-ex2-retake", moduleIds: ["ML-02", "ML-05"] }
+  - { exerciseId: "ML-EXAM-ex3-pca-eigendecomposition-numeric", moduleIds: ["ML-06"] }
+  - { exerciseId: "ML-EXAM-ex3-retake", moduleIds: ["ML-06"] }
+  - { exerciseId: "ML-EXAM-ex4-ensemble-variance-transfer", moduleIds: ["ML-07"] }
+  - { exerciseId: "ML-EXAM-ex4-retake", moduleIds: ["ML-07"] }
+---
+
+import ExerciseCard from '../../components/exercise/ExerciseCard.astro';
+
+Cumulative, like the other exams: every question combines at least two ML modules, or extends a taught formula to a case not directly worked out in the modules themselves.
+
+## Part 1 — Autodiff and the kernel trick
+
+<ExerciseCard id="ML-EXAM-ex1-backprop-autodiff-conceptual" />
+<ExerciseCard id="ML-EXAM-ex1-retake" />
+
+## Part 2 — Transfer: the push-through identity (primal ↔ dual ridge regression)
+
+<ExerciseCard id="ML-EXAM-ex2-push-through-identity" />
+<ExerciseCard id="ML-EXAM-ex2-retake" />
+
+## Part 3 — PCA via eigendecomposition
+
+<ExerciseCard id="ML-EXAM-ex3-pca-eigendecomposition-numeric" />
+<ExerciseCard id="ML-EXAM-ex3-retake" />
+
+## Part 4 — Why ensembles work: variance reduction
+
+<ExerciseCard id="ML-EXAM-ex4-ensemble-variance-transfer" />
+<ExerciseCard id="ML-EXAM-ex4-retake" />

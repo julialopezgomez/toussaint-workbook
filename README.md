@@ -44,6 +44,22 @@ That's optional: everything else on the site works without it, you'll just see a
 
 To stop: go back to each terminal and press `Ctrl+C`.
 
+### Full-text search (needs a production build, not `npm run dev`)
+
+The `/search` page (full-text search across every module, cheat sheet, and exam) is powered by [Pagefind](https://pagefind.app), which indexes the site at production build time, not on the fly, so it isn't available under the regular `npm run dev` workflow above. To use it:
+
+```bash
+npm run build
+npm run preview
+```
+
+Then open `/search` from that preview server. `/curriculum`'s own filter box (module title/concept search) works fine under regular `npm run dev` and doesn't need a build — reach for `/search` specifically when you want full-text search across lesson prose, not just module titles.
+
+### Other exports
+
+- `/print` — every module's lesson content concatenated in curriculum order, styled for printing (`Cmd/Ctrl+P` → Save as PDF). Exercises aren't included (interactive grading doesn't translate to print).
+- `/anki` — a downloadable `.tsv` flashcard deck (notation symbol→meaning pairs, plus a curated set of exercise recall cards), importable into Anki.
+
 ## Your progress
 
 Your answers and check results are saved automatically in your browser's local storage (IndexedDB) as you use the site, not on disk and not sent anywhere (this site has no server or database). Use the "Export my progress" / "Import progress" buttons on the homepage to back up your progress or move it to another browser or machine.
@@ -127,3 +143,4 @@ If you're a student encountering this: go read Prof. Toussaint's actual lecture 
 - **Math looks like raw text (`$\sigma(z)$` instead of a rendered formula) / buttons don't do anything**: you're not viewing it through the dev server. Make sure `npm run dev` is running and you opened `http://localhost:4321`, not a local file.
 - **"Could not reach the local grading server"**: start it with `npm run grading-server` in a second terminal.
 - **Port already in use**: another copy of the server is probably already running; check your terminals, or just reopen `http://localhost:4321`, it may already be up.
+- **`/search` says "Search index not found"**: expected under `npm run dev` — see "Full-text search" above, you need `npm run build && npm run preview` instead.

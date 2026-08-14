@@ -1,0 +1,37 @@
+{
+  "moduleId": "REV1-01",
+  "exercises": [
+    {
+      "id": "REV1-01-ex1-block-matching",
+      "objective": "Recall the one-line core idea of three blocks from memory, without looking at the table.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Without looking at the table above, write the one-line core idea for MATH, DYN, and SYM from memory.",
+      "hints": [
+        "MATH: think about what tools every later block borrowed from it (Taylor expansion, gradients, metrics, SVD).",
+        "DYN: think about the progression from equations of motion to control to stability.",
+        "SYM: think about the progression from propositional logic to relational/probabilistic representations."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "REV1-01-ex2-spectrum-application",
+      "objective": "Apply the known-model-to-model-free spectrum to a concrete sim-to-real scenario.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "A researcher has an accurate simulator (a full, known dynamics model) for a robotic arm, but the simulator doesn't perfectly match the real robot. Where would (a) using the simulator's model directly with LQR, and (b) fine-tuning with real-robot Q-learning data on top, sit along the known-model-to-model-free spectrum? Which approach would you expect to need less real-world data, and why?",
+      "hints": [
+        "(a) sits at the 'fully known model' end (LQR, DYN-04): zero real-world data needed to compute the controller itself, but its performance is only as good as the simulator's match to reality.",
+        "(b) sits toward the model-free end, using real data to correct for whatever the simulator gets wrong, closer to RLEARN-01's residual dynamics learning or RL-03's Q-learning.",
+        "(a) needs less real-world data, by construction, but risks the sim-to-real gap producing poor real-world performance; (b) needs more real data but directly corrects for that gap. In practice this is exactly why RLEARN-01's residual learning and RLEARN-04's domain randomization exist: hybrid approaches that don't sit at either extreme."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

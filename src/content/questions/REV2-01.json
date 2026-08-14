@@ -1,0 +1,37 @@
+{
+  "moduleId": "REV2-01",
+  "exercises": [
+    {
+      "id": "REV2-01-ex1-throughline-recall",
+      "objective": "Recall RLEARN-00's control-stack-shortcuts framing from memory.",
+      "provenance": "newly-authored",
+      "difficulty": "foundation",
+      "estimatedMinutes": 8,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "State RLEARN-00's 'shortcuts to the model-based control stack' framing in your own words, and give one concrete example pairing (a classical DYN/KIN component and the RLEARN module that shortcuts it).",
+      "hints": [
+        "The framing: robot learning methods replace or shortcut specific pieces of the model-based stack (dynamics modeling, optimal control, constraint-solving, state estimation) when the assumptions behind that classical piece break down.",
+        "One example: dynamics modeling (DYN-01's M(q)q_ddot+F(q,q_dot)=u) shortcut by system identification/dynamics learning (RLEARN-01).",
+        "Another valid example: optimal control (DYN-04's Riccati/MPC) shortcut by learning a value/Q-function directly (RL-02/RL-03), or constraint-solving/IK (KIN-03) shortcut by a policy or sampler that directly satisfies the constraint."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "REV2-01-ex2-pattern-recognition",
+      "objective": "Name the privileged-teacher pattern and at least three modules that instantiate it.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 10,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Name the recurring pattern that connects RLEARN-02's DAgger, RLEARN-04's sim2real, and RLEARN-06's grasp labels, and explain the pattern in one sentence.",
+      "hints": [
+        "All three involve some source of information available during training but not at deployment.",
+        "The pattern: train with information unavailable at deployment (a privileged expert, simulator, or exact-pose computation), generate labels/data from it, then train a deployment-time model on only what's actually available at deployment.",
+        "A fourth valid example: RLEARN-07's Deep Visual Constraints, trained on privileged simulation trial-and-error data but deployed using only camera images."
+      ],
+      "reviewCardIds": []
+    }
+  ]
+}

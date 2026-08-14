@@ -1,0 +1,40 @@
+---
+id: MATH-EXAM
+block: MATH
+title: "Math Foundations Exam"
+coversModules: ["MATH-00", "MATH-01", "MATH-02", "MATH-02B", "MATH-03", "MATH-03B", "MATH-04", "MATH-05"]
+masteryThreshold: 0.8
+remediationMap:
+  - { exerciseId: "MATH-EXAM-ex1-covariant-gradient-conceptual", moduleIds: ["MATH-03B", "MATH-05"] }
+  - { exerciseId: "MATH-EXAM-ex1-retake", moduleIds: ["MATH-03B", "MATH-05"] }
+  - { exerciseId: "MATH-EXAM-ex2-taylor-hessian-derivation", moduleIds: ["MATH-00", "MATH-01", "MATH-02"] }
+  - { exerciseId: "MATH-EXAM-ex2-retake", moduleIds: ["MATH-00", "MATH-01", "MATH-02"] }
+  - { exerciseId: "MATH-EXAM-ex3-rank-deficient-svd", moduleIds: ["MATH-04"] }
+  - { exerciseId: "MATH-EXAM-ex3-retake", moduleIds: ["MATH-04"] }
+  - { exerciseId: "MATH-EXAM-ex4-weighted-least-squares-transfer", moduleIds: ["MATH-02B"] }
+  - { exerciseId: "MATH-EXAM-ex4-retake", moduleIds: ["MATH-02B"] }
+---
+
+import ExerciseCard from '../../components/exercise/ExerciseCard.astro';
+
+This exam is cumulative, not a repeat of any single module's exercises: every question deliberately combines ideas from at least two MATH modules, or pushes a covered identity into territory the modules themselves didn't work out explicitly. If a question feels unfamiliar even though every *piece* of it is something you've seen, that's the point, this is exactly the kind of transfer the block was building toward.
+
+## Part 1 — Steepest descent under a metric
+
+<ExerciseCard id="MATH-EXAM-ex1-covariant-gradient-conceptual" />
+<ExerciseCard id="MATH-EXAM-ex1-retake" />
+
+## Part 2 — Taylor expansion and the Hessian/Jacobian connection
+
+<ExerciseCard id="MATH-EXAM-ex2-taylor-hessian-derivation" />
+<ExerciseCard id="MATH-EXAM-ex2-retake" />
+
+## Part 3 — Eigendecomposition, rank, and low-rank approximation
+
+<ExerciseCard id="MATH-EXAM-ex3-rank-deficient-svd" />
+<ExerciseCard id="MATH-EXAM-ex3-retake" />
+
+## Part 4 — Matrix calculus: transfer to unfamiliar objectives
+
+<ExerciseCard id="MATH-EXAM-ex4-weighted-least-squares-transfer" />
+<ExerciseCard id="MATH-EXAM-ex4-retake" />

@@ -1,0 +1,145 @@
+{
+  "moduleId": "CUMULATIVE-FINAL",
+  "exercises": [
+    {
+      "id": "CUMULATIVE-FINAL-ex1-model-knowledge-spectrum",
+      "objective": "Order LQR, model-based RL, and model-free learning along a spectrum of how much is known about the model in advance.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "DYN-04's LQR, RL-02's value iteration, and RLEARN-01/RL-03's model-free dynamics/Q-learning all ultimately compute a value function, but assume different amounts of prior knowledge about the world. Order these three along a single spectrum from 'most known in advance' to 'least,' and explain what's gained and what's lost at each step along it.",
+      "hints": [
+        "LQR (DYN-04) assumes the full dynamics model $A,B$ and cost $Q,R$ are known exactly in advance, and solves the Riccati equation directly, no data collection needed at all.",
+        "Value iteration (RL-02) assumes the transition model $P$ and reward $R$ are known exactly, but doesn't require them to be linear/quadratic; it needs to iterate rather than solve in closed form, but still requires zero real-world interaction.",
+        "Model-free learning (RLEARN-01's dynamics learning, or RL-03's Q-learning directly) assumes neither $P$/$R$ nor even a model structure is known; it has to estimate everything from data. Gained: applicability to unknown/complex systems where you can't write down a model. Lost: sample efficiency and any exactness guarantee, since everything now depends on how representative the collected data is."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "CUMULATIVE-FINAL-ex1-retake",
+      "objective": "Trace the vector/covector distinction across MATH, PLAN, and DYN.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [
+        "CUMULATIVE-FINAL-ex1-model-knowledge-spectrum"
+      ],
+      "answerType": "short-text",
+      "prompt": "MATH-03B/MATH-05 establish that $\\nabla f(x)$ is a covector, and that steepest descent under a non-Euclidean metric needs the covariant gradient $-G^{-1}\\nabla f(x)$. For a robot whose configuration mixes units (e.g. meters for a prismatic joint, radians for a revolute joint), explain why plain gradient-based potential-field control (PLAN-01) could behave badly, and what fixing it would require.",
+      "hints": [
+        "Mixed units mean 'distance' in configuration space isn't naturally Euclidean: a 1-radian change and a 1-meter change aren't comparable in any physically meaningful sense, so the identity metric $G=I$ (implicitly assumed by plain $-\\nabla U(q)$) doesn't reflect the system's actual geometry.",
+        "Plain gradient descent under this mismatched metric will move disproportionately in whichever coordinate happens to have a larger numeric gradient component, not necessarily the physically 'best' direction to move — exactly MATH-EXAM's Part 1 theme, now showing up as a concrete robotics consequence rather than an abstract point.",
+        "Fixing it requires the covariant gradient $-G^{-1}\\nabla U(q)$ (MATH-05) with $G$ chosen to reflect the actual physical cost of moving in each coordinate (e.g. a mass/inertia-weighted metric), turning PLAN-01's plain potential-field control into a metric-aware version."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "CUMULATIVE-FINAL-ex1-model-knowledge-spectrum"
+    },
+    {
+      "id": "CUMULATIVE-FINAL-ex2-combinatorial-vs-convex",
+      "objective": "Explain why CAP-01's convex-decomposition approach sidesteps the combinatorial explosion SYM-03 identifies.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "SYM-03 shows that representing a robotics domain with grounded FOL literals blows up combinatorially ($2^{400}$ for just 20 objects), motivating a move away from purely symbolic, deterministic representations. CAP-01's convex-decomposition planner also avoids representing the full continuous configuration space explicitly, but via a completely different mechanism. Explain the difference.",
+      "hints": [
+        "SYM-03's blowup comes from enumerating *discrete* combinations: every possible truth-value assignment to every ground literal is a distinct symbolic state, growing exponentially in the number of objects/predicates.",
+        "CAP-01's convex decomposition instead represents the *continuous* configuration space directly as a union of a manageable number of convex regions ($CS_\\text{free}\\approx\\bigcup_jP_j$), not by discretizing it into symbolic states at all: the number of regions needed depends on the geometry's complexity, not combinatorially on object count.",
+        "So SYM-03's fix (moving to probabilistic relational rules) addresses blowup in the *discrete/symbolic* representation, while CAP-01's convex decomposition avoids ever needing that kind of discrete enumeration for the continuous geometry in the first place: two genuinely different responses to 'representing a large space compactly,' not the same fix applied twice."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "CUMULATIVE-FINAL-ex2-retake",
+      "objective": "Explain what remains hard about CAP-01's MIQP despite its convex objective.",
+      "provenance": "newly-authored",
+      "difficulty": "challenge",
+      "estimatedMinutes": 15,
+      "prerequisites": [
+        "CUMULATIVE-FINAL-ex2-combinatorial-vs-convex"
+      ],
+      "answerType": "short-text",
+      "prompt": "OPT-04 establishes that convex problems have no bad local minima. CAP-01's MIQP objective ($\\sum_i\\|\\mathbf x_{i+1}-\\mathbf x_i\\|_2^2$) is convex. Explain why the overall MIQP is still computationally hard despite this, i.e. what OPT-04's convexity guarantee does and doesn't cover here.",
+      "hints": [
+        "OPT-04's guarantee is about the *continuous* optimization landscape: for a fixed choice of binary variables $z_{ij}$, the resulting continuous QP subproblem is indeed convex and easy.",
+        "But the MIQP also searches over the *discrete* binary variables (which region each configuration belongs to, how many grasps $\\ell$), and that combinatorial search is not covered by convexity at all: there's no guarantee of 'no bad local minima' across different discrete choices, since convexity is a statement about continuous variables holding a discrete structure fixed.",
+        "So the MIQP is 'easy per discrete choice, hard across discrete choices': convexity makes each of the (potentially many) continuous subproblems tractable, but doesn't make searching over which subproblem to solve tractable, which is exactly why real MIQP solvers need branch-and-bound or similar combinatorial search on top of convex subproblem solving."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "CUMULATIVE-FINAL-ex2-combinatorial-vs-convex"
+    },
+    {
+      "id": "CUMULATIVE-FINAL-ex3-cap-dependencies-reflection",
+      "objective": "Trace at least 4 distinct blocks CAP-01 directly draws on, and the specific concept reused from each.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "Identify at least 4 different blocks (not modules, blocks) that CAP-01 directly draws on, and for each, name the one specific concept or formula it reuses. This is a self-check: if the curriculum's notation and structure genuinely transferred, this should be answerable directly from CAP-01's own text.",
+      "hints": [
+        "PLAN is the most direct: CAP-01 explicitly shows its $CS/CS_\\text{free}$ notation is identical to PLAN-01's $\\mathcal X/\\mathcal X_\\text{fea}$.",
+        "DYN is also explicit: the MIQP's quadratic path-length objective is described as 'the same cost-functional flavor as DYN-04's trajectory optimization.'",
+        "RLEARN is explicit too: the whole structural-parallel table connects the MIQP's discrete/continuous split to RLEARN-07's TAMP/LGP skeleton/trajectory split. A fourth: OPT, for the MIQP formulation itself (constrained optimization, KKT-adjacent reasoning about convex subproblems) — or SYM, for the discrete/symbolic-vs-continuous framing echoed in the combinatorial-explosion comparison (see the previous exercise)."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "CUMULATIVE-FINAL-ex3-retake",
+      "objective": "Trace the reachability/feasibility theme across PLAN, SYM, RLEARN, and CAP.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 15,
+      "prerequisites": [
+        "CUMULATIVE-FINAL-ex3-cap-dependencies-reflection"
+      ],
+      "answerType": "short-text",
+      "prompt": "Trace the theme 'a plan is only as good as your representation of feasible/reachable space' across at least three modules from different blocks, ending with CAP-01's own version of this issue.",
+      "hints": [
+        "PLAN-02: PRM's probabilistic-completeness bound goes vacuous for narrow passages, a direct instance of the representation (samples) failing to capture true feasible space near tight constraints.",
+        "SYM-03: deterministic symbolic rules fail to represent real, noisy action outcomes reliably, motivating probabilistic relational rules as a better (if still imperfect) representation of what's actually achievable.",
+        "CAP-01: the experiments show coverage of $CS_\\text{free}$, not dimensionality, is the binding constraint, and low coverage doesn't just give a worse plan, it can give *no* plan (the 4-DOF 0.70-target case) even when a true solution exists — the same underlying theme (a finite representation of feasible space can silently miss the truth) recurring in a decomposition-based rather than sampling-based or symbolic form."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "CUMULATIVE-FINAL-ex3-cap-dependencies-reflection"
+    },
+    {
+      "id": "CUMULATIVE-FINAL-ex4-utility-of-shortest-path",
+      "objective": "Question CAP-01's implicit utility function through RL-07's decision-theoretic lens.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [],
+      "answerType": "short-text",
+      "prompt": "RL-07's decision theory frames good decisions as maximizing expected utility. CAP-01's MIQP minimizes total squared path length, i.e. implicitly maximizing the utility $U=-\\sum_i\\|\\mathbf x_{i+1}-\\mathbf x_i\\|^2$. Is 'shortest path' obviously the right utility for a real manipulation task? Give one concrete reason it might not be, connecting back to RL-07's framing.",
+      "hints": [
+        "RL-07 frames utility as something that should reflect what actually matters for the task, not an arbitrary mathematical convenience; squared path length is convenient (keeps the QP convex, per OPT-04) but isn't obviously what a manipulation task actually cares about.",
+        "One concrete gap: shortest path length says nothing about energy consumption, joint-torque limits, collision margin (how close to obstacles the path passes), or robustness to model error, all of which a real deployed system might care about far more than raw path length.",
+        "This is exactly the kind of gap RL-07's decision-theory framing exists to make visible: 'the objective function is easy to optimize' and 'the objective function reflects what you actually want' are two different claims, and conflating them is a common, easy-to-miss mistake in applied optimization."
+      ],
+      "reviewCardIds": []
+    },
+    {
+      "id": "CUMULATIVE-FINAL-ex4-retake",
+      "objective": "Connect the Laplace approximation's local-mode limitation to CAP-01's MIQP finding only one grasp sequence.",
+      "provenance": "newly-authored",
+      "difficulty": "core",
+      "estimatedMinutes": 12,
+      "prerequisites": [
+        "CUMULATIVE-FINAL-ex4-utility-of-shortest-path"
+      ],
+      "answerType": "short-text",
+      "prompt": "PROB-06's Laplace approximation is explicitly local: it captures the distribution's shape around one mode, silently missing any other modes. Explain the analogous limitation in CAP-01's MIQP as actually solved (iteratively, for increasing $\\ell$, taking the first feasible solution), and why this parallel is worth noticing.",
+      "hints": [
+        "CAP-01's pipeline finds the minimum number of grasps giving a feasible plan, then the shortest sequence for that specific $\\ell$: it doesn't explore whether a solution with more grasps (a different discrete 'mode' of the solution space) might actually have a shorter or more robust continuous trajectory overall.",
+        "This is structurally the same limitation as the Laplace approximation: both methods commit to one specific solution structure (a mode, or a grasp count) early, and represent/optimize only around that choice, rather than characterizing the full space of qualitatively different solutions.",
+        "The parallel is worth noticing because it's a recurring pattern across this entire curriculum, not a coincidence specific to either method: local optimization/approximation methods are efficient precisely because they commit early, and that same commitment is exactly what makes them miss globally better alternatives, a tradeoff to watch for in almost any method covered in this workbook, not just these two."
+      ],
+      "reviewCardIds": [],
+      "retakeVariantOf": "CUMULATIVE-FINAL-ex4-utility-of-shortest-path"
+    }
+  ]
+}
