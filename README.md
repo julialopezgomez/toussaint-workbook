@@ -62,17 +62,20 @@ Then open `/search` from that preview server. `/curriculum`'s own filter box (mo
 
 ## Development quality quick guide
 
-The full routine is in [`docs/agent/STAGE_RUNBOOK.md`](docs/agent/STAGE_RUNBOOK.md); current work and ownership are in [`docs/agent/CURRENT_HANDOFF.md`](docs/agent/CURRENT_HANDOFF.md).
+The full routine is in [`docs/agent/STAGE_RUNBOOK.md`](docs/agent/STAGE_RUNBOOK.md); current work and ownership are in [`docs/agent/CURRENT_HANDOFF.md`](docs/agent/CURRENT_HANDOFF.md). **Your role is normally only to open the appropriate chat and give the short instruction below—the agent is responsible for reading files and running/reporting checks.**
 
 | Situation | What to do |
 |---|---|
-| New/resumed **Codex** session | Codex should load `AGENTS.md` automatically. Say: **“Follow the repository startup and resume protocol before continuing.”** |
-| New/resumed **Claude** session | Claude should load `CLAUDE.md`. Say the same line, then use any task-specific prompt named in `CURRENT_HANDOFF.md`; if none is named, continue from the recorded next safe action. |
-| After compression, rate limit, or model switch | Say: **“Rehydrate from repository evidence, run the context check, and restate scope before continuing.”** |
-| Before pausing or switching agents | Say: **“Stop at a clean boundary, update `CURRENT_HANDOFF.md`, and run the context check.”** |
-| Starting/finishing a review block | Run `python3 scripts/validate/agent_context.py` and `python3 scripts/validate/review_integrity.py`. |
-| Implementing content or code | Run the context check at batch start/end, plus relevant semantic/numerical tests, `npx astro check`, `npm run build`, and live visual/runtime checks where applicable. |
+| New/resumed **Codex** session | Open Codex at the repository root and say: **“Follow the repository startup and resume protocol before continuing.”** Codex should load `AGENTS.md` automatically. |
+| New/resumed **Claude** session | Open Claude Code at the repository root and say: **“Follow the repository startup and resume protocol. Read and execute any task-specific prompt named in `CURRENT_HANDOFF.md`; otherwise continue from its next safe action.”** |
+| After compression or a rate-limit reset | Stay in the same window once and say: **“Rehydrate from repository evidence, run the context check, and restate scope before continuing.”** If confusion or the same error recurs after that recovery, open a fresh window and use the relevant new/resumed-session instruction above. |
+| Changing model/agent or crossing a major gate | First use the pause instruction below. Then open a fresh window with the new model/agent and use its new/resumed-session instruction. |
+| Before closing, pausing, or switching | Say: **“Stop at a clean boundary, update `CURRENT_HANDOFF.md`, run the context check, and report the next safe action before ending.”** |
+| Starting/finishing a review block | Say: **“Follow the review-boundary protocol and report the validator results before asking for approval or continuing.”** |
+| Implementing content or code | Say: **“Follow the implementation-batch protocol, run the checks appropriate to the changes, and report results and anything not checked.”** |
 | A checker fails or the agent seems confused | Stop substantive work; ask it to re-read `AGENTS.md`, the handoff, and the governing decision/plan, repair the continuity state, and rerun the check. |
+
+To invoke a prompt file, you normally only need to say **“Read and execute the prompt at `<path named in CURRENT_HANDOFF.md>`.”** If an agent cannot run the validators, the manual fallback is `python3 scripts/validate/agent_context.py`; at a review boundary, also run `python3 scripts/validate/review_integrity.py`.
 
 ## Your progress
 
