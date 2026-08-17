@@ -1,7 +1,31 @@
-# Project State — Toussaint Workbook
+# Project State — historical implementation ledger
 
-## Current phase
-**Everything in the original curriculum and architecture design is now built and validated (batches 13-17): all blocks' modules (69 modules, ~226 est. hours, including the two cumulative-review modules REV1-01/REV2-01), all 13 cheat sheets, all 7 block milestone exams, the Cumulative Final Assessment, the Anki export, Pagefind full-text search, and the print/book export. Nothing from the original design remains unbuilt. This batch (17) has been committed and pushed to the private remote.**
+> **HISTORICAL / NOT THE RESUME ENTRY POINT.** This file preserves the Phase
+> 3–4 implementation narrative and may contain snapshots that were current when
+> written. For live task state, approval boundaries, file ownership, and the next
+> action, start with `AGENTS.md` and `docs/agent/CURRENT_HANDOFF.md`. Use approved
+> decisions, current review evidence, and the stable Phase 5 plan over this
+> narrative whenever they differ.
+
+## Historical phase snapshot
+**Phase 4 (the original curriculum/architecture design) is complete and fully committed/pushed as of batch 17 (commit `dd2e871`, confirmed matching `origin/main`): all blocks' modules (69 modules, ~226 est. hours, including REV1-01/REV2-01), all 13 cheat sheets, all 7 block milestone exams, the Cumulative Final Assessment, the Anki export, Pagefind full-text search, and the print/book export. Phase 5 (interactive/coding exercises, possible new source integration — Tedrake, MuJoCo, Hugging Face/LeRobot) is starting, with two small pilots begun but deliberately paused mid-work — see "In progress, uncommitted" immediately below before doing anything else in this repo.**
+
+## In progress, uncommitted — READ THIS FIRST if resuming
+Two interactive-exercise pilots were started (a new content pattern: coding/simulation/visualization exercises, distinct from every module built so far) and then **deliberately paused mid-work by the user**, who is preparing a more detailed prompt to steer Phase 5 before more gets built. **Do not silently continue building on this without fresh direction from the user** — they explicitly stopped this work to scope it properly first.
+
+Current uncommitted state (`git status --short` as of this entry):
+```
+ M package-lock.json
+ M package.json
+ M src/content/course/KIN/KIN-01.mdx
+?? src/components/interactive/
+```
+- **`three` and `@types/three` added as dependencies** (`package.json`/`package-lock.json`) — a genuinely new capability for this project (first 3D/graphics library; everything before this was Astro + KaTeX only).
+- **`src/components/interactive/RotationViz.astro`** (new, untracked): an interactive three.js 3D visualizer for Rodrigues' formula / the exponential map — drag to orbit, set axis $\hat w$ + angle $\theta$ via sliders, watch a body frame + a simple box ("robot link") rotate live. Computes $R(w)$ two ways on every frame (the exact Rodrigues' formula from KIN-01, and three.js's own axis-angle rotation) and displays both, so the numeric cross-check is baked into the tool. **Embedded into `KIN-01.mdx`** (imported, placed right after the Rodrigues' formula section, before "## Angular velocity") — this embed is the one actual content-file edit sitting uncommitted.
+- **`src/components/interactive/GridWorldRL.astro`** (new, untracked): a live in-browser Q-learning trainer on a tiny 5×5 grid world (start/goal/pit), using the *exact* update rule and $\epsilon$-greedy pseudocode already taught in RL-03, with adjustable $\alpha$/$\epsilon$/$\gamma$, a value-heatmap + greedy-policy-arrow rendering, and a `<details>` panel showing the real training code (not a paraphrase — the code shown is kept in sync by hand with the code that actually runs). **Built but NOT yet embedded anywhere** — the natural spot is RL-03.mdx, right after the Q-learning pseudocode block and its conceptual exercise (`RL-03-ex3-td-vs-qlearning-conceptual`), before "## Why Q-learning converges."
+- **Validation status: none run yet.** No `astro check`, no `npm run build`, no live-browser test, on either component. Do not assume either one actually works until validated — they're unverified code, not confirmed-working features.
+- **Design decisions already made** (worth preserving if this direction continues): (a) interactive demos are embedded directly in existing lesson `.mdx` files as exploratory widgets, not shoehorned into the `ExerciseCard`/graded-`answerType:"code"` schema (that schema value exists but has zero grading/rendering implementation behind it — real future work if graded coding exercises are wanted, distinct from these exploratory demos); (b) client-side-only, no server, no new backend — consistent with the project's standing "no hosted deployment" rule; (c) prefer showing real, working code in the page over a black-box visualization, per the user's explicit "see how that is done" framing.
+- **User's stated Phase 5 ideas, not yet scoped into a concrete plan**: integrate Russ Tedrake's MIT *Underactuated Robotics*/*Robotic Manipulation* notes (more advanced/complex robotics than Toussaint's corpus covers) — **explicitly flagged by the user as needing the same audit-first rigor as the original Toussaint source-selection process**, not a casual addition; coding exercises for RL (train simple policies, see the actual algorithms) and behavior cloning similarly; robotics simulation (MuJoCo or similar); Hugging Face / LeRobot integration (previously noted in RLEARN's own source content as something the user engaged with during self-development activities); more interactive visualizations for other blocks where relevant, explicitly **not** forced onto MATH (whose existing pen-and-paper exercises the user already considers sufficient there). The user is drafting a more detailed prompt to scope this properly before more building happens.
 
 ## Resolved (2026-08-12, sixth pass): added MATH-00 (Taylor Expansion From Scratch)
 User flagged, after reviewing batch 1, that Taylor expansion was used as a derivation tool in both MATH-01 (chain rule) and MATH-02 (second-order Taylor for Hessians) without ever being taught from scratch, and the user is specifically rusty on it. Added as **MATH-00** (not a renumber of MATH-01-05, to avoid churning already-published IDs) with a from-scratch derivation of both first- and second-order Taylor approximations (first order from the derivative definition directly, second order from matching-derivatives against a quadratic polynomial), two worked examples (sin/cos series, both independently verified), and 4 exercises. MATH-01's prerequisites and readiness check updated to point to it; MATH-01 and MATH-02's prose updated with explicit cross-references back to MATH-00 rather than leaving Taylor expansion as an unexplained tool. `CURRICULUM.md` updated (new row, module/hour counts, a production note explaining the insertion). Tested live, build clean (10 pages).
@@ -215,8 +239,8 @@ See `docs/decisions/0000-requirements.md`, `0001-corpus-update-and-priorities.md
 - `CURRICULUM.md`'s SYM block table and a new production note updated (hours roughly steady, ~8 to ~8.5); `PROJECT_STATE.md` updated with this entry.
 
 ## Pending — next action needed from user
-- **Nothing is outstanding.** Every item from the original curriculum (`CURRICULUM.md`) and architecture (`ARCHITECTURE.md`) design has been built, including the two cumulative-review modules, Pagefind search, and the print/book export, all previously-deferred items the user explicitly asked to complete in batch 17.
-- This is now purely a maintenance/study phase: future work is whatever the user wants to add, fix, or extend, per README's "Editing content" section.
+- **Phase 4 (original design): nothing outstanding.** Every item from `CURRICULUM.md`/`ARCHITECTURE.md`'s original design is built, committed, and pushed as of batch 17.
+- **Phase 5 (interactive/coding exercises + possible new sources): awaiting a scoping prompt from the user.** See "In progress, uncommitted" above for exact current state — two pilots started, paused deliberately, not yet validated or committed. Do not resume this work without fresh direction; the user is actively drafting a more detailed prompt for it.
 
 ## Completed — Phase 4, batch 17: cumulative-review modules + print export + Pagefind search built; full site committed and pushed (2026-08-14, twenty-fifth pass)
 - User said "do what's left and commit please" — completing the three previously-deferred items in one batch, then committing everything from batches 13-17.

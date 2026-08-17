@@ -1,0 +1,222 @@
+---
+// Interactive Q-learning demo: a tiny 5x5 grid world, trained live in the browser using
+// literally the update rule and epsilon-greedy pseudocode taught above, not a black box.
+// Newly-authored interactive tool (not from Toussaint's source). The training code shown
+// in the panel below is the *actual* code that runs, not a simplified paraphrase.
+---
+<div class="gw no-print">
+  <div class="gw-main">
+    <div class="gw-grid" id="gw-grid"></div>
+    <div class="gw-legend">
+      <span><span class="swatch start"></span> start</span>
+      <span><span class="swatch goal"></span> goal (+10)</span>
+      <span><span class="swatch pit"></span> pit (−10)</span>
+      <span>cell color = learned $V(s)=\max_aQ(s,a)$, arrow = greedy action</span>
+    </div>
+  </div>
+  <div class="gw-controls">
+    <div class="control-row">
+      <label>Learning rate $\alpha$ = <span id="gw-alpha-val">0.3</span></label>
+      <input type="range" id="gw-alpha" min="0.05" max="1" step="0.05" value="0.3" />
+    </div>
+    <div class="control-row">
+      <label>Exploration $\epsilon$ = <span id="gw-epsilon-val">0.2</span></label>
+      <input type="range" id="gw-epsilon" min="0" max="1" step="0.05" value="0.2" />
+    </div>
+    <div class="control-row">
+      <label>Discount $\gamma$ = <span id="gw-gamma-val">0.9</span></label>
+      <input type="range" id="gw-gamma" min="0.5" max="0.99" step="0.01" value="0.9" />
+    </div>
+    <div class="gw-buttons">
+      <button type="button" id="gw-run100">Run 100 episodes</button>
+      <button type="button" id="gw-run500">Run 500 more</button>
+      <button type="button" id="gw-reset">Reset Q-table</button>
+    </div>
+    <p class="gw-stats" id="gw-stats">0 episodes run. Avg return (last 20): —</p>
+  </div>
+  <details class="gw-code">
+    <summary>Show the actual training code (this is really what runs when you click "Run")</summary>
+    <pre><code>{`function trainEpisode(Q, alpha, epsilon, gamma) {
+  let s = START;
+  let totalReturn = 0;
+  for (let step = 0; step < MAX_STEPS; step++) {
+    // epsilon-greedy action selection
+    const a = Math.random() < epsilon
+      ? randomAction()
+      : argmaxAction(Q, s);
+
+    const { sPrime, reward, done } = step_env(s, a);
+    totalReturn += reward;
+
+    // Q-learning update: Q(s,a) <- Q(s,a) + alpha * [r + gamma*max_a' Q(s',a') - Q(s,a)]
+    const maxQNext = done ? 0 : Math.max(...ACTIONS.map(ap => Q[sPrime][ap]));
+    const tdError = reward + gamma * maxQNext - Q[s][a];
+    Q[s][a] += alpha * tdError;
+
+    s = sPrime;
+    if (done) break;
+  }
+  return totalReturn;
+}`}</code></pre>
+  </details>
+</div>
+
+<style>
+  .gw { display: grid; gap: 1rem; margin: 1.5rem 0; border: 1px solid var(--border); border-radius: 0.6rem; padding: 1rem; background: var(--surface); }
+  @media (min-width: 640px) { .gw { grid-template-columns: 1fr 1fr; } .gw-code { grid-column: 1 / -1; } }
+  .gw-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; aspect-ratio: 1/1; max-width: 320px; }
+  .gw-cell {
+    position: relative; border-radius: 0.25rem; display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; color: #fff; font-weight: 600; background: #2a2a3a; transition: background 0.2s;
+  }
+  .gw-cell.start::before { content: 'S'; position: absolute; top: 2px; left: 4px; font-size: 0.6rem; opacity: 0.7; }
+  .gw-cell.goal { outline: 2px solid #4dff77; }
+  .gw-cell.pit { outline: 2px solid #ff4d4d; }
+  .gw-legend { display: flex; flex-wrap: wrap; gap: 0.6rem; font-size: 0.75rem; opacity: 0.75; margin-top: 0.5rem; }
+  .swatch { display: inline-block; width: 0.7rem; height: 0.7rem; border-radius: 0.15rem; margin-right: 0.2rem; vertical-align: middle; }
+  .swatch.start { background: #2a2a3a; border: 1px solid #888; }
+  .swatch.goal { background: #2a2a3a; outline: 2px solid #4dff77; }
+  .swatch.pit { background: #2a2a3a; outline: 2px solid #ff4d4d; }
+  .gw-controls { display: flex; flex-direction: column; gap: 0.7rem; font-size: 0.85rem; }
+  .control-row label { display: block; margin-bottom: 0.2rem; opacity: 0.85; }
+  .gw-buttons { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .gw-buttons button {
+    font: inherit; font-size: 0.8rem; padding: 0.35rem 0.7rem; border-radius: 0.3rem;
+    border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer;
+  }
+  .gw-buttons button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .gw-stats { font-size: 0.8rem; opacity: 0.75; margin: 0; }
+  .gw-code summary { cursor: pointer; font-size: 0.85rem; opacity: 0.85; }
+  .gw-code pre { margin-top: 0.6rem; }
+</style>
+
+<script>
+  const SIZE = 5;
+  const START = 0;
+  const GOAL = SIZE * SIZE - 1; // bottom-right
+  const PIT = 12; // (2,2), roughly center
+  const ACTIONS = [0, 1, 2, 3] as const; // up, down, left, right
+  const MAX_STEPS = 100;
+
+  function toRC(s: number): [number, number] { return [Math.floor(s / SIZE), s % SIZE]; }
+  function toS(r: number, c: number): number { return r * SIZE + c; }
+
+  function stepEnv(s: number, a: number): { sPrime: number; reward: number; done: boolean } {
+    if (s === GOAL || s === PIT) return { sPrime: s, reward: 0, done: true };
+    let [r, c] = toRC(s);
+    if (a === 0) r = Math.max(0, r - 1);
+    else if (a === 1) r = Math.min(SIZE - 1, r + 1);
+    else if (a === 2) c = Math.max(0, c - 1);
+    else if (a === 3) c = Math.min(SIZE - 1, c + 1);
+    const sPrime = toS(r, c);
+    if (sPrime === GOAL) return { sPrime, reward: 10, done: true };
+    if (sPrime === PIT) return { sPrime, reward: -10, done: true };
+    return { sPrime, reward: -1, done: false };
+  }
+
+  function randomAction(): number { return ACTIONS[Math.floor(Math.random() * ACTIONS.length)]; }
+  function argmaxAction(Q: number[][], s: number): number {
+    let best = 0, bestVal = -Infinity;
+    for (const a of ACTIONS) if (Q[s][a] > bestVal) { bestVal = Q[s][a]; best = a; }
+    return best;
+  }
+
+  // This is the exact function shown in the <details> code panel above -- kept in sync by hand.
+  function trainEpisode(Q: number[][], alpha: number, epsilon: number, gamma: number): number {
+    let s = START;
+    let totalReturn = 0;
+    for (let step = 0; step < MAX_STEPS; step++) {
+      const a = Math.random() < epsilon ? randomAction() : argmaxAction(Q, s);
+      const { sPrime, reward, done } = stepEnv(s, a);
+      totalReturn += reward;
+      const maxQNext = done ? 0 : Math.max(...ACTIONS.map((ap) => Q[sPrime][ap]));
+      const tdError = reward + gamma * maxQNext - Q[s][a];
+      Q[s][a] += alpha * tdError;
+      s = sPrime;
+      if (done) break;
+    }
+    return totalReturn;
+  }
+
+  function init() {
+    const gridEl = document.getElementById('gw-grid');
+    if (!gridEl) return;
+
+    let Q: number[][] = Array.from({ length: SIZE * SIZE }, () => [0, 0, 0, 0]);
+    let episodesRun = 0;
+    let recentReturns: number[] = [];
+
+    const cells: HTMLElement[] = [];
+    for (let s = 0; s < SIZE * SIZE; s++) {
+      const cell = document.createElement('div');
+      cell.className = 'gw-cell';
+      if (s === START) cell.classList.add('start');
+      if (s === GOAL) { cell.classList.add('goal'); cell.textContent = '★'; }
+      if (s === PIT) { cell.classList.add('pit'); cell.textContent = '×'; }
+      gridEl.appendChild(cell);
+      cells.push(cell);
+    }
+
+    function render() {
+      const values = Q.map((qa) => Math.max(...qa));
+      const finite = values.filter((v) => Number.isFinite(v) && v !== 0);
+      const maxAbs = Math.max(1, ...finite.map((v) => Math.abs(v)));
+      const arrows = ['↑', '↓', '←', '→'];
+      for (let s = 0; s < SIZE * SIZE; s++) {
+        if (s === GOAL || s === PIT) continue;
+        const v = values[s];
+        const t = Math.max(-1, Math.min(1, v / maxAbs));
+        const hue = t >= 0 ? 140 : 0; // green for positive, red for negative
+        const light = 18 + Math.abs(t) * 22;
+        cells[s].style.background = `hsl(${hue}, 55%, ${light}%)`;
+        cells[s].textContent = episodesRun > 0 ? arrows[argmaxAction(Q, s)] : '';
+      }
+      const statsEl = document.getElementById('gw-stats');
+      if (statsEl) {
+        const avg = recentReturns.length ? (recentReturns.reduce((a, b) => a + b, 0) / recentReturns.length).toFixed(1) : '—';
+        statsEl.textContent = `${episodesRun} episodes run. Avg return (last ${recentReturns.length}): ${avg}`;
+      }
+    }
+
+    function getParams() {
+      const alpha = parseFloat((document.getElementById('gw-alpha') as HTMLInputElement).value);
+      const epsilon = parseFloat((document.getElementById('gw-epsilon') as HTMLInputElement).value);
+      const gamma = parseFloat((document.getElementById('gw-gamma') as HTMLInputElement).value);
+      return { alpha, epsilon, gamma };
+    }
+
+    function runEpisodes(n: number) {
+      const { alpha, epsilon, gamma } = getParams();
+      for (let i = 0; i < n; i++) {
+        const ret = trainEpisode(Q, alpha, epsilon, gamma);
+        recentReturns.push(ret);
+        if (recentReturns.length > 20) recentReturns.shift();
+        episodesRun++;
+      }
+      render();
+    }
+
+    document.getElementById('gw-run100')?.addEventListener('click', () => runEpisodes(100));
+    document.getElementById('gw-run500')?.addEventListener('click', () => runEpisodes(500));
+    document.getElementById('gw-reset')?.addEventListener('click', () => {
+      Q = Array.from({ length: SIZE * SIZE }, () => [0, 0, 0, 0]);
+      episodesRun = 0;
+      recentReturns = [];
+      render();
+    });
+
+    ['gw-alpha', 'gw-epsilon', 'gw-gamma'].forEach((id) => {
+      const el = document.getElementById(id) as HTMLInputElement;
+      const valEl = document.getElementById(id + '-val');
+      el.addEventListener('input', () => { if (valEl) valEl.textContent = el.value; });
+    });
+
+    render();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+</script>

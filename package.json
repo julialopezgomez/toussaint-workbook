@@ -19,7 +19,8 @@
     "astro": "^7.2.1",
     "katex": "^0.18.4",
     "rehype-katex": "^7.0.1",
-    "remark-math": "^6.0.0"
+    "remark-math": "^6.0.0",
+    "three": "^0.185.1"
   },
   "overrides": {
     "katex": "$katex"
@@ -27,6 +28,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@types/node": "^26.2.0",
+    "@types/three": "^0.185.4",
     "pagefind": "^1.5.2",
     "typescript": "^6.0.3"
   }

@@ -1,97 +1,127 @@
 # Current agent handoff
 
-Updated: 2026-08-14
-Status: **ACTIVE — replace this file at the next block/gate/model boundary**
+Updated: 2026-08-16
+Status: **ACTIVE — PLAN 3.7 / PROPOSAL 8 STRUCTURAL FAIL; PLANNING CORRECTION REQUIRED**
 
 ## Baseline and authority
 
-- Committed Phase 4 baseline: `dd2e8717f82dfcb77aff4b8c89aba258997f87fe`.
-- Active Phase 5 plan: `docs/plans/PHASE5_AUGMENTATION_PLAN.md`, revision
-  2.2, SHA-256
-  `412b807536da6d90b1063ad800aadf5435a6e05eabe6e3cfcd6ea65ac308f2f3`.
-- Gate A is closed and approved: `docs/decisions/0005-gate-a-approved.md`.
-- MATH and OPT review dispositions are approved:
-  `docs/decisions/0006-math-review-approved.md` and
-  `docs/decisions/0007-opt-review-approved.md`.
-- Revision 2.2 is now obsolete for future-work counts and foundation scope. It
-  remains the historical approved Gate A successor until Claude publishes the
-  reconciled next plan revision; do not rewrite decision 0005.
+- Committed Phase 4 baseline: `dd2e8717f82dfcb77aff4b8c89aba258997f87fe` (69 modules, 226.0 h).
+- Active Phase 5 plan: `docs/plans/PHASE5_AUGMENTATION_PLAN.md`, **revision 3.7**, SHA-256
+  `e298acfac750f378d0557f69233f8f8d0094eaaf0f37fb1d3f8f2de86ea149ea`.
+- Gate B proposal: `docs/plans/GATE_B_SOURCE_SELECTION.md`, **proposal revision 8**, SHA-256
+  `f79edcb28bda7ab86603831cd532b5ea16b3acec013b9a4c9a40e5aafc8e190e`, pinned to that plan.
+- Governing review evidence: `docs/review/planning/PLAN_3_7_STRUCTURAL_AUDIT.md`, SHA-256
+  `9e71ff62524e279a81c30cd38340e18ba6229695edad34a10b105c6585a38cad`, verdict
+  **STRUCTURAL FAIL** against plan 3.7 / proposal 8: **two HIGH and two MEDIUM findings**.
+- Prior governing evidence remains read-only: `PLAN_3_6_STRUCTURAL_AUDIT.md`, SHA-256
+  `a42cb26edc93219a0c82c8e5abc84878cb7ded0530528a2d7c518bd84d694b89`, also FAIL.
+- `docs/plans/GATE_A_BASELINE.md` is unchanged at approved SHA-256
+  `470046a5fa4036794c37434295cea67385e985ca9871c06413b964dddc1a45a4`.
+- Decision 0005 is not rewritten; Gate A remains closed. Decisions 0006/0007 approve MATH/OPT
+  review findings and planned deltas, not current coverage or implementation.
+
+## Status — read before anything else
+
+**Plan 3.7 / proposal 8 have now been independently reviewed and FAILED.** Proposal revisions 1–4,
+6, 7 and 8 failed independent review; proposal 5 was superseded before review. No revision of this
+plan/proposal has passed. **Gate B is NOT STARTED and NOT APPROVED. Group A is NOT STARTED and NOT
+APPROVED. No approval may be requested.** C2-01 remains resolved; the failure is structural and does
+not reopen that correction.
+
+The audit found:
+
+1. **HIGH — C1-02 incomplete:** `groupAStarted` and `currentProposalApproved` are recorded status
+   booleans but are absent from `mustAssertFacts` / `factAssertions`; flipping either exits 0.
+   `blockedCorrection: null→C2-01` also exits 0, allowing C2-01 to be both resolved and blocked.
+2. **HIGH — C4-02 not enforced:** restoring live O1 wording that Gate-B approval “approves citation”
+   exits 0 after the changed proposal hash is re-pinned.
+3. **MEDIUM — C4-03 incomplete/live:** D3 still resolves its per-model licence blocker by reading
+   and recording into `sources.json` before use, bundling evaluation with acquisition; §3.3 is also
+   outside the validator sweep, and a §3.3-only `at acquisition` mutation exits 0.
+4. **MEDIUM — STR-02 contradiction:** proposal §§4 and 6.6 call `σ` the renamed `SYM-02`
+   substitution; plan §8.2 and the ledger leave that replacement `UNSETTLED` for Gate C.
 
 ## Active objectives
 
-Two coordinated lanes are active:
+1. **Planning lane:** correct the four audit findings in the plan/proposal/ledger/validator as
+   applicable, update proposal 8's failed status and audit ledger/pins, then stop for one fresh
+   independent structural review. Do not edit this audit report.
+2. **Owner:** nothing to decide. Approval remains withheld; no approval prompt is safe.
+3. **Codex review lane:** continue PROB separately. Approved review deltas enter the plan only
+   through §18.
 
-1. **Claude planning lane:** incorporate decisions 0006/0007 into the next
-   Phase 5 plan revision, validate every changed count/route, then perform Gate
-   B source selection only and stop for owner approval. No curriculum content,
-   source ingestion, lab, or application authoring is authorized.
-2. **Codex review lane:** continue the independent current-workbook review in
-   curriculum order, starting with PROB. Findings enter `docs/review/**` and are
-   batched for owner approval. Unapproved PROB findings must not be silently
-   inserted into Claude's current plan revision.
+## Confirmed passes and carried state
 
-## Approved planning delta awaiting incorporation
+- **PASS:** C1-01; C2-01, C2-02, C2-03; C9-04; STR-01; totals; gate/prerequisite order;
+  Gate-A invariance; audit freshness at audit start.
+- **C2-01 remains RESOLVED.** `docs/review/modules/KIN-02.md:141-160` correctly assigns content/error
+  correction to F0, all keying and added recall to F8, and 0.0 scheduled learner hours to F8 recall.
+  It still pins superseded plan 3.6; that review-lane pin-staleness item is non-substantive and the
+  one-time authorization used to correct it at 3.6 is spent.
+- **C4-02 current prose is correct but its mutation guard is not.** The finding is about structural
+  closure, not a claim that current O1 already grants citation.
+- **C4-03's cited E9/E10 rows are corrected.** D3 and the omitted §3.3 sibling keep the item open.
 
-- Add a foundation-stabilization lane for mandatory MATH/OPT factual, theorem,
-  notation, route, prerequisite, source-qualification, cheat-sheet, and exam
-  repairs before downstream Phase 5 work relies on them.
-- Add `NUM-03`, `OPT-04B`, and `OPT-05B`; recompute all affected module/block/hour
-  totals, routes, prerequisites, stubs, and acceptance criteria.
-- Add whole-block keyed recall and the approved MATH/OPT static-visual work.
-- Preserve `MATH-05` as conceptual/covariance owner and `OPT-01` as recall/use.
-- Keep ADMM optional/deferred; route optimization–RL overlap to RL/RLEARN.
-- Expand Gate B source needs to cover the approved foundation repairs and new
-  modules. The review benchmark is evidence only, not automatic production
-  corpus approval.
-- Add a controlled amendment mechanism so later approved block reviews can
-  extend the plan/source corpus without invalidating Gate A or restarting Gate B.
+## Mutation and deterministic evidence
+
+- **97 isolated mutations** ran in a disposable `/private/tmp` repository copy; original bytes were
+  restored between cases, dependent hashes were re-pinned, and the fixture was deleted.
+- Status booleans: **6/8 caught**; missed `groupAStarted`, `currentProposalApproved`.
+- Correction fields: **1/2 caught**; missed `blockedCorrection`.
+- Ledger source membership: **39/39 caught**. Scored-row decision status: **39/39 caught**.
+- Targeted closures/freshness: **7/9 caught**; missed C4-02 O1 and C4-03 §3.3.
+- Independent recount: 105 modules · 20 blocks · 368.0 h · **347.5 main / 20.5 optional** ·
+  +36 modules / +142.0 h · 13 exams · 19 cheat sheets · 35 labs · 13 static figures ·
+  7 in-block additions. Added hours are 120.5 + 9.0 + 9.5 + 1.5 + 1.5 + 0.0.
+- Proposal recount: 39 unique scored rows = **23 SELECT / 7 OPTIONAL / 9 CONDITIONAL**.
+
+## Validator and freshness state
+
+Before the new audit report existed, all three required commands passed with zero failures/warnings:
+`agent_context.py`, `review_integrity.py`, and `phase5_plan_consistency.py`.
+
+The new audit makes the candidate's planning-owned status/freshness state deliberately stale: the ledger
+does not yet record `PLAN_3_7_STRUCTURAL_AUDIT.md`, still says proposal 8 is unreviewed, and does not
+list proposal 8 among failed revisions. Per the owner's no-candidate-correction instruction, the
+reviewer did not repair those planning files. `phase5_plan_consistency.py` should fail current-status
+agreement and freshness until the planning lane absorbs this audit. This handoff now pins the new
+report and records the true FAIL.
+
+## Not done and deferred
+
+- No approval requested/recorded; no Gate B, Group A, acquisition, ingestion, install, authoring,
+  Gate C, F0 or runtime work started.
+- No source fetched or externally checked. `manifest.json` remains the original 13 PDF entries.
+- C5–C8, D3's maintenance-score judgment, underactuated appendix titles, and the prior-knowledge
+  E9 metadata remain unverified/deferred.
+- No Astro check or build: no curriculum/runtime artifact changed. No commit or push.
 
 ## Current review state
 
-- Calibration, Gate A, MATH, and OPT are owner-approved.
-- MATH and OPT are `CURRENTLY_PARTIAL`; approval records findings, not repairs.
-- PROB is the next block. No PROB block/module review record has yet been
-  published or approved.
-- Live visual approval remains deferred. Static structure evidence is not live
-  desktop/mobile visual verification.
-- The agent continuity protocol, stage runbook, context validator, and structural
-  review validator are installed and currently pass with zero warnings.
+- Calibration, Gate A, MATH and OPT are owner-approved. MATH/OPT remain `CURRENTLY_PARTIAL` pending
+  implementation and re-review. PROB is next; no PROB record is published and no PROB finding is
+  pre-emptively present in the plan. Live visual approval remains deferred (`STRUCTURE_VERIFIED`).
 
 ## Write ownership and dirty worktree
 
-- Claude may write `docs/plans/**`, a Gate B proposal, and planning-owned support
-  artifacts required by the consolidated prompt.
-- Codex may write `docs/review/**`, review decision records after owner approval,
-  and this agent-protocol layer.
-- Neither lane may modify current lesson/exercise/solution/cheat-sheet/exam
-  content during planning/review.
-- Existing modified/untracked application, curriculum, package, interactive,
-  plan, review, and temporary files are user-owned or pre-existing. Inspect
-  `git status` and relevant diffs; do not discard, stage, or overwrite them.
-- `RotationViz` and `GridWorldRL` are paused prototypes and excluded from this
-  review/plan implementation pass unless the owner explicitly reactivates them.
+- Claude/planning owns `docs/plans/**` except `GATE_A_BASELINE.md`, plus
+  `scripts/validate/phase5_plan_consistency.py`. `docs/review/**` is Codex/review-owned and immutable
+  after publication. The owner's one-time exception allowing this reviewer to record the audit
+  result in `CURRENT_HANDOFF.md` has now been used.
+- Neither lane may modify lesson/exercise/solution/cheat-sheet/exam content during planning/review.
+- Preserve pre-existing user-owned changes: `PROJECT_STATE.md`,
+  `data/curriculum/{ARCHITECTURE,CURRICULUM}.md`, `package.json`, `package-lock.json`,
+  `src/content/course/KIN/KIN-01.mdx`, `src/components/interactive/`, `tmp/`.
+- `RotationViz` and `GridWorldRL` remain PAUSED; nothing may depend on either.
 
 ## Next safe actions and stop conditions
 
-### Claude
-
-Use `docs/prompts/CLAUDE_PHASE5_RECONCILE_GATE_B.md`. Stay on Opus for this pass.
-Stop after publishing the reconciled plan revision and the Gate B source
-recommendation with one batched owner-approval prompt. Do not ingest sources or
-author content.
-
-### Codex
-
-Run both agent validators, audit PROB under `docs/review/REVIEW_PROTOCOL.md`,
-then present one batched approval recommendation. Do not implement review
-findings. Reconcile approved findings into the plan only after the planning lane
-has a stable path/revision.
+**Next safe action:** planning-lane correction of the four findings and freshness/status records,
+followed by one fresh independent structural review. **Stop:** no approval request, acquisition,
+ingestion, install or authoring before that review passes and the applicable gate is approved.
 
 ## Verification required at the next boundary
 
-- Recompute the active plan SHA-256 and update this handoff after Claude's pass.
-- Search all planning docs for stale module/addition/hour totals.
-- Confirm Gate A remains closed and no decision record was rewritten.
-- Confirm `docs/review/**` was not changed by the planning lane.
-- Run `python3 scripts/validate/agent_context.py` and
-  `python3 scripts/validate/review_integrity.py`; record any warnings.
+At the next boundary, rerun `agent_context.py`, `review_integrity.py`, and
+`phase5_plan_consistency.py`; confirm Gate A and all four audit reports at exact hashes; recompute and
+re-pin plan/proposal hashes if either changes. A chat summary is not evidence for any number above.

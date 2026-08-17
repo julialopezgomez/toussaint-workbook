@@ -140,18 +140,22 @@ Provisional external resource: link selected sections of Solà's quaternion refe
 
 ## Phase 5 plan reconciliation
 
-Plan: `docs/plans/PHASE5_AUGMENTATION_PLAN.md`, revision 2.2, pinned SHA-256 `412b807536da6d90b1063ad800aadf5435a6e05eabe6e3cfcd6ea65ac308f2f3`.
+Plan: `docs/plans/PHASE5_AUGMENTATION_PLAN.md`, revision 3.6, pinned SHA-256 `f90415eee32837ea01589a55f8eb63274b3c72ed3ef93a311af9e3bb5e41f39b`.
+
+*Re-pinned and corrected at plan revision 3.6 under the owner's narrow authorization for this section only (audit finding C2-01). Through the previous pinning this reconciliation cited plan revision 2.2 and assigned keyed-recall production to Gate F0, which contradicted plan §4.0.1a, §17.2 and §13. No finding, verdict, evidence, or other content of this review record is changed by that correction.*
 
 | Findings | Plan owner | Mapping |
 |---|---|---|
-| KIN02-01/03/04 | Gate F0 | Absorbed: double cover, sign/antipodal handling, integration/renormalization, and keyed recall become repairs. |
+| KIN02-01/03/04 | Gate F0 (content) + Gate F8 (recall) | Absorbed: **F0** teaches double cover, sign/antipodal handling and integration/renormalization as corrections to the lesson itself. **F8 owns all keyed recall** for these findings; no recall item is produced at F0. |
 | KIN02-02 | Gate F0 | Partly absorbed: metadata/source claim and p5 routing are fixed; other omitted units require the mappings below. |
 | KIN02-05 | Gate F0 + optional reference | Absorbed for unit/tangent assumptions; full general Jacobian is explicitly optional. |
 | KIN02-06 | Gate F0 | Absorbed: revision 2.1 verifies that `KIN-01` does not own this material and assigns both compact formulas to `KIN-02`. |
 | KIN02-07 | F0 static figure + later quaternion visualization | Absorbed with the correct teach-first, visualize-second ordering. |
-| KIN02-08 | Gate F0 + F8 | Absorbed: F0 rewrites the sigmoid-analogy prompt as direct keyed recall and names the convention targets; F8 separately governs card-export volume. |
-| KIN02-09 | Milestone correction in §17.3 | Absorbed: add a real KIN remediation/assessment item to the DYN milestone. |
+| KIN02-08 | Gate F0 (content) + Gate F8 (recall) | Absorbed: **F0 replaces the unrelated sigmoid-analogy prompt with a correct quaternion prompt** — error correction, not recall design — and names the convention targets. **F8 keys that prompt and owns every added keyed-recall item** (`q ~ −q`, inverse/product order, exp/log domains, normalization, SLERP sign choice, frame convention), plus card-export volume. |
+| KIN02-09 | Gate F0 (addition) + Gate F8 (persistence check only) | Absorbed: **F0 adds the missing `DYN-EXAM` KIN remediation mapping** (§17.3). **F8 only persistence-checks that mapping and adds no new remediation.** |
 | KIN02-10 | Explicit scope decision | Intentionally out of scope; may re-enter only if later simulation randomization needs it. |
+
+Under plan §5.3a the F8 keyed-recall work above adds **0.0 scheduled learner study hours**; it is production work inside the existing hour envelope, not new study time. The `+0.5 h` recorded for `KIN-02` in §17.2 is unchanged and covers the F0 content additions only.
 
 Current content remains `CURRENTLY_PARTIAL` until F0 and later deepening work are implemented and re-reviewed. All calibration findings now have explicit plan ownership or scope dispositions.
 

@@ -30,3 +30,6 @@ pnpm-debug.log*
 # in version control either, private repo or not.
 data/source-manifest/raw-text/
 data/source-manifest/html-text/
+
+# temporary files
+tmp/

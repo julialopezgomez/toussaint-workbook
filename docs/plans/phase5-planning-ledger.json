@@ -1,0 +1,2037 @@
+{
+  "schemaVersion": 1,
+  "planRevision": "3.7",
+  "planPath": "docs/plans/PHASE5_AUGMENTATION_PLAN.md",
+  "baselineCommit": "dd2e8717f82dfcb77aff4b8c89aba258997f87fe",
+  "generatedFor": "Phase 5 plan revision 3.7 (correction pass answering the independent STRUCTURAL FAIL on plan 3.6 / proposal 7 recorded at docs/review/planning/PLAN_3_6_STRUCTURAL_AUDIT.md) and Gate B proposal revision 8",
+  "note": "Machine-readable inputs for every count and hour figure published in the plan. scripts/validate/phase5_plan_consistency.py re-derives the baseline from src/content/course, recomputes every total from the deltas below, and asserts the plan text matches. Hours are learner study hours, not authoring effort.",
+  "hourEstimationMethod": {
+    "unit": "learner study hours",
+    "granularity": 0.5,
+    "baseline": "read from estimatedHours in each module's MDX frontmatter; never hand-entered",
+    "repairs": "a correction that replaces an incorrect statement with a correct one adds 0.0 h",
+    "compactAdditions": "approved in-module FOUNDATION additions are sized at 0.5 h per compact concept block (definition + qualification + one worked instance), 1.0 h where the decision approves two such blocks or a new worked example with an exercise. Keyed recall is NOT part of this sizing: all keyed-recall work is F8, not F0 (plan section 4.0.1a), and is sized at 0.0 scheduled learner study hours under keyedRecallHourPolicy below.",
+    "newModules": "sized by analogy to the nearest existing module of the same tier, route role, and artifact type; each analogy is recorded in newModules[].sizingAnalogy",
+    "inPlaceAdditions": "carried unchanged from plan revision 2.2 section 4.7, which was verified to sum to its stated subtotal",
+    "excludedFromF0": [
+      "keyed-recall additions of any kind, in any block",
+      "PLAN-EXAM creation",
+      "RLEARN-EXAM extension to SYM-01..04",
+      "retake-target alignment",
+      "exam rebalancing and new OPT-06 coverage",
+      "the 13 required static figures",
+      "exercise-balance reporting",
+      "any work on the paused RotationViz or GridWorldRL prototypes"
+    ],
+    "keyedRecallHourPolicy": {
+      "scheduledLearnerHours": 0.0,
+      "batch": "F8",
+      "decidedAtPlanRevision": "3.4",
+      "planSection": "5.3a",
+      "rationale": [
+        "Hours size content a learner studies, not authoring effort. The plan already applies this: a correction that replaces a wrong statement with a right one adds 0.0 h despite being real work.",
+        "The material a recall item tests is already budgeted in its module's estimatedHours or in an F0-e compact addition; counting recall hours on top would double-count the same content.",
+        "Retrieval practice is rehearsal inside the existing envelope: the 30 MATH and 26 OPT end-of-module prompts already exist and already sit inside those modules' hours. F8 makes them answered and keyed rather than adding a study session.",
+        "Volume is the owner's call and plan section 15 treats the card count as a queue, not a gate. A quantity with no fixed target cannot carry a defensible hour figure."
+      ],
+      "supersedes": "plan revision 3.3's unsupported claim that keyed recall is 'sized separately in that batch', which no ledger field backed (audit finding C2-02).",
+      "ifChanged": "Assigning scheduled hours to keyed recall is a section 18 amendment requiring a full recount, never a silent edit to this figure."
+    }
+  },
+  "canonicalBlockOrder": [
+    "MATH",
+    "NUM",
+    "PROB",
+    "OPT",
+    "ODE",
+    "KIN",
+    "DYN",
+    "UAC",
+    "PLAN",
+    "MANIP",
+    "ML",
+    "ACC",
+    "RL",
+    "SYM",
+    "REV1",
+    "RLEARN",
+    "SIM",
+    "DRL",
+    "REV2",
+    "CAP"
+  ],
+  "baselineBlocks": {
+    "MATH": {
+      "modules": 8,
+      "hours": 32.5
+    },
+    "PROB": {
+      "modules": 6,
+      "hours": 18.0
+    },
+    "OPT": {
+      "modules": 6,
+      "hours": 28.5
+    },
+    "ODE": {
+      "modules": 3,
+      "hours": 11.5
+    },
+    "KIN": {
+      "modules": 3,
+      "hours": 8.0
+    },
+    "DYN": {
+      "modules": 7,
+      "hours": 27.0
+    },
+    "PLAN": {
+      "modules": 4,
+      "hours": 12.0
+    },
+    "MANIP": {
+      "modules": 2,
+      "hours": 5.5
+    },
+    "ML": {
+      "modules": 7,
+      "hours": 23.0
+    },
+    "RL": {
+      "modules": 7,
+      "hours": 20.5
+    },
+    "SYM": {
+      "modules": 4,
+      "hours": 8.5
+    },
+    "REV1": {
+      "modules": 1,
+      "hours": 1.5
+    },
+    "RLEARN": {
+      "modules": 9,
+      "hours": 25.5
+    },
+    "REV2": {
+      "modules": 1,
+      "hours": 1.0
+    },
+    "CAP": {
+      "modules": 1,
+      "hours": 3.0
+    }
+  },
+  "foundationStabilization": {
+    "description": "Approved MATH/OPT repairs (decisions 0006, 0007) plus the approved compact in-module additions. Hours are the added learner time of the additions only; corrections add 0.0 h.",
+    "modules": [
+      {
+        "id": "MATH-00",
+        "deltaHours": 0.5,
+        "additions": [
+          "Taylor polynomial vs series vs analyticity boundary",
+          "qualitative remainder/local-error order"
+        ],
+        "repairs": []
+      },
+      {
+        "id": "MATH-01",
+        "deltaHours": 0.5,
+        "additions": [
+          "compact core-notation table (declaration/scope, set builder, maps, min/argmin, inf/sup, fixed arguments)"
+        ],
+        "repairs": [
+          "spline C^{p-1} unconditional claim",
+          "RBF width vs variance convention",
+          "future modules narrated as prior knowledge"
+        ]
+      },
+      {
+        "id": "MATH-02",
+        "deltaHours": 0.5,
+        "additions": [
+          "explicit forward route to the NUM-01 executable gradient check",
+          "float-scale/tolerance forward qualification"
+        ],
+        "repairs": [
+          "PSD treated as sufficient for a strict local minimum",
+          "Hessian symmetry without mixed-partial regularity",
+          "eigendecomposition links pointing to MATH-05 instead of MATH-04"
+        ]
+      },
+      {
+        "id": "MATH-02B",
+        "deltaHours": 1.0,
+        "additions": [
+          "Identities 2.5 including Woodbury",
+          "shape table"
+        ],
+        "repairs": [
+          "PSD/PD cross-reference routed to MATH-03B",
+          "lambda>0 condition for invertibility",
+          "undisclosed source correction note"
+        ]
+      },
+      {
+        "id": "MATH-03",
+        "deltaHours": 1.0,
+        "additions": [
+          "affine spaces/subspaces and equality-constraint geometry",
+          "mixed input/output basis transforms with one worked example and exercise"
+        ],
+        "repairs": [
+          "missing vector-space distributivity axiom",
+          "dual space defined without linearity",
+          "reversed covariance/contravariance table",
+          "eigendecomposition route",
+          "prerequisite metadata and readiness"
+        ]
+      },
+      {
+        "id": "MATH-03B",
+        "deltaHours": 0.5,
+        "additions": [
+          "general full-rank projection B(B^T B)^{-1}B^T and its least-squares bridge"
+        ],
+        "repairs": [
+          "PSD/minimum implication repeated",
+          "scalar product collapsed into a PD matrix without basis choice",
+          "notation v>0 for a matrix",
+          "eigenvalue proof route"
+        ]
+      },
+      {
+        "id": "MATH-04",
+        "deltaHours": 0.5,
+        "additions": [
+          "Eckart-Young best rank-k approximation with Frobenius/spectral error and a truncation example"
+        ],
+        "repairs": [
+          "covariance normalization 1/n -> 1/m",
+          "pseudoinverse zero modes",
+          "symmetric SVD/eigendecomposition coincidence overbroad",
+          "PSD/PD eigenvalue wording",
+          "power-method convergence qualifications"
+        ]
+      },
+      {
+        "id": "MATH-05",
+        "deltaHours": 0.5,
+        "additions": [
+          "coordinate-transformation/invariance derivation with one numeric rescaling example"
+        ],
+        "repairs": [
+          "prerequisite metadata (MATH-02/03/03B, not MATH-04)",
+          "directional limit vs Frechet differentiability",
+          "natural-gradient/preconditioning/Gauss-Newton conditions"
+        ]
+      },
+      {
+        "id": "OPT-01",
+        "deltaHours": 0.5,
+        "additions": [
+          "Newton-decrement stopping reference box"
+        ],
+        "repairs": [
+          "unnormalized metric steepest direction in lesson and exercise",
+          "Armijo vs weak vs strong Wolfe separation and an enforceable line search",
+          "descent sign and damping/trust-region limiting behaviour",
+          "strictly-convex-quadratic condition for the one-step Newton claim",
+          "Levenberg-Marquardt naming",
+          "overgeneralized optimizer desiderata",
+          "remove the MATH-05 duplicate derivation; recall and apply instead"
+        ]
+      },
+      {
+        "id": "OPT-02",
+        "deltaHours": 0.5,
+        "additions": [
+          "explicit implementation bridge to NUM-03 for stable least-squares solves"
+        ],
+        "repairs": [
+          "J^T J rank/damping/conditioning requirements",
+          "sparsity and fill-in claim",
+          "BFGS curvature condition y^T s > 0",
+          "linear vs nonlinear CG and exact-arithmetic conditions",
+          "dense O(n^3) cost qualification"
+        ]
+      },
+      {
+        "id": "OPT-03",
+        "deltaHours": 0.5,
+        "additions": [
+          "multiplier sensitivity/shadow-price reference box"
+        ],
+        "repairs": [
+          "constraint qualification for KKT necessity",
+          "force balance as a cone of active inequality gradients plus equality span",
+          "stationarity vs minimizing the Lagrangian; saddle/duality conditions",
+          "equality-constrained stationarity presented as an unconstrained problem"
+        ]
+      },
+      {
+        "id": "OPT-04",
+        "deltaHours": 1.5,
+        "additions": [
+          "LP relaxation, lower bounds, rounding and branch-and-bound intuition",
+          "DCP-style composition with QP/SOCP/SDP problem-class recognition",
+          "compact Phase-I/feasible-start context"
+        ],
+        "repairs": [
+          "false convex/quasiconvex/unimodal hierarchy",
+          "log-barrier domain, limit and smoothness claims",
+          "barrier-gradient sign contradiction in the exercise",
+          "convex QP requires Q PSD not PD",
+          "SQP uses the Hessian of the Lagrangian plus globalization",
+          "Simplex and central-path assumptions"
+        ]
+      },
+      {
+        "id": "OPT-05",
+        "deltaHours": 0.5,
+        "additions": [
+          "explicit route to OPT-05B and a corrected scope statement for the module title"
+        ],
+        "repairs": [
+          "SGD convergence assumptions (unbiasedness, variance bound, step size, problem class)",
+          "sampling and per-step cost overgeneralization",
+          "adaptive methods as second moments, not Hessian diagonals",
+          "Nesterov O(1/k^2) tied to the accelerated method",
+          "prerequisite/readiness to probability"
+        ]
+      },
+      {
+        "id": "OPT-06",
+        "deltaHours": 0.5,
+        "additions": [
+          "explicit min/max convention table for acquisition functions"
+        ],
+        "repairs": [
+          "GP-UCB direction under the minimization convention",
+          "UCB1 bounded/sub-Gaussian stationary reward assumptions",
+          "GP posterior nonzero prior mean",
+          "ensemble spread as heuristic, not calibrated confidence",
+          "kernel smoothness and stable-solve/jitter conditions"
+        ]
+      }
+    ]
+  },
+  "calibrationRepairs": {
+    "description": "Calibration-review repairs outside MATH/OPT, carried from plan revision 2.2 section 17.2. MATH-02B's calibration repair is folded into foundationStabilization to avoid double counting.",
+    "modules": [
+      {
+        "id": "KIN-02",
+        "deltaHours": 0.5
+      },
+      {
+        "id": "RLEARN-02",
+        "deltaHours": 1.0
+      }
+    ]
+  },
+  "inPlaceAdditions": {
+    "description": "Visualization and lab attachments to existing modules, carried unchanged from plan revision 2.2 section 4.7.",
+    "modules": [
+      {
+        "id": "KIN-01",
+        "deltaHours": 0.0
+      },
+      {
+        "id": "KIN-02",
+        "deltaHours": 0.5
+      },
+      {
+        "id": "KIN-03",
+        "deltaHours": 0.5
+      },
+      {
+        "id": "ODE-02",
+        "deltaHours": 0.5
+      },
+      {
+        "id": "ODE-03",
+        "deltaHours": 1.0
+      },
+      {
+        "id": "DYN-02",
+        "deltaHours": 0.5
+      },
+      {
+        "id": "DYN-04",
+        "deltaHours": 1.0
+      },
+      {
+        "id": "DYN-07",
+        "deltaHours": 1.0
+      },
+      {
+        "id": "PLAN-01",
+        "deltaHours": 0.5
+      },
+      {
+        "id": "PLAN-02",
+        "deltaHours": 1.0
+      },
+      {
+        "id": "MANIP-01",
+        "deltaHours": 0.5
+      },
+      {
+        "id": "RL-02",
+        "deltaHours": 0.5
+      },
+      {
+        "id": "RL-03",
+        "deltaHours": 0.5
+      },
+      {
+        "id": "RL-06",
+        "deltaHours": 0.5
+      },
+      {
+        "id": "ML-03",
+        "deltaHours": 1.0
+      }
+    ]
+  },
+  "rescopes": {
+    "description": "Review modules rescoped to cover the new blocks.",
+    "modules": [
+      {
+        "id": "REV1-01",
+        "deltaHours": 0.5
+      },
+      {
+        "id": "REV2-01",
+        "deltaHours": 1.0
+      }
+    ]
+  },
+  "newModules": [
+    {
+      "id": "NUM-01",
+      "block": "NUM",
+      "hours": 2.0,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "MATH-02"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "NUM-02",
+      "block": "NUM",
+      "hours": 3.0,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "NUM-01",
+        "MATH-03"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "NUM-03",
+      "block": "NUM",
+      "hours": 3.0,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "NUM-01",
+        "MATH-04"
+      ],
+      "origin": "decision-0006",
+      "deepens": [
+        "MATH-04"
+      ],
+      "sizingAnalogy": "sized as NUM-02 (3.0 h): one CPU-first main-route module with a single measured lab and comparable concept count"
+    },
+    {
+      "id": "UAC-01",
+      "block": "UAC",
+      "hours": 2.5,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "DYN-01",
+        "DYN-03"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "UAC-02",
+      "block": "UAC",
+      "hours": 3.5,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "UAC-01",
+        "ODE-02"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "UAC-03",
+      "block": "UAC",
+      "hours": 3.5,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "DYN-06",
+        "UAC-02"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "UAC-04",
+      "block": "UAC",
+      "hours": 4.0,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "DYN-04",
+        "OPT-04",
+        "NUM-02"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "UAC-05",
+      "block": "UAC",
+      "hours": 3.0,
+      "tier": 3,
+      "route": "optional",
+      "prerequisites": [
+        "UAC-03",
+        "UAC-04"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "PLAN-05",
+      "block": "PLAN",
+      "hours": 4.0,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "PLAN-01",
+        "OPT-04",
+        "NUM-02"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "PLAN-06",
+      "block": "PLAN",
+      "hours": 3.5,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "PLAN-05",
+        "OPT-04"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "MANIP-03",
+      "block": "MANIP",
+      "hours": 4.0,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "MANIP-01",
+        "DYN-01",
+        "UAC-01"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "MANIP-04",
+      "block": "MANIP",
+      "hours": 3.5,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "MANIP-03",
+        "DYN-03"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "MANIP-05",
+      "block": "MANIP",
+      "hours": 2.5,
+      "tier": 3,
+      "route": "optional",
+      "prerequisites": [
+        "MANIP-02",
+        "UAC-02"
+      ],
+      "origin": "rev2.0-relocated",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "ACC-01",
+      "block": "ACC",
+      "hours": 2.5,
+      "tier": 2,
+      "route": "main",
+      "prerequisites": [
+        "NUM-02",
+        "ML-01"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "ACC-02",
+      "block": "ACC",
+      "hours": 3.5,
+      "tier": 2,
+      "route": "main",
+      "prerequisites": [
+        "ACC-01"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "ACC-03",
+      "block": "ACC",
+      "hours": 3.0,
+      "tier": 2,
+      "route": "main",
+      "prerequisites": [
+        "ACC-02"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "ACC-04",
+      "block": "ACC",
+      "hours": 4.0,
+      "tier": 2,
+      "route": "main",
+      "prerequisites": [
+        "ACC-02",
+        "PLAN-05"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "ACC-05",
+      "block": "ACC",
+      "hours": 2.5,
+      "tier": 3,
+      "route": "optional",
+      "prerequisites": [
+        "ACC-03"
+      ],
+      "origin": "rev2.0-renumbered",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "ACC-06",
+      "block": "ACC",
+      "hours": 3.0,
+      "tier": 3,
+      "route": "optional",
+      "prerequisites": [
+        "ACC-03"
+      ],
+      "origin": "rev1.1",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "SIM-01",
+      "block": "SIM",
+      "hours": 3.5,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "ODE-03",
+        "DYN-01",
+        "NUM-01"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "SIM-02",
+      "block": "SIM",
+      "hours": 3.5,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "SIM-01",
+        "KIN-03"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "SIM-03",
+      "block": "SIM",
+      "hours": 3.0,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "SIM-02",
+        "RLEARN-03"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "SIM-04",
+      "block": "SIM",
+      "hours": 3.5,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "SIM-03",
+        "DYN-03",
+        "DYN-07"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "SIM-05",
+      "block": "SIM",
+      "hours": 3.5,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "SIM-04",
+        "MANIP-03"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "SIM-06",
+      "block": "SIM",
+      "hours": 3.5,
+      "tier": 2,
+      "route": "main",
+      "prerequisites": [
+        "SIM-03",
+        "ACC-03"
+      ],
+      "origin": "rev2.0-relocated",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "DRL-01",
+      "block": "DRL",
+      "hours": 2.5,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "RL-03",
+        "SIM-03",
+        "NUM-01"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "DRL-02",
+      "block": "DRL",
+      "hours": 3.0,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "DRL-01"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "DRL-03",
+      "block": "DRL",
+      "hours": 3.5,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "DRL-02",
+        "ML-04",
+        "RL-04"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "DRL-04",
+      "block": "DRL",
+      "hours": 3.0,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "DRL-03",
+        "RL-04"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "DRL-05",
+      "block": "DRL",
+      "hours": 4.5,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "DRL-04"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "DRL-06",
+      "block": "DRL",
+      "hours": 4.5,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "DRL-05",
+        "SIM-04"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "DRL-07",
+      "block": "DRL",
+      "hours": 4.0,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "DRL-02",
+        "RLEARN-02",
+        "SIM-04"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "DRL-08",
+      "block": "DRL",
+      "hours": 4.0,
+      "tier": 3,
+      "route": "optional",
+      "prerequisites": [
+        "DRL-07",
+        "ML-04",
+        "PROB-05"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "CAP-02",
+      "block": "CAP",
+      "hours": 4.0,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "CAP-01",
+        "PLAN-06",
+        "ACC-04",
+        "SIM-05"
+      ],
+      "origin": "rev1.0",
+      "sizingAnalogy": "carried from revision 2.2"
+    },
+    {
+      "id": "OPT-04B",
+      "block": "OPT",
+      "hours": 3.5,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "OPT-03",
+        "OPT-04",
+        "NUM-03"
+      ],
+      "origin": "decision-0007",
+      "deepens": [
+        "OPT-03"
+      ],
+      "sizingAnalogy": "sized between OPT-03 (4.5 h, full constrained-optimization module) and NUM-03 (3.0 h): a focused CPU-first module with one theorem, one derivation chain, one small lab and a failure-mode section"
+    },
+    {
+      "id": "OPT-05B",
+      "block": "OPT",
+      "hours": 3.0,
+      "tier": 1,
+      "route": "main",
+      "prerequisites": [
+        "OPT-05",
+        "PROB-02",
+        "NUM-01"
+      ],
+      "origin": "decision-0007",
+      "deepens": [
+        "OPT-05"
+      ],
+      "sizingAnalogy": "sized as NUM-03 (3.0 h): a focused CPU-first module teaching three method families at intuition depth plus an evaluation-budget lab, explicitly not a survey of every evolutionary heuristic"
+    }
+  ],
+  "existingTier3Modules": [
+    {
+      "id": "ML-07",
+      "hours": 2.5
+    },
+    {
+      "id": "RLEARN-08",
+      "hours": 2.0
+    }
+  ],
+  "labs": {
+    "description": "Enumerated lab inventory for the augmented curriculum. Revision 2.2 quoted '~31'; the explicit enumeration of its own section 10.2 table is 32. Revision 3.0 adds one lab each for NUM-03, OPT-04B and OPT-05B.",
+    "carriedFromRevision22": [
+      "LAB-NUM-01",
+      "LAB-NUM-02",
+      "LAB-ODE-03",
+      "LAB-DYN-04",
+      "LAB-DYN-07",
+      "LAB-UAC-02",
+      "LAB-UAC-04",
+      "LAB-MANIP-05",
+      "LAB-PLAN-02",
+      "LAB-PLAN-05",
+      "LAB-PLAN-06",
+      "LAB-ML-03",
+      "LAB-ACC-02",
+      "LAB-ACC-03",
+      "LAB-ACC-04",
+      "LAB-SIM-06",
+      "LAB-ACC-05",
+      "LAB-ACC-06",
+      "LAB-SIM-01",
+      "LAB-SIM-02",
+      "LAB-SIM-03",
+      "LAB-SIM-04",
+      "LAB-SIM-05",
+      "LAB-DRL-01",
+      "LAB-DRL-02",
+      "LAB-DRL-03",
+      "LAB-DRL-04",
+      "LAB-DRL-05",
+      "LAB-DRL-06",
+      "LAB-DRL-07",
+      "LAB-DRL-08",
+      "LAB-CAP-02"
+    ],
+    "addedAtRevision30": [
+      "LAB-NUM-03",
+      "LAB-OPT-04B",
+      "LAB-OPT-05B"
+    ]
+  },
+  "requiredStaticFigures": {
+    "description": "Static figures that are acceptance criteria, not optional enrichment. Interactives may never be used to close a figure finding.",
+    "MATH": [
+      "taylor locality",
+      "Hessian classes",
+      "basis change",
+      "metric geometry",
+      "SVD/rank collapse"
+    ],
+    "OPT": [
+      "line-search/Newton geometry",
+      "sparsity/conjugate directions",
+      "KKT force balance",
+      "LP/central-path/SQP geometry",
+      "stochastic/GP-acquisition behaviour"
+    ],
+    "calibration": [
+      "KIN-02 double-cover/arc",
+      "RLEARN-02 two-lane distribution shift",
+      "RLEARN-02 GAN/VAE/diffusion comparison"
+    ]
+  },
+  "published": {
+    "totalModules": 105,
+    "newModules": 36,
+    "totalBlocks": 20,
+    "newBlocks": 5,
+    "totalHours": 368.0,
+    "addedHours": 142.0,
+    "mainRouteHours": 347.5,
+    "optionalHours": 20.5,
+    "newModuleHours": 120.5,
+    "foundationStabilizationHours": 9.0,
+    "inPlaceAdditionHours": 9.5,
+    "calibrationRepairHours": 1.5,
+    "rescopeHours": 1.5,
+    "inBlockAdditions": 7,
+    "newExams": 5,
+    "totalExams": 13,
+    "newCheatSheets": 5,
+    "totalCheatSheets": 19,
+    "requiredStaticFigures": 13,
+    "labs": 35,
+    "f8KeyedRecallHours": 0.0
+  },
+  "correctedRevision22Arithmetic": {
+    "description": "Errors found in revision 2.2 while recomputing. Recorded so the corrections are auditable rather than silent.",
+    "items": [
+      {
+        "where": "section 5.1 block table",
+        "was": "DYN 29 h",
+        "is": "DYN 29.5 h at revision-2.2 scope",
+        "cause": "the +2.5 h of DYN-02/04/07 in-place additions was applied as +2.0"
+      },
+      {
+        "where": "section 5.1 block table",
+        "was": "PLAN 20 h",
+        "is": "PLAN 21.0 h at revision-2.2 scope",
+        "cause": "the +1.5 h of PLAN-01/02 in-place additions was omitted"
+      },
+      {
+        "where": "section 5.1 block table",
+        "was": "MANIP 15.5 h",
+        "is": "MANIP 16.0 h at revision-2.2 scope",
+        "cause": "the +0.5 h MANIP-01 in-place addition was omitted"
+      },
+      {
+        "where": "sections 1 and 5.1 totals",
+        "was": "~348.5 h total",
+        "is": "350.5 h at revision-2.2 scope",
+        "cause": "sum of the three block errors above"
+      },
+      {
+        "where": "section 10.2",
+        "was": "~31 labs",
+        "is": "32 labs at revision-2.2 scope",
+        "cause": "the section's own table enumerates 32"
+      }
+    ],
+    "collisionWarning": "Revision 3.0 briefly reused 348.5 as its main-route subtotal, colliding with revision 2.2's incorrect total. Revision 3.1 removes the collision: main route is now 347.5 h after the two optional reference boxes were reclassified, so 348.5 no longer names any current figure and is purely a superseded revision-2.2 value."
+  },
+  "staleClaimsThatMustNotAppear": [
+    "The workbook's defect is not missing theory",
+    "102 modules",
+    "+33 modules",
+    "33 new modules",
+    "all 33 new modules",
+    "+~122.5",
+    "~120 h new material",
+    "Gates B–G not started",
+    "Gate B NOT started",
+    "**102**",
+    "~329 h",
+    "~329 M",
+    "**33**",
+    "~31 labs",
+    "~450",
+    "226 → ~346 h",
+    "63→69→102",
+    "163–197→226→~346",
+    "348.5 main / 19.5 optional",
+    "**348.5 h is main route**",
+    "348.5 M / 19.5 O",
+    "348.5 h is main route and 19.5 h is optional",
+    "main route = 368.0 − 19.5",
+    "348.5 now means the main-route subtotal",
+    "2 modules with a real internal sequence",
+    "PLAN/MANIP additions fold into the existing DYN exam",
+    "Every lab has a CPU-only default within the 5–15 min ceiling",
+    "violates the no-account constraint",
+    "fits exactly one declared role",
+    "the reconciled plan revision 3.0",
+    "RotationViz (already wired) — refactor to lazy load",
+    "**Wire GridWorldRL** (prototype exists)",
+    "one keyed recall item",
+    "all 33 chapters",
+    "33 Tedrake chapters",
+    "B1/B2 — Tedrake (33 chapters)",
+    "any hosted service (all require an account)",
+    "P1 is blocked on a paused prototype",
+    "once the pilots are committed",
+    "Status at revision 3.1:",
+    "Binding at revision 3.1:",
+    "Optional has two components at revision 3.1",
+    "≥23 approved · 17–22 conditional",
+    "17–22 are **conditional**",
+    "Licence and role unconfirmed",
+    "41 rows",
+    "`ppo.py`, `sac.py`",
+    "write **newly authored** exposition informed by it",
+    "state those conditions in the workbook's own words",
+    "`DYN-EXAM` gains a KIN remediation entry (MS-04)",
+    "Revision 3.0 of that proposal was reviewed and NOT approved",
+    "proposal complete, owner approval pending",
+    "permission to acquire, pin, and record it at its approved role",
+    "Fetch the source and record it in `sources.json` v2",
+    "beyond the approved Group-A entries",
+    "acquisition, pinning into `sources.json` v2, and citation",
+    "sized separately in that batch",
+    "both need `OPT-03`'s KKT constraint qualification repaired in F0",
+    "Both depend on F0 having repaired `OPT-03`'s KKT necessity conditions first",
+    "renamed `R_u`** in DYN-06/UAC/SIM-04",
+    "touch 4 existing modules",
+    "the four existing-notation renames",
+    "**Proposal revision 4 — 2026-08-15.**",
+    "**Proposal revision 5 — 2026-08-15.**",
+    "Gate B proposal revision 4 — DRAFT ONLY",
+    "**Proposal revision 6 — 2026-08-15.**",
+    "**Proposal revision 7 — 2026-08-15.**",
+    "One locator-verification fetch at acquisition",
+    "One re-attempt at acquisition",
+    "Per-dataset confirmation at acquisition",
+    "Locators verified and pinned at acquisition",
+    "confirmed at acquisition as part of the same blocker",
+    "no review or approval request authorized",
+    "Gate B proposal revision 6 — DRAFT ONLY",
+    "Gate B proposal revision 7 — DRAFT ONLY"
+  ],
+  "optionalInModuleAdditions": {
+    "description": "Approved in-module additions that decision 0007 classifies as OPTIONAL reference boxes. Their hours count as optional, not main route. Corrected at revision 3.1; revision 3.0 wrongly counted them as main route.",
+    "items": [
+      {
+        "id": "OPT-01",
+        "item": "Newton-decrement stopping reference box",
+        "hours": 0.5
+      },
+      {
+        "id": "OPT-03",
+        "item": "Multiplier sensitivity / shadow-price reference box",
+        "hours": 0.5
+      }
+    ]
+  },
+  "pausedPrototypes": {
+    "description": "Owner-paused. No batch, gate, pilot, or acceptance criterion may depend on these. Plan section 4.7a.",
+    "items": [
+      {
+        "id": "RotationViz",
+        "status": "PAUSED",
+        "scheduledHours": 0.0,
+        "note": "KIN-01 in-place row stays at +0.0 h; lazy-load refactor contingent on owner reactivation."
+      },
+      {
+        "id": "GridWorldRL",
+        "status": "PAUSED",
+        "scheduledHours": 0.0,
+        "note": "RL-03's +0.5 h in-place row is authored in F2 with or without this prototype."
+      }
+    ]
+  },
+  "assessmentInventory": {
+    "description": "Exam and cheat-sheet IDs enumerated rather than counted. Added at plan revision 3.3 per mandatory correction 9. existing* are re-derived from src/content/{milestones,cheatsheets} by the validator and must match byte-for-byte; new* are the IDs this plan promises to create.",
+    "existingExamIds": [
+      "CUMULATIVE-FINAL",
+      "DYN-EXAM",
+      "MATH-EXAM",
+      "ML-EXAM",
+      "OPT-EXAM",
+      "PROB-EXAM",
+      "RL-EXAM",
+      "RLEARN-EXAM"
+    ],
+    "newExamIds": [
+      "ACC-EXAM",
+      "DRL-EXAM",
+      "PLAN-EXAM",
+      "SIM-EXAM",
+      "UAC-EXAM"
+    ],
+    "newExamBatch": {
+      "ACC-EXAM": "F8",
+      "DRL-EXAM": "F8",
+      "PLAN-EXAM": "F8",
+      "SIM-EXAM": "F8",
+      "UAC-EXAM": "F8"
+    },
+    "existingCheatSheetIds": [
+      "cap",
+      "dyn",
+      "kin",
+      "manip",
+      "math",
+      "ml",
+      "neural-networks-backprop",
+      "ode",
+      "opt",
+      "plan",
+      "prob",
+      "rl",
+      "rlearn",
+      "sym"
+    ],
+    "newCheatSheetIds": [
+      "acc",
+      "drl",
+      "num",
+      "sim",
+      "uac"
+    ],
+    "newCheatSheetBatch": {
+      "acc": "F8",
+      "drl": "F8",
+      "num": "F8",
+      "sim": "F8",
+      "uac": "F8"
+    },
+    "note": "SIM-EXAM covers NUM and SIM, so NUM gets a cheat sheet but no exam of its own (plan 5.3). DYN-EXAM's KIN remediation entry is added at F0 and only PERSISTENCE-CHECKED at F8; it is not a new F8 remediation.",
+    "requiredBatchForNewAssessments": "F8"
+  },
+  "staleClaimScope": {
+    "description": "Which documents each stale claim is checked against. Added at plan revision 3.3 per mandatory correction 9: revision 3.2's checker scanned the plan only, so an identical stale claim could survive in the proposal or the handoff undetected.",
+    "documents": [
+      "docs/plans/PHASE5_AUGMENTATION_PLAN.md",
+      "docs/plans/GATE_B_SOURCE_SELECTION.md",
+      "docs/agent/CURRENT_HANDOFF.md"
+    ],
+    "exemptions": {
+      "description": "A stale phrase may legitimately appear inside an explicitly-labelled historical correction note. Each exemption names the document and the phrase, and the validator requires the phrase to be within contextWindow characters of one of the markers below.",
+      "contextWindow": 700,
+      "markers": [
+        "Corrected at revision",
+        "corrected at revision",
+        "Corrected at proposal revision",
+        "corrected at proposal revision",
+        "Repaired at revision",
+        "Repaired at proposal revision",
+        "Scoped at revision",
+        "scoped at revision",
+        "through revision 3.2",
+        "Through revision 3.2",
+        "revision 3 named",
+        "Revision 3's",
+        "revision 3 said",
+        "Revision 3 published",
+        "got wrong",
+        "must not appear",
+        "was wrong",
+        "were wrong",
+        "is now stated",
+        "which FAILED",
+        "each FAILED",
+        "and each FAILED",
+        "Corrected at revision 3.4",
+        "corrected at revision 3.4",
+        "audit finding",
+        "Revision 3.3 claimed",
+        "revision 3.3 said",
+        "Through revision 3.3",
+        "through revision 3.3",
+        "which is false",
+        "no ledger field backed",
+        "supersedes",
+        "STRUCTURAL FAIL"
+      ],
+      "note": "A correction register must be able to quote the wording it removed. Each exemption requires one of these markers within contextWindow characters of the hit, so an unqualified stale claim still fails while a labelled historical note does not."
+    }
+  },
+  "gateBProposal": {
+    "description": "Machine-checkable expectations for docs/plans/GATE_B_SOURCE_SELECTION.md. Added at plan revision 3.3 per mandatory correction 9, so the proposal's schema completeness, coverage-matrix completeness and score/status consistency are checked rather than asserted.",
+    "proposalRevision": 8,
+    "path": "docs/plans/GATE_B_SOURCE_SELECTION.md",
+    "sourceEntryRequiredFields": [
+      "sourceId",
+      "kind",
+      "roles",
+      "reuseStatus",
+      "cost",
+      "requiresAccount",
+      "conditional",
+      "citationUnits",
+      "modules"
+    ],
+    "sourceEntryLicenseFields": [
+      "license",
+      "licenseNote"
+    ],
+    "conditionalRequiredFields": [
+      "blocker",
+      "activationCondition",
+      "resolutionCeiling",
+      "ifUnresolved"
+    ],
+    "expectedSourceEntries": 48,
+    "expectedPdfEntries": 13,
+    "statusCounts": {
+      "SELECT": 23,
+      "OPTIONAL": 7,
+      "CONDITIONAL": 9,
+      "totalScored": 39
+    },
+    "statusVocabulary": [
+      "SELECT",
+      "OPTIONAL",
+      "CONDITIONAL"
+    ],
+    "conditionalSourceIds": [
+      "deits-tedrake-iris",
+      "drake-docs",
+      "haarnoja-sac-apps",
+      "lerobot-docs",
+      "marcucci-gcs",
+      "mjwarp-docs",
+      "mujoco-menagerie",
+      "sutton-barto-2e",
+      "triton-docs"
+    ],
+    "optionalSourceIdsWithEntries": [
+      "jax-docs",
+      "mujoco-playground"
+    ],
+    "scoreBands": {
+      "eligibleFullRole": 23,
+      "eligibleNarrowedRoleFloor": 17,
+      "maxScore": 33,
+      "note": "Bands set ELIGIBILITY only. Status is assigned separately by plan 9.9's taxonomy. A source scoring above 23 may still be OPTIONAL or CONDITIONAL, and that is not a contradiction - it was treated as one through plan revision 3.2."
+    },
+    "coverageMatrix": {
+      "columns": [
+        "unit",
+        "covering modules",
+        "disposition",
+        "reason",
+        "notation conflicts introduced"
+      ],
+      "totalRows": 220,
+      "perSourceRows": {
+        "A1": 34,
+        "A2": 14,
+        "A3": 19,
+        "A4": 13,
+        "A5": 7,
+        "A5b": 6,
+        "A6": 3,
+        "A7": 5,
+        "A8": 6,
+        "B1": 26,
+        "B2": 12,
+        "documentation": 56,
+        "D1": 3,
+        "D2": 1,
+        "papers": 15
+      },
+      "documentationRowsPerSource": {
+        "C1": 15,
+        "C2": 8,
+        "C3": 6,
+        "C4": 6,
+        "C5": 2,
+        "C6": 1,
+        "C7": 1,
+        "C8": 2,
+        "C9": 6,
+        "C10": 6,
+        "C11": 3
+      },
+      "tedrakeSourceUnits": {
+        "underactuatedChapters": 21,
+        "underactuatedAppendices": 5,
+        "manipulationChapters": 12,
+        "total": 38
+      },
+      "requiredUnits": {
+        "B1": [
+          "UA ch.1",
+          "UA ch.2",
+          "UA ch.3",
+          "UA ch.4",
+          "UA ch.5",
+          "UA ch.6",
+          "UA ch.7",
+          "UA ch.8",
+          "UA ch.9",
+          "UA ch.10",
+          "UA ch.11",
+          "UA ch.12",
+          "UA ch.13",
+          "UA ch.14",
+          "UA ch.15",
+          "UA ch.16",
+          "UA ch.17",
+          "UA ch.18",
+          "UA ch.19",
+          "UA ch.20",
+          "UA ch.21",
+          "UA Appendix A",
+          "UA Appendix B",
+          "UA Appendix C",
+          "UA Appendix D",
+          "UA Appendix E"
+        ],
+        "B2": [
+          "RM ch.1",
+          "RM ch.2",
+          "RM ch.3",
+          "RM ch.4",
+          "RM ch.5",
+          "RM ch.6",
+          "RM ch.7",
+          "RM ch.8",
+          "RM ch.9",
+          "RM ch.10",
+          "RM ch.11",
+          "RM ch.12"
+        ]
+      },
+      "requiredUnitsNote": "Identity-level membership for the 38 Tedrake source units. The row COUNT was already checked; audit finding C9-02 showed a duplicate UA ch.1 replacing UA ch.2 kept the count at 220 and passed."
+    },
+    "correctedAtProposalRevision4": [
+      "documentation row total 41 -> 56",
+      "A1 rows 13+22 -> 34",
+      "A2 table 12 rows -> 14",
+      "A3 rows 13 -> 19",
+      "Tedrake 33 -> 38 units, instantiated individually",
+      "E4b and E10 given matrix rows",
+      "CleanRL sac.py -> sac_continuous_action.py",
+      "C7 MuJoCo Playground CONDITIONAL -> OPTIONAL (Apache-2.0, SIM-06 reference, no blocker)",
+      "C11 JAX CONDITIONAL -> OPTIONAL (no blocker; Tier-3 optionality is not a blocker)",
+      "all 13 PDF sha256 values de-truncated to full 64 hex",
+      "v1 fields relativePath/pdfMetadata/embeddedToc/extraction present in every PDF entry"
+    ],
+    "gateBAuthority": {
+      "description": "Audit finding C4-01 (CRITICAL). Gate B produces and approves EVALUATION AND PLANNING artifacts only. Acquisition, fetching, pinning, sources.json population and manifest migration are Gate D implementation work that no Gate B approval authorizes - including for Group A.",
+      "gateBMayProduce": [
+        "scores",
+        "dispositions",
+        "coverage records",
+        "locator findings",
+        "licence findings",
+        "version findings",
+        "notation conflicts",
+        "a non-executed sources.json v2 draft"
+      ],
+      "gateBMayNot": [
+        "acquire",
+        "fetch",
+        "download",
+        "pin acquired material",
+        "populate sources.json",
+        "migrate manifest.json",
+        "ingest or extract source text"
+      ],
+      "acquisitionGate": "D",
+      "groupAExceptionRemoved": "Plan 9.10 and proposal 10.1 previously prohibited a populated sources.json only 'beyond the approved Group-A entries', which affirmatively authorized populating Group-A rows. Deleted at plan revision 3.4 / proposal revision 5."
+    },
+    "statusMembership": {
+      "SELECT": [
+        "A1",
+        "A2",
+        "A3",
+        "A4",
+        "A5",
+        "A5b",
+        "A6",
+        "A7",
+        "A8",
+        "B1",
+        "B2",
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "D1",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "E5"
+      ],
+      "OPTIONAL": [
+        "A9",
+        "A10",
+        "A11",
+        "A12",
+        "C7",
+        "C11",
+        "E8"
+      ],
+      "CONDITIONAL": [
+        "C6",
+        "C8",
+        "C9",
+        "C10",
+        "D3",
+        "E4b",
+        "E9a",
+        "E9b",
+        "E10"
+      ],
+      "note": "Membership sets, not just counts. Audit finding C9-02: moving A1 from SELECT to OPTIONAL preserved every printed count and passed the old check. Audit finding C9 (proposal revision 6): the CONDITIONAL list named 'Menagerie', which had no scored row in proposal 2.1-2.5 - the matrices held 38 scored rows while 2.6b published 39. Menagerie is now scored as D3, so the scored-ID set and the roll-up union are the same 39 IDs and the validator enforces that equality."
+    },
+    "correctedAtProposalRevision6": [
+      "Menagerie scored as D3 in 2.4 (25/33, CONDITIONAL on per-model licences) - it had a sources.json draft entry, a role, named modules, a blocker row, an open item and a reuse row, but no scored row",
+      "2.6b CONDITIONAL roll-up: 'Menagerie' -> 'D3'; scored set and roll-up union now equal at 39",
+      "2 step-2 status table realigned to plan 9.9's three questions: Gate-B evaluation status, future Gate-D acquisition eligibility, future Gate-C citation/authoring eligibility",
+      "header, 0.7 and 10.2 record proposal revision 5 as a partial UNREVIEWED correction pass superseded BEFORE review, not as reviewed or approved",
+      "sources.json draft generatedBy 'proposal revision 4' -> 'proposal revision 6'",
+      "2.4 retitled 'Reference implementations and model assets' to cover D3"
+    ],
+    "correctedAtProposalRevision7": [
+      "numbering note said the proposal revision was 'currently 5' while the header declared 6 (audit C1-01)",
+      "7 O1 no longer says a Gate-B approval 'approves citation'; it records classification and future eligibility only (audit C4-02)",
+      "scored-row decision is now recorded per source ID and compared with the 2.6b bucket and ledger statusMembership (audit C9-04)",
+      "sources.json draft generatedBy 'proposal revision 6' -> 'proposal revision 7'"
+    ],
+    "conditionalResolutionTerminology": {
+      "description": "Audit finding C4-03. Plan 9.9 makes a CONDITIONAL source ineligible for acquisition while its blocker stands, and plan 9.9.1 states that the bounded evaluation-only Gate-D fetch/read 'is not acquisition'. A conditional blocker therefore cannot be resolved 'at acquisition': that schedules the resolution after the event the resolution is a precondition for. Proposal 7 O5 said 'One locator-verification fetch at acquisition' and O6 said 'One re-attempt at acquisition'; sibling rows in 2.6, 3.3 and the 5 draft said the same. Every blocker-resolution statement for a CONDITIONAL source now names the plan-9.9.1 Gate-D evaluation-only fetch/read instead. 'At acquisition' remains correct for unblocked SELECT/OPTIONAL fields that a later Gate D will fill (0.6).",
+      "forbiddenInConditionalResolution": [
+        "at acquisition"
+      ],
+      "requiredPhraseFragments": [
+        "evaluation-only",
+        "9.9.1"
+      ],
+      "checkedSections": [
+        "2.6 activation-condition cells",
+        "5 sources.json v2 draft activationCondition / resolutionCeiling fields for conditional entries",
+        "7 open-item resolution cells for conditional sources"
+      ]
+    }
+  },
+  "structuralAudit": {
+    "path": "docs/review/planning/PLAN_3_6_STRUCTURAL_AUDIT.md",
+    "sha256": "a42cb26edc93219a0c82c8e5abc84878cb7ded0530528a2d7c518bd84d694b89",
+    "verdict": "STRUCTURAL FAIL",
+    "auditedPlanRevision": "3.6",
+    "auditedProposalRevision": 7,
+    "passed": [
+      "C1-01",
+      "C2-01",
+      "C2-02",
+      "C3",
+      "C4-02",
+      "C9",
+      "C9-04",
+      "STR-01",
+      "STR-02",
+      "totals and route classification",
+      "gate and prerequisite order",
+      "Gate-A invariance"
+    ],
+    "failed": [
+      "C1-02",
+      "C2-03",
+      "C4-03"
+    ],
+    "note": "Plan revision 3.7 and proposal revision 8 respond to it. C1-02: the status validator printed the withdrawn 'no review or approval request authorized' state and never compared the ledger's fact booleans, so a true->false mutation of independentReviewRequiredAndAuthorized exited 0. C2-03: plan 5.1 said the +142.0 h decomposes 'exactly' and listed five components, omitting the declared sixth f8KeyedRecall at 0.0 h. C4-03: proposal 7 O5/O6 resolved CONDITIONAL blockers 'at acquisition', which plan 9.9 makes impossible while the blocker stands. Review-owned evidence, read-only; this report is never edited.",
+    "priorAudit": {
+      "path": "docs/review/planning/PLAN_3_5_STRUCTURAL_AUDIT.md",
+      "sha256": "3f3cd468e56ddedb69a29cd0e6d92ab81b7364a8ca63f686a400cc76f1d31a4e",
+      "verdict": "STRUCTURAL FAIL",
+      "auditedPlanRevision": "3.5",
+      "auditedProposalRevision": 6,
+      "note": "Review-owned evidence, read-only. Plan revision 3.6 and proposal revision 7 responded to it; the PLAN_3_6 audit confirmed all five of its findings answered.",
+      "priorAudit": {
+        "path": "docs/review/planning/PLAN_3_3_STRUCTURAL_AUDIT.md",
+        "sha256": "6c6d0164ec296740db2c377259f08afcf1d41d3ffb2d816a229b3ef051b64b7c",
+        "verdict": "STRUCTURAL FAIL",
+        "auditedPlanRevision": "3.3",
+        "auditedProposalRevision": 4,
+        "note": "Review-owned evidence, read-only. Plan revision 3.4 and proposal revision 5 respond to it. C2-01 is BLOCKED because its fix requires editing review-owned docs/review/modules/KIN-02.md."
+      }
+    }
+  },
+  "f8KeyedRecall": {
+    "description": "Enumerated F8 keyed-recall component. Its value is 0.0 h by the explicit policy in hourEstimationMethod.keyedRecallHourPolicy. It exists as a real component so the addedHours decomposition is complete by construction rather than exhaustive by coincidence - the defect audit finding C2-02 identified.",
+    "deltaHours": 0.0,
+    "batch": "F8",
+    "scope": [
+      "MATH: whole-block keyed recall across all 8 modules (decision 0006)",
+      "OPT: whole-block keyed recall across all 6 modules (decision 0007)",
+      "KIN-02: keying the F0-corrected prompt, plus recall for q ~ -q, inverse/product order, exp/log domains, normalization, SLERP sign choice, frame convention (KIN02-01, KIN02-08)",
+      "RLEARN-02: RLN02-08 recall items",
+      "MATH-02B: M02B-06 recall items"
+    ]
+  },
+  "addedHoursComponents": {
+    "description": "The six enumerated components of published.addedHours. Listed explicitly so the sum is checkable as a complete enumeration, not merely as an arithmetic total.",
+    "newModuleHours": 120.5,
+    "foundationStabilizationHours": 9.0,
+    "inPlaceAdditionHours": 9.5,
+    "calibrationRepairHours": 1.5,
+    "rescopeHours": 1.5,
+    "f8KeyedRecallHours": 0.0,
+    "total": 142.0
+  },
+  "notationMigration": {
+    "description": "Existing baseline modules requiring a notation rename at Gate C. Derived by searching src/content/course/** directly at plan revision 3.4, not asserted. Plan revision 3.3 claimed 'four renames touch 4 existing modules' and named the wrong membership (audit finding STR-02).",
+    "affectedExistingModuleCount": 5,
+    "modules": [
+      {
+        "id": "DYN-04",
+        "renames": [
+          "R->R_u",
+          "Q->Q_x"
+        ],
+        "evidence": "DYN-04.mdx:76,88,120 - LQR input/state cost matrices in the HJB/Riccati derivation",
+        "omittedThroughPlanRevision": "3.3"
+      },
+      {
+        "id": "DYN-06",
+        "renames": [
+          "R->R_u",
+          "Q->Q_x"
+        ],
+        "evidence": "DYN-06.mdx:117,123,125 - LQR value function as a Lyapunov function",
+        "omittedThroughPlanRevision": null
+      },
+      {
+        "id": "OPT-05",
+        "renames": [
+          "L->L_grad"
+        ],
+        "evidence": "OPT-05.mdx:24 notation entry; :91,93 definition and theorem",
+        "omittedThroughPlanRevision": null
+      },
+      {
+        "id": "ODE-01",
+        "renames": [
+          "L->L_grad"
+        ],
+        "evidence": "ODE-01.mdx:118 quotes OPT-05's definition including the symbol L",
+        "omittedThroughPlanRevision": "3.3"
+      },
+      {
+        "id": "SYM-02",
+        "renames": [
+          "theta->UNSETTLED"
+        ],
+        "evidence": "SYM-02.mdx:21 notation entry; body :61,71,87,95,102",
+        "omittedThroughPlanRevision": null
+      }
+    ],
+    "excludedAfterCheck": {
+      "DYN-07": "uses only the Riccati solution P; no Q/R cost matrices",
+      "REV1-01": "prose reference to LQR only",
+      "RLEARN-00": "prose reference to the Q-function only",
+      "ML-03": "L = loss, the meaning that KEEPS L",
+      "KIN-01": "R in SO(3), the meaning that KEEPS R",
+      "OPT-04": "QP cost matrix Q, a third scoped meaning, not renamed"
+    },
+    "unresolvedAtGateC": {
+      "symbol": "SYM-02 substitution replacement",
+      "problem": "Plan revisions through 3.3 named sigma. sigma already carries six distinct baseline meanings: PROB-05 standard deviation, PROB-06 Laplace variance, MATH-04 singular value, ML-03 sigmoid activation, OPT-05 gradient-noise variance, OPT-06 GP posterior std. The Gate B proposal additionally confines Hansen's CMA-ES step-size sigma to OPT-05B.",
+      "required": "Gate C must choose a genuinely free symbol and record the choice."
+    }
+  },
+  "currentGateBStatus": {
+    "description": "Audit findings C1, C1-01 and C1-02. The single recorded fact set for CURRENT Gate-B and proposal status. phase5_plan_consistency.py DERIVES a status tuple from each region below by parsing the revision claims in its prose - including the detached 'proposal revision number (currently N)' form that audit finding C1-01 showed slipping past the earlier regex - then compares every region against this block and against the other regions. Each region declares the FACTS it must speak to, not the conclusions it must state: the validator reads each fact's current value out of 'facts' and looks up the assertion that value requires in 'factAssertions', so flipping a fact changes what every region is required to say. Audit finding C1-02: regions previously named assertion labels directly, so the booleans under 'facts' were never compared with anything and setting independentReviewRequiredAndAuthorized to false exited 0 while six regions went on asserting the opposite. It does not rely on an exact stale-phrase list, and no 'Corrected at revision' marker exempts a region: a labelled historical note is excluded by SLICING the region, never by matching a marker near a hit.",
+    "planRevision": "3.7",
+    "proposalRevision": 8,
+    "failedProposalRevisions": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      7
+    ],
+    "supersededUnreviewedProposalRevisions": [
+      5
+    ],
+    "supersessionNote": "Proposal revisions 1-4 each FAILED independent review. Proposal revision 5 was superseded BEFORE review after a pre-review inspection found three defects; it was never reviewed. Proposal revision 6, with plan revision 3.5, FAILED the independent structural audit recorded at docs/review/planning/PLAN_3_5_STRUCTURAL_AUDIT.md. Proposal revision 7, with plan revision 3.6, FAILED the independent structural audit recorded at docs/review/planning/PLAN_3_6_STRUCTURAL_AUDIT.md on findings C1-02, C2-03 and C4-03. Proposal revision 8 is current, corrected, unreviewed and unapproved. Describing 5, 6 or 7 as current or unreviewed-and-pending is a factual error, and describing any revision as reviewed-and-passed is a factual error: no revision of this plan or proposal has ever passed.",
+    "facts": {
+      "gateBApproved": false,
+      "gateBStarted": false,
+      "groupAApproved": false,
+      "groupAStarted": false,
+      "currentProposalReviewed": false,
+      "currentProposalApproved": false,
+      "independentReviewRequiredAndAuthorized": true,
+      "approvalRequestAuthorized": false,
+      "resolvedCorrection": "C2-01",
+      "blockedCorrection": null,
+      "c201ResolutionNote": "Resolved at plan revision 3.6 by the owner-authorized narrow correction to docs/review/modules/KIN-02.md lines 141-156 only: re-pinned to plan 3.6, F0 owns the quaternion content and the sigmoid-prompt replacement, F8 owns keying and every added recall item, KIN02-09 is an F0 addition persistence-checked at F8. No finding, verdict or evidence changed. The resolution stands at plan revision 3.7; that record's plan pin now names the superseded revision 3.6 and is the review lane's to re-pin, which is a pin-staleness item and not a reopening of C2-01."
+    },
+    "regions": [
+      {
+        "name": "plan header status line",
+        "path": "docs/plans/PHASE5_AUGMENTATION_PLAN.md",
+        "startAnchor": "**Status:** **Gate A APPROVED",
+        "endAnchor": "**Benchmark corpus:**",
+        "mustAssertFacts": [
+          "gateBStarted",
+          "gateBApproved",
+          "groupAApproved",
+          "currentProposalReviewed",
+          "independentReviewRequiredAndAuthorized",
+          "approvalRequestAuthorized",
+          "resolvedCorrection"
+        ]
+      },
+      {
+        "name": "plan 9.6 current proposal status",
+        "path": "docs/plans/PHASE5_AUGMENTATION_PLAN.md",
+        "startAnchor": "**Current status of the Gate B proposal",
+        "endAnchor": "**Binding from revision 3.1 onward:**",
+        "mustAssertFacts": [
+          "gateBStarted",
+          "gateBApproved",
+          "groupAApproved",
+          "currentProposalReviewed",
+          "independentReviewRequiredAndAuthorized",
+          "approvalRequestAuthorized",
+          "resolvedCorrection"
+        ]
+      },
+      {
+        "name": "plan 13 Gate B section",
+        "path": "docs/plans/PHASE5_AUGMENTATION_PLAN.md",
+        "startAnchor": "### Gate B — Source shortlist & selection",
+        "endAnchor": "### Gate C — Augmented curriculum",
+        "mustAssertFacts": [
+          "gateBStarted",
+          "gateBApproved",
+          "groupAApproved",
+          "currentProposalReviewed",
+          "independentReviewRequiredAndAuthorized",
+          "approvalRequestAuthorized",
+          "resolvedCorrection"
+        ]
+      },
+      {
+        "name": "plan 16 decisions status paragraph",
+        "path": "docs/plans/PHASE5_AUGMENTATION_PLAN.md",
+        "startAnchor": "## 16. Decisions — RESOLVED",
+        "endAnchor": "**1. Size of the applied augmentation",
+        "mustAssertFacts": [
+          "gateBApproved",
+          "groupAApproved",
+          "currentProposalReviewed",
+          "independentReviewRequiredAndAuthorized",
+          "approvalRequestAuthorized"
+        ]
+      },
+      {
+        "name": "proposal header",
+        "path": "docs/plans/GATE_B_SOURCE_SELECTION.md",
+        "startAnchor": "# Gate B — Production source selection proposal",
+        "endAnchor": "## 0. Boundaries and what changed",
+        "mustAssertFacts": [
+          "gateBStarted",
+          "gateBApproved",
+          "groupAApproved",
+          "currentProposalReviewed",
+          "independentReviewRequiredAndAuthorized",
+          "approvalRequestAuthorized",
+          "resolvedCorrection"
+        ]
+      },
+      {
+        "name": "handoff baseline and status",
+        "path": "docs/agent/CURRENT_HANDOFF.md",
+        "startAnchor": "## Baseline and authority",
+        "endAnchor": "## Active objectives",
+        "mustAssertFacts": [
+          "gateBStarted",
+          "gateBApproved",
+          "groupAApproved",
+          "currentProposalReviewed",
+          "independentReviewRequiredAndAuthorized",
+          "approvalRequestAuthorized",
+          "resolvedCorrection"
+        ]
+      }
+    ],
+    "assertionPatterns": {
+      "gateBNotStarted": {
+        "affirm": [
+          "gate b[^.|]{0,160}?not started",
+          "gate b has not started"
+        ],
+        "contradict": [
+          "gate b (?:has|is)(?: now)? (?:started|begun|under ?way)",
+          "gate b is in progress"
+        ]
+      },
+      "gateBNotApproved": {
+        "affirm": [
+          "gate b[^.|]{0,160}?not approved"
+        ],
+        "contradict": [
+          "gate b (?:is|was|has been) approved",
+          "gate b approval (?:is )?(?:recorded|granted)"
+        ]
+      },
+      "groupANotApproved": {
+        "affirm": [
+          "group a[^.|]{0,160}?not approved",
+          "group a[^.|]{0,160}?unapproved",
+          "no group-a source is approved"
+        ],
+        "contradict": [
+          "group a (?:is|was|has been) approved",
+          "group-a (?:partial )?approval (?:is|was) (?:recorded|granted)"
+        ]
+      },
+      "currentProposalNotReviewed": {
+        "affirm": [
+          "unreviewed",
+          "not reviewed",
+          "not yet been reviewed"
+        ],
+        "contradict": [
+          "(?<!not )ready for approval",
+          "(?:a|the) (?:fresh )?independent review (?:has )?passed",
+          "review (?:is|has been) (?:complete|passed)"
+        ]
+      },
+      "reviewRequiredAndAuthorized": {
+        "affirm": [
+          "fresh independent (?:structural )?review",
+          "independent (?:structural )?review .{0,60}?(?:required|may be requested)",
+          "required next action"
+        ],
+        "contradict": [
+          "no (?:fresh )?independent review is currently authorized",
+          "no independent review is currently authorized",
+          "no fresh review may be requested",
+          "no fresh structural review until"
+        ]
+      },
+      "approvalNotAuthorized": {
+        "affirm": [
+          "no approval may be requested",
+          "approval may not be requested",
+          "not approved",
+          "no approval has been"
+        ],
+        "contradict": [
+          "approval (?:is|has been|was) (?:granted|recorded|requested)",
+          "owner has approved"
+        ]
+      },
+      "c201Resolved": {
+        "affirm": [
+          "c2-01 is resolved",
+          "c2-01[^.|]{0,60}?resolved"
+        ],
+        "contradict": [
+          "c2-01[^.|]{0,80}?(?:is|remains)\\s+(?:still\\s+)?blocked",
+          "blocked[^.|]{0,60}?c2-01"
+        ]
+      },
+      "gateBStarted": {
+        "affirm": [
+          "gate b (?:has|is)(?: now)? (?:started|begun|under ?way)",
+          "gate b is in progress"
+        ],
+        "contradict": [
+          "gate b[^.|]{0,160}?not started",
+          "gate b has not started"
+        ]
+      },
+      "gateBApproved": {
+        "affirm": [
+          "gate b (?:is|was|has been) approved",
+          "gate b approval (?:is )?(?:recorded|granted)"
+        ],
+        "contradict": [
+          "gate b[^.|]{0,160}?not approved"
+        ]
+      },
+      "groupAApproved": {
+        "affirm": [
+          "group a (?:is|was|has been) approved",
+          "group-a (?:partial )?approval (?:is|was) (?:recorded|granted)"
+        ],
+        "contradict": [
+          "group a[^.|]{0,160}?not approved",
+          "group a[^.|]{0,160}?unapproved",
+          "no group-a source is approved"
+        ]
+      },
+      "currentProposalReviewed": {
+        "affirm": [
+          "(?:a|the) (?:fresh )?independent review (?:has )?passed",
+          "review (?:is|has been) (?:complete|passed)"
+        ],
+        "contradict": [
+          "unreviewed",
+          "not reviewed",
+          "not yet been reviewed"
+        ]
+      },
+      "reviewNotAuthorized": {
+        "affirm": [
+          "no (?:fresh )?independent review is currently authorized",
+          "no independent review is currently authorized",
+          "no fresh review may be requested",
+          "no fresh structural review until"
+        ],
+        "contradict": [
+          "fresh independent (?:structural )?review",
+          "independent (?:structural )?review .{0,60}?(?:required|may be requested)",
+          "required next action"
+        ]
+      },
+      "approvalAuthorized": {
+        "affirm": [
+          "approval (?:is|has been|was) (?:granted|recorded|requested)",
+          "owner has approved"
+        ],
+        "contradict": [
+          "no approval may be requested",
+          "approval may not be requested",
+          "no approval has been"
+        ]
+      },
+      "c201Blocked": {
+        "affirm": [
+          "c2-01[^.|]{0,80}?(?:is|remains)\\s+(?:still\\s+)?blocked",
+          "blocked[^.|]{0,60}?c2-01"
+        ],
+        "contradict": [
+          "c2-01 is resolved",
+          "c2-01[^.|]{0,60}?resolved"
+        ]
+      }
+    },
+    "derivationRules": [
+      "Within each region, every 'proposal revision(s) N' mention is classified from a bounded local window (up to the next such mention, capped) as FAILED / UNREVIEWED / SUPERSEDED / CURRENT.",
+      "The detached form 'proposal revision number (currently N)' is ALSO parsed, as a CURRENT claim. Audit finding C1-01: the earlier regex required a digit immediately after 'proposal revision', so a numbering note saying 'currently 5' contradicted a header saying 6 and still exited 0.",
+      "failed(region) must be a subset of failedProposalRevisions.",
+      "unreviewed(region) must not intersect failedProposalRevisions - a failed revision has been reviewed, so calling it unreviewed is the C1 defect class.",
+      "current(region) must be a subset of {proposalRevision}.",
+      "superseded(region) must be a subset of failedProposalRevisions + supersededUnreviewedProposalRevisions.",
+      "No region may mention a proposal revision greater than proposalRevision.",
+      "Every region that classifies any revision must place proposalRevision in unreviewed or current.",
+      "Each region's mustAssertFacts names FACTS, not conclusions. The required assertion is looked up as factAssertions[fact][value-of-fact-in-facts], so the booleans under 'facts' are what the prose is compared against. Audit finding C1-02: regions previously named assertion labels directly, so no fact was ever read and a true->false mutation of independentReviewRequiredAndAuthorized exited 0.",
+      "A fact whose current value has no entry in factAssertions fails; an unmapped state is never treated as satisfied.",
+      "The validator's own success line is rendered FROM the facts, never from a fixed string. Audit finding C1-02: the passing diagnostic hard-coded 'no review or approval request authorized' and reported the withdrawn state on every clean run.",
+      "Regions are compared with one another, not only with the ledger, so a matched pair of wrong regions is still caught by the ledger comparison and a single drifted region by both."
+    ],
+    "factAssertions": {
+      "description": "Audit finding C1-02. Maps each recorded fact to the assertion every region carrying that fact must make, keyed by the fact's CURRENT value. This is what makes the status derivation real: the expected wording is looked up from the boolean, so a ledger-only mutation of a fact re-points every region at the opposite assertion and fails. A fact value with no entry here is itself a failure - an undefined state must never be silently unchecked.",
+      "gateBStarted": {
+        "false": "gateBNotStarted",
+        "true": "gateBStarted"
+      },
+      "gateBApproved": {
+        "false": "gateBNotApproved",
+        "true": "gateBApproved"
+      },
+      "groupAApproved": {
+        "false": "groupANotApproved",
+        "true": "groupAApproved"
+      },
+      "currentProposalReviewed": {
+        "false": "currentProposalNotReviewed",
+        "true": "currentProposalReviewed"
+      },
+      "independentReviewRequiredAndAuthorized": {
+        "true": "reviewRequiredAndAuthorized",
+        "false": "reviewNotAuthorized"
+      },
+      "approvalRequestAuthorized": {
+        "false": "approvalNotAuthorized",
+        "true": "approvalAuthorized"
+      },
+      "resolvedCorrection": {
+        "C2-01": "c201Resolved",
+        "null": "c201Blocked"
+      }
+    }
+  },
+  "addedHoursComponentContract": {
+    "description": "Audit finding C2-02. Plan 1 claimed phase5_plan_consistency.py checked the six-component addedHours enumeration; through plan revision 3.5 it recomputed from FIVE components and never read f8KeyedRecall, addedHoursComponents or published.f8KeyedRecallHours, so raising the F8 component from 0.0 to 2.0 while leaving the policy and the overall total alone exited 0. This block names every field the validator must now derive and cross-check.",
+    "components": [
+      {
+        "name": "newModuleHours",
+        "derivedFrom": "sum of newModules[].hours"
+      },
+      {
+        "name": "foundationStabilizationHours",
+        "derivedFrom": "sum of foundationStabilization.modules[].deltaHours"
+      },
+      {
+        "name": "inPlaceAdditionHours",
+        "derivedFrom": "sum of inPlaceAdditions.modules[].deltaHours"
+      },
+      {
+        "name": "calibrationRepairHours",
+        "derivedFrom": "sum of calibrationRepairs.modules[].deltaHours"
+      },
+      {
+        "name": "rescopeHours",
+        "derivedFrom": "sum of rescopes.modules[].deltaHours"
+      },
+      {
+        "name": "f8KeyedRecallHours",
+        "derivedFrom": "f8KeyedRecall.deltaHours"
+      }
+    ],
+    "mustAgree": [
+      "the six derived components sum to published.addedHours",
+      "addedHoursComponents.<name> equals each derived component",
+      "addedHoursComponents.total equals published.addedHours",
+      "published.f8KeyedRecallHours equals f8KeyedRecall.deltaHours",
+      "hourEstimationMethod.keyedRecallHourPolicy.scheduledLearnerHours equals f8KeyedRecall.deltaHours",
+      "f8KeyedRecall.batch equals hourEstimationMethod.keyedRecallHourPolicy.batch equals F8"
+    ],
+    "policyNote": "The 0.0-hour figure is a POLICY (plan 5.3a), not an arithmetic accident: keyed recall is production work inside the existing hour envelope, so it adds no scheduled learner study time. Changing it is a section 18 amendment requiring a full recount, which is why the validator requires the policy field and the component to move together or not at all.",
+    "planTable": {
+      "description": "Audit finding C2-03. Plan 5.1 said the +142.0 h 'decomposes exactly as' and then listed five components, omitting f8KeyedRecall at 0.0 h - the very component 5.3a says is 'not omitted'. The ledger and the validator were already correct; the human-facing table was not. The validator now parses that table and requires its rows to be the SAME multiset of hour figures as the six derived components, plus a Total row equal to addedHours.",
+      "planSection": "5.1",
+      "leadIn": "The +142.0 h decomposes exactly as",
+      "requiredComponentRows": 6,
+      "mustListZeroValuedComponents": true
+    }
+  },
+  "auditFreshness": {
+    "description": "Added at plan revision 3.7. A new independent audit landing against the CURRENT candidate must not be able to coexist with continuity documents that still call that candidate unreviewed - which is exactly the state this repository was in when PLAN_3_6_STRUCTURAL_AUDIT.md existed on disk while the handoff, the plan and the proposal all still said plan 3.6 / proposal 7 were unreviewed and awaiting a fresh review. phase5_plan_consistency.py reads the audited plan and proposal revisions out of each audit report's own title line - not out of this block - so an unrecorded report cannot hide.",
+    "directory": "docs/review/planning",
+    "glob": "PLAN_*_STRUCTURAL_AUDIT.md",
+    "titlePattern": "^#\\s.*plan\\s+(\\d+\\.\\d+)\\s*/\\s*Gate B proposal\\s+(\\d+)",
+    "verdictPattern": "Final verdict:\\s*\\*\\*(STRUCTURAL (?:FAIL|PASS))\\*\\*",
+    "handoffMustPinLatestAuditSha": true,
+    "rules": [
+      "Every audit report on disk must be recorded below, at its exact SHA-256, and must parse.",
+      "No audit may target the current planRevision/proposalRevision while facts.currentProposalReviewed is false: an audit of the current candidate means the candidate HAS been reviewed, and every 'unreviewed' region, including the handoff, is then stale by construction.",
+      "An audit with a STRUCTURAL FAIL verdict requires its audited proposal revision to appear in currentGateBStatus.failedProposalRevisions.",
+      "The handoff must pin the latest audit's full SHA-256, so a newer audit cannot land without the handoff being rewritten."
+    ],
+    "audits": [
+      {
+        "path": "docs/review/planning/PLAN_3_3_STRUCTURAL_AUDIT.md",
+        "sha256": "6c6d0164ec296740db2c377259f08afcf1d41d3ffb2d816a229b3ef051b64b7c",
+        "auditedPlanRevision": "3.3",
+        "auditedProposalRevision": 4,
+        "verdict": "STRUCTURAL FAIL"
+      },
+      {
+        "path": "docs/review/planning/PLAN_3_5_STRUCTURAL_AUDIT.md",
+        "sha256": "3f3cd468e56ddedb69a29cd0e6d92ab81b7364a8ca63f686a400cc76f1d31a4e",
+        "auditedPlanRevision": "3.5",
+        "auditedProposalRevision": 6,
+        "verdict": "STRUCTURAL FAIL"
+      },
+      {
+        "path": "docs/review/planning/PLAN_3_6_STRUCTURAL_AUDIT.md",
+        "sha256": "a42cb26edc93219a0c82c8e5abc84878cb7ded0530528a2d7c518bd84d694b89",
+        "auditedPlanRevision": "3.6",
+        "auditedProposalRevision": 7,
+        "verdict": "STRUCTURAL FAIL"
+      }
+    ],
+    "latestAudit": "docs/review/planning/PLAN_3_6_STRUCTURAL_AUDIT.md"
+  }
+}

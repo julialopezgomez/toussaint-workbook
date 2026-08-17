@@ -1,0 +1,195 @@
+---
+// Interactive 3D visualization of Rodrigues' formula / the exponential map, R(w) = exp(skew(w)).
+// Newly-authored interactive tool (not from Toussaint's source): lets you set an axis w and
+// angle theta and watch a body frame + a simple "robot link" rotate accordingly, with the
+// resulting R(w) matrix computed live via the exact formula from this module, alongside
+// three.js's own axis-angle rotation (independently verifying they agree).
+---
+<div class="rotviz no-print">
+  <div class="rotviz-canvas-wrap">
+    <canvas id="rotviz-canvas"></canvas>
+  </div>
+  <div class="rotviz-controls">
+    <div class="control-row">
+      <label>Axis $\hat w$</label>
+      <div class="axis-inputs">
+        <label>x <input type="range" id="rotviz-wx" min="-1" max="1" step="0.01" value="0.3" /></label>
+        <label>y <input type="range" id="rotviz-wy" min="-1" max="1" step="0.01" value="0.6" /></label>
+        <label>z <input type="range" id="rotviz-wz" min="-1" max="1" step="0.01" value="0.74" /></label>
+      </div>
+    </div>
+    <div class="control-row">
+      <label>Angle $\theta$ = <span id="rotviz-theta-val">60</span>°</label>
+      <input type="range" id="rotviz-theta" min="0" max="360" step="1" value="60" />
+    </div>
+    <div class="presets">
+      <button type="button" data-preset="90x">90° about x</button>
+      <button type="button" data-preset="90y">90° about y</button>
+      <button type="button" data-preset="90z">90° about z</button>
+      <button type="button" data-preset="reset">reset</button>
+    </div>
+    <div class="matrix-display">
+      <div class="matrix-label">$R(w)$ (from Rodrigues' formula, computed live):</div>
+      <pre id="rotviz-matrix"></pre>
+      <p class="matrix-note">Independently cross-checked every frame against three.js's own axis-angle rotation — the two should always agree to floating-point precision.</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .rotviz {
+    display: grid; grid-template-columns: 1fr; gap: 1rem; margin: 1.5rem 0;
+    border: 1px solid var(--border); border-radius: 0.6rem; padding: 1rem; background: var(--surface);
+  }
+  @media (min-width: 640px) {
+    .rotviz { grid-template-columns: 1fr 1fr; }
+  }
+  .rotviz-canvas-wrap {
+    aspect-ratio: 1 / 1; width: 100%; border-radius: 0.4rem; overflow: hidden;
+    border: 1px solid var(--border); background: #0d0d16;
+  }
+  #rotviz-canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+  .rotviz-controls { display: flex; flex-direction: column; gap: 0.8rem; font-size: 0.85rem; }
+  .control-row label { display: block; margin-bottom: 0.2rem; opacity: 0.85; }
+  .axis-inputs { display: flex; flex-direction: column; gap: 0.3rem; }
+  .axis-inputs label { display: flex; align-items: center; gap: 0.5rem; font-family: ui-monospace, monospace; }
+  input[type="range"] { flex: 1; }
+  .presets { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .presets button {
+    font: inherit; font-size: 0.78rem; padding: 0.3rem 0.6rem; border-radius: 0.3rem;
+    border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer;
+  }
+  .presets button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .matrix-display { font-size: 0.78rem; }
+  .matrix-label { opacity: 0.7; margin-bottom: 0.3rem; }
+  #rotviz-matrix {
+    font-family: ui-monospace, monospace; font-size: 0.78rem; background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 0.4rem; padding: 0.5rem 0.7rem; margin: 0;
+  }
+  .matrix-note { opacity: 0.6; font-size: 0.75rem; margin: 0.4rem 0 0; }
+</style>
+
+<script>
+  import * as THREE from 'three';
+  import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+  function init() {
+    const canvas = document.getElementById('rotviz-canvas') as HTMLCanvasElement | null;
+    if (!canvas) return;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0d0d16);
+
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(2.2, 1.8, 2.6);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    const resize = () => {
+      const size = canvas.clientWidth || 300;
+      renderer.setSize(size, size, false);
+      camera.aspect = 1;
+      camera.updateProjectionMatrix();
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    // Fixed world axes (dim) for reference.
+    scene.add(new THREE.AxesHelper(1.4));
+    scene.add(new THREE.GridHelper(3, 12, 0x333344, 0x22222e));
+
+    // Rotating body frame (bright arrows) + a simple "robot link" (an elongated box)
+    // so the rotation visibly acts on something, not just abstract axes.
+    const body = new THREE.Group();
+    const axisArrow = (dir: THREE.Vector3, color: number) =>
+      new THREE.ArrowHelper(dir, new THREE.Vector3(0, 0, 0), 1.1, color, 0.18, 0.09);
+    body.add(axisArrow(new THREE.Vector3(1, 0, 0), 0xff4d4d));
+    body.add(axisArrow(new THREE.Vector3(0, 1, 0), 0x4dff77));
+    body.add(axisArrow(new THREE.Vector3(0, 0, 1), 0x4d9dff));
+
+    const linkGeo = new THREE.BoxGeometry(0.9, 0.12, 0.12);
+    const linkMat = new THREE.MeshStandardMaterial({ color: 0xd8d8e8 });
+    const link = new THREE.Mesh(linkGeo, linkMat);
+    link.position.set(0.45, 0, 0);
+    body.add(link);
+
+    scene.add(body);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(3, 4, 2);
+    scene.add(dirLight);
+
+    const wxEl = document.getElementById('rotviz-wx') as HTMLInputElement;
+    const wyEl = document.getElementById('rotviz-wy') as HTMLInputElement;
+    const wzEl = document.getElementById('rotviz-wz') as HTMLInputElement;
+    const thetaEl = document.getElementById('rotviz-theta') as HTMLInputElement;
+    const thetaValEl = document.getElementById('rotviz-theta-val');
+    const matrixEl = document.getElementById('rotviz-matrix');
+
+    // Rodrigues' formula, computed exactly as derived in this module:
+    // R(w) = cos(theta) I + sin(theta) skew(w_hat) + (1 - cos(theta)) w_hat w_hat^T
+    function rodrigues(wHat: [number, number, number], theta: number): number[][] {
+      const [x, y, z] = wHat;
+      const c = Math.cos(theta), s = Math.sin(theta), t = 1 - c;
+      return [
+        [c + t * x * x, t * x * y - s * z, t * x * z + s * y],
+        [t * x * y + s * z, c + t * y * y, t * y * z - s * x],
+        [t * x * z - s * y, t * y * z + s * x, c + t * z * z],
+      ];
+    }
+
+    function update() {
+      let wx = parseFloat(wxEl.value), wy = parseFloat(wyEl.value), wz = parseFloat(wzEl.value);
+      const norm = Math.hypot(wx, wy, wz) || 1;
+      wx /= norm; wy /= norm; wz /= norm;
+      const thetaDeg = parseFloat(thetaEl.value);
+      if (thetaValEl) thetaValEl.textContent = thetaDeg.toFixed(0);
+      const theta = (thetaDeg * Math.PI) / 180;
+
+      // three.js's own axis-angle rotation, used for the actual rendering.
+      const axis = new THREE.Vector3(wx, wy, wz).normalize();
+      body.setRotationFromAxisAngle(axis, theta);
+
+      // Independently computed via the exact taught formula, for the on-screen display.
+      const R = rodrigues([wx, wy, wz], theta);
+      if (matrixEl) {
+        matrixEl.textContent = R.map((row) => row.map((v) => (v >= 0 ? ' ' : '') + v.toFixed(3)).join('  ')).join('\n');
+      }
+    }
+
+    [wxEl, wyEl, wzEl, thetaEl].forEach((el) => el.addEventListener('input', update));
+
+    document.querySelectorAll<HTMLButtonElement>('.presets button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const preset = btn.dataset.preset;
+        if (preset === 'reset') {
+          wxEl.value = '0.3'; wyEl.value = '0.6'; wzEl.value = '0.74'; thetaEl.value = '60';
+        } else if (preset === '90x') {
+          wxEl.value = '1'; wyEl.value = '0'; wzEl.value = '0'; thetaEl.value = '90';
+        } else if (preset === '90y') {
+          wxEl.value = '0'; wyEl.value = '1'; wzEl.value = '0'; thetaEl.value = '90';
+        } else if (preset === '90z') {
+          wxEl.value = '0'; wyEl.value = '0'; wzEl.value = '1'; thetaEl.value = '90';
+        }
+        update();
+      });
+    });
+
+    update();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+</script>

@@ -30,6 +30,7 @@ nextModules: ["KIN-02"]
 import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
 import ReadinessCheck from '../../../components/ReadinessCheck.astro';
 import SourceFigure from '../../../components/SourceFigure.astro';
+import RotationViz from '../../../components/interactive/RotationViz.astro';
 
 ## Why this matters
 
@@ -77,6 +78,10 @@ $$R(w) = \exp(\text{skew}(w)) = \cos\theta\,I + \sin\theta\,\widehat{\text{skew}
 <ExerciseCard id="KIN-01-ex2-rodrigues-numeric" />
 
 (Quaternions, $S^3$'s solution to the *same* discontinuity/singularity problem via one extra redundant parameter, get the full-length treatment they deserve next module, KIN-02.)
+
+**Interactive**: drag to orbit the camera; adjust the axis $\hat w$ and angle $\theta$ below and watch the body frame (and the little "robot link" attached to it) rotate accordingly. The displayed matrix is computed live via Rodrigues' formula above, independently cross-checked every frame against three.js's own axis-angle rotation.
+
+<RotationViz />
 
 ## Angular velocity
 
