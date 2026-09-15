@@ -1,0 +1,369 @@
+---
+// Newly-authored interactive exercise. It illustrates standard A* mechanics and
+// does not reproduce a source exercise or source figure.
+---
+
+<section class="astar no-print" aria-labelledby="astar-heading">
+  <header class="astar-header">
+    <div>
+      <p class="astar-kicker">Optional interactive extension</p>
+      <h3 id="astar-heading">Trace A* one queue operation at a time</h3>
+    </div>
+    <span class="astar-progress-label">Step <span data-step-number>1</span> of 12</span>
+  </header>
+
+  <div class="astar-progress" role="progressbar" aria-label="A* exercise progress" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0">
+    <span data-progress-bar></span>
+  </div>
+
+  <div class="astar-grid">
+    <div class="astar-left">
+      <svg class="astar-graph" viewBox="0 0 540 310" role="img" aria-labelledby="astar-graph-title astar-graph-desc">
+        <title id="astar-graph-title">Weighted graph used in the A* trace</title>
+        <desc id="astar-graph-desc">Start S connects to A and B. A connects to B and C. B and C connect to goal G. Each node displays its heuristic estimate.</desc>
+        <line class="edge" data-edge="SA" x1="70" y1="155" x2="220" y2="65" /><text class="edge-label" x="135" y="97">cost 1</text>
+        <line class="edge" data-edge="SB" x1="70" y1="155" x2="220" y2="245" /><text class="edge-label" x="135" y="225">cost 4</text>
+        <line class="edge" data-edge="AC" x1="220" y1="65" x2="365" y2="65" /><text class="edge-label" x="284" y="51">cost 2</text>
+        <line class="edge" data-edge="AB" x1="220" y1="65" x2="220" y2="245" /><text class="edge-label" x="230" y="158">cost 2</text>
+        <line class="edge" data-edge="BG" x1="220" y1="245" x2="470" y2="155" /><text class="edge-label" x="348" y="222">cost 5</text>
+        <line class="edge" data-edge="CG" x1="365" y1="65" x2="470" y2="155" /><text class="edge-label" x="425" y="95">cost 3</text>
+        <g class="node" data-node="S" transform="translate(70 155)"><circle r="35" /><text y="-3">S</text><text y="15">h=5</text></g>
+        <g class="node" data-node="A" transform="translate(220 65)"><circle r="35" /><text y="-3">A</text><text y="15">h=4</text></g>
+        <g class="node" data-node="B" transform="translate(220 245)"><circle r="35" /><text y="-3">B</text><text y="15">h=4</text></g>
+        <g class="node" data-node="C" transform="translate(365 65)"><circle r="35" /><text y="-3">C</text><text y="15">h=2</text></g>
+        <g class="node" data-node="G" transform="translate(470 155)"><circle r="35" /><text y="-3">G</text><text y="15">h=0</text></g>
+      </svg>
+      <div class="legend" aria-label="Graph state legend">
+        <span><i class="dot current"></i>current</span>
+        <span><i class="dot open"></i>open</span>
+        <span><i class="dot closed"></i>closed</span>
+        <span><i class="dot path"></i>final path</span>
+      </div>
+
+      <div class="question-panel" aria-live="polite">
+        <h4 data-question-title></h4>
+        <p data-question-prompt></p>
+        <form data-answer-form>
+          <div class="answer-grid" data-inputs></div>
+          <div class="actions">
+            <button type="submit">Check answer</button>
+            <button type="button" class="secondary" data-hint-button>Hint</button>
+            <button type="button" class="secondary" data-next-button disabled>Next</button>
+          </div>
+        </form>
+        <p class="hint" data-hint hidden></p>
+        <p class="feedback" data-feedback role="status"></p>
+      </div>
+    </div>
+
+    <div class="astar-right">
+      <section class="runtime-panel">
+        <h4>Pseudocode</h4>
+        <ol class="pseudocode" data-pseudocode>
+          <li data-line="1"><span>1</span><code>g[start] ← 0; f[start] ← h(start); parent[start] ← null</code></li>
+          <li data-line="2"><span>2</span><code>open.push(start, priority=f[start])</code></li>
+          <li data-line="3"><span>3</span><code>while open is not empty:</code></li>
+          <li data-line="4"><span>4</span><code class="indent-1">current ← open.pop_smallest_f()</code></li>
+          <li data-line="5"><span>5</span><code class="indent-1">if current = goal:</code></li>
+          <li data-line="6"><span>6</span><code class="indent-2">return reconstruct_path(parent)</code></li>
+          <li data-line="7"><span>7</span><code class="indent-1">add current to closed</code></li>
+          <li data-line="8"><span>8</span><code class="indent-1">for each neighbor of current:</code></li>
+          <li data-line="9"><span>9</span><code class="indent-2">tentative_g ← g[current] + edge_cost</code></li>
+          <li data-line="10"><span>10</span><code class="indent-2">if tentative_g &lt; g[neighbor]:</code></li>
+          <li data-line="11"><span>11</span><code class="indent-3">parent[neighbor] ← current</code></li>
+          <li data-line="12"><span>12</span><code class="indent-3">g[neighbor] ← tentative_g</code></li>
+          <li data-line="13"><span>13</span><code class="indent-3">f[neighbor] ← g[neighbor] + h(neighbor)</code></li>
+          <li data-line="14"><span>14</span><code class="indent-3">open.insert_or_update(neighbor, f)</code></li>
+        </ol>
+        <p class="executing"><strong>Executing:</strong> <span data-line-note></span></p>
+      </section>
+
+      <section class="runtime-panel">
+        <h4>Priority queue: open</h4>
+        <div data-queue-view></div>
+      </section>
+
+      <section class="runtime-panel">
+        <h4>Stored node records</h4>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Node</th><th>g</th><th>h</th><th>f</th><th>Parent</th><th>Status</th></tr></thead>
+            <tbody data-memory-body></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <button type="button" class="secondary restart" data-restart-button>Restart exercise</button>
+</section>
+
+<style>
+  .astar { margin: 1.5rem 0; border: 1px solid var(--border); border-radius: 0.75rem; padding: 1rem; background: var(--surface); }
+  .astar-header { display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
+  .astar-header h3 { margin: 0; }
+  .astar-kicker { margin: 0 0 0.2rem; color: var(--accent); font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .astar-progress-label { white-space: nowrap; font-size: 0.8rem; opacity: 0.7; }
+  .astar-progress { height: 0.35rem; margin: 0.8rem 0 1rem; overflow: hidden; border-radius: 999px; background: var(--surface-2); }
+  .astar-progress span { display: block; width: 0; height: 100%; background: var(--accent); transition: width 0.2s ease; }
+  .astar-grid { display: grid; grid-template-columns: minmax(320px, 1.05fr) minmax(300px, 0.95fr); gap: 1rem; align-items: start; }
+  .astar-left, .astar-right { min-width: 0; }
+  .astar-right { display: grid; gap: 0.9rem; }
+  .astar-graph { display: block; width: 100%; min-height: 285px; }
+  .edge { stroke: var(--border); stroke-width: 2; }
+  .edge.path-edge { stroke: var(--accent-2); stroke-width: 4; }
+  .edge-label { fill: var(--muted); font-size: 12px; }
+  .node circle { fill: var(--surface); stroke: var(--border); stroke-width: 2; }
+  .node text { fill: var(--fg); font-size: 12px; text-anchor: middle; }
+  .node.open circle { fill: color-mix(in srgb, var(--accent) 18%, var(--surface)); stroke: var(--accent); }
+  .node.closed circle { fill: var(--surface-2); }
+  .node.current circle { fill: var(--accent); stroke: var(--accent); }
+  .node.current text { fill: var(--bg); }
+  .node.path circle { fill: color-mix(in srgb, var(--accent-2) 20%, var(--surface)); stroke: var(--accent-2); stroke-width: 3; }
+  .node.path.current circle { fill: var(--accent-2); }
+  .legend { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: -0.3rem; font-size: 0.75rem; opacity: 0.75; }
+  .dot { display: inline-block; width: 0.65rem; height: 0.65rem; margin-right: 0.25rem; border: 2px solid var(--border); border-radius: 50%; vertical-align: -0.05rem; }
+  .dot.current { background: var(--accent); border-color: var(--accent); }
+  .dot.open { background: color-mix(in srgb, var(--accent) 18%, var(--surface)); border-color: var(--accent); }
+  .dot.closed { background: var(--surface-2); }
+  .dot.path { background: color-mix(in srgb, var(--accent-2) 20%, var(--surface)); border-color: var(--accent-2); }
+  .question-panel, .runtime-panel { margin-top: 0.9rem; border: 1px solid var(--border); border-radius: 0.6rem; padding: 0.85rem; background: var(--bg); }
+  .runtime-panel { margin-top: 0; }
+  .question-panel h4, .runtime-panel h4 { margin: 0 0 0.5rem; }
+  .question-panel p { margin: 0.45rem 0; }
+  .answer-grid { display: grid; grid-template-columns: repeat(3, minmax(70px, 1fr)); gap: 0.5rem; margin: 0.7rem 0; }
+  .answer-grid.one { grid-template-columns: 1fr; }
+  .answer-grid.two { grid-template-columns: repeat(2, minmax(90px, 1fr)); }
+  .field { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.8rem; }
+  input, select { width: 100%; box-sizing: border-box; padding: 0.45rem 0.55rem; border: 1px solid var(--border); border-radius: 0.35rem; background: var(--surface); color: var(--fg); font: inherit; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  button { border: 1px solid var(--accent); border-radius: 0.35rem; padding: 0.4rem 0.75rem; background: transparent; color: var(--accent); font: inherit; cursor: pointer; }
+  button:disabled { cursor: not-allowed; opacity: 0.45; }
+  button:not(:disabled):hover { filter: brightness(1.08); }
+  .restart { margin-top: 0.9rem; }
+  .hint { opacity: 0.78; }
+  .feedback { min-height: 1.4em; font-size: 0.88rem; }
+  .feedback.pass { color: var(--accent-2); }
+  .feedback.fail { color: var(--danger); }
+  .pseudocode { margin: 0; padding: 0; list-style: none; font-size: 0.72rem; line-height: 1.5; }
+  .pseudocode li { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr); padding: 0.15rem 0.3rem; border-left: 3px solid transparent; }
+  .pseudocode li > span { text-align: right; padding-right: 0.45rem; opacity: 0.55; }
+  .pseudocode code { padding: 0; overflow-wrap: anywhere; background: transparent; font-size: inherit; }
+  .pseudocode li.active { border-left-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .indent-1 { padding-left: 1rem !important; }
+  .indent-2 { padding-left: 2rem !important; }
+  .indent-3 { padding-left: 3rem !important; }
+  .executing { margin: 0.55rem 0 0; font-size: 0.78rem; }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+  th, td { padding: 0.35rem 0.4rem; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th { font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+  .queue-empty { padding: 0.35rem 0; font-size: 0.8rem; opacity: 0.65; }
+  @media (max-width: 820px) { .astar-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 460px) { .astar-header { display: block; } .astar-progress-label { display: block; margin-top: 0.4rem; } .answer-grid, .answer-grid.two { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  import { recordAttempt } from '../../lib/progress/store';
+
+  type QueueRow = [string, number, number, number, string];
+  type NodeRecord = { g: number | string; h: number; f: number | string; parent: string; status: string };
+  type TraceState = { queue: QueueRow[]; current: string | null; closed: string[]; path: string[]; records: Record<string, NodeRecord> };
+  type Field = [string, 'number', string] | [string, 'select', string, string[]];
+  type Question = { title: string; prompt: string; fields: Field[]; hint: string; ok: string; lines: number[]; note: string };
+
+  const names = ['S', 'A', 'B', 'C', 'G'];
+  const heuristics: Record<string, number> = { S: 5, A: 4, B: 4, C: 2, G: 0 };
+  const blank: TraceState = { queue: [], current: null, closed: [], path: [], records: { S: { g: 0, h: 5, f: '?', parent: '—', status: 'initializing' } } };
+  const states: TraceState[] = [
+    { queue: [['S', 0, 5, 5, '—']], current: null, closed: [], path: [], records: { S: { g: 0, h: 5, f: 5, parent: '—', status: 'open' } } },
+    { queue: [], current: 'S', closed: [], path: [], records: { S: { g: 0, h: 5, f: 5, parent: '—', status: 'current' } } },
+    { queue: [], current: 'S', closed: ['S'], path: [], records: { S: { g: 0, h: 5, f: 5, parent: '—', status: 'closed' } } },
+    { queue: [['A', 1, 4, 5, 'S'], ['B', 4, 4, 8, 'S']], current: 'S', closed: ['S'], path: [], records: { S: { g: 0, h: 5, f: 5, parent: '—', status: 'closed' }, A: { g: 1, h: 4, f: 5, parent: 'S', status: 'open' }, B: { g: 4, h: 4, f: 8, parent: 'S', status: 'open' } } },
+    { queue: [['B', 4, 4, 8, 'S']], current: 'A', closed: ['S'], path: [], records: { S: { g: 0, h: 5, f: 5, parent: '—', status: 'closed' }, A: { g: 1, h: 4, f: 5, parent: 'S', status: 'current' }, B: { g: 4, h: 4, f: 8, parent: 'S', status: 'open' } } },
+    { queue: [['B', 4, 4, 8, 'S']], current: 'A', closed: ['S', 'A'], path: [], records: { S: { g: 0, h: 5, f: 5, parent: '—', status: 'closed' }, A: { g: 1, h: 4, f: 5, parent: 'S', status: 'closed' }, B: { g: 4, h: 4, f: 8, parent: 'S', status: 'open' } } },
+    { queue: [['C', 3, 2, 5, 'A'], ['B', 3, 4, 7, 'A']], current: 'A', closed: ['S', 'A'], path: [], records: { S: { g: 0, h: 5, f: 5, parent: '—', status: 'closed' }, A: { g: 1, h: 4, f: 5, parent: 'S', status: 'closed' }, B: { g: 3, h: 4, f: 7, parent: 'A', status: 'open' }, C: { g: 3, h: 2, f: 5, parent: 'A', status: 'open' } } },
+    { queue: [['B', 3, 4, 7, 'A']], current: 'C', closed: ['S', 'A'], path: [], records: { S: { g: 0, h: 5, f: 5, parent: '—', status: 'closed' }, A: { g: 1, h: 4, f: 5, parent: 'S', status: 'closed' }, B: { g: 3, h: 4, f: 7, parent: 'A', status: 'open' }, C: { g: 3, h: 2, f: 5, parent: 'A', status: 'current' } } },
+    { queue: [['B', 3, 4, 7, 'A']], current: 'C', closed: ['S', 'A', 'C'], path: [], records: { S: { g: 0, h: 5, f: 5, parent: '—', status: 'closed' }, A: { g: 1, h: 4, f: 5, parent: 'S', status: 'closed' }, B: { g: 3, h: 4, f: 7, parent: 'A', status: 'open' }, C: { g: 3, h: 2, f: 5, parent: 'A', status: 'closed' } } },
+    { queue: [['G', 6, 0, 6, 'C'], ['B', 3, 4, 7, 'A']], current: 'C', closed: ['S', 'A', 'C'], path: [], records: { S: { g: 0, h: 5, f: 5, parent: '—', status: 'closed' }, A: { g: 1, h: 4, f: 5, parent: 'S', status: 'closed' }, B: { g: 3, h: 4, f: 7, parent: 'A', status: 'open' }, C: { g: 3, h: 2, f: 5, parent: 'A', status: 'closed' }, G: { g: 6, h: 0, f: 6, parent: 'C', status: 'open' } } },
+    { queue: [['B', 3, 4, 7, 'A']], current: 'G', closed: ['S', 'A', 'C'], path: [], records: { S: { g: 0, h: 5, f: 5, parent: '—', status: 'closed' }, A: { g: 1, h: 4, f: 5, parent: 'S', status: 'closed' }, B: { g: 3, h: 4, f: 7, parent: 'A', status: 'open' }, C: { g: 3, h: 2, f: 5, parent: 'A', status: 'closed' }, G: { g: 6, h: 0, f: 6, parent: 'C', status: 'current' } } },
+    { queue: [['B', 3, 4, 7, 'A']], current: 'G', closed: ['S', 'A', 'C'], path: ['S', 'A', 'C', 'G'], records: { S: { g: 0, h: 5, f: 5, parent: '—', status: 'path' }, A: { g: 1, h: 4, f: 5, parent: 'S', status: 'path' }, B: { g: 3, h: 4, f: 7, parent: 'A', status: 'open' }, C: { g: 3, h: 2, f: 5, parent: 'A', status: 'path' }, G: { g: 6, h: 0, f: 6, parent: 'C', status: 'goal' } } },
+  ];
+
+  const questions: Question[] = [
+    { title: 'Initialize the start', prompt: 'Given g(S)=0 and h(S)=5, calculate f(S).', fields: [['f(S)', 'number', '5']], hint: 'Use f=g+h.', ok: 'S is inserted into open with priority 5.', lines: [1, 2], note: 'Initialize S, then push it into open.' },
+    { title: 'Pop from the priority queue', prompt: 'Which node is removed from open first?', fields: [['Current node', 'select', 'S', ['S', 'A', 'B', 'G']]], hint: 'There is only one node in open.', ok: 'S becomes current and leaves the queue.', lines: [3, 4], note: 'The queue returns the smallest-f node.' },
+    { title: 'Test the goal', prompt: 'Is current node S the goal?', fields: [['Answer', 'select', 'No', ['Yes', 'No', 'Only if h=0', 'Not enough information']]], hint: 'The goal node is labelled G.', ok: 'S is not the goal, so it is added to closed.', lines: [5, 7], note: 'The goal test fails; S moves to closed.' },
+    { title: 'Expand the neighbors of S', prompt: 'Calculate the records inserted for A and B.', fields: [['g(A)', 'number', '1'], ['f(A)', 'number', '5'], ['parent(A)', 'select', 'S', ['S', 'A', 'B', '—']], ['g(B)', 'number', '4'], ['f(B)', 'number', '8'], ['parent(B)', 'select', 'S', ['S', 'A', 'B', '—']]], hint: 'For each neighbor: tentative g = g(S)+edge cost, then f=g+h.', ok: 'Open is ordered A(f=5), then B(f=8).', lines: [8, 9, 10, 11, 12, 13, 14], note: 'Relax S→A and S→B, storing g, f, and parent.' },
+    { title: 'Next loop iteration', prompt: 'Which node is popped from open now?', fields: [['Current node', 'select', 'A', ['A', 'B', 'C', 'G']]], hint: 'The priority queue is ordered by f.', ok: 'A has the smallest f=5 and becomes current.', lines: [3, 4], note: 'Pop the smallest-f node.' },
+    { title: 'Test A', prompt: 'Is current node A the goal?', fields: [['Answer', 'select', 'No', ['Yes', 'No', 'Only if f=0', 'Only if g=h']]], hint: 'Compare the node label with G.', ok: 'A is not the goal, so A joins closed.', lines: [5, 7], note: 'The goal test fails; A moves to closed.' },
+    { title: 'Expand A and update records', prompt: 'A discovers C and finds a cheaper route to B. Enter the resulting values.', fields: [['g(C)', 'number', '3'], ['f(C)', 'number', '5'], ['parent(C)', 'select', 'A', ['S', 'A', 'B', 'C']], ['new g(B)', 'number', '3'], ['new f(B)', 'number', '7'], ['new parent(B)', 'select', 'A', ['S', 'A', 'B', 'C']]], hint: 'C: 1+2. B through A: 1+2, which improves its old g=4.', ok: 'C enters at f=5; B decreases from f=8 to f=7 and its parent changes to A.', lines: [8, 9, 10, 11, 12, 13, 14], note: 'Insert C and decrease B’s queue priority.' },
+    { title: 'Choose from the updated queue', prompt: 'Which node is popped next?', fields: [['Current node', 'select', 'C', ['A', 'B', 'C', 'G']]], hint: 'Compare C(f=5) and B(f=7).', ok: 'C becomes current.', lines: [3, 4], note: 'Pop the smallest-f node.' },
+    { title: 'Test C', prompt: 'Is current node C the goal?', fields: [['Answer', 'select', 'No', ['Yes', 'No', 'Only if h=0', 'Only if parent=A']]], hint: 'The goal is G.', ok: 'C is not the goal, so C joins closed.', lines: [5, 7], note: 'The goal test fails; C moves to closed.' },
+    { title: 'Expand C toward G', prompt: 'Calculate the record created for G.', fields: [['g(G)', 'number', '6'], ['f(G)', 'number', '6'], ['parent(G)', 'select', 'C', ['A', 'B', 'C', 'G']]], hint: 'g(G)=g(C)+cost(C,G), and h(G)=0.', ok: 'G enters open ahead of B because 6<7.', lines: [8, 9, 10, 11, 12, 13, 14], note: 'Relax C→G and insert G by priority.' },
+    { title: 'Pop the next node', prompt: 'Which node is removed from open?', fields: [['Current node', 'select', 'G', ['A', 'B', 'C', 'G']]], hint: 'Compare G(f=6) with B(f=7).', ok: 'G becomes current. B stays in the queue.', lines: [3, 4], note: 'Pop the smallest-f node.' },
+    { title: 'Terminate and reconstruct', prompt: 'Select the reconstructed path and enter its total cost.', fields: [['Path', 'select', 'S → A → C → G', ['S → B → G', 'S → A → B → G', 'S → A → C → G', 'S → A → G']], ['Total cost', 'number', '6']], hint: 'Follow parent pointers backward: G←C←A←S.', ok: 'A* returns S→A→C→G with total cost 6. B remains open because the algorithm stops when G is popped.', lines: [5, 6], note: 'The goal test succeeds; follow parent pointers backward.' },
+  ];
+
+  function initExercise(root: HTMLElement) {
+    if (root.dataset.initialized === 'true') return;
+    root.dataset.initialized = 'true';
+    let step = 0;
+    let passed = false;
+    const inputs = root.querySelector<HTMLElement>('[data-inputs]')!;
+
+    function showState(state: TraceState) {
+      root.querySelectorAll<SVGGElement>('[data-node]').forEach((node) => {
+        const name = node.dataset.node!;
+        const classes = ['node'];
+        if (state.closed.includes(name)) classes.push('closed');
+        if (state.queue.some((row) => row[0] === name)) classes.push('open');
+        if (state.current === name) classes.push('current');
+        if (state.path.includes(name)) classes.push('path');
+        node.setAttribute('class', classes.join(' '));
+      });
+      root.querySelectorAll<SVGLineElement>('[data-edge]').forEach((edge) => {
+        edge.classList.toggle('path-edge', state.path.length > 0 && ['SA', 'AC', 'CG'].includes(edge.dataset.edge!));
+      });
+
+      const queueView = root.querySelector<HTMLElement>('[data-queue-view]')!;
+      queueView.replaceChildren();
+      if (state.queue.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'queue-empty';
+        empty.textContent = 'Queue is empty';
+        queueView.appendChild(empty);
+      } else {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-scroll';
+        const table = document.createElement('table');
+        table.innerHTML = '<thead><tr><th>Priority</th><th>Node</th><th>g</th><th>h</th><th>f</th><th>Parent</th></tr></thead>';
+        const body = document.createElement('tbody');
+        state.queue.forEach((row, index) => {
+          const tr = document.createElement('tr');
+          [index + 1, ...row].forEach((value) => { const td = document.createElement('td'); td.textContent = String(value); tr.appendChild(td); });
+          body.appendChild(tr);
+        });
+        table.appendChild(body);
+        wrapper.appendChild(table);
+        queueView.appendChild(wrapper);
+      }
+
+      const memory = root.querySelector<HTMLTableSectionElement>('[data-memory-body]')!;
+      memory.replaceChildren();
+      names.forEach((name) => {
+        const record = state.records[name] ?? { g: '—', h: heuristics[name], f: '—', parent: '—', status: 'unseen' };
+        const tr = document.createElement('tr');
+        [name, record.g, record.h, record.f, record.parent, record.status].forEach((value) => { const td = document.createElement('td'); td.textContent = String(value); tr.appendChild(td); });
+        memory.appendChild(tr);
+      });
+    }
+
+    function render() {
+      const question = questions[step];
+      passed = false;
+      root.querySelector<HTMLElement>('[data-step-number]')!.textContent = String(step + 1);
+      root.querySelector<HTMLElement>('[data-question-title]')!.textContent = question.title;
+      root.querySelector<HTMLElement>('[data-question-prompt]')!.textContent = question.prompt;
+      root.querySelector<HTMLElement>('[data-line-note]')!.textContent = question.note;
+      const feedback = root.querySelector<HTMLElement>('[data-feedback]')!;
+      feedback.textContent = '';
+      feedback.className = 'feedback';
+      const hint = root.querySelector<HTMLElement>('[data-hint]')!;
+      hint.textContent = question.hint;
+      hint.hidden = true;
+      root.querySelector<HTMLButtonElement>('[data-hint-button]')!.textContent = 'Hint';
+      const next = root.querySelector<HTMLButtonElement>('[data-next-button]')!;
+      next.disabled = true;
+      next.textContent = step === questions.length - 1 ? 'Finish' : 'Next';
+
+      inputs.replaceChildren();
+      inputs.className = `answer-grid${question.fields.length === 1 ? ' one' : question.fields.length === 2 ? ' two' : ''}`;
+      question.fields.forEach((field) => {
+        const label = document.createElement('label');
+        label.className = 'field';
+        label.append(field[0]);
+        let control: HTMLInputElement | HTMLSelectElement;
+        if (field[1] === 'select') {
+          control = document.createElement('select');
+          const placeholder = document.createElement('option');
+          placeholder.value = '';
+          placeholder.textContent = 'Choose…';
+          control.appendChild(placeholder);
+          field[3].forEach((value) => { const option = document.createElement('option'); option.value = value; option.textContent = value; control.appendChild(option); });
+        } else {
+          control = document.createElement('input');
+          control.type = 'number';
+          control.step = 'any';
+        }
+        control.dataset.answer = field[2];
+        control.setAttribute('aria-label', field[0]);
+        label.appendChild(control);
+        inputs.appendChild(label);
+      });
+
+      root.querySelectorAll<HTMLElement>('[data-line]').forEach((line) => line.classList.toggle('active', question.lines.includes(Number(line.dataset.line))));
+      showState(step === 0 ? blank : states[step - 1]);
+      const progress = Math.round((step / questions.length) * 100);
+      root.querySelector<HTMLElement>('[data-progress-bar]')!.style.width = `${progress}%`;
+      root.querySelector<HTMLElement>('.astar-progress')!.setAttribute('aria-valuenow', String(step));
+    }
+
+    root.querySelector<HTMLFormElement>('[data-answer-form]')!.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const controls = [...inputs.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input, select')];
+      const wrong = controls.filter((control) => control.value.trim() !== control.dataset.answer);
+      const feedback = root.querySelector<HTMLElement>('[data-feedback]')!;
+      const answer = Object.fromEntries(controls.map((control) => [control.getAttribute('aria-label') ?? '', control.value]));
+      const isCorrect = wrong.length === 0;
+      recordAttempt({
+        exerciseId: 'PLAN-01-interactive-astar-trace',
+        moduleId: 'PLAN-01',
+        timestamp: Date.now(),
+        answer: JSON.stringify({ step: step + 1, values: answer }),
+        checkResult: { passed: isCorrect, mode: 'deterministic' },
+      }).catch(() => {});
+
+      if (!isCorrect) {
+        feedback.textContent = 'Not quite. Use the highlighted pseudocode and inspect the current queue and stored records.';
+        feedback.className = 'feedback fail';
+        wrong[0]?.focus();
+        return;
+      }
+
+      passed = true;
+      showState(states[step]);
+      feedback.textContent = questions[step].ok;
+      feedback.className = 'feedback pass';
+      controls.forEach((control) => { control.disabled = true; });
+      root.querySelector<HTMLButtonElement>('[data-next-button]')!.disabled = false;
+      root.querySelector<HTMLElement>('[data-progress-bar]')!.style.width = `${Math.round(((step + 1) / questions.length) * 100)}%`;
+      root.querySelector<HTMLElement>('.astar-progress')!.setAttribute('aria-valuenow', String(step + 1));
+    });
+
+    root.querySelector<HTMLButtonElement>('[data-hint-button]')!.addEventListener('click', () => {
+      const hint = root.querySelector<HTMLElement>('[data-hint]')!;
+      hint.hidden = !hint.hidden;
+      root.querySelector<HTMLButtonElement>('[data-hint-button]')!.textContent = hint.hidden ? 'Hint' : 'Hide hint';
+    });
+    root.querySelector<HTMLButtonElement>('[data-next-button]')!.addEventListener('click', () => {
+      if (!passed) return;
+      if (step < questions.length - 1) { step += 1; render(); }
+      else {
+        const feedback = root.querySelector<HTMLElement>('[data-feedback]')!;
+        feedback.textContent = 'Exercise complete. Restart to trace A* again.';
+        feedback.className = 'feedback pass';
+        root.querySelector<HTMLButtonElement>('[data-next-button]')!.disabled = true;
+      }
+    });
+    root.querySelector<HTMLButtonElement>('[data-restart-button]')!.addEventListener('click', () => { step = 0; render(); });
+    render();
+  }
+
+  function initAllAStarExercises() {
+    document.querySelectorAll<HTMLElement>('.astar').forEach(initExercise);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAllAStarExercises);
+  else initAllAStarExercises();
+</script>

@@ -31,6 +31,7 @@ nextModules: ["PLAN-02"]
 
 import ExerciseCard from '../../../components/exercise/ExerciseCard.astro';
 import ReadinessCheck from '../../../components/ReadinessCheck.astro';
+import AStarTraceExercise from '../../../components/interactive/AStarTraceExercise.astro';
 
 ## Why this matters
 
@@ -79,6 +80,12 @@ Define a **total potential** $U(q):=U_\text{att}(q)+U_\text{rep}(q)$: an attract
 
 An alternative: discretize $\mathcal{X}_\text{fea}$ into a grid, and treat it as a graph search problem. The **wavefront algorithm** starts at the goal cell (value $0$) and repeatedly labels every unlabeled cell adjacent to a labeled cell with (labeled-neighbor-value $+1$), propagating outward like a wavefront until every reachable cell is labeled; following the gradient of these labels (always stepping to a strictly smaller-numbered neighbor) from any start cell produces a shortest grid path, and (unlike potential fields) is provably free of local minima, since a labeled cell's value is exactly its graph-shortest-path distance to the goal. **Dijkstra's algorithm** generalizes this to an arbitrary weighted graph, incrementally labeling nodes with their distance-from-start and provably producing optimal (shortest) paths.
 
+### Optional interactive extension: tracing A*
+
+**A\*** augments the cost accumulated from the start, $g(n)$, with a heuristic estimate of the remaining cost to the goal, $h(n)$, and orders its priority queue by $f(n)=g(n)+h(n)$. The trace below makes every queue operation explicit: calculate the node records, choose the next node, and watch the active pseudocode lines, open list, and stored parent pointers update together.
+
+<AStarTraceExercise />
+
 <ExerciseCard id="PLAN-01-ex3-grid-search-scaling" />
 
 Both wavefront and Dijkstra require an actual grid (or graph) over $\mathcal{X}_\text{fea}$ to search: fine in 2D or 3D, but a grid over an $n$-dimensional configuration space has $O(k^n)$ cells for $k$ cells per dimension, the **curse of dimensionality**. A 6-DOF arm at even a coarse $k=20$ per joint already needs $20^6=64$ million cells. This is exactly the gap [PLAN-02](/course/PLAN/PLAN-02)'s sampling-based methods (PRM, RRT) are designed to close: searching $\mathcal{X}_\text{fea}$ via random sampling instead of exhaustive discretization.
@@ -111,7 +118,7 @@ Both wavefront and Dijkstra require an actual grid (or graph) over $\mathcal{X}_
 
 ## Source note
 
-The formal $\mathcal{X}$/$\mathcal{X}_\text{fea}$/generalized-and-minimal-coordinates/degrees-of-freedom exposition is adapted from Marc Toussaint's `robotkin` HTML note ("Fundamental Kinematics Concepts" section), previously unused by KIN-01/KIN-03 (which drew on that same note's kinematics/Jacobian and inverse-kinematics sections instead). The feedback-control/trajectory-optimization/path-finding triad, the Bug-algorithm framing, potential fields, and the wavefront/Dijkstra grid-search treatment are adapted from `lecture-robotics`, §4-4.1 (pp. 52-68); the Bug1/Bug2 algorithms themselves are credited in the source to Howie Choset's CMU lectures and are described only briefly here as historical/heuristic context, since the source itself treats them as a brief aside before the sampling-based methods that are the chapter's real focus. The $C_\text{free}$/$C_\text{obs}$ terminology equivalence is standard across the wider motion-planning literature (e.g. LaValle, *Planning Algorithms*), noted here since Toussaint's own notes use $\mathcal{X}_\text{fea}$/$Q_\text{free}$ instead. All exercises are newly authored and independently verified (the potential-field gradient algebraically, the grid-cell-count scaling numerically).
+The formal $\mathcal{X}$/$\mathcal{X}_\text{fea}$/generalized-and-minimal-coordinates/degrees-of-freedom exposition is adapted from Marc Toussaint's `robotkin` HTML note ("Fundamental Kinematics Concepts" section), previously unused by KIN-01/KIN-03 (which drew on that same note's kinematics/Jacobian and inverse-kinematics sections instead). The feedback-control/trajectory-optimization/path-finding triad, the Bug-algorithm framing, potential fields, and the wavefront/Dijkstra grid-search treatment are adapted from `lecture-robotics`, §4-4.1 (pp. 52-68); the Bug1/Bug2 algorithms themselves are credited in the source to Howie Choset's CMU lectures and are described only briefly here as historical/heuristic context, since the source itself treats them as a brief aside before the sampling-based methods that are the chapter's real focus. The $C_\text{free}$/$C_\text{obs}$ terminology equivalence is standard across the wider motion-planning literature (e.g. LaValle, *Planning Algorithms*), noted here since Toussaint's own notes use $\mathcal{X}_\text{fea}$/$Q_\text{free}$ instead. The optional A* trace is a newly-authored interactive extension rather than a source-derived exercise. All exercises are newly authored and independently verified (the potential-field gradient algebraically, the grid-cell-count scaling numerically, and the A* trace against the graph's edge costs and heuristic values).
 
 ---
 
